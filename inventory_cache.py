@@ -30,13 +30,39 @@ class InventoryCache:
                 self._memory_conn.row_factory = sqlite3.Row
             return self._memory_conn
         conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        conn.execute("PRAGMA journal_mode = WAL;")
+        conn.execute("PRAGMA synchronous = NORMAL;")
+        conn.execute("PRAGMA busy_timeout = 5000;")
         conn.execute("PRAGMA foreign_keys = ON;")
+        conn.execute("PRAGMA cache_size = -64000;")
+        conn.execute("PRAGMA temp_store = MEMORY;")
         conn.row_factory = sqlite3.Row
         return conn
 
     def _close_connection(self, conn: sqlite3.Connection):
         if self.db_path != ":memory:":
             conn.close()
+
+    def _cleanup_sidecars(self):
+        if self.db_path != ":memory:":
+            for path in (self.db_path, f"{self.db_path}-wal", f"{self.db_path}-shm"):
+                if os.path.exists(path):
+                    try:
+                        os.remove(path)
+                    except OSError:
+                        pass
+
+    def close(self):
+        with self._lock:
+            if self.db_path == ":memory:":
+                if hasattr(self, "_memory_conn") and self._memory_conn:
+                    try:
+                        self._memory_conn.close()
+                    except Exception:
+                        pass
+                    self._memory_conn = None
+            else:
+                self._cleanup_sidecars()
 
     def _init_db(self):
         with self._lock:
@@ -128,11 +154,8 @@ class InventoryCache:
         self._create_tables(conn)
 
     def _reset_and_recreate_db(self):
-        if self.db_path != ":memory:" and os.path.exists(self.db_path):
-            try:
-                os.remove(self.db_path)
-            except OSError:
-                pass
+        if self.db_path != ":memory:":
+            self._cleanup_sidecars()
         elif hasattr(self, "_memory_conn") and self._memory_conn:
             try:
                 self._memory_conn.close()
@@ -150,12 +173,17 @@ class InventoryCache:
     def is_corrupted(self) -> bool:
         return self._is_corrupted
 
+    def _read_lock_context(self):
+        if self.db_path == ":memory:":
+            return self._lock
+        return threading.Lock()
+
     def load_cached_inventory(self) -> Dict[str, Any]:
         """
         Immediately loads cached folder structures and item metadata from local SQLite storage on startup.
         Returns dict containing 'folders' and 'items'.
         """
-        with self._lock:
+        with self._read_lock_context():
             conn = self._get_connection()
             try:
                 cursor = conn.cursor()
@@ -183,7 +211,7 @@ class InventoryCache:
                 self._close_connection(conn)
 
     def get_update_token(self, token_id: str = "default") -> Optional[str]:
-        with self._lock:
+        with self._read_lock_context():
             conn = self._get_connection()
             try:
                 cursor = conn.cursor()
@@ -197,7 +225,7 @@ class InventoryCache:
 
     def apply_delta_update(self, delta_data: Dict[str, Any], new_token: str, token_id: str = "default") -> bool:
         """
-        Applies HTTP delta updates (added/updated/removed folders and items) to SQLite cache.
+        Applies HTTP delta updates (added/updated/removed folders and items) to SQLite cache using executemany.
         """
         with self._lock:
             conn = self._get_connection()
@@ -205,8 +233,19 @@ class InventoryCache:
                 cursor = conn.cursor()
                 now = time.time()
 
-                for folder in delta_data.get("folders_to_add_or_update", []):
-                    cursor.execute(
+                folders_to_add = [
+                    (
+                        folder["folder_id"],
+                        folder.get("parent_id"),
+                        folder["name"],
+                        folder.get("type_default", 0),
+                        folder.get("version", 0),
+                        folder.get("update_token"),
+                    )
+                    for folder in delta_data.get("folders_to_add_or_update", [])
+                ]
+                if folders_to_add:
+                    cursor.executemany(
                         """
                         INSERT INTO folders (folder_id, parent_id, name, type_default, version, update_token)
                         VALUES (?, ?, ?, ?, ?, ?)
@@ -217,21 +256,32 @@ class InventoryCache:
                             version=excluded.version,
                             update_token=excluded.update_token;
                         """,
-                        (
-                            folder["folder_id"],
-                            folder.get("parent_id"),
-                            folder["name"],
-                            folder.get("type_default", 0),
-                            folder.get("version", 0),
-                            folder.get("update_token")
-                        )
+                        folders_to_add,
                     )
 
-                for folder_id in delta_data.get("folders_to_remove", []):
-                    cursor.execute("DELETE FROM folders WHERE folder_id=?;", (folder_id,))
+                folders_to_remove = [
+                    (f_id,) if not isinstance(f_id, tuple) else f_id
+                    for f_id in delta_data.get("folders_to_remove", [])
+                ]
+                if folders_to_remove:
+                    cursor.executemany("DELETE FROM folders WHERE folder_id=?;", folders_to_remove)
 
-                for item in delta_data.get("items_to_add_or_update", []):
-                    cursor.execute(
+                items_to_add = [
+                    (
+                        item["item_id"],
+                        item["folder_id"],
+                        item["name"],
+                        item["asset_id"],
+                        item.get("type", 0),
+                        item.get("inv_type", 0),
+                        item.get("flags", 0),
+                        item.get("creation_date", 0),
+                        now,
+                    )
+                    for item in delta_data.get("items_to_add_or_update", [])
+                ]
+                if items_to_add:
+                    cursor.executemany(
                         """
                         INSERT INTO items (item_id, folder_id, name, asset_id, type, inv_type, flags, creation_date, updated_at)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -245,21 +295,15 @@ class InventoryCache:
                             creation_date=excluded.creation_date,
                             updated_at=excluded.updated_at;
                         """,
-                        (
-                            item["item_id"],
-                            item["folder_id"],
-                            item["name"],
-                            item["asset_id"],
-                            item.get("type", 0),
-                            item.get("inv_type", 0),
-                            item.get("flags", 0),
-                            item.get("creation_date", 0),
-                            now
-                        )
+                        items_to_add,
                     )
 
-                for item_id in delta_data.get("items_to_remove", []):
-                    cursor.execute("DELETE FROM items WHERE item_id=?;", (item_id,))
+                items_to_remove = [
+                    (i_id,) if not isinstance(i_id, tuple) else i_id
+                    for i_id in delta_data.get("items_to_remove", [])
+                ]
+                if items_to_remove:
+                    cursor.executemany("DELETE FROM items WHERE item_id=?;", items_to_remove)
 
                 cursor.execute(
                     """
@@ -269,12 +313,12 @@ class InventoryCache:
                         token_value=excluded.token_value,
                         last_synced=excluded.last_synced;
                     """,
-                    (token_id, new_token, now)
+                    (token_id, new_token, now),
                 )
 
                 conn.commit()
                 return True
-            except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError):
+            except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError, TypeError):
                 conn.rollback()
                 return False
             finally:
@@ -282,7 +326,7 @@ class InventoryCache:
 
     def reload_full_inventory(self, full_data: Dict[str, Any], new_token: str, token_id: str = "default") -> bool:
         """
-        Clears existing cache and replaces with full HTTP sync data (used on fallback or initial sync).
+        Clears existing cache and replaces with full HTTP sync data using batch executemany.
         """
         with self._lock:
             conn = self._get_connection()
@@ -293,39 +337,47 @@ class InventoryCache:
                 cursor.execute("DELETE FROM items;")
                 cursor.execute("DELETE FROM folders;")
 
-                for folder in full_data.get("folders", []):
-                    cursor.execute(
+                folders = [
+                    (
+                        folder["folder_id"],
+                        folder.get("parent_id"),
+                        folder["name"],
+                        folder.get("type_default", 0),
+                        folder.get("version", 0),
+                        folder.get("update_token"),
+                    )
+                    for folder in full_data.get("folders", [])
+                ]
+                if folders:
+                    cursor.executemany(
                         """
                         INSERT INTO folders (folder_id, parent_id, name, type_default, version, update_token)
                         VALUES (?, ?, ?, ?, ?, ?);
                         """,
-                        (
-                            folder["folder_id"],
-                            folder.get("parent_id"),
-                            folder["name"],
-                            folder.get("type_default", 0),
-                            folder.get("version", 0),
-                            folder.get("update_token")
-                        )
+                        folders,
                     )
 
-                for item in full_data.get("items", []):
-                    cursor.execute(
+                items = [
+                    (
+                        item["item_id"],
+                        item["folder_id"],
+                        item["name"],
+                        item["asset_id"],
+                        item.get("type", 0),
+                        item.get("inv_type", 0),
+                        item.get("flags", 0),
+                        item.get("creation_date", 0),
+                        now,
+                    )
+                    for item in full_data.get("items", [])
+                ]
+                if items:
+                    cursor.executemany(
                         """
                         INSERT INTO items (item_id, folder_id, name, asset_id, type, inv_type, flags, creation_date, updated_at)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                         """,
-                        (
-                            item["item_id"],
-                            item["folder_id"],
-                            item["name"],
-                            item["asset_id"],
-                            item.get("type", 0),
-                            item.get("inv_type", 0),
-                            item.get("flags", 0),
-                            item.get("creation_date", 0),
-                            now
-                        )
+                        items,
                     )
 
                 cursor.execute(
@@ -336,19 +388,19 @@ class InventoryCache:
                         token_value=excluded.token_value,
                         last_synced=excluded.last_synced;
                     """,
-                    (token_id, new_token, now)
+                    (token_id, new_token, now),
                 )
 
                 conn.commit()
                 return True
-            except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError):
+            except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError, TypeError):
                 conn.rollback()
                 return False
             finally:
                 self._close_connection(conn)
 
     def get_item(self, item_id: str) -> Optional[Dict[str, Any]]:
-        with self._lock:
+        with self._read_lock_context():
             conn = self._get_connection()
             try:
                 cursor = conn.cursor()
@@ -359,7 +411,7 @@ class InventoryCache:
                 self._close_connection(conn)
 
     def get_folder_items(self, folder_id: str) -> List[Dict[str, Any]]:
-        with self._lock:
+        with self._read_lock_context():
             conn = self._get_connection()
             try:
                 cursor = conn.cursor()
