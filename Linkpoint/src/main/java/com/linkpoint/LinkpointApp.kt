@@ -6067,7 +6067,7 @@ class LinkpointApp : Application() {
      * Check if landmark manager is initialized (for debug reports)
      */
     fun isLandmarkManagerInitialized(): Boolean = ::landmarkManager.isInitialized
-    
+
     /**
      * Check if HUD manager is initialized (for debug reports)
      */
