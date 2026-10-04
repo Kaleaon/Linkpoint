@@ -7,30 +7,8 @@ import { Graphics3D } from './graphics-3d';
 import { Camera3D } from './camera-3d';
 import { Primitives3D } from './primitives-3d';
 import { extractFrustum, multiplyMat4, testAABB, transformAABB, OUTSIDE, type Frustum } from './frustum';
-import { TieredSimdCuller } from './simd-culler';
-import { intersectRayOrientedBox, intersectRayTriangle, invertMat4, type Ray } from './ray-pick';
+import { intersectRayOrientedBox } from './ray-pick';
 import { HEAVENLY_BODY_RADIUS, atmosphereColor, atmosphereUniforms } from './atmosphere';
-
-export function computeST(uv: ArrayLike<number>, faceConfig?: any): [number, number, number] {
-  const u = Number(uv[0]) || 0;
-  const v = Number(uv[1]) || 0;
-  const repeat = faceConfig?.repeat || [1, 1];
-  const offset = faceConfig?.offset || [0, 0];
-  const rotation = faceConfig?.rotation || 0;
-
-  const centeredU = u - 0.5;
-  const centeredV = v - 0.5;
-  const cos = Math.cos(rotation);
-  const sin = Math.sin(rotation);
-
-  const rotatedU = cos * centeredU - sin * centeredV + 0.5;
-  const rotatedV = sin * centeredU + cos * centeredV + 0.5;
-
-  const s = rotatedU * repeat[0] + offset[0];
-  const t = rotatedV * repeat[1] + offset[1];
-
-  return [s, t, 0];
-}
 import { DEFAULT_SKY, DEFAULT_WATER, dayFraction, normalizeSky, normalizeWater, skyAt, skyState, waterAt, type SkySettings, type SkyState, type WaterSettings } from './eep';
 import { DETAIL_TILE_METRES, FALLBACK_LAYER_COLORS, TERRAIN_LAYERS, compositionTexture, terrainComposition, type TerrainParams } from './terrain';
 import { fitHud, hudExtents, hudProjection, HUD_SIZE, type HudFit } from './hud';
@@ -48,11 +26,11 @@ const SUN_DISTANCE = 10000;
 export class Scene3D extends Utils.EventEmitter {
   public graphics: Graphics3D;
   public camera: Camera3D;
-
+  
   // Scene objects
   public objects: Map<string, any> = new Map();
   public lights: any[] = [];
-
+  
   // Grid
   public showGrid: boolean = true;
   public gridSize: number = 256;
@@ -68,8 +46,6 @@ export class Scene3D extends Utils.EventEmitter {
   public showSky = true;
   public showWater = true;
   public cullingEnabled = true;
-  public culler = new TieredSimdCuller();
-  private frameCount = 0;
   public waterHeight = DEFAULT_WATER_HEIGHT;
   public underWater = false;
   /** Objects drawn / skipped by frustum culling in the most recent frame. */
@@ -126,12 +102,12 @@ export class Scene3D extends Utils.EventEmitter {
     // Create default primitives
     this.createDefaultPrimitives();
     this.createEnvironmentMeshes();
-
+    
     // Create grid
     if (this.showGrid) {
       this.createGrid();
     }
-
+    
     // Add default light
     this.addLight({
       type: 'directional',
@@ -139,7 +115,7 @@ export class Scene3D extends Utils.EventEmitter {
       color: [1, 1, 1],
       intensity: 1.0
     });
-
+    
     this.emit('initialized');
   }
 
@@ -150,17 +126,17 @@ export class Scene3D extends Utils.EventEmitter {
     // Cube
     const cube = Primitives3D.createCube(1);
     this.graphics.createMesh('cube', cube.vertices, cube.indices, cube.normals, cube.texCoords);
-
+    
     // Sphere
     const sphere = Primitives3D.createSphere(0.5, 32, 16);
     this.graphics.createMesh('sphere', sphere.vertices, sphere.indices, sphere.normals, sphere.texCoords);
-
+    
     // Plane
     const plane = Primitives3D.createPlane(10, 10, 10, 10);
     this.graphics.createMesh('plane', plane.vertices, plane.indices, plane.normals, plane.texCoords);
     const particleSprite = Primitives3D.createPlane(1, 1);
     this.graphics.createMesh('particle-sprite', particleSprite.vertices, particleSprite.indices, particleSprite.normals, particleSprite.texCoords);
-
+    
     // Cylinder
     const cylinder = Primitives3D.createCylinder(0.5, 0.5, 1, 32);
     this.graphics.createMesh('cylinder', cylinder.vertices, cylinder.indices, cylinder.normals, cylinder.texCoords);
@@ -201,8 +177,13 @@ export class Scene3D extends Utils.EventEmitter {
     return parts.map((part, index) => {
       const name = `asset:${assetId}:${index}`;
       const skin = Array.isArray(part.joints) && Array.isArray(part.jointWeights) ? { joints: part.joints, weights: part.jointWeights } : undefined;
-      this.graphics.createMesh(name, part.vertices, part.indices, part.normals, part.texCoords, undefined, skin);
-      return { mesh: name, materialIndex: Number(part.materialIndex ?? index) };
+      try {
+        this.graphics.createMesh(name, part.vertices, part.indices, part.normals, part.texCoords, undefined, skin);
+        return { mesh: name, materialIndex: Number(part.materialIndex ?? index) };
+      } catch (err) {
+        console.warn(`[Scene3D] Failed to register mesh ${name}, falling back to asset proxy:`, err);
+        return { mesh: 'asset-proxy', materialIndex: Number(part.materialIndex ?? index) };
+      }
     });
   }
 
@@ -238,7 +219,12 @@ export class Scene3D extends Utils.EventEmitter {
   /** Replace the flat helper grid with the simulator's height field. */
   setTerrain(heights: number[], size = 256) {
     if (!Array.isArray(heights) || size < 2 || heights.length < size * size) return false;
-    const cells = Math.min(128, size - 1);
+    // A simulator region supplies one height sample per metre.  Keep every sample for the
+    // normal 256x256 height field: reducing it to 128 cells moves the intervening vertices onto
+    // rounded sample positions and makes the rendered ground cut through (or sit below) prims
+    // whose placement was calculated from the original terrain.  255 cells still fit exactly in
+    // WebGL's unsigned-short index range (256 * 256 vertices, last index 65535).
+    const cells = Math.min(255, size - 1);
     const vertices: number[] = [], normals: number[] = [], texCoords: number[] = [], indices: number[] = [];
     const sample = (x: number, y: number) => Number(heights[Math.min(size - 1, y) * size + Math.min(size - 1, x)]) || 0;
     for (let y = 0; y <= cells; y++) {
@@ -382,16 +368,8 @@ export class Scene3D extends Utils.EventEmitter {
       // Packed joint matrices (see skinning.ts packJointRows) for rigged meshes.
       skin: config.skin || null,
     };
-
+    
     this.objects.set(id, object);
-    this.culler.upsertObject(
-      id,
-      object.position,
-      object.rotation,
-      object.scale,
-      this.objectLocalBounds(object),
-      (p, r, s) => this.calculateModelMatrix(p, r, s)
-    );
     this.emit('object_added', object);
     return object;
   }
@@ -403,7 +381,6 @@ export class Scene3D extends Utils.EventEmitter {
     const object = this.objects.get(id);
     if (object) {
       this.objects.delete(id);
-      this.culler.removeObject(id);
       this.emit('object_removed', object);
     }
   }
@@ -415,14 +392,6 @@ export class Scene3D extends Utils.EventEmitter {
     const object = this.objects.get(id);
     if (object) {
       Object.assign(object, updates);
-      this.culler.upsertObject(
-        id,
-        object.position,
-        object.rotation,
-        object.scale,
-        this.objectLocalBounds(object),
-        (p, r, s) => this.calculateModelMatrix(p, r, s)
-      );
       this.emit('object_updated', object);
     }
   }
@@ -438,7 +407,7 @@ export class Scene3D extends Utils.EventEmitter {
       color: config.color || [1, 1, 1],
       intensity: config.intensity || 1.0
     };
-
+    
     this.lights.push(light);
     this.emit('light_added', light);
     return light;
@@ -457,29 +426,6 @@ export class Scene3D extends Utils.EventEmitter {
     const viewMatrix = this.camera.getViewMatrix();
     const projectionMatrix = this.camera.getProjectionMatrix();
     const frustum = this.cullingEnabled ? extractFrustum(multiplyMat4(projectionMatrix, viewMatrix)) : null;
-
-    this.frameCount++;
-    if (this.cullingEnabled && frustum) {
-      for (const object of this.objects.values()) {
-        if (!object.hud && object.visible !== false) {
-          const local = this.objectLocalBounds(object);
-          this.culler.upsertObject(
-            object.id,
-            object.position,
-            object.rotation,
-            object.scale,
-            local,
-            (p, r, s) => this.calculateModelMatrix(p, r, s)
-          );
-        }
-      }
-      this.culler.cull(
-        this.camera.position as [number, number, number],
-        frustum,
-        this.frameCount,
-        (p, r, s) => this.calculateModelMatrix(p, r, s)
-      );
-    }
 
     // Below the surface the sky is not visible; show the water tint instead.
     const waterActive = this.showWater && this.terrainLoaded && this.environmentMeshesReady;
@@ -598,13 +544,12 @@ export class Scene3D extends Utils.EventEmitter {
     const x = ((2 * screenX) / width - 1) * this.hudAspect();
     const y = 1 - (2 * screenY) / height;
     const ray = { origin: [x, y, 50], direction: [0, 0, -1] };
-    let best: { id: string; distance: number; point: number[]; face?: number; uv?: number[]; st?: number[] } | null = null;
+    let best: { id: string; distance: number; point: number[] } | null = null;
     for (const { object, local } of setup.prims) {
       const bounds = this.objectLocalBounds(object) || UNIT_CUBE_BOUNDS;
-      const model = multiplyMat4(setup.fit.matrix, local);
-      const hit = this.pickObjectRay(ray, object, model, bounds.min, bounds.max);
-      if (hit === null || (best && hit.distance >= best.distance)) continue;
-      best = { id: object.id, distance: hit.distance, point: hit.point, face: hit.face, uv: hit.uv, st: hit.st };
+      const distance = intersectRayOrientedBox(ray, multiplyMat4(setup.fit.matrix, local), bounds.min, bounds.max);
+      if (distance === null || (best && distance >= best.distance)) continue;
+      best = { id: object.id, distance, point: [x, y, 50 - distance] };
     }
     return best;
   }
@@ -695,157 +640,31 @@ export class Scene3D extends Utils.EventEmitter {
 
   /** True when the object's world bounds are entirely outside the frustum. Unknown bounds are never culled. */
   private isCulled(object: any, frustum: Frustum | null) {
-    if (!frustum || !this.cullingEnabled) return false;
+    if (!frustum) return false;
     const local = this.objectLocalBounds(object);
     if (!local) return false;
-
-    const cullerObj = this.culler.getObject(object.id);
-    if (cullerObj) {
-      return !cullerObj.visible;
-    }
-
     const model = this.calculateModelMatrix(object.position, object.rotation, object.scale);
     const world = transformAABB(model, local.min, local.max);
     return testAABB(frustum, world.min, world.max) === OUTSIDE;
   }
 
   /**
-   * Two-stage ray pick test against an object given its model matrix and bounding box.
-   * Performs broad-phase box culling first, then narrow-phase triangle intersection
-   * if vertex buffers are available.
-   */
-  private pickObjectRay(
-    ray: Ray,
-    object: any,
-    modelMatrix: ArrayLike<number>,
-    localMin: ArrayLike<number>,
-    localMax: ArrayLike<number>,
-  ): { distance: number; point: number[]; face: number; uv: [number, number, number]; st: [number, number, number] } | null {
-    const boxDist = intersectRayOrientedBox(ray, modelMatrix, localMin, localMax);
-    if (boxDist === null) return null;
-
-    const draws = this.objectDraws(object);
-    let hasGeometry = false;
-
-    if (typeof (this.graphics as any).getMeshGeometry === 'function') {
-      for (const draw of draws) {
-        if ((this.graphics as any).getMeshGeometry(draw.mesh)) {
-          hasGeometry = true;
-          break;
-        }
-      }
-    }
-
-    // Fallback to bounding box intersection when CPU vertex buffers are absent.
-    if (!hasGeometry) {
-      const point = [
-        ray.origin[0] + ray.direction[0] * boxDist,
-        ray.origin[1] + ray.direction[1] * boxDist,
-        ray.origin[2] + ray.direction[2] * boxDist,
-      ];
-      return {
-        distance: boxDist,
-        point,
-        face: 0,
-        uv: [0, 0, 0],
-        st: [0, 0, 0],
-      };
-    }
-
-    // Narrow phase: transform ray into object local space and test mesh triangles.
-    const inverse = invertMat4(modelMatrix);
-    if (!inverse) return null;
-
-    const ox = ray.origin[0], oy = ray.origin[1], oz = ray.origin[2];
-    const w = inverse[3] * ox + inverse[7] * oy + inverse[11] * oz + inverse[15];
-    const invW = w ? 1 / w : 1;
-    const localOrigin = [
-      (inverse[0] * ox + inverse[4] * oy + inverse[8] * oz + inverse[12]) * invW,
-      (inverse[1] * ox + inverse[5] * oy + inverse[9] * oz + inverse[13]) * invW,
-      (inverse[2] * ox + inverse[6] * oy + inverse[10] * oz + inverse[14]) * invW,
-    ];
-
-    const dx = ray.direction[0], dy = ray.direction[1], dz = ray.direction[2];
-    const localDirection = [
-      inverse[0] * dx + inverse[4] * dy + inverse[8] * dz,
-      inverse[1] * dx + inverse[5] * dy + inverse[9] * dz,
-      inverse[2] * dx + inverse[6] * dy + inverse[10] * dz,
-    ];
-
-    const localRay: Ray = { origin: localOrigin, direction: localDirection };
-
-    let bestHit: { distance: number; face: number; uv: [number, number]; point: number[] } | null = null;
-
-    for (const draw of draws) {
-      const geom = (this.graphics as any).getMeshGeometry(draw.mesh);
-      if (!geom || !geom.vertices || !geom.indices) continue;
-
-      const vertices = geom.vertices;
-      const indices = geom.indices;
-      const texCoords = geom.texCoords;
-      const faceIndex = Number(draw.materialIndex ?? 0);
-
-      for (let i = 0; i + 2 < indices.length; i += 3) {
-        const i0 = indices[i];
-        const i1 = indices[i + 1];
-        const i2 = indices[i + 2];
-
-        const v0 = [vertices[3 * i0], vertices[3 * i0 + 1], vertices[3 * i0 + 2]];
-        const v1 = [vertices[3 * i1], vertices[3 * i1 + 1], vertices[3 * i1 + 2]];
-        const v2 = [vertices[3 * i2], vertices[3 * i2 + 1], vertices[3 * i2 + 2]];
-
-        const uv0 = texCoords ? [texCoords[2 * i0], texCoords[2 * i0 + 1]] : undefined;
-        const uv1 = texCoords ? [texCoords[2 * i1], texCoords[2 * i1 + 1]] : undefined;
-        const uv2 = texCoords ? [texCoords[2 * i2], texCoords[2 * i2 + 1]] : undefined;
-
-        const hit = intersectRayTriangle(localRay, v0, v1, v2, uv0, uv1, uv2);
-        if (hit && hit.t > 0 && (!bestHit || hit.t < bestHit.distance)) {
-          const worldPoint = [
-            ray.origin[0] + ray.direction[0] * hit.t,
-            ray.origin[1] + ray.direction[1] * hit.t,
-            ray.origin[2] + ray.direction[2] * hit.t,
-          ];
-          bestHit = {
-            distance: hit.t,
-            face: faceIndex,
-            uv: hit.uv || [0, 0],
-            point: worldPoint,
-          };
-        }
-      }
-    }
-
-    if (!bestHit) return null;
-
-    const faceConfig = object.faces?.[bestHit.face];
-    const rawUV: [number, number, number] = [bestHit.uv[0], bestHit.uv[1], 0];
-    const st = computeST(rawUV, faceConfig);
-
-    return {
-      distance: bestHit.distance,
-      point: bestHit.point,
-      face: bestHit.face,
-      uv: rawUV,
-      st,
-    };
-  }
-
-  /**
-   * Find the nearest visible object under a screen point using two-stage picking
-   * (broad-phase box culling followed by narrow-phase ray-triangle intersection).
+   * Find the nearest visible object under a screen point using each object's
+   * oriented bounding box. Terrain and water are not pickable yet. Distance is
+   * in world metres from the camera.
    */
   pick(screenX: number, screenY: number, width: number, height: number) {
     if (typeof this.camera.screenToWorldRay !== 'function') return null;
     const ray = this.camera.screenToWorldRay(screenX, screenY, width, height);
-    let best: { id: string; distance: number; point: number[]; face?: number; uv?: number[]; st?: number[] } | null = null;
+    let best: { id: string; distance: number; point: number[] } | null = null;
     for (const object of this.objects.values()) {
       if (!object.visible || object.hud) continue;
       // Meshes without known bounds are treated as the unit cube prims are scaled from.
       const local = this.objectLocalBounds(object) || UNIT_CUBE_BOUNDS;
       const model = this.calculateModelMatrix(object.position, object.rotation, object.scale);
-      const hit = this.pickObjectRay(ray, object, model, local.min, local.max);
-      if (hit === null || (best && hit.distance >= best.distance)) continue;
-      best = { id: object.id, distance: hit.distance, point: hit.point, face: hit.face, uv: hit.uv, st: hit.st };
+      const distance = intersectRayOrientedBox(ray, model, local.min, local.max);
+      if (distance === null || (best && distance >= best.distance)) continue;
+      best = { id: object.id, distance, point: ray.origin.map((value: number, axis: number) => value + ray.direction[axis] * distance) };
     }
     return best;
   }
@@ -882,9 +701,9 @@ export class Scene3D extends Utils.EventEmitter {
   renderGrid(viewMatrix: Float32Array, projectionMatrix: Float32Array) {
     const modelMatrix = this.mat4Identity();
     const normalMatrix = this.mat3FromMat4(modelMatrix);
-
+    
     const light = this.lights[0] || { position: [100, 100, 200], color: [1, 1, 1] };
-
+    
     if (this.terrainTextured && this.terrainMaterials) {
       const names = this.terrainMaterials.textureNames;
       const use = [0, 1, 2, 3].map((i) => (this.graphics.hasTexture(names[i]) ? 1 : 0));
@@ -936,16 +755,17 @@ export class Scene3D extends Utils.EventEmitter {
    */
   renderObject(object: any, viewMatrix: Float32Array, projectionMatrix: Float32Array, options: { model?: Float32Array; fullBright?: boolean } = {}) {
     const skinned = Boolean(object.skin) && typeof this.graphics.isSkinnedMesh === 'function';
-    // Rigged meshes are authored in avatar space: the viewer ignores the object's prim scale for them.
+    // WorldViewer has already resolved the correct scale: worn rigged attachments use unit scale,
+    // while Animesh keeps its simulator scale. Do not discard that distinction here.
     const modelMatrix = options.model || this.calculateModelMatrix(
       object.position,
       object.rotation,
-      skinned ? [1, 1, 1] : object.scale
+      object.scale
     );
-
+    
     const normalMatrix = this.mat3FromMat4(modelMatrix);
     const light = this.lights[0] || { position: [100, 100, 200], color: [1, 1, 1] };
-
+    
     const draws = object.meshes?.length ? object.meshes : [{ mesh: object.mesh, materialIndex: 0 }];
     for (const draw of draws) {
       const face = object.faces?.[draw.materialIndex];
@@ -990,17 +810,14 @@ export class Scene3D extends Utils.EventEmitter {
   private calculateModelMatrix(position: number[], rotation: number[], scale: number[]) {
     const matrix = this.mat4Identity();
 
-    // Translate
-    this.mat4Translate(matrix, position);
-
-    // Rotate
+    // The rotation helpers pre-multiply, so build S, then R, then T. Applying
+    // translation first would rotate the object's position around the origin.
+    this.mat4Scale(matrix, scale);
     if (rotation[0] !== 0) this.mat4RotateX(matrix, rotation[0]);
     if (rotation[1] !== 0) this.mat4RotateY(matrix, rotation[1]);
     if (rotation[2] !== 0) this.mat4RotateZ(matrix, rotation[2]);
-
-    // Scale
-    this.mat4Scale(matrix, scale);
-
+    this.mat4Translate(matrix, position);
+    
     return matrix;
   }
 
@@ -1025,46 +842,34 @@ export class Scene3D extends Utils.EventEmitter {
   private mat4RotateX(m: Float32Array, angle: number) {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const m1 = m[1], m2 = m[2];
-    const m5 = m[5], m6 = m[6];
-    const m9 = m[9], m10 = m[10];
-
-    m[1] = m1 * c + m2 * s;
-    m[2] = m2 * c - m1 * s;
-    m[5] = m5 * c + m6 * s;
-    m[6] = m6 * c - m5 * s;
-    m[9] = m9 * c + m10 * s;
-    m[10] = m10 * c - m9 * s;
+    for (let column = 0; column < 4; column++) {
+      const offset = column * 4;
+      const y = m[offset + 1], z = m[offset + 2];
+      m[offset + 1] = y * c - z * s;
+      m[offset + 2] = y * s + z * c;
+    }
   }
 
   private mat4RotateY(m: Float32Array, angle: number) {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const m0 = m[0], m2 = m[2];
-    const m4 = m[4], m6 = m[6];
-    const m8 = m[8], m10 = m[10];
-
-    m[0] = m0 * c - m2 * s;
-    m[2] = m0 * s + m2 * c;
-    m[4] = m4 * c - m6 * s;
-    m[6] = m4 * s + m6 * c;
-    m[8] = m8 * c - m10 * s;
-    m[10] = m8 * s + m10 * c;
+    for (let column = 0; column < 4; column++) {
+      const offset = column * 4;
+      const x = m[offset], z = m[offset + 2];
+      m[offset] = x * c + z * s;
+      m[offset + 2] = z * c - x * s;
+    }
   }
 
   private mat4RotateZ(m: Float32Array, angle: number) {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const m0 = m[0], m1 = m[1];
-    const m4 = m[4], m5 = m[5];
-    const m8 = m[8], m9 = m[9];
-
-    m[0] = m0 * c + m1 * s;
-    m[1] = m1 * c - m0 * s;
-    m[4] = m4 * c + m5 * s;
-    m[5] = m5 * c - m4 * s;
-    m[8] = m8 * c + m9 * s;
-    m[9] = m9 * c - m8 * s;
+    for (let column = 0; column < 4; column++) {
+      const offset = column * 4;
+      const x = m[offset], y = m[offset + 1];
+      m[offset] = x * c - y * s;
+      m[offset + 1] = x * s + y * c;
+    }
   }
 
   private mat4Scale(m: Float32Array, v: number[]) {
