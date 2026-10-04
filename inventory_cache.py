@@ -334,50 +334,53 @@ class InventoryCache:
                 cursor = conn.cursor()
                 now = time.time()
 
+                cursor.execute("PRAGMA foreign_keys = OFF;")
                 cursor.execute("DELETE FROM items;")
                 cursor.execute("DELETE FROM folders;")
 
-                folders = [
-                    (
-                        folder["folder_id"],
-                        folder.get("parent_id"),
-                        folder["name"],
-                        folder.get("type_default", 0),
-                        folder.get("version", 0),
-                        folder.get("update_token"),
+                raw_folders = full_data.get("folders", [])
+                if raw_folders:
+                    folders_gen = (
+                        (
+                            folder["folder_id"],
+                            folder.get("parent_id"),
+                            folder["name"],
+                            folder.get("type_default", 0),
+                            folder.get("version", 0),
+                            folder.get("update_token"),
+                        )
+                        for folder in raw_folders
                     )
-                    for folder in full_data.get("folders", [])
-                ]
-                if folders:
                     cursor.executemany(
                         """
                         INSERT INTO folders (folder_id, parent_id, name, type_default, version, update_token)
                         VALUES (?, ?, ?, ?, ?, ?);
                         """,
-                        folders,
+                        folders_gen,
                     )
 
-                items = [
-                    (
-                        item["item_id"],
-                        item["folder_id"],
-                        item["name"],
-                        item["asset_id"],
-                        item.get("type", 0),
-                        item.get("inv_type", 0),
-                        item.get("flags", 0),
-                        item.get("creation_date", 0),
-                        now,
+                raw_items = full_data.get("items", [])
+                if raw_items:
+                    items_gen = (
+                        (
+                            item["item_id"],
+                            item["folder_id"],
+                            item["name"],
+                            item["asset_id"],
+                            item.get("type", 0),
+                            item.get("inv_type", 0),
+                            item.get("flags", 0),
+                            item.get("creation_date", 0),
+                            now,
+                        )
+                        for item in raw_items
                     )
-                    for item in full_data.get("items", [])
-                ]
-                if items:
                     cursor.executemany(
                         """
                         INSERT INTO items (item_id, folder_id, name, asset_id, type, inv_type, flags, creation_date, updated_at)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                         """,
-                        items,
+                        items_gen,
                     )
 
                 cursor.execute(
@@ -391,6 +394,7 @@ class InventoryCache:
                     (token_id, new_token, now),
                 )
 
+                cursor.execute("PRAGMA foreign_keys = ON;")
                 conn.commit()
                 return True
             except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError, TypeError):
