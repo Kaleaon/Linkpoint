@@ -397,12 +397,12 @@ class GroupsManager(
     suspend fun requestAccountSummary(groupId: UUID): GroupAccountSummary? {
         return withContext(Dispatchers.IO) {
             try {
-                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN)
 
                 // AgentData
                 payload.putUUID(agentId)
-                payload.putUUID(groupId)
                 payload.putUUID(udpConnection.getSessionId())
+                payload.putUUID(groupId)
 
                 // MoneyData
                 payload.putInt(0) // RequestID - server will echo this back
@@ -427,12 +427,12 @@ class GroupsManager(
     suspend fun requestAccountDetails(groupId: UUID): GroupAccountDetails? {
         return withContext(Dispatchers.IO) {
             try {
-                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN)
 
                 // AgentData
                 payload.putUUID(agentId)
-                payload.putUUID(groupId)
                 payload.putUUID(udpConnection.getSessionId())
+                payload.putUUID(groupId)
 
                 // MoneyData
                 payload.putInt(0) // RequestID
@@ -456,12 +456,12 @@ class GroupsManager(
     suspend fun requestAccountTransactions(groupId: UUID): List<GroupTransaction>? {
         return withContext(Dispatchers.IO) {
             try {
-                val payload = ByteBuffer.allocate(52).order(ByteOrder.LITTLE_ENDIAN)
+                val payload = ByteBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN)
 
                 // AgentData
                 payload.putUUID(agentId)
-                payload.putUUID(groupId)
                 payload.putUUID(udpConnection.getSessionId())
+                payload.putUUID(groupId)
 
                 // MoneyData
                 payload.putInt(0) // RequestID
@@ -611,9 +611,9 @@ class GroupsManager(
         const val GP_GROUP_CHANGE_IDENTITY = 0x10000000L
 
         // Group accounting message IDs
-        const val MSG_GROUP_ACCOUNT_SUMMARY_REQUEST = 0xFF0070
-        const val MSG_GROUP_ACCOUNT_DETAILS_REQUEST = 0xFF0071
-        const val MSG_GROUP_ACCOUNT_TRANSACTIONS_REQUEST = 0xFF0072
+        const val MSG_GROUP_ACCOUNT_SUMMARY_REQUEST = MessageIdRegistry.GROUP_ACCOUNT_SUMMARY_REQUEST
+        const val MSG_GROUP_ACCOUNT_DETAILS_REQUEST = MessageIdRegistry.GROUP_ACCOUNT_DETAILS_REQUEST
+        const val MSG_GROUP_ACCOUNT_TRANSACTIONS_REQUEST = MessageIdRegistry.GROUP_ACCOUNT_TRANSACTIONS_REQUEST
 
         // Group proposals message IDs
         const val MSG_GROUP_ACTIVE_PROPOSALS_REQUEST = 0xFF0073
