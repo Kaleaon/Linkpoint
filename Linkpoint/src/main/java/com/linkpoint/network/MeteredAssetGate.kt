@@ -76,6 +76,18 @@ class MeteredAssetGate(
     }
 
     /**
+     * Release active permits or reset the semaphore cap when transitioning to background
+     * or pausing asset queues.
+     */
+    @Synchronized
+    fun releaseActivePermits() {
+        val available = current.availablePermits
+        val maxCap = concurrencyCap
+        current = buildSemaphore(meteredNow)
+        Log.i(TAG, "Active permits freed/reset (available was $available of $maxCap)")
+    }
+
+    /**
      * Acquire a permit for the duration of [block]. Suspending; respects
      * coroutine cancellation. Callers MUST use this rather than holding a
      * permit across multiple operations — the semaphore swap on
