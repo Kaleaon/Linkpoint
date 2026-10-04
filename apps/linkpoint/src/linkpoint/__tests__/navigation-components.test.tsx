@@ -88,6 +88,31 @@ describe("Navigation Components & NavShell", () => {
       expect(mounted.host.querySelector('[role="tablist"]')).toBeNull();
       expect(mounted.host.querySelector('[data-testid="screen-content"]')).toBeTruthy();
     });
+
+    it("renders connection banner when disconnected and updates on protocol events", async () => {
+      setViewportWidth(412);
+      const { app } = await import("../app");
+      (app.protocol as any).connected = false;
+      mounted = await mountScreen(() => <NavShellTestContainer layout="glass" initialScreen="Chat" width={412} />);
+
+      await act(async () => {
+        app.protocol.emit("disconnected");
+      });
+
+      const banner = mounted.host.querySelector(".connection-banner");
+      expect(banner).toBeTruthy();
+      expect(banner?.textContent).toContain("Connection lost");
+
+      const reconnectBtn = banner?.querySelector("button");
+      expect(reconnectBtn).toBeTruthy();
+
+      await act(async () => {
+        (app.protocol as any).connected = true;
+        app.protocol.emit("connected", {});
+      });
+
+      expect(mounted.host.querySelector(".connection-banner")).toBeNull();
+    });
   });
 
   describe("RailNav accessibility & interaction", () => {
