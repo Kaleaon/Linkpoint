@@ -211,7 +211,8 @@ class Gles3RenderCommandConsumer(
                     scaleX = scale[0], scaleY = scale[1], scaleZ = scale[2],
                     rotation = null,
                     meshData = cmd.meshData,
-                    textureEntry = cmd.textureEntry
+                    textureEntry = cmd.textureEntry,
+                    hostAvatarId = cmd.hostAvatarId
                 )
                 tryBindFaceTextures(cmd.localId.toLong(), cmd.textureEntry)
             }

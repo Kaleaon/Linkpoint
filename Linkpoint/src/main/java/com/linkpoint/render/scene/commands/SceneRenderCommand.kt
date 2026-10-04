@@ -11,7 +11,8 @@ sealed interface SceneRenderCommand {
     data class UpsertMesh(
         val localId: Int,
         val meshData: MeshData,
-        val textureEntry: ByteArray
+        val textureEntry: ByteArray,
+        val hostAvatarId: UUID? = null
     ) : SceneRenderCommand
     data class UpdateMaterial(
         val localId: Int,

@@ -232,6 +232,7 @@ class LumiyaRenderer : RenderEngineProvider {
             createFullScreenQuad()
 
             avatarStore = DrawableAvatarStore { AvatarMeshAssetLoader.loadDefaultAvatarMesh(context) }
+            meshStore.avatarStore = avatarStore
 
             // Initialise subsystems
             terrainDrawable = DrawableTerrain(ctx)
@@ -580,7 +581,8 @@ class LumiyaRenderer : RenderEngineProvider {
         scaleX: Float, scaleY: Float, scaleZ: Float,
         rotation: FloatArray? = null,
         meshData: com.linkpoint.assets.MeshData,
-        textureEntry: ByteArray? = null
+        textureEntry: ByteArray? = null,
+        hostAvatarId: java.util.UUID? = null
     ): Boolean {
         requireGlThread("upsertMeshPrim")
         if (!isInitialized) return false
@@ -591,8 +593,13 @@ class LumiyaRenderer : RenderEngineProvider {
             scaleX = scaleX, scaleY = scaleY, scaleZ = scaleZ,
             rotation = rotation,
             meshData = meshData,
-            textureEntry = textureEntry
+            textureEntry = textureEntry,
+            hostAvatarId = hostAvatarId
         )
+    }
+
+    fun setMeshHostAvatarId(id: Long, hostAvatarId: java.util.UUID?) {
+        meshStore.setHostAvatarId(id, hostAvatarId)
     }
 
     /** Look up the default-face texture UUID currently bound to a prim. */
