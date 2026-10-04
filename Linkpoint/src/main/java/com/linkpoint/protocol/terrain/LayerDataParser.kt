@@ -113,15 +113,15 @@ object LayerDataParser {
             Log.d(TAG, "Terrain header: stride=0x${stride.toString(16)}, patchSize=$patchSize, type=$layerType")
             val scratch = DecompressScratchBuffers()
 
-            val maxPatchesX = (regionSizeX / TerrainPatch.PATCH_SIZE).coerceIn(16, 128)
-            val maxPatchesY = (regionSizeY / TerrainPatch.PATCH_SIZE).coerceIn(16, 128)
+            val maxPatchesX = (regionSizeX / TerrainPatch.PATCH_SIZE).coerceIn(16, VirtualRegionMapper.MAX_PATCHES_PER_SIDE)
+            val maxPatchesY = (regionSizeY / TerrainPatch.PATCH_SIZE).coerceIn(16, VirtualRegionMapper.MAX_PATCHES_PER_SIDE)
             val maxPatches = maxOf(maxPatchesX, maxPatchesY)
 
-            // Decompress patches until end marker (supporting Varregions up to 2048m)
+            // Decompress patches until end marker (supporting Varregions up to 4096m)
             while (!buffer.isEOF()) {
                 val patch = TerrainPatch.decompressPatch(buffer, patchSize, maxPatches, scratch) ?: break
 
-                if (patch.x >= 0 && patch.y >= 0 && patch.x < maxPatchesX && patch.y < maxPatchesY) {
+                if (patch.x in 0 until maxPatchesX && patch.y in 0 until maxPatchesY) {
                     patches.add(patch)
                 }
             }
@@ -131,6 +131,22 @@ object LayerDataParser {
         }
 
         return patches
+    }
+
+    /**
+     * Parse LayerData message and split/re-index terrain patches into virtual 256m tiles.
+     * All patches in the returned VirtualTilePackets are re-indexed to standard 0 to 15 coordinate ranges.
+     */
+    fun parseVirtualTiles(
+        data: ByteArray,
+        regionWidth: Int = VirtualRegionMapper.STANDARD_TILE_SIZE,
+        regionHeight: Int = VirtualRegionMapper.STANDARD_TILE_SIZE
+    ): Map<VirtualTileIndex, VirtualTilePacket> {
+        val result = parse(data) ?: return emptyMap()
+        if (result.type != LayerType.LAND && result.type != LayerType.LAND_EXTENDED) {
+            return emptyMap()
+        }
+        return VirtualRegionMapper.splitTerrainPatchesToVirtualTiles(result.patches, regionWidth, regionHeight)
     }
 
     private fun createDefaultPatches(): List<TerrainPatch> {

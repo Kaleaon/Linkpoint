@@ -2506,12 +2506,10 @@ open class UDPConnectionFixed(
 
         // State (0 = standing)
         payload.put(0.toByte())
-
-        // Camera center (default position)
-        payload.putFloat(128f)
-        payload.putFloat(128f)
-        payload.putFloat(25f)
-
+        // Camera center (adjusted for active virtual tile offset and global region space)
+        payload.putFloat(agentGlobalX)
+        payload.putFloat(agentGlobalY)
+        payload.putFloat(agentGlobalZ)
         // Camera look-at direction (looking forward)
         payload.putFloat(1f)
         payload.putFloat(0f)
@@ -3885,12 +3883,51 @@ open class UDPConnectionFixed(
      * Get the number of registered message handlers
      */
     fun getRegisteredHandlerCount(): Int = messageHandlers.size
+    @Volatile private var activeVirtualTileIndex = com.linkpoint.protocol.terrain.VirtualTileIndex(0, 0)
+    @Volatile private var activeRegionWidth = 256
+    @Volatile private var activeRegionHeight = 256
+    @Volatile private var agentGlobalX = 128f
+    @Volatile private var agentGlobalY = 128f
+    @Volatile private var agentGlobalZ = 25f
 
     /**
-     * Update agent position for AgentUpdate messages
+     * Configure virtual region bounds (e.g. for varregions up to 4096m x 4096m).
+     */
+    fun configureVirtualRegion(width: Int, height: Int) {
+        activeRegionWidth = width.coerceIn(256, com.linkpoint.protocol.terrain.VirtualRegionMapper.MAX_REGION_SIZE)
+        activeRegionHeight = height.coerceIn(256, com.linkpoint.protocol.terrain.VirtualRegionMapper.MAX_REGION_SIZE)
+        Log.i(TAG, "Virtual region dimensions configured: ${activeRegionWidth}x${activeRegionHeight}m")
+    }
+
+    /**
+     * Get active virtual tile index.
+     */
+    fun getActiveVirtualTile(): com.linkpoint.protocol.terrain.VirtualTileIndex = activeVirtualTileIndex
+
+    /**
+     * Get active virtual tile position relative to current 256m sub-region tile.
+     */
+    fun getVirtualTileRelativePosition(): com.linkpoint.protocol.terrain.VirtualTilePosition {
+        return com.linkpoint.protocol.terrain.VirtualRegionMapper.globalToVirtualTile(
+            agentGlobalX, agentGlobalY, agentGlobalZ, activeRegionWidth, activeRegionHeight
+        )
+    }
+
+    /**
+     * Update agent position for AgentUpdate messages and recalculate active virtual tile offsets.
      */
     fun updateAgentPosition(x: Float, y: Float, z: Float) {
-        // Position is not currently used in sendAgentUpdate but can be added later
+        agentGlobalX = x
+        agentGlobalY = y
+        agentGlobalZ = z
+
+        val tilePosition = com.linkpoint.protocol.terrain.VirtualRegionMapper.globalToVirtualTile(
+            x, y, z, activeRegionWidth, activeRegionHeight
+        )
+        if (activeVirtualTileIndex != tilePosition.tileIndex) {
+            activeVirtualTileIndex = tilePosition.tileIndex
+            Log.d(TAG, "Agent crossed into virtual tile (${tilePosition.tileIndex.x}, ${tilePosition.tileIndex.y}), relative pos: (${tilePosition.localX}, ${tilePosition.localY})")
+        }
     }
 
     /**
