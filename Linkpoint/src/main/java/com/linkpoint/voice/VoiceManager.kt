@@ -98,6 +98,8 @@ class VoiceManager(
     private var inputGain = 1.0f
     private var outputGain = 1.0f
 
+    // OpenSim SIP-to-WebRTC adapter
+    private val openSimVoiceSignalingAdapter = OpenSimVoiceSignalingAdapter()
     init {
         runBlocking(voiceDispatcher) {
             initializeWebRTC()
@@ -136,7 +138,7 @@ class VoiceManager(
             localAudioTrack = peerConnectionFactory?.createAudioTrack("localAudio", audioSource)
 
             Log.i(TAG, "[${Thread.currentThread().name}] WebRTC initialized")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e(TAG, "[${Thread.currentThread().name}] Failed to initialize WebRTC", e)
         }
     }
@@ -223,40 +225,73 @@ class VoiceManager(
      * Google STUN). The signaling layer that POSTs SDP to the channel
      * URI is still pending — see the [VoiceSession] class doc.
      */
+    /**
+     * Join parcel voice for OpenSim regions or legacy non-SL WebRTC channels.
+     * Delegates directly to [joinOpenSimVoice] to bypass legacy native Vivox JNI stubs.
+     */
     suspend fun joinParcelVoice(): Boolean = withContext(voiceDispatcher) {
-        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
-        val account = provisionVoiceAccount() // best-effort; may be null on Vivox sims
-
-        Log.i(TAG, "Joining voice channel: ${voiceInfo.channelUri} " +
-            "(${account?.iceServers?.size ?: 0} ICE servers from sim)")
-
-        val session = createSession(voiceInfo.channelUri, account?.iceServers ?: emptyList())
-        currentParcelSession = session
-        activeSessions[voiceInfo.channelUri] = session
-
-        session.connect(voiceInfo.channelUri, voiceInfo.channelCredentials)
-        _isConnected.value = true
-        true
+        joinOpenSimVoice()
     }
 
     /**
-     * Top-level entry point for spatial voice. Picks the WebRTC flow
-     * for WebRTC-enabled regions and falls back to Vivox for everything
-     * else, based on `SimulatorFeatures.voice_server_type` (the cap's
-     * self-description). LL is rolling WebRTC out gradually — limited
-     * release began 2026-03-18 — so on any single login the same
-     * client must speak both protocols depending on which region the
-     * avatar is in.
+     * Join spatial voice on an OpenSim region or non-SL WebRTC grid.
+     * Requests `ParcelVoiceInfoRequest` and `ProvisionVoiceAccountRequest` credentials,
+     * converts OpenSim SIP credentials via [OpenSimVoiceSignalingAdapter],
+     * and starts a [WebRtcVoiceSession] without calling legacy native Vivox C++ JNI stubs.
+     */
+    suspend fun joinOpenSimVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
+        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
+        val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
+
+        Log.i(TAG, "Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
+
+        val creds = openSimVoiceSignalingAdapter.parseCredentials(voiceInfo, account)
+        val iceServers = if (creds.iceServers.isNotEmpty()) creds.iceServers else defaultWebRtcIceServers()
+
+        currentWebRtcSession?.close()
+
+        val factory = peerConnectionFactory
+        if (factory == null) {
+            Log.w(TAG, "WebRTC PeerConnectionFactory not initialized for OpenSim voice session")
+            return@withContext false
+        }
+
+        val session = WebRtcVoiceSession(
+            capabilityManager = capabilityManager,
+            factory = factory,
+            channelType = WebRtcVoiceSession.ChannelType.SPATIAL,
+            parcelLocalId = parcelLocalId
+        )
+        currentWebRtcSession = session
+
+        return@withContext try {
+            session.connect(iceServers)
+            session.sendJoin(primary = true)
+            _isConnected.value = true
+            Log.i(TAG, "OpenSim WebRTC spatial voice connected successfully (parcel=$parcelLocalId)")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "OpenSim WebRTC spatial voice connect failed: ${e.message}", e)
+            session.close()
+            currentWebRtcSession = null
+            _isConnected.value = false
+            false
+        }
+    }
+
+    /**
+     * Top-level entry point for spatial voice. Picks the SL WebRTC flow
+     * for WebRTC-enabled regions (`voice_server_type == "webrtc"`) and
+     * routes OpenSim grids / non-SL WebRTC regions to [joinOpenSimVoice]
+     * via [OpenSimVoiceSignalingAdapter].
      *
-     * The `parcelLocalId` is only meaningful for spatial voice on a
-     * WebRTC region (LL's protocol scopes a session to a parcel when
-     * provided, region otherwise). Vivox sims ignore it.
+     * Bypasses legacy native Vivox C++ JNI stubs completely on 64-bit Android runtimes.
      */
     suspend fun joinSpatialVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
         if (isWebRtcVoiceRegion()) {
             joinSpatialVoiceWebRtc(parcelLocalId)
         } else {
-            joinParcelVoice()
+            joinOpenSimVoice(parcelLocalId)
         }
     }
 
