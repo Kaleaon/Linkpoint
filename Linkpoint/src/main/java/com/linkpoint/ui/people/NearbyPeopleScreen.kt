@@ -37,6 +37,8 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import com.linkpoint.ui.components.linkpoint2.primitives.L2TopBar
+import com.linkpoint.ui.components.linkpoint2.primitives.L2Chip
+import com.linkpoint.ui.components.linkpoint2.primitives.L2ChipVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +60,8 @@ data class NearbyPerson(
     val id: UUID,
     val name: String,
     val distance: Float,
-    val isFriend: Boolean = false
+    val isFriend: Boolean = false,
+    val isTyping: Boolean = false
 )
 
 enum class NearbyPeopleFilter {
@@ -256,6 +259,13 @@ fun NearbyPersonCard(
                             text = "★",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    if (person.isTyping) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        L2Chip(
+                            label = "typing…",
+                            variant = L2ChipVariant.Primary
                         )
                     }
                 }

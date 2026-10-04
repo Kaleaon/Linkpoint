@@ -30,6 +30,7 @@ class NearbyPeopleActivity : AppCompatActivity() {
     private val friendsManager by lazy { LinkpointApp.getInstance().friendsManager }
     private val imManager by lazy { LinkpointApp.getInstance().imManager }
 
+    private var rawPeople: List<NearbyPerson> = emptyList()
     private var people: List<NearbyPerson> by mutableStateOf(emptyList())
     private var selectedFilter: NearbyPeopleFilter by mutableStateOf(NearbyPeopleFilter.ALL)
     private var isLoading: Boolean by mutableStateOf(false)
@@ -55,7 +56,21 @@ class NearbyPeopleActivity : AppCompatActivity() {
             }
         }
 
+        observeTypingAvatars()
         loadNearbyPeople()
+    }
+
+    private fun observeTypingAvatars() {
+        val app = LinkpointApp.getInstanceOrNull() ?: return
+        if (app.isChatManagerInitialized()) {
+            lifecycleScope.launch {
+                app.chatManager.typingAvatars.collect { typingSet ->
+                    people = rawPeople.map { person ->
+                        person.copy(isTyping = typingSet.contains(person.id))
+                    }
+                }
+            }
+        }
     }
 
     private fun loadNearbyPeople() {
@@ -64,7 +79,14 @@ class NearbyPeopleActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                people = worldMap.getNearbyUsers()
+                val app = LinkpointApp.getInstanceOrNull()
+                val typingSet = if (app != null && app.isChatManagerInitialized()) {
+                    app.chatManager.typingAvatars.value
+                } else {
+                    emptySet()
+                }
+
+                rawPeople = worldMap.getNearbyUsers()
                     .map {
                         NearbyPerson(
                             id = it.agentId,
@@ -73,7 +95,11 @@ class NearbyPeopleActivity : AppCompatActivity() {
                             isFriend = it.isFriend
                         )
                     }
+                people = rawPeople.map { person ->
+                    person.copy(isTyping = typingSet.contains(person.id))
+                }
             } catch (e: Exception) {
+                rawPeople = emptyList()
                 people = emptyList()
                 emptyMessageOverride = getString(R.string.error_loading_nearby_people, e.message ?: "unknown")
             } finally {

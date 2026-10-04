@@ -102,6 +102,7 @@ data class ChatMessage(
 @Composable
 fun ChatScreen(
     messages: List<ChatMessage>,
+    typingAvatarNames: List<String> = emptyList(),
     currentAvatarName: String = "You",
     threadAvatarName: String = "Local",
     threadOnline: Boolean = true,
@@ -218,6 +219,22 @@ fun ChatScreen(
                         }
                     }
                 }
+            }
+        }
+
+        if (typingAvatarNames.isNotEmpty() && (currentChannel == ChatChannel.LOCAL || currentChannel == ChatChannel.NEARBY)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = formatTypingIndicator(typingAvatarNames),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontStyle = FontStyle.Italic,
+                )
             }
         }
 
@@ -367,6 +384,15 @@ fun ChatBubble(
                 }
             }
         }
+    }
+}
+
+fun formatTypingIndicator(names: List<String>): String {
+    return when {
+        names.isEmpty() -> ""
+        names.size == 1 -> "${names[0]} is typing…"
+        names.size == 2 -> "${names[0]} and ${names[1]} are typing…"
+        else -> "${names[0]} and ${names.size - 1} others are typing…"
     }
 }
 
