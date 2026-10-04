@@ -91,13 +91,95 @@ object TextureDecodeTranscodePipeline {
 }
 
 /**
- * Basis transcoder shim. The native Basis Universal bridge has not been
- * vendored or wired into CMake, so callers naturally fall back to the J2K
- * pipeline. To enable real transcoding, vendor basis_universal, restore the
- * basis_transcoder_jni.cpp / openjpeg_basis_integration.cpp sources, list
- * them in src/main/cpp/CMakeLists.txt, and reintroduce the JNI bindings.
+ * Basis Universal transcoder bridge.
+ * Uses native C++ Basis Universal transcoder linked into liblinkpoint-j2k.so.
  */
 internal object BasisTranscoder {
-    fun tryReadDimensions(ktx2Data: ByteArray): Pair<Int, Int>? = null
-    fun tryTranscodeToRgba32(ktx2Data: ByteArray): ByteArray? = null
+    private const val TAG = "BasisTranscoder"
+
+    @Volatile
+    private var libraryLoaded = false
+
+    init {
+        try {
+            System.loadLibrary("linkpoint-j2k")
+            nativeInit()
+            libraryLoaded = true
+            android.util.Log.i(TAG, "KTX2 transcoder initialized successfully")
+        } catch (e: UnsatisfiedLinkError) {
+            android.util.Log.w(TAG, "linkpoint-j2k native library not available for Basis: ${e.message}")
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Failed to initialize BasisTranscoder: ${e.message}")
+        }
+    }
+
+    fun isAvailable(): Boolean = libraryLoaded
+
+    fun tryReadDimensions(ktx2Data: ByteArray): Pair<Int, Int>? {
+        if (!libraryLoaded || ktx2Data.isEmpty()) return null
+        return try {
+            nativeGetDimensions(ktx2Data)
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Failed to read KTX2 dimensions: ${e.message}")
+            null
+        }
+    }
+
+    fun tryTranscodeToRgba32(ktx2Data: ByteArray): ByteArray? {
+        if (!libraryLoaded || ktx2Data.isEmpty()) return null
+        return try {
+            nativeTranscodeToRgba32(ktx2Data)
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Failed to transcode KTX2 to RGBA32: ${e.message}")
+            null
+        }
+    }
+
+    fun tryTranscodeToEtc2(ktx2Data: ByteArray): ByteArray? {
+        if (!libraryLoaded || ktx2Data.isEmpty()) return null
+        return try {
+            nativeTranscodeToEtc2(ktx2Data)
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Failed to transcode KTX2 to ETC2: ${e.message}")
+            null
+        }
+    }
+
+    fun tryTranscodeToAstc(ktx2Data: ByteArray): ByteArray? {
+        if (!libraryLoaded || ktx2Data.isEmpty()) return null
+        return try {
+            nativeTranscodeToAstc(ktx2Data)
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Failed to transcode KTX2 to ASTC: ${e.message}")
+            null
+        }
+    }
+
+    fun tryTranscode(ktx2Data: ByteArray, targetFormat: Int): ByteArray? {
+        if (!libraryLoaded || ktx2Data.isEmpty()) return null
+        return try {
+            nativeTranscode(ktx2Data, targetFormat)
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Failed to transcode KTX2 with format $targetFormat: ${e.message}")
+            null
+        }
+    }
+
+    @JvmStatic
+    private external fun nativeInit(): Boolean
+
+    @JvmStatic
+    private external fun nativeGetDimensions(ktx2Data: ByteArray): Pair<Int, Int>?
+
+    @JvmStatic
+    private external fun nativeTranscodeToRgba32(ktx2Data: ByteArray): ByteArray?
+
+    @JvmStatic
+    private external fun nativeTranscodeToEtc2(ktx2Data: ByteArray): ByteArray?
+
+    @JvmStatic
+    private external fun nativeTranscodeToAstc(ktx2Data: ByteArray): ByteArray?
+
+    @JvmStatic
+    private external fun nativeTranscode(ktx2Data: ByteArray, targetFormat: Int): ByteArray?
 }

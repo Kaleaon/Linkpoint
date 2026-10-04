@@ -31,6 +31,122 @@ typedef struct {
     size_t offset;
 } MemoryStream;
 
+// JP2 box parsing structures and functions supporting 64-bit XLBox lengths & superboxes
+struct JP2BoxHeader {
+    uint32_t type;         // 4-byte box type
+    uint64_t header_size;  // 8 or 16 bytes
+    uint64_t total_size;   // Box length including header
+    uint64_t data_offset;  // Payload offset in input buffer
+    uint64_t data_size;    // Payload length
+};
+
+static inline uint32_t parse_u32_be(const uint8_t* p) {
+    return (static_cast<uint32_t>(p[0]) << 24) |
+           (static_cast<uint32_t>(p[1]) << 16) |
+           (static_cast<uint32_t>(p[2]) << 8)  |
+           (static_cast<uint32_t>(p[3]));
+}
+
+static inline uint64_t parse_u64_be(const uint8_t* p) {
+    return (static_cast<uint64_t>(p[0]) << 56) |
+           (static_cast<uint64_t>(p[1]) << 48) |
+           (static_cast<uint64_t>(p[2]) << 40) |
+           (static_cast<uint64_t>(p[3]) << 32) |
+           (static_cast<uint64_t>(p[4]) << 24) |
+           (static_cast<uint64_t>(p[5]) << 16) |
+           (static_cast<uint64_t>(p[6]) << 8)  |
+           (static_cast<uint64_t>(p[7]));
+}
+
+static bool parse_jp2_box_header(const uint8_t* data, size_t size, size_t offset, JP2BoxHeader* box) {
+    if (offset + 8 > size) return false;
+
+    uint32_t lbox = parse_u32_be(data + offset);
+    uint32_t tbox = parse_u32_be(data + offset + 4);
+
+    uint64_t header_size = 8;
+    uint64_t total_size = lbox;
+
+    if (lbox == 1) { // 64-bit extended box length field (XLBox)
+        if (offset + 16 > size) return false;
+        total_size = parse_u64_be(data + offset + 8);
+        header_size = 16;
+    } else if (lbox == 0) { // Box extends to end of input stream
+        total_size = size - offset;
+    }
+
+    if (total_size < header_size || offset + total_size > size) {
+        return false;
+    }
+
+    box->type = tbox;
+    box->header_size = header_size;
+    box->total_size = total_size;
+    box->data_offset = offset + header_size;
+    box->data_size = total_size - header_size;
+    return true;
+}
+
+static bool is_jp2_superbox(uint32_t box_type) {
+    // JP2 Header superbox ('jp2h' = 0x6A703268), Resolution superbox ('res ' = 0x72657320)
+    return box_type == 0x6A703268 || box_type == 0x72657320;
+}
+
+static bool find_jp2_box(
+    const uint8_t* data,
+    size_t size,
+    size_t start_offset,
+    size_t end_offset,
+    uint32_t target_type,
+    JP2BoxHeader* out_box
+) {
+    size_t pos = start_offset;
+    while (pos + 8 <= end_offset && pos < size) {
+        JP2BoxHeader box;
+        if (!parse_jp2_box_header(data, size, pos, &box)) {
+            pos++;
+            continue;
+        }
+
+        if (box.type == target_type) {
+            *out_box = box;
+            return true;
+        }
+
+        // If this box is a superbox, traverse inside it
+        if (is_jp2_superbox(box.type)) {
+            size_t sub_end = box.data_offset + box.data_size;
+            if (sub_end > end_offset) sub_end = end_offset;
+            if (find_jp2_box(data, size, box.data_offset, sub_end, target_type, out_box)) {
+                return true;
+            }
+        }
+
+        if (box.total_size < box.header_size) {
+            pos++;
+        } else {
+            pos += box.total_size;
+        }
+    }
+    return false;
+}
+
+static bool parse_jp2_ihdr_dimensions(const uint8_t* data, size_t size, int* out_width, int* out_height) {
+    JP2BoxHeader ihdr;
+    if (find_jp2_box(data, size, 0, size, 0x69686472 /* 'ihdr' */, &ihdr)) {
+        if (ihdr.data_size >= 8) {
+            uint32_t h = parse_u32_be(data + ihdr.data_offset);
+            uint32_t w = parse_u32_be(data + ihdr.data_offset + 4);
+            if (w > 0 && h > 0) {
+                *out_width = static_cast<int>(w);
+                *out_height = static_cast<int>(h);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 static OPJ_SIZE_T stream_read(void* buffer, OPJ_SIZE_T numBytes, void* userData) {
     MemoryStream* stream = (MemoryStream*)userData;
 
@@ -87,22 +203,17 @@ static void info_callback(const char* msg, void* userData) {
 
 // Detect codec type from data
 static OPJ_CODEC_FORMAT detectCodecFormat(const uint8_t* data, size_t size) {
-    if (size < 12) {
+    if (size < 8) {
         return OPJ_CODEC_UNKNOWN;
     }
 
-    // Check for JP2 file format (starts with JP2 signature box)
-    if (data[0] == 0x00 && data[1] == 0x00 && data[2] == 0x00 && data[3] == 0x0C &&
-        data[4] == 0x6A && data[5] == 0x50 && data[6] == 0x20 && data[7] == 0x20) {
+    // Check for JP2 file format (starts with JP2 signature box 'jP  ')
+    JP2BoxHeader box;
+    if (parse_jp2_box_header(data, size, 0, &box) && box.type == 0x6A502020 /* 'jP  ' */) {
         return OPJ_CODEC_JP2;
     }
 
-    // Check for J2K codestream (starts with SOC marker)
-    if (data[0] == 0xFF && data[1] == 0x4F && data[2] == 0xFF && data[3] == 0x51) {
-        return OPJ_CODEC_J2K;
-    }
-
-    // Try J2K anyway if unclear
+    // Check for J2K codestream (starts with SOC marker 0xFF4F)
     if (data[0] == 0xFF && data[1] == 0x4F) {
         return OPJ_CODEC_J2K;
     }
@@ -361,7 +472,7 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeGetImageSize(
     jbyteArray jdata
 ) {
     jsize dataSize = env->GetArrayLength(jdata);
-    if (dataSize < 50) {
+    if (dataSize < 12) {
         return nullptr;
     }
 
@@ -371,6 +482,26 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeGetImageSize(
     }
 
     const uint8_t* data = reinterpret_cast<const uint8_t*>(dataPtr);
+
+    int width = 0;
+    int height = 0;
+
+    // Fast path: attempt direct JP2 ihdr box extraction (handles 64-bit XLBox lengths & superboxes)
+    if (parse_jp2_ihdr_dimensions(data, dataSize, &width, &height)) {
+        env->ReleaseByteArrayElements(jdata, dataPtr, JNI_ABORT);
+
+        jclass pairClass = env->FindClass("kotlin/Pair");
+        jmethodID pairConstructor = env->GetMethodID(pairClass, "<init>", "(Ljava/lang/Object;Ljava/lang/Object;)V");
+        jclass intClass = env->FindClass("java/lang/Integer");
+        jmethodID intConstructor = env->GetMethodID(intClass, "<init>", "(I)V");
+
+        if (pairClass && pairConstructor && intClass && intConstructor) {
+            jobject widthObj = env->NewObject(intClass, intConstructor, width);
+            jobject heightObj = env->NewObject(intClass, intConstructor, height);
+            return env->NewObject(pairClass, pairConstructor, widthObj, heightObj);
+        }
+        return nullptr;
+    }
 
     // Detect format
     OPJ_CODEC_FORMAT format = detectCodecFormat(data, dataSize);

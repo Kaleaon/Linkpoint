@@ -312,35 +312,49 @@ object JPEG2000Decoder {
     }
 
     private fun parseJ2KHeader(data: ByteArray): Pair<Int, Int>? {
-        if (data.size < 50) return null
+        if (data.size < 12) return null
 
         try {
             val buffer = ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN)
-            if (data[0] == 0x00.toByte() && data[1] == 0x00.toByte() &&
-                data[2] == 0x00.toByte() && data[3] == 0x0C.toByte()) {
-                var pos = 0
-                while (pos < data.size - 8) {
+
+            fun scanBoxes(startOffset: Int, endOffset: Int): Pair<Int, Int>? {
+                var pos = startOffset
+                while (pos <= endOffset - 8 && pos >= 0) {
                     buffer.position(pos)
                     var boxLen = buffer.int.toLong() and 0xFFFFFFFFL
                     val boxType = buffer.int
 
                     var headerOffset = 8
-                    if (boxLen == 1L && pos + 16 <= data.size) {
+                    if (boxLen == 1L) {
+                        if (pos + 16 > endOffset) break
                         boxLen = buffer.long
                         headerOffset = 16
                     }
 
                     if (boxType == 0x69686472) { // 'ihdr'
-                        val height = buffer.int
-                        val width = buffer.int
-                        if (width > 0 && height > 0) {
-                            return Pair(width, height)
+                        if (pos + headerOffset + 8 <= data.size) {
+                            buffer.position(pos + headerOffset)
+                            val height = buffer.int
+                            val width = buffer.int
+                            if (width > 0 && height > 0) {
+                                return Pair(width, height)
+                            }
+                        }
+                    } else if (boxType == 0x6A703268 || boxType == 0x72657320) { // 'jp2h' or 'res ' superbox
+                        if (boxLen >= headerOffset) {
+                            val superboxEnd = (pos + boxLen).toInt().coerceAtMost(endOffset)
+                            val result = scanBoxes(pos + headerOffset, superboxEnd)
+                            if (result != null) return result
                         }
                     }
 
                     pos += if (boxLen >= headerOffset) boxLen.toInt() else 1
                 }
+                return null
             }
+
+            val jp2Result = scanBoxes(0, data.size)
+            if (jp2Result != null) return jp2Result
 
             if (data[0] == 0xFF.toByte() && data[1] == 0x4F.toByte()) { // SOC marker
                 var pos = 2

@@ -29,7 +29,7 @@ object TextureFormatPolicy {
     data class DeviceCapabilities(
         val supportsEtc2Rgba: Boolean,
         val supportsRgba8: Boolean = true,
-        val supportsBasisTranscoding: Boolean = false,
+        val supportsBasisTranscoding: Boolean = BasisTranscoder.isAvailable(),
         val supportsEtcpak: Boolean = false,
     )
 

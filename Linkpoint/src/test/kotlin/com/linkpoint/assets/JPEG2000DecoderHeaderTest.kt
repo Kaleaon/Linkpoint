@@ -103,10 +103,53 @@ class JPEG2000DecoderHeaderTest {
         return bytes
     }
 
+    @Test
+    fun `parses jp2 ihdr dimensions with 64-bit extended box lengths and superbox traversal`() {
+        val data = buildFakeJp264BitAndSuperbox(width = 1024, height = 768)
+        val size = JPEG2000Decoder.getImageSize(data)
+        assertNotNull(size)
+        assertEquals(1024, size!!.first)
+        assertEquals(768, size.second)
+    }
+
+    private fun buildFakeJp264BitAndSuperbox(width: Int, height: Int): ByteArray {
+        val bytes = ByteArray(128)
+        // 1. Signature box: LBox = 12 (0x0000000C), TBox = 'jP  '
+        bytes[0] = 0x00; bytes[1] = 0x00; bytes[2] = 0x00; bytes[3] = 0x0C
+        bytes[4] = 0x6A; bytes[5] = 0x50; bytes[6] = 0x20; bytes[7] = 0x20
+
+        // 2. Superbox 'jp2h' with 64-bit XLBox:
+        // LBox = 1 (0x00000001), TBox = 'jp2h' (0x6A703268), XLBox = 100 bytes
+        var pos = 12
+        bytes[pos + 0] = 0x00; bytes[pos + 1] = 0x00; bytes[pos + 2] = 0x00; bytes[pos + 3] = 0x01
+        bytes[pos + 4] = 0x6A; bytes[pos + 5] = 0x70; bytes[pos + 6] = 0x32; bytes[pos + 7] = 0x68
+        putLong(bytes, pos + 8, 100L) // XLBox length 100
+
+        // 3. Child box 'ihdr' inside 'jp2h' superbox (header offset = 16)
+        pos = 28 // 12 + 16
+        bytes[pos + 0] = 0x00; bytes[pos + 1] = 0x00; bytes[pos + 2] = 0x00; bytes[pos + 3] = 0x16 // LBox = 22
+        bytes[pos + 4] = 0x69; bytes[pos + 5] = 0x68; bytes[pos + 6] = 0x64; bytes[pos + 7] = 0x72 // 'ihdr'
+        putInt(bytes, pos + 8, height)
+        putInt(bytes, pos + 12, width)
+
+        return bytes
+    }
+
     private fun putInt(array: ByteArray, offset: Int, value: Int) {
         array[offset] = ((value ushr 24) and 0xFF).toByte()
         array[offset + 1] = ((value ushr 16) and 0xFF).toByte()
         array[offset + 2] = ((value ushr 8) and 0xFF).toByte()
         array[offset + 3] = (value and 0xFF).toByte()
+    }
+
+    private fun putLong(array: ByteArray, offset: Int, value: Long) {
+        array[offset + 0] = ((value ushr 56) and 0xFF).toByte()
+        array[offset + 1] = ((value ushr 48) and 0xFF).toByte()
+        array[offset + 2] = ((value ushr 40) and 0xFF).toByte()
+        array[offset + 3] = ((value ushr 32) and 0xFF).toByte()
+        array[offset + 4] = ((value ushr 24) and 0xFF).toByte()
+        array[offset + 5] = ((value ushr 16) and 0xFF).toByte()
+        array[offset + 6] = ((value ushr 8) and 0xFF).toByte()
+        array[offset + 7] = (value and 0xFF).toByte()
     }
 }
