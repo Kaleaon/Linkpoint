@@ -8,7 +8,7 @@ members = [
     "crates/linkpoint-cache",
     "crates/linkpoint-tauri",
 ]
-exclude = ["apps/linkpoint/src-tauri", "crates/quick-xml"]
+exclude = ["apps/linkpoint/src-tauri", "LLSD-KOTLIN/src/main/rust", "crates/quick-xml"]
 
 [workspace.package]
 version = "0.1.0"

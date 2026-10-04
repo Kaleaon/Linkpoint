@@ -1,13 +1,15 @@
 package com.linkpoint.network.grid
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.core.GridInfo
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33], manifest = Config.NONE)
 class GridInfoResolverTest {
 
     @Test

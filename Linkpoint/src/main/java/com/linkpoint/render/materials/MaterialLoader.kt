@@ -7,7 +7,10 @@ import com.google.android.filament.Material
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.filamat.MaterialBuilder
 import com.google.android.filament.filamat.MaterialPackage
+import com.google.android.filament.Texture
+import com.google.android.filament.TextureSampler
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Loads and manages Filament materials for rendering.
@@ -288,13 +291,19 @@ class MaterialLoader(
     private var waterMaterial: Material? = null
     private val customMaterials = mutableMapOf<String, Material>()
 
+    private var defaultGrayTexture: Texture? = null
+    private var defaultNormalTexture: Texture? = null
+    private var defaultSampler: TextureSampler? = null
+
     /**
-     * Initialize default materials.
+     * Initialize default materials and fallback textures.
      * Must be called after Engine is created.
      */
     fun initialize(): Boolean {
         try {
             Log.i(TAG, "Initializing MaterialLoader...")
+
+            initializeDefaultTextures()
 
             // Compile and create unlit default material
             unlitMaterial = compileMaterial(UNLIT_MATERIAL_SOURCE, "UnlitDefault")
@@ -338,6 +347,77 @@ class MaterialLoader(
             return false
         }
     }
+
+    private fun initializeDefaultTextures() {
+        defaultGrayTexture = create1x1Texture(0x80.toByte(), 0x80.toByte(), 0x80.toByte(), 0xFF.toByte())
+        defaultNormalTexture = create1x1Texture(0x80.toByte(), 0x80.toByte(), 0xFF.toByte(), 0xFF.toByte())
+        defaultSampler = TextureSampler(
+            TextureSampler.MinFilter.LINEAR,
+            TextureSampler.MagFilter.LINEAR,
+            TextureSampler.WrapMode.REPEAT
+        )
+    }
+
+    private fun create1x1Texture(r: Byte, g: Byte, b: Byte, a: Byte): Texture? {
+        return try {
+            val texture = Texture.Builder()
+                .width(1)
+                .height(1)
+                .levels(1)
+                .sampler(Texture.Sampler.SAMPLER_2D)
+                .format(Texture.InternalFormat.RGBA8)
+                .build(engine)
+
+            val buffer = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder())
+            buffer.put(r).put(g).put(b).put(a)
+            buffer.flip()
+
+            val pixelBuffer = Texture.PixelBufferDescriptor(
+                buffer,
+                Texture.Format.RGBA,
+                Texture.Type.UBYTE
+            )
+            texture.setImage(engine, 0, pixelBuffer)
+            texture
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create 1x1 fallback texture", e)
+            null
+        }
+    }
+
+    fun bindBaseColorMap(
+        instance: MaterialInstance,
+        texture: Texture?,
+        sampler: TextureSampler? = null
+    ) {
+        val texToBind = texture ?: defaultGrayTexture
+        val samplerToBind = sampler ?: defaultSampler
+        if (texToBind != null && samplerToBind != null) {
+            instance.setParameter("baseColorMap", texToBind, samplerToBind)
+            instance.setParameter("hasTexture", 1f)
+        } else {
+            instance.setParameter("hasTexture", 0f)
+        }
+    }
+
+    fun bindNormalMap(
+        instance: MaterialInstance,
+        texture: Texture?,
+        sampler: TextureSampler? = null
+    ) {
+        val texToBind = texture ?: defaultNormalTexture
+        val samplerToBind = sampler ?: defaultSampler
+        if (texToBind != null && samplerToBind != null) {
+            instance.setParameter("normalMap", texToBind, samplerToBind)
+            instance.setParameter("hasNormalMap", if (texture != null) 1f else 0f)
+        } else {
+            instance.setParameter("hasNormalMap", 0f)
+        }
+    }
+
+    fun getDefaultGrayTexture(): Texture? = defaultGrayTexture
+    fun getDefaultNormalTexture(): Texture? = defaultNormalTexture
+    fun getDefaultSampler(): TextureSampler? = defaultSampler
 
     /**
      * Compile a material from source string.
@@ -478,11 +558,17 @@ class MaterialLoader(
         particleMaterial?.let { engine.destroyMaterial(it) }
         waterMaterial?.let { engine.destroyMaterial(it) }
 
+        defaultGrayTexture?.let { engine.destroyTexture(it) }
+        defaultNormalTexture?.let { engine.destroyTexture(it) }
+
         unlitMaterial = null
         litMaterial = null
         terrainMaterial = null
         particleMaterial = null
         waterMaterial = null
+        defaultGrayTexture = null
+        defaultNormalTexture = null
+        defaultSampler = null
 
         MaterialBuilder.shutdown()
     }

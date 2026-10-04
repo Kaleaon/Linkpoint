@@ -164,7 +164,12 @@ class AvatarBaker(
             // Composite each layer
             for (layer in layers) {
                 try {
-                    val texture = textureManager.getTexture(layer.textureId) ?: continue
+                    val fetched = textureManager.getTexture(layer.textureId)
+                    val texture = if (fetched == null || textureManager.isPlaceholder(layer.textureId)) {
+                        createFallbackLayerTexture(channel)
+                    } else {
+                        fetched
+                    }
                     
                     // Tint if needed
                     val tinted = if (layer.tint != null) {
@@ -334,6 +339,22 @@ class AvatarBaker(
         return layers
     }
     
+    private fun createFallbackLayerTexture(channel: Int): Bitmap {
+        val width = BAKE_WIDTH
+        val height = BAKE_HEIGHT
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val color = when (channel) {
+            BAKE_HEAD, BAKE_UPPER, BAKE_LOWER, BAKE_LEFTARM, BAKE_LEFTLEG, BAKE_AUX1, BAKE_AUX2, BAKE_AUX3 -> {
+                0xFFE0AC69.toInt() // Neutral skin tone (warm tan)
+            }
+            BAKE_EYES -> 0xFF336699.toInt() // Neutral eye color
+            BAKE_HAIR -> 0xFF4A3525.toInt() // Neutral hair color
+            else -> 0xFF808080.toInt()      // Neutral cloth gray
+        }
+        bitmap.eraseColor(color)
+        return bitmap
+    }
+
     private fun tintBitmap(source: Bitmap, tint: IntArray): Bitmap {
         val result = source.copy(Bitmap.Config.ARGB_8888, true)
         

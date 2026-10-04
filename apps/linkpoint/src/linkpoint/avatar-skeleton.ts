@@ -61,6 +61,7 @@ export interface SkeletonBone {
 }
 
 export class AvatarSkeleton {
+  static readonly BONES: string[] = Object.keys(DATA.bones).filter((name) => DATA.bones[name].isJoint);
   readonly bones: SkeletonBone[] = [];
   private readonly byName = new Map<string, number>();
 

@@ -159,14 +159,14 @@ object AttachmentPoints {
         ATTACH_LWING to AttachmentPoint(ATTACH_LWING, "Left Wing", "mWing1Left", false),
         ATTACH_RWING to AttachmentPoint(ATTACH_RWING, "Right Wing", "mWing1Right", false),
         ATTACH_FACE_JAW to AttachmentPoint(ATTACH_FACE_JAW, "Jaw", "mFaceJaw", false),
-        ATTACH_FACE_LEAR to AttachmentPoint(ATTACH_FACE_LEAR, "Alt Left Ear", "mFaceEarLeft", false),
-        ATTACH_FACE_REAR to AttachmentPoint(ATTACH_FACE_REAR, "Alt Right Ear", "mFaceEarRight", false),
+        ATTACH_FACE_LEAR to AttachmentPoint(ATTACH_FACE_LEAR, "Alt Left Ear", "mFaceEar1Left", false),
+        ATTACH_FACE_REAR to AttachmentPoint(ATTACH_FACE_REAR, "Alt Right Ear", "mFaceEar1Right", false),
         ATTACH_FACE_LEYE to AttachmentPoint(ATTACH_FACE_LEYE, "Alt Left Eye", "mFaceEyeAltLeft", false),
         ATTACH_FACE_REYE to AttachmentPoint(ATTACH_FACE_REYE, "Alt Right Eye", "mFaceEyeAltRight", false),
         ATTACH_FACE_TONGUE to AttachmentPoint(ATTACH_FACE_TONGUE, "Tongue", "mFaceTongueTip", false),
         ATTACH_GROIN to AttachmentPoint(ATTACH_GROIN, "Groin", "mGroin", false),
-        ATTACH_HIND_LFOOT to AttachmentPoint(ATTACH_HIND_LFOOT, "Left Hind Foot", "mHindFoot1Left", false),
-        ATTACH_HIND_RFOOT to AttachmentPoint(ATTACH_HIND_RFOOT, "Right Hind Foot", "mHindFoot1Right", false)
+        ATTACH_HIND_LFOOT to AttachmentPoint(ATTACH_HIND_LFOOT, "Left Hind Foot", "mHindLimb4Left", false),
+        ATTACH_HIND_RFOOT to AttachmentPoint(ATTACH_HIND_RFOOT, "Right Hind Foot", "mHindLimb4Right", false)
     )
     
     // HUD attachment point IDs
