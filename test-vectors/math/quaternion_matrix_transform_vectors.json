@@ -1,0 +1,138 @@
+{
+  "version": "1.0",
+  "description": "Shared canonical 3D math test vectors for quaternions, matrices, Euler angles, and AABB volume queries",
+  "quaternions": [
+    {
+      "name": "identity_quaternion",
+      "operation": "identity",
+      "input": {},
+      "expected": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0,
+        "is_identity": true
+      }
+    },
+    {
+      "name": "multiply_quaternions",
+      "operation": "multiply",
+      "input": {
+        "q1": [0.0, 0.0, 0.70710678, 0.70710678],
+        "q2": [0.70710678, 0.0, 0.0, 0.70710678]
+      },
+      "expected": {
+        "q": [0.5, -0.5, 0.5, 0.5]
+      }
+    },
+    {
+      "name": "normalize_quaternion",
+      "operation": "normalize",
+      "input": {
+        "q": [1.0, 2.0, 3.0, 4.0]
+      },
+      "expected": {
+        "q": [0.18257418, 0.36514837, 0.54772256, 0.73029674],
+        "magnitude": 5.47722557
+      }
+    },
+    {
+      "name": "rotate_vector_z90",
+      "operation": "rotate_vector",
+      "input": {
+        "q": [0.0, 0.0, 0.70710678, 0.70710678],
+        "v": [1.0, 0.0, 0.0]
+      },
+      "expected": {
+        "v": [0.0, 1.0, 0.0]
+      }
+    },
+    {
+      "name": "slerp_midpoint",
+      "operation": "slerp",
+      "input": {
+        "q1": [0.0, 0.0, 0.0, 1.0],
+        "q2": [0.0, 0.0, 1.0, 0.0],
+        "t": 0.5
+      },
+      "expected": {
+        "q": [0.0, 0.0, 0.70710678, 0.70710678]
+      }
+    }
+  ],
+  "matrices": [
+    {
+      "name": "identity_matrix_multiplication",
+      "operation": "multiply",
+      "input": {
+        "m1": [
+          1.0, 0.0, 0.0, 0.0,
+          0.0, 1.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          0.0, 0.0, 0.0, 1.0
+        ],
+        "m2": [
+          1.0, 0.0, 0.0, 0.0,
+          0.0, 1.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          0.0, 0.0, 0.0, 1.0
+        ]
+      },
+      "expected": {
+        "m": [
+          1.0, 0.0, 0.0, 0.0,
+          0.0, 1.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          0.0, 0.0, 0.0, 1.0
+        ]
+      }
+    },
+    {
+      "name": "translation_transform_point",
+      "operation": "transform_point",
+      "input": {
+        "translation": [1.0, 2.0, 3.0],
+        "v": [1.0, 1.0, 1.0]
+      },
+      "expected": {
+        "v": [2.0, 3.0, 4.0]
+      }
+    }
+  ],
+  "euler_angles": [
+    {
+      "name": "zero_euler",
+      "roll": 0.0,
+      "pitch": 0.0,
+      "yaw": 0.0,
+      "expected_quaternion": [0.0, 0.0, 0.0, 1.0]
+    },
+    {
+      "name": "yaw_pi_by_two",
+      "roll": 0.0,
+      "pitch": 0.0,
+      "yaw": 1.5707963,
+      "expected_quaternion": [0.0, 0.0, 0.70710678, 0.70710678]
+    }
+  ],
+  "aabb_queries": [
+    {
+      "name": "symmetric_unit_box",
+      "min": [-1.0, -1.0, -1.0],
+      "max": [1.0, 1.0, 1.0],
+      "center": [0.0, 0.0, 0.0],
+      "extents": [2.0, 2.0, 2.0],
+      "contains_points": [
+        { "point": [0.0, 0.0, 0.0], "expected": true },
+        { "point": [2.0, 2.0, 2.0], "expected": false }
+      ],
+      "intersections": [
+        { "min": [0.0, 0.0, 0.0], "max": [2.0, 2.0, 2.0], "expected": true },
+        { "min": [3.0, 3.0, 3.0], "max": [4.0, 4.0, 4.0], "expected": false }
+      ],
+      "ray_intersects": [
+        { "origin": [0.0, 0.0, -5.0], "dir": [0.0, 0.0, 1.0], "expected_hit": true, "expected_t": 4.0 }
+      ]
+    }
+  ]
+}
