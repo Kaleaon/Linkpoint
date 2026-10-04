@@ -249,6 +249,9 @@ android {
         unitTests {
             isReturnDefaultValues = true  // Return default values for unmocked Android methods like Log
             isIncludeAndroidResources = true
+            all {
+                it.useJUnitPlatform()
+            }
         }
     }
 
@@ -472,12 +475,15 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
     // Used by tests that import `kotlin.test.*` (e.g.
     // ReliableTransportPolicyTest). Bundled assertions/Test annotations
     // delegate to JUnit 4 underneath so the existing junit:junit
     // dependency keeps the test runner unchanged.
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
     // Pinned to mockito 4.x — newer mockito 5.x is JVM 11 only and the project
     // still targets Java 1.8.
     testImplementation("org.mockito:mockito-core:4.11.0")

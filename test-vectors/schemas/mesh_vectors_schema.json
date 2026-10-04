@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mesh Pipeline Test Vectors Schema",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "llmesh_vectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "hex_bytes": { "type": "string" },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "vertex_count": { "type": "integer" },
+              "index_count": { "type": "integer" },
+              "positions": { "type": "array", "items": { "type": "number" } },
+              "normals": { "type": "array", "items": { "type": "number" } },
+              "uvs": { "type": "array", "items": { "type": "number" } },
+              "indices": { "type": "array", "items": { "type": "integer" } }
+            },
+            "required": ["vertex_count", "index_count", "positions", "normals", "uvs", "indices"]
+          }
+        },
+        "required": ["name", "hex_bytes", "expected"]
+      }
+    }
+  },
+  "required": ["version", "llmesh_vectors"]
+}

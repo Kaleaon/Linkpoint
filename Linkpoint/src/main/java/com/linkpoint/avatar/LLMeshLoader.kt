@@ -119,12 +119,20 @@ object LLMeshLoader {
      * files. Returns null on missing asset or parse failure (callers
      * should fall back to the placeholder articulated body in that case).
      */
+    private fun safeLog(msg: String) {
+        try {
+            Log.w(TAG, msg)
+        } catch (_: Throwable) {
+            // Ignored on headless JVM unit test runner
+        }
+    }
+
     fun load(context: Context, assetName: String): LLMesh? {
         return try {
             val bytes = context.assets.open("character/$assetName").use { it.readBytes() }
             parse(bytes, assetName)
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to load LLM asset $assetName: ${e.message}")
+            safeLog("Failed to load LLM asset $assetName: ${e.message}")
             null
         }
     }
@@ -133,7 +141,7 @@ object LLMeshLoader {
         if (bytes.size < MAGIC_RESERVED + 25 + 2) return null
         val magic = String(bytes, 0, MAGIC.length, Charsets.US_ASCII)
         if (magic != MAGIC) {
-            Log.w(TAG, "$name: not an LLM file (magic='$magic')")
+            safeLog("$name: not an LLM file (magic='$magic')")
             return null
         }
 
@@ -157,7 +165,7 @@ object LLMeshLoader {
             // U16 count, NOT U32.
             val numVertices = bb.short.toInt() and 0xFFFF
             if (numVertices <= 0 || numVertices > 200_000) {
-                Log.w(TAG, "$name: implausible vertex count $numVertices")
+                safeLog("$name: implausible vertex count $numVertices")
                 return null
             }
 
@@ -201,7 +209,7 @@ object LLMeshLoader {
             // U16 face count.
             val numFaces = bb.short.toInt() and 0xFFFF
             if (numFaces <= 0 || numFaces > 200_000) {
-                Log.w(TAG, "$name: implausible face count $numFaces")
+                safeLog("$name: implausible face count $numFaces")
                 return null
             }
             val indices = ShortArray(numFaces * 3)
@@ -253,7 +261,7 @@ object LLMeshLoader {
                 morphs = morphs
             )
         } catch (e: Exception) {
-            Log.w(TAG, "$name: LLM parse failed at byte ${bb.position()}: ${e.message}")
+            safeLog("$name: LLM parse failed at byte ${bb.position()}: ${e.message}")
             return null
         }
     }

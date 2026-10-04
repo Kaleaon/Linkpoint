@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "3D Math Test Vectors Schema",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "quaternions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "operation": { "type": "string" },
+          "input": { "type": "object" },
+          "expected": { "type": "object" }
+        },
+        "required": ["name", "operation", "input", "expected"]
+      }
+    },
+    "matrices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "operation": { "type": "string" },
+          "input": { "type": "object" },
+          "expected": { "type": "object" }
+        },
+        "required": ["name", "operation", "input", "expected"]
+      }
+    },
+    "euler_angles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "roll": { "type": "number" },
+          "pitch": { "type": "number" },
+          "yaw": { "type": "number" },
+          "expected_quaternion": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": ["name", "roll", "pitch", "yaw", "expected_quaternion"]
+      }
+    },
+    "aabb_queries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "min": { "type": "array", "items": { "type": "number" } },
+          "max": { "type": "array", "items": { "type": "number" } },
+          "center": { "type": "array", "items": { "type": "number" } },
+          "extents": { "type": "array", "items": { "type": "number" } },
+          "contains_points": { "type": "array" },
+          "intersections": { "type": "array" },
+          "ray_intersects": { "type": "array" }
+        },
+        "required": ["name", "min", "max", "center", "extents"]
+      }
+    }
+  },
+  "required": ["version", "quaternions", "matrices", "euler_angles", "aabb_queries"]
+}
