@@ -249,16 +249,47 @@ function parseLoginName(text) {
  */
 function normalizeStart(start) {
   const value = String(start || 'last').trim();
-  if (value === 'first' || value === 'home') return 'home';
-  if (!/^uri:/i.test(value)) return 'last';
-  const parts = value.slice(4).split('&');
-  const region = parts[0];
-  const coordinates = parts.slice(1);
-  if (!region || !/^[\w .'-]{1,64}$/.test(region) || (coordinates.length !== 0 && coordinates.length !== 3) || coordinates.some((c) => !/^-?\d{1,4}$/.test(c))) {
+  const lower = value.toLowerCase();
+  if (!value || lower === 'last' || lower === 'last location') return 'last';
+  if (lower === 'first' || lower === 'home') return 'home';
+
+  let region = '';
+  let x = 128;
+  let y = 128;
+  let z = 30;
+
+  if (/^uri:/i.test(value)) {
+    const parts = value.slice(4).split('&');
+    region = parts[0];
+    const coordinates = parts.slice(1);
+    if (!region || !/^[\w .'-]{1,64}$/.test(region) || (coordinates.length !== 0 && coordinates.length !== 3) || coordinates.some((c) => !/^-?\d{1,4}$/.test(c))) {
+      throw new Error('The start location is not a valid region and position');
+    }
+    if (coordinates.length === 3) {
+      x = Number(coordinates[0]);
+      y = Number(coordinates[1]);
+      z = Number(coordinates[2]);
+    }
+  } else {
+    try {
+      const dest = parseDestination(value);
+      if (!dest || !dest.region) {
+        throw new Error('The start location is not a valid region and position');
+      }
+      region = dest.region;
+      x = dest.x ?? 128;
+      y = dest.y ?? 128;
+      z = dest.z ?? 30;
+    } catch {
+      throw new Error('The start location is not a valid region and position');
+    }
+  }
+
+  if (!region || !/^[\w .'-]{1,64}$/.test(region) || !Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
     throw new Error('The start location is not a valid region and position');
   }
-  // Without coordinates the grid's default spot in that region is requested.
-  return `uri:${[region, ...(coordinates.length === 3 ? coordinates : ['128', '128', '30'])].join('&')}`;
+
+  return `uri:${region}&${x}&${y}&${z}`;
 }
 
 /** node-metaverse LoginParameters for a request from the browser or renderer. */

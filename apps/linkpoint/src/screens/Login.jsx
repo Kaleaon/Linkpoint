@@ -5,6 +5,8 @@ import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app";
 import Icon from "../components/Icon.jsx";
+import StartLocationCombobox, { saveRecentLocation } from "../components/StartLocationCombobox.jsx";
+import slActions from "../../core/sl-actions.cjs";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -38,10 +40,21 @@ export default function Login() {
     if (!username.trim() || !password) { setError(t("login_error_empty_credentials")); return; }
     const grid = grids.find((item) => item.key === state.loginGrid);
     if (!grid) { setError(t("login_error_invalid_grid")); return; }
+
+    try {
+      if (typeof slActions?.normalizeStart === "function") {
+        slActions.normalizeStart(start);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("login_error_rejected"));
+      return;
+    }
+
     setBusy(true); setError("");
     try {
       if (grid.key.startsWith("custom-") && window.linkpointDesktop?.allowLoginEndpoint) await window.linkpointDesktop.allowLoginEndpoint(grid.host);
       await app.auth.login(grid.key.startsWith("custom-") ? grid.host : grid.key, username.trim(), password, remember, start, mfa.token.trim());
+      saveRecentLocation(start);
       setPassword(""); setMfa({ needed: false, token: "", message: "" }); actions.setScreen("Chat");
     } catch (reason) {
       const details = reason?.details;
@@ -57,8 +70,21 @@ export default function Login() {
   };
 
   const connectSavedSession = async () => {
+    try {
+      if (typeof slActions?.normalizeStart === "function") {
+        slActions.normalizeStart(start);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("login_error_rejected"));
+      return;
+    }
+
     setBusy(true); setError("");
-    try { await app.auth.autoLogin(start); actions.setScreen("Chat"); }
+    try {
+      await app.auth.autoLogin(start);
+      saveRecentLocation(start);
+      actions.setScreen("Chat");
+    }
     catch (reason) { setError(reason instanceof Error ? reason.message : t("login_error_saved_credentials")); }
     finally { setBusy(false); }
   };
@@ -73,7 +99,7 @@ export default function Login() {
       <label style={label}>{t("login_label_avatar_name")}<input autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} placeholder={t("login_placeholder_avatar_name")} style={{ ...control, display: "block", marginTop: 6 }} /></label>
       <label style={label}>{t("login_label_password")}<input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder={t("login_placeholder_password")} style={{ ...control, display: "block", marginTop: 6 }} /></label>
       {mfa.needed ? <label style={label}>{t("login_label_mfa")}<input autoFocus inputMode="numeric" autoComplete="one-time-code" maxLength={12} value={mfa.token} onChange={(event) => setMfa({ ...mfa, token: event.target.value })} placeholder={t("login_placeholder_mfa")} aria-describedby="mfa-help" style={{ ...control, display: "block", marginTop: 6, letterSpacing: ".3em" }} /><small id="mfa-help" style={{ display: "block", marginTop: 6, color: V.ink2, font: `400 11px/1.4 ${typography.font}`, letterSpacing: 0 }}>{mfa.message}</small></label> : null}
-      <label style={label}>{t("login_label_start_location")}<select value={start} onChange={(event) => setStart(event.target.value)} style={{ ...control, display: "block", marginTop: 6 }}><option value="last">{t("login_option_last_location")}</option><option value="home">{t("login_option_home")}</option></select></label>
+      <label style={label}>{t("login_label_start_location")}<StartLocationCombobox value={start} onChange={setStart} /></label>
       <label style={{ color: V.ink2, fontSize: 12 }}><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /> {t("login_remember_me")}</label>
       {error ? <div role="alert" style={{ color: V.err }}>{error}</div> : null}
       <button type="submit" disabled={busy} style={{ minHeight: 48, border: 0, borderRadius: V.rs, background: V.pri, color: V.onpri, fontWeight: 700 }}>{busy ? t("login_button_connecting") : mfa.needed ? t("login_button_mfa") : t("login_button_connect")}</button>
@@ -83,3 +109,4 @@ export default function Login() {
     </form>
   </div>;
 }
+
