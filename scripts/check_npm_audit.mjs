@@ -26,15 +26,22 @@ try {
   process.exit(1);
 }
 
+if (auditResult.error) {
+  console.error('npm audit reported error:', auditResult.error);
+  process.exit(1);
+}
+
 const vulnerabilities = auditResult.vulnerabilities || {};
 const unhandledAdvisories = [];
 
 for (const [pkgName, vuln] of Object.entries(vulnerabilities)) {
   const viaList = Array.isArray(vuln.via) ? vuln.via : [];
   for (const item of viaList) {
-    if (typeof item === 'object' && item.url) {
-      const ghsaId = item.url.split('/').pop();
-      const severity = item.severity || vuln.severity;
+    if (item && typeof item === 'object' && item.url) {
+      const match = item.url.match(/GHSA-[a-zA-Z0-9-]+/i);
+      const ghsaId = match ? match[0] : item.url.split('/').pop();
+      const rawSeverity = item.severity || vuln.severity || '';
+      const severity = rawSeverity.toLowerCase();
       if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
         unhandledAdvisories.push({
           package: pkgName,
