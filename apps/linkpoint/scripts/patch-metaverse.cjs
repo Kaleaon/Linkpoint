@@ -52,19 +52,19 @@ function applyPatches(options = {}) {
       console.log('[patch-metaverse] Patched Packet.js successfully.');
     }
   }
-  
+
   const friendCommandsPath = path.join(nmvDir, 'dist/lib/classes/commands/FriendCommands.js');
   if (fs.existsSync(friendCommandsPath)) {
     let fcContent = fs.readFileSync(friendCommandsPath, 'utf8');
     let modified = false;
-  
+
     // Fix OnlineNotification has() === undefined bug
     const onlineTarget = "if (this.friendsList.has(uuidStr) === undefined)";
     if (fcContent.includes(onlineTarget)) {
       fcContent = fcContent.replaceAll(onlineTarget, "if (!this.friendsList.has(uuidStr))");
       modified = true;
     }
-  
+
     // Ensure online event fires reliably even if friend object is already present or resolving
     const onlineCheckTarget = "if (friend && !friend.online) {";
     const onlineCheckReplacement = "if (friend) {";
@@ -72,14 +72,14 @@ function applyPatches(options = {}) {
       fcContent = fcContent.replace(onlineCheckTarget, onlineCheckReplacement);
       modified = true;
     }
-  
+
     const offlineCheckTarget = "if (friend !== undefined && friend.online) {";
     const offlineCheckReplacement = "if (friend !== undefined) {";
     if (fcContent.includes(offlineCheckTarget)) {
       fcContent = fcContent.replace(offlineCheckTarget, offlineCheckReplacement);
       modified = true;
     }
-  
+
     if (modified) {
       fs.writeFileSync(friendCommandsPath, fcContent, 'utf8');
       console.log('[patch-metaverse] Patched FriendCommands.js successfully for online status.');

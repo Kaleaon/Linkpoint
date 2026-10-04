@@ -13,16 +13,16 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Xfer Manager - Handles file transfers via the Xfer protocol.
- * 
+ *
  * Based on the reference viewer's SLXferManager.java
- * 
+ *
  * Xfer is used for:
  * - Task inventory listings
  * - Notecard contents
  * - Script source code
  * - Animation files
  * - Large data that doesn't fit in single packets
- * 
+ *
  * Xfer flow:
  * 1. Server sends RequestXfer with xfer ID and filename
  * 2. Client sends ConfirmXferPacket for each received packet
@@ -39,28 +39,28 @@ class XferManager(
         const val XFER_FILE = 1
         const val XFER_ASSET = 2
         const val XFER_ESTATE_FILE = 3
-        
+
         // Packet size
         const val MAX_PACKET_SIZE = 1000
-        
+
         // Final packet marker
         const val FINAL_PACKET_FLAG = 0x80000000.toInt()
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Active xfers by xfer ID
     private val activeXfers = ConcurrentHashMap<Long, Xfer>()
-    
+
     // Xfer request handlers
     private val xferHandlers = ConcurrentHashMap<String, XferHandler>()
-    
+
     // Xfer ID counter
     private val xferIdCounter = AtomicLong(System.currentTimeMillis())
-    
+
     /**
      * Register a handler for xfer requests by filename pattern.
-     * 
+     *
      * @param filenamePattern Pattern to match. Can be:
      *   - "*" to match all files
      *   - A prefix string (e.g., "task_inv" matches "task_inv_abc.txt")
@@ -71,7 +71,7 @@ class XferManager(
         xferHandlers[filenamePattern] = handler
         Log.d(TAG, "Registered xfer handler for pattern: $filenamePattern")
     }
-    
+
     /**
      * Handle RequestXfer message from server.
      * Server is requesting that we prepare to receive a file.
@@ -79,59 +79,59 @@ class XferManager(
     fun handleRequestXfer(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val xferId = PacketCodec.fromBuffer(buffer).readLeLong()
-            
+
             // Read filename (variable length string)
             val filenameLen = PacketCodec.fromBuffer(buffer).readLeByte().toInt() and 0xFF
             val filenameBytes = ByteArray(filenameLen)
             buffer.get(filenameBytes)
             val filename = String(filenameBytes, Charsets.UTF_8).trim('\u0000')
-            
+
             // Skip remaining fields (FilePath, DeleteOnCompletion, etc.)
-            
+
             Log.d(TAG, "RequestXfer: id=$xferId filename=$filename")
-            
+
             val xfer = Xfer(
                 xferId = xferId,
                 filename = filename
             )
-            
+
             activeXfers[xferId] = xfer
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing RequestXfer", e)
         }
     }
-    
+
     /**
      * Handle SendXferPacket message from server.
      */
     fun handleSendXferPacket(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val codec = PacketCodec.fromBuffer(buffer)
             val xferId = codec.readLeLong()
             val packetNum = codec.readLeInt()
-            
+
             // Read data (variable length)
             val dataLen = codec.readLeShort().toInt() and 0xFFFF
             val data = ByteArray(dataLen)
             buffer.get(data)
-            
+
             val xfer = activeXfers[xferId]
             if (xfer == null) {
                 Log.w(TAG, "Received SendXferPacket for unknown xfer: $xferId")
                 return
             }
-            
+
             // Check if final packet
             val isFinal = (packetNum and FINAL_PACKET_FLAG) != 0
             val actualPacketNum = packetNum and 0x7FFFFFFF
-            
+
             Log.v(TAG, "SendXferPacket: id=$xferId packet=$actualPacketNum final=$isFinal size=${data.size}")
-            
+
             // First packet may contain size info
             val actualData = if (actualPacketNum == 0 && data.size >= 4) {
                 // First 4 bytes of first packet is total size (little-endian)
@@ -140,47 +140,47 @@ class XferManager(
             } else {
                 data
             }
-            
+
             xfer.addPacket(actualPacketNum, actualData)
-            
+
             // Send confirmation
             scope.launch {
                 sendConfirmXferPacket(xferId, packetNum)
             }
-            
+
             // Check if complete
             if (isFinal) {
                 completeXfer(xfer)
             }
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing SendXferPacket", e)
         }
     }
-    
+
     /**
      * Handle AbortXfer message from server.
      */
     fun handleAbortXfer(payload: ByteArray) {
         try {
             val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
-            
+
             val codec = PacketCodec.fromBuffer(buffer)
             val xferId = codec.readLeLong()
             val result = codec.readLeInt()
-            
+
             Log.w(TAG, "AbortXfer: id=$xferId result=$result")
-            
+
             val xfer = activeXfers.remove(xferId)
             if (xfer != null) {
                 notifyHandlers(xfer, XferResult.Error(result, "Xfer aborted by server"))
             }
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing AbortXfer", e)
         }
     }
-    
+
     /**
      * Send ConfirmXferPacket to acknowledge received packet.
      */
@@ -189,26 +189,26 @@ class XferManager(
         PacketCodec.fromBuffer(payload)
             .writeLeLong(xferId)
             .writeLeInt(packetNum)
-        
+
         try {
             udpConnection.sendPacket(MessageIdRegistry.CONFIRM_XFER_PACKET, payload.array(), reliable = false)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to send ConfirmXferPacket", e)
         }
     }
-    
+
     /**
      * Complete an xfer and notify handlers.
      */
     private fun completeXfer(xfer: Xfer) {
         activeXfers.remove(xfer.xferId)
-        
+
         val data = xfer.assembleData()
         Log.i(TAG, "Xfer completed: ${xfer.filename} size=${data.size}")
-        
+
         notifyHandlers(xfer, XferResult.Success(data))
     }
-    
+
     /**
      * Notify registered handlers of xfer completion.
      * Patterns are matched as prefixes (filename.startsWith(pattern)) for more predictable behavior.
@@ -229,7 +229,7 @@ class XferManager(
                 }
                 else -> xfer.filename.startsWith(pattern, ignoreCase = true)
             }
-            
+
             if (matches) {
                 try {
                     handler.onXferComplete(xfer.filename, result)
@@ -239,7 +239,7 @@ class XferManager(
             }
         }
     }
-    
+
     /**
      * Request a file from the server via Xfer.
      * Note: This is typically server-initiated, but can be client-requested for some file types.
@@ -251,41 +251,41 @@ class XferManager(
         deleteOnCompletion: Boolean = false
     ): Long {
         val xferId = xferIdCounter.incrementAndGet()
-        
+
         val filenameBytes = filename.toByteArray(Charsets.UTF_8)
         val payload = ByteBuffer.allocate(24 + 1 + filenameBytes.size + 1 + 1)
             .order(ByteOrder.LITTLE_ENDIAN)
-        
+
         // XferID block
         PacketCodec.fromBuffer(payload).writeLeLong(xferId)
-        
+
         // VFile block
         PacketCodec.fromBuffer(payload).writeUuid(vFileId)
         payload.putShort(vFileType.toShort())
-        
+
         // FilePath block
         payload.put(0) // FilePath - unused
-        
+
         // Filename
         payload.put(filenameBytes.size.toByte())
         payload.put(filenameBytes)
-        
+
         // DeleteOnCompletion
         payload.put(if (deleteOnCompletion) 1 else 0)
-        
+
         // UseBigPackets
         payload.put(0)
-        
+
         val xfer = Xfer(xferId, filename)
         activeXfers[xferId] = xfer
-        
+
         udpConnection.sendPacket(MessageIdRegistry.REQUEST_XFER, payload.array(), reliable = true)
-        
+
         Log.d(TAG, "Requested xfer for file: $filename xferId=$xferId")
-        
+
         return xferId
     }
-    
+
     /**
      * Get diagnostics information.
      */
@@ -295,7 +295,7 @@ class XferManager(
             registeredHandlers = xferHandlers.size
         )
     }
-    
+
     /**
      * Shutdown the xfer manager.
      */
@@ -315,28 +315,28 @@ internal class Xfer(
     val filename: String
 ) {
     var expectedSize: Int = 0
-    
+
     private val packets = mutableMapOf<Int, ByteArray>()
-    
+
     fun addPacket(packetNum: Int, data: ByteArray) {
         packets[packetNum] = data
     }
-    
+
     fun assembleData(): ByteArray {
         if (packets.isEmpty()) return ByteArray(0)
-        
+
         val totalSize = packets.values.sumOf { it.size }
         val result = ByteArray(totalSize)
         var offset = 0
-        
+
         // Assemble packets in order
         packets.keys.sorted().forEach { packetNum ->
-            val data = packets[packetNum] 
+            val data = packets[packetNum]
                 ?: throw IllegalStateException("Packet $packetNum not found in xfer data")
             System.arraycopy(data, 0, result, offset, data.size)
             offset += data.size
         }
-        
+
         return result
     }
 }
@@ -351,10 +351,10 @@ sealed class XferResult {
             if (other !is Success) return false
             return data.contentEquals(other.data)
         }
-        
+
         override fun hashCode(): Int = data.contentHashCode()
     }
-    
+
     data class Error(val code: Int, val message: String) : XferResult()
 }
 

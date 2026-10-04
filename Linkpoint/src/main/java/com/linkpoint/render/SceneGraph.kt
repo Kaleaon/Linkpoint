@@ -10,53 +10,53 @@ import java.util.UUID
 /**
  * Scene graph that holds all renderable objects.
  * Connects protocol data to rendering system.
- * 
+ *
  * This class maintains the current state of the scene including:
  * - All objects in the scene (positions, rotations, metadata)
  * - Terrain mesh data
  * - Scene statistics
- * 
+ *
  * The scene graph is updated by protocol handlers (SceneDataHandler) and
  * observed by the rendering system to render the scene.
  */
 class SceneGraph {
-    
+
     companion object {
         private const val TAG = "SceneGraph"
     }
-    
+
     /** All renderable objects by UUID */
     private val _objects = MutableStateFlow<Map<UUID, RenderableObject>>(emptyMap())
     val objects: StateFlow<Map<UUID, RenderableObject>> = _objects.asStateFlow()
-    
+
     /** Terrain mesh data */
     private val _terrain = MutableStateFlow<TerrainMesh?>(null)
     val terrain: StateFlow<TerrainMesh?> = _terrain.asStateFlow()
-    
+
     /** Scene statistics */
     private val _statistics = MutableStateFlow(SceneStatistics())
     val statistics: StateFlow<SceneStatistics> = _statistics.asStateFlow()
-    
+
     /** Timestamp of last update */
     private var lastUpdateTime = 0L
-    
+
     /**
      * Update an object in the scene graph
-     * 
+     *
      * @param sceneObject The object data from protocol
      */
     fun updateObject(sceneObject: com.linkpoint.protocol.scenery.SceneObject) {
         _objects.value = _objects.value.toMutableMap().apply {
             put(sceneObject.id, toRenderableObject(sceneObject))
         }
-        
+
         lastUpdateTime = System.currentTimeMillis()
         updateStatistics()
     }
-    
+
     /**
      * Update terrain data
-     * 
+     *
      * @param terrainData The terrain data from protocol
      */
     fun updateTerrain(terrainData: TerrainData) {
@@ -66,26 +66,26 @@ class SceneGraph {
                 width = 256,
                 depth = 256
             )
-            
+
             lastUpdateTime = System.currentTimeMillis()
             updateStatistics()
         }
     }
-    
+
     /**
      * Remove an object from the scene
-     * 
+     *
      * @param objectId The UUID of the object to remove
      */
     fun removeObject(objectId: UUID) {
         _objects.value = _objects.value.toMutableMap().apply {
             remove(objectId)
         }
-        
+
         lastUpdateTime = System.currentTimeMillis()
         updateStatistics()
     }
-    
+
     /**
      * Clear all objects from the scene
      */
@@ -94,7 +94,7 @@ class SceneGraph {
         lastUpdateTime = System.currentTimeMillis()
         updateStatistics()
     }
-    
+
     /**
      * Clear the entire scene (objects and terrain)
      */
@@ -153,7 +153,7 @@ class SceneGraph {
             updateStatistics()
         }
     }
-    
+
     /**
      * Update scene statistics
      */
@@ -184,7 +184,7 @@ class SceneGraph {
             isAvatar = sceneObject.pCode == 47
         )
     }
-    
+
     /**
      * Get scene information as a string
      */
@@ -218,7 +218,7 @@ data class Vector3(val x: Float, val y: Float, val z: Float) {
         val UP = Vector3(0f, 1f, 0f)
         val FORWARD = Vector3(0f, 0f, -1f)
     }
-    
+
     fun distanceTo(other: Vector3): Float {
         val dx = x - other.x
         val dy = y - other.y

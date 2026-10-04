@@ -28,19 +28,19 @@ import kotlin.math.sin
 
 /**
  * Compose version of the RadarView that displays nearby avatars and objects.
- * 
+ *
  * Features an animated sweeping effect inspired by real radar displays.
  * Uses trigonometry and Compose animations for smooth radar sweep.
- * 
+ *
  * The radar shows:
  * - Your position (center)
  * - Animated sweep effect
  * - Nearby avatars as dots (green for friends, blue for others)
  * - Distance rings
  * - Cardinal directions
- * 
+ *
  * Based on: https://proandroiddev.com/extraordinary-animations-using-trigonometry-and-coroutines-radar-animation
- * 
+ *
  * @param modifier Modifier for the radar
  * @param size Size of the radar (diameter)
  * @param range Radar range in meters
@@ -89,7 +89,7 @@ fun Radar(
     } else {
         remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     }
-    
+
     // Helper function to convert Compose Color to Android Color int
     fun toAndroidColor(color: Color): Int {
         return android.graphics.Color.argb(
@@ -99,7 +99,7 @@ fun Radar(
             (color.blue * 255).toInt()
         )
     }
-    
+
     val textPaint = remember(textColor) {
         android.graphics.Paint().apply {
             color = toAndroidColor(textColor)
@@ -108,7 +108,7 @@ fun Radar(
             isAntiAlias = true
         }
     }
-    
+
     val directionPaint = remember(textColor) {
         android.graphics.Paint().apply {
             color = toAndroidColor(textColor)
@@ -117,7 +117,7 @@ fun Radar(
             isAntiAlias = true
         }
     }
-    
+
     Canvas(
         modifier = modifier.size(size)
     ) {
@@ -125,14 +125,14 @@ fun Radar(
         val centerX = canvasSize.width / 2f
         val centerY = canvasSize.height / 2f
         val radius = min(canvasSize.width, canvasSize.height) / 2f * 0.9f
-        
+
         // Draw background
         drawCircle(
             color = backgroundColor,
             radius = radius,
             center = Offset(centerX, centerY)
         )
-        
+
         // Draw animated radar sweep (if enabled)
         if (enableSweepAnimation) {
             drawRadarSweep(
@@ -143,7 +143,7 @@ fun Radar(
                 sweepColor = sweepColor
             )
         }
-        
+
         // Draw range rings
         drawRangeRings(
             centerX = centerX,
@@ -153,7 +153,7 @@ fun Radar(
             gridColor = gridColor,
             textPaint = textPaint
         )
-        
+
         // Draw cardinal directions (rotated by heading)
         drawDirections(
             centerX = centerX,
@@ -162,14 +162,14 @@ fun Radar(
             heading = heading,
             directionPaint = directionPaint
         )
-        
+
         // Draw self at center
         drawCircle(
             color = selfColor,
             radius = 8f,
             center = Offset(centerX, centerY)
         )
-        
+
         // Draw blips
         blips.forEach { blip ->
             drawBlip(
@@ -209,7 +209,7 @@ private fun DrawScope.drawRadarSweep(
         1f to sweepColor.copy(alpha = 0f),
         center = Offset(centerX, centerY)
     )
-    
+
     rotate(degrees = sweepAngle - 90f, pivot = Offset(centerX, centerY)) {
         drawArc(
             brush = sweepGradient,
@@ -220,12 +220,12 @@ private fun DrawScope.drawRadarSweep(
             size = Size(radius * 2, radius * 2)
         )
     }
-    
+
     // Draw sweep line
     val sweepRadians = Math.toRadians(sweepAngle.toDouble())
     val lineEndX = centerX + radius * cos(sweepRadians).toFloat()
     val lineEndY = centerY + radius * sin(sweepRadians).toFloat()
-    
+
     drawLine(
         color = sweepColor.copy(alpha = 0.8f),
         start = Offset(centerX, centerY),
@@ -245,7 +245,7 @@ private fun DrawScope.drawRangeRings(
     val ringCount = 3
     for (i in 1..ringCount) {
         val ringRadius = radius * i / ringCount
-        
+
         // Draw ring
         drawCircle(
             color = gridColor,
@@ -253,7 +253,7 @@ private fun DrawScope.drawRangeRings(
             center = Offset(centerX, centerY),
             style = Stroke(width = 1f)
         )
-        
+
         // Draw range label using native canvas
         val rangeLabel = "${(range * i / ringCount).toInt()}m"
         drawContext.canvas.nativeCanvas.drawText(
@@ -263,7 +263,7 @@ private fun DrawScope.drawRangeRings(
             textPaint
         )
     }
-    
+
     // Draw crosshairs
     drawLine(
         color = gridColor,
@@ -287,7 +287,7 @@ private fun DrawScope.drawDirections(
     directionPaint: android.graphics.Paint
 ) {
     val offset = radius + 20
-    
+
     // Apply heading rotation
     rotate(
         degrees = -Math.toDegrees(heading.toDouble()).toFloat(),
@@ -317,17 +317,17 @@ private fun DrawScope.drawBlip(
 ) {
     // Skip if out of range
     if (blip.distance > range) return
-    
+
     // Normalize distance to radar radius
     val normalizedDist = blip.distance / range * radius
-    
+
     // Calculate angle relative to heading
     val angle = blip.bearing - heading
-    
+
     // Convert to screen coordinates
     val x = centerX + normalizedDist * sin(angle)
     val y = centerY - normalizedDist * cos(angle)
-    
+
     // Choose color based on type
     val blipColor = when (blip.type) {
         BlipType.FRIEND -> friendColor
@@ -335,7 +335,7 @@ private fun DrawScope.drawBlip(
         BlipType.OBJECT -> objectColor
         BlipType.SELF -> selfColor
     }
-    
+
     // Draw blip
     val blipSize = if (blip.type == BlipType.OBJECT) 4f else 6f
     drawCircle(
@@ -343,7 +343,7 @@ private fun DrawScope.drawBlip(
         radius = blipSize,
         center = Offset(x, y)
     )
-    
+
     // Draw name for avatars if close
     if (blip.type != BlipType.OBJECT && blip.distance < range / 2) {
         textPaint.textSize = 20f
@@ -358,11 +358,11 @@ private fun DrawScope.drawBlip(
 
 /**
  * Creates sample radar blips for testing and previews.
- * 
+ *
  * This utility function generates a list of demo blips representing
  * different entity types (friend, stranger, object) at various positions.
  * Useful for @Preview composables and UI testing.
- * 
+ *
  * @return List of sample RadarBlip objects for demonstration
  */
 fun createSampleBlips(): List<RadarBlip> {

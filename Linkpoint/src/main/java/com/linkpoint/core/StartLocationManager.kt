@@ -10,17 +10,17 @@ import org.json.JSONObject
 
 /**
  * Manages start location options for login.
- * 
+ *
  * Features:
  * - Cached landmarks from user's inventory (loaded after first successful login)
  * - Saved start location preferences
  * - Custom SLURL support
  * - Integration with themed destinations from DestinationGuide
- * 
+ *
  * Based on Second Life mobile app functionality.
  */
 class StartLocationManager(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "StartLocationManager"
         private const val PREFS_NAME = "start_location_prefs"
@@ -32,50 +32,50 @@ class StartLocationManager(private val context: Context) {
         private const val MAX_CACHED_LANDMARKS = 50
         private const val MAX_FAVORITE_LOCATIONS = 20
     }
-    
+
     private val prefs = SecurePreferences.getEncryptedPreferences(context, PREFS_NAME)
-    
+
     // Start location options
     private val _startOptions = MutableStateFlow<List<StartLocationOption>>(emptyList())
     val startOptions: StateFlow<List<StartLocationOption>> = _startOptions
-    
+
     // Cached landmarks from inventory
     private val _cachedLandmarks = MutableStateFlow<List<CachedLandmark>>(emptyList())
     val cachedLandmarks: StateFlow<List<CachedLandmark>> = _cachedLandmarks
-    
+
     // Favorite locations (user-saved quick access locations)
     private val _favoriteLocations = MutableStateFlow<List<SavedLocation>>(emptyList())
     val favoriteLocations: StateFlow<List<SavedLocation>> = _favoriteLocations
-    
+
     // Current selection
     private val _selectedOption = MutableStateFlow(StartLocationType.LAST_LOCATION)
     val selectedOption: StateFlow<StartLocationType> = _selectedOption
-    
+
     // Custom SLURL if selected
     private val _customSLURL = MutableStateFlow<String?>(null)
     val customSLURL: StateFlow<String?> = _customSLURL
-    
+
     // Selected landmark if type is LANDMARK
     private val _selectedLandmark = MutableStateFlow<CachedLandmark?>(null)
     val selectedLandmark: StateFlow<CachedLandmark?> = _selectedLandmark
-    
+
     // Selected destination if type is DESTINATION
     private val _selectedDestination = MutableStateFlow<Destination?>(null)
     val selectedDestination: StateFlow<Destination?> = _selectedDestination
-    
+
     init {
         loadSavedPreferences()
         loadCachedLandmarks()
         loadFavoriteLocations()
         refreshStartOptions()
     }
-    
+
     /**
      * Get all available start location options.
      */
     fun getAvailableOptions(): List<StartLocationOption> {
         val options = mutableListOf<StartLocationOption>()
-        
+
         // Basic options - always available
         options.add(StartLocationOption(
             type = StartLocationType.LAST_LOCATION,
@@ -83,14 +83,14 @@ class StartLocationManager(private val context: Context) {
             description = "Return to where you logged off",
             iconType = StartLocationIconType.HISTORY
         ))
-        
+
         options.add(StartLocationOption(
             type = StartLocationType.HOME,
             displayName = "Home",
             description = "Teleport to your home location",
             iconType = StartLocationIconType.HOME
         ))
-        
+
         // Favorites section (if any)
         val favorites = _favoriteLocations.value
         if (favorites.isNotEmpty()) {
@@ -111,7 +111,7 @@ class StartLocationManager(private val context: Context) {
                 ))
             }
         }
-        
+
         // Cached landmarks section (if any)
         val landmarks = _cachedLandmarks.value
         if (landmarks.isNotEmpty()) {
@@ -132,7 +132,7 @@ class StartLocationManager(private val context: Context) {
                 ))
             }
         }
-        
+
         // Custom SLURL option
         options.add(StartLocationOption(
             type = StartLocationType.CUSTOM_SLURL,
@@ -140,27 +140,27 @@ class StartLocationManager(private val context: Context) {
             description = "Enter a specific location",
             iconType = StartLocationIconType.LOCATION
         ))
-        
+
         return options
     }
-    
+
     /**
      * Refresh the start options list.
      */
     fun refreshStartOptions() {
         _startOptions.value = getAvailableOptions()
     }
-    
+
     /**
      * Select a start location option.
      */
     fun selectOption(option: StartLocationOption) {
         _selectedOption.value = option.type
-        
+
         when (option.type) {
             StartLocationType.LANDMARK -> {
-                val landmark = _cachedLandmarks.value.find { 
-                    it.inventoryItemId == option.landmarkId 
+                val landmark = _cachedLandmarks.value.find {
+                    it.inventoryItemId == option.landmarkId
                 }
                 _selectedLandmark.value = landmark
                 _selectedDestination.value = null
@@ -190,10 +190,10 @@ class StartLocationManager(private val context: Context) {
                 _customSLURL.value = null
             }
         }
-        
+
         savePreferences()
     }
-    
+
     /**
      * Set custom SLURL.
      */
@@ -204,7 +204,7 @@ class StartLocationManager(private val context: Context) {
         }
         savePreferences()
     }
-    
+
     /**
      * Get the start location string for login request.
      * Returns the format expected by Second Life login API.
@@ -227,7 +227,7 @@ class StartLocationManager(private val context: Context) {
             else -> "last"
         }
     }
-    
+
     /**
      * Parse SLURL to login start location format.
      * Format: uri:region_name&x&y&z
@@ -238,7 +238,7 @@ class StartLocationManager(private val context: Context) {
             Regex("secondlife://([^/]+)/(\\d+)?/?(\\d+)?/?(\\d+)?", RegexOption.IGNORE_CASE),
             Regex("https?://maps\\.secondlife\\.com/secondlife/([^/]+)/(\\d+)?/?(\\d+)?/?(\\d+)?", RegexOption.IGNORE_CASE)
         )
-        
+
         for (pattern in patterns) {
             val match = pattern.find(slurl)
             if (match != null) {
@@ -254,7 +254,7 @@ class StartLocationManager(private val context: Context) {
                 return "uri:$regionName&$x&$y&$z"
             }
         }
-        
+
         // If parsing fails, try to use as region name directly
         return if (slurl.contains("://") || slurl.contains("&")) {
             "last"  // Invalid format, fall back to last
@@ -262,7 +262,7 @@ class StartLocationManager(private val context: Context) {
             "uri:$slurl&128&128&25"
         }
     }
-    
+
     /**
      * Cache landmarks from inventory after login.
      */
@@ -280,36 +280,36 @@ class StartLocationManager(private val context: Context) {
                 cachedAt = System.currentTimeMillis()
             )
         }
-        
+
         _cachedLandmarks.value = cached
         saveCachedLandmarks()
         refreshStartOptions()
-        
+
         Log.i(TAG, "Cached ${cached.size} landmarks from inventory")
     }
-    
+
     /**
      * Add a favorite location.
      */
     fun addFavoriteLocation(location: SavedLocation) {
         val current = _favoriteLocations.value.toMutableList()
-        
+
         // Remove if already exists
         current.removeAll { it.id == location.id || it.toSLURL() == location.toSLURL() }
-        
+
         // Add at beginning
         current.add(0, location)
-        
+
         // Limit size
         if (current.size > MAX_FAVORITE_LOCATIONS) {
             current.removeAt(current.size - 1)
         }
-        
+
         _favoriteLocations.value = current
         saveFavoriteLocations()
         refreshStartOptions()
     }
-    
+
     /**
      * Remove a favorite location.
      */
@@ -320,7 +320,7 @@ class StartLocationManager(private val context: Context) {
         saveFavoriteLocations()
         refreshStartOptions()
     }
-    
+
     /**
      * Mark first login as complete (enables landmark caching).
      */
@@ -328,14 +328,14 @@ class StartLocationManager(private val context: Context) {
         prefs.edit().putBoolean(KEY_FIRST_LOGIN_COMPLETE, true).apply()
         Log.i(TAG, "First login marked complete - landmark caching enabled")
     }
-    
+
     /**
      * Check if first login has been completed.
      */
     fun isFirstLoginComplete(): Boolean = prefs.getBoolean(KEY_FIRST_LOGIN_COMPLETE, false)
-    
+
     // ==================== PERSISTENCE ====================
-    
+
     private fun loadSavedPreferences() {
         try {
             val lastOption = prefs.getString(KEY_LAST_START_OPTION, null)
@@ -347,20 +347,20 @@ class StartLocationManager(private val context: Context) {
             Log.w(TAG, "Failed to load preferences", e)
         }
     }
-    
+
     private fun savePreferences() {
         prefs.edit()
             .putString(KEY_LAST_START_OPTION, _selectedOption.value.name)
             .putString(KEY_CUSTOM_SLURL, _customSLURL.value)
             .apply()
     }
-    
+
     private fun loadCachedLandmarks() {
         try {
             val json = prefs.getString(KEY_CACHED_LANDMARKS, null) ?: return
             val array = JSONArray(json)
             val landmarks = mutableListOf<CachedLandmark>()
-            
+
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
                 landmarks.add(CachedLandmark(
@@ -375,14 +375,14 @@ class StartLocationManager(private val context: Context) {
                     cachedAt = obj.getLong("cachedAt")
                 ))
             }
-            
+
             _cachedLandmarks.value = landmarks
             Log.i(TAG, "Loaded ${landmarks.size} cached landmarks")
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load cached landmarks", e)
         }
     }
-    
+
     private fun saveCachedLandmarks() {
         try {
             val array = JSONArray()
@@ -405,13 +405,13 @@ class StartLocationManager(private val context: Context) {
             Log.e(TAG, "Failed to save cached landmarks", e)
         }
     }
-    
+
     private fun loadFavoriteLocations() {
         try {
             val json = prefs.getString(KEY_FAVORITE_LOCATIONS, null) ?: return
             val array = JSONArray(json)
             val favorites = mutableListOf<SavedLocation>()
-            
+
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
                 favorites.add(SavedLocation(
@@ -424,14 +424,14 @@ class StartLocationManager(private val context: Context) {
                     addedAt = obj.getLong("addedAt")
                 ))
             }
-            
+
             _favoriteLocations.value = favorites
             Log.i(TAG, "Loaded ${favorites.size} favorite locations")
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load favorite locations", e)
         }
     }
-    
+
     private fun saveFavoriteLocations() {
         try {
             val array = JSONArray()

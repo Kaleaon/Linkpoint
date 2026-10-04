@@ -35,13 +35,13 @@ jobs:
         run: |
           set -euo pipefail
           git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
-          
+
           BASE_CODE=$(python3 - <<'PY'
           import re, subprocess, sys
           try:
               txt = subprocess.check_output(["git","show","${{ github.base_ref }}:build.gradle.kts"], text=True)
               m = re.search(r"(?m)^\s*versionCode\s*=\s*(\d+)\s*$", txt)
-              if not m: 
+              if not m:
                   print("0")
                   sys.exit(0)
               print(m.group(1))
@@ -49,7 +49,7 @@ jobs:
               print("0")
           PY
           )
-          
+
           HEAD_CODE=$(python3 scripts/bump_version_code.py --file build.gradle.kts)
           echo "base=$BASE_CODE" >> "$GITHUB_OUTPUT"
           echo "head=$HEAD_CODE" >> "$GITHUB_OUTPUT"

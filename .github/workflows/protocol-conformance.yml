@@ -112,4 +112,3 @@ jobs:
             Linkpoint/build/reports/protocol/
             Linkpoint/build/reports/tests/
           if-no-files-found: warn
-

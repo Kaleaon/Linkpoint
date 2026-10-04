@@ -23,25 +23,25 @@ class SkyRenderer(
     companion object {
         private const val TAG = "SkyRenderer"
     }
-    
+
     // Current sky settings
     private var currentPreset: SkyPreset = SkyPreset.DEFAULT
-    
+
     // Filament skybox
     private var skybox: Skybox? = null
     private var indirectLight: IndirectLight? = null
-    
+
     // Sun entity
     private var sunEntity: Int = 0
-    
+
     init {
         createSunLight()
         applyPreset(SkyPreset.DEFAULT)
     }
-    
+
     private fun createSunLight() {
         sunEntity = EntityManager.get().create()
-        
+
         LightManager.Builder(LightManager.Type.SUN)
             .color(1.0f, 0.95f, 0.9f)
             .intensity(110_000f)
@@ -51,21 +51,21 @@ class SkyRenderer(
             .sunHaloSize(10.0f)
             .sunHaloFalloff(80.0f)
             .build(engine, sunEntity)
-        
+
         scene.addEntity(sunEntity)
     }
-    
+
     /**
      * Apply a sky preset
      */
     fun applyPreset(preset: SkyPreset) {
         currentPreset = preset
-        
+
         // Update sun position and color
         val lightManager = engine.lightManager
         val instance = lightManager.getInstance(sunEntity)
         if (instance != 0) {
-            lightManager.setDirection(instance, 
+            lightManager.setDirection(instance,
                 preset.sunDirection.x,
                 preset.sunDirection.y,
                 preset.sunDirection.z
@@ -77,17 +77,17 @@ class SkyRenderer(
             )
             lightManager.setIntensity(instance, preset.sunIntensity)
         }
-        
+
         // Update ambient light
         indirectLight?.let { engine.destroyIndirectLight(it) }
         indirectLight = IndirectLight.Builder()
             .intensity(preset.ambientIntensity)
             .build(engine)
         scene.indirectLight = indirectLight
-        
+
         Log.d(TAG, "Applied sky preset: ${preset.name}")
     }
-    
+
     /**
      * Apply EEP settings from server (EnvironmentSettings/ExtEnvironment).
      */
@@ -106,7 +106,7 @@ class SkyRenderer(
         )
         applyPreset(preset)
     }
-    
+
     /**
      * Load Windlight preset from assets
      */
@@ -116,23 +116,23 @@ class SkyRenderer(
             val inputStream = context.assets.open("windlight/$presetName.xml")
             val xml = inputStream.bufferedReader().readText()
             inputStream.close()
-            
+
             val preset = parseWindlightXml(xml, presetName)
             applyPreset(preset)
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load Windlight preset: $presetName", e)
         }
     }
-    
+
     private fun parseWindlightXml(xml: String, name: String): SkyPreset {
         // Parse Windlight XML format
         // This is a simplified parser - full implementation would handle all parameters
-        
+
         fun extractFloat(key: String): Float {
             val regex = """<key>$key</key>\s*<real>([\d.eE+-]+)</real>""".toRegex()
             return regex.find(xml)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
         }
-        
+
         fun extractVector(key: String): LLVector3 {
             val regex = """<key>$key</key>\s*<array>\s*<real>([\d.eE+-]+)</real>\s*<real>([\d.eE+-]+)</real>\s*<real>([\d.eE+-]+)</real>""".toRegex()
             val match = regex.find(xml)
@@ -144,21 +144,21 @@ class SkyRenderer(
                 )
             } else LLVector3.zero()
         }
-        
+
         fun extractColor(key: String): LLColor4 {
             val v = extractVector(key)
             return LLColor4(v.x, v.y, v.z, 1f)
         }
-        
+
         val sunAngle = extractFloat("sun_angle")
         val eastAngle = extractFloat("east_angle")
-        
+
         // Calculate sun direction from angles
         val sunY = kotlin.math.sin(sunAngle)
         val sunXZ = kotlin.math.cos(sunAngle)
         val sunX = sunXZ * kotlin.math.sin(eastAngle)
         val sunZ = sunXZ * kotlin.math.cos(eastAngle)
-        
+
         return SkyPreset(
             name = name,
             sunDirection = LLVector3(sunX, sunY, sunZ).normalize(),
@@ -171,7 +171,7 @@ class SkyRenderer(
             cloudCoverage = extractFloat("cloud_coverage")
         )
     }
-    
+
     /**
      * Update sun position based on time
      */
@@ -179,31 +179,31 @@ class SkyRenderer(
         // Time is 0-24 hours
         val normalizedTime = time / 24f
         val angle = normalizedTime * kotlin.math.PI.toFloat() * 2f - kotlin.math.PI.toFloat() / 2f
-        
+
         val sunY = kotlin.math.sin(angle)
         val sunXZ = kotlin.math.cos(angle)
-        
+
         val sunDirection = LLVector3(0.3f * sunXZ, sunY, sunXZ).normalize()
-        
+
         val lightManager = engine.lightManager
         val instance = lightManager.getInstance(sunEntity)
         if (instance != 0) {
             lightManager.setDirection(instance, sunDirection.x, sunDirection.y, sunDirection.z)
-            
+
             // Adjust intensity based on sun height
             val intensity = (sunY + 0.2f).coerceIn(0f, 1f) * currentPreset.sunIntensity
             lightManager.setIntensity(instance, intensity)
-            
+
             // Warm color at sunrise/sunset
             val warmth = (1f - kotlin.math.abs(sunY)).coerceIn(0f, 1f) * 0.3f
-            lightManager.setColor(instance, 
+            lightManager.setColor(instance,
                 1f,
                 0.95f - warmth * 0.2f,
                 0.9f - warmth * 0.4f
             )
         }
     }
-    
+
     fun destroy() {
         skybox?.let { engine.destroySkybox(it) }
         indirectLight?.let { engine.destroyIndirectLight(it) }
@@ -231,17 +231,17 @@ data class SkyPreset(
          * Default preset using SL standard midday settings.
          */
         val DEFAULT = SLDefaultEnvironment.createDefaultSkyPreset()
-        
+
         /**
          * Sunset preset using SL-like sunset settings.
          */
         val SUNSET = SLDefaultEnvironment.TimeOfDayPresets.SUNSET
-        
+
         /**
          * Midnight preset using SL-like night settings.
          */
         val MIDNIGHT = SLDefaultEnvironment.TimeOfDayPresets.MIDNIGHT
-        
+
         /**
          * Sunrise preset using SL-like sunrise settings.
          */
@@ -286,7 +286,7 @@ data class EEPSettings(
         const val KEY_SUN_SCALE = "sun_scale"
         const val KEY_AMBIENT_SCALE = "ambient_scale"
         const val KEY_MOON_SCALE = "moon_scale"
-        
+
         // Use SL defaults for fallback values
         private val DEFAULT_AMBIENT_COLOR = SLDefaultEnvironment.DEFAULT_AMBIENT_COLOR
         private val DEFAULT_BLUE_DENSITY = SLDefaultEnvironment.DEFAULT_BLUE_DENSITY

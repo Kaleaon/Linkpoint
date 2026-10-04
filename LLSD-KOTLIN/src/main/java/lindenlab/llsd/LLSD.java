@@ -109,7 +109,7 @@ public class LLSD {
             case '\"':
                 encodeBufferSize = encodeBufferSize + 5;
                 break;
-                
+
 
             default:
                 break;

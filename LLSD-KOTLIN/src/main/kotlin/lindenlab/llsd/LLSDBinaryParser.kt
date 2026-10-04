@@ -36,7 +36,7 @@ import java.util.*
  * @see [LLSD Binary Specification](http://wiki.secondlife.com/wiki/LLSD#Binary_Serialization)
  */
 class LLSDBinaryParser {
-    
+
     /**
      * Parses an LLSD document from a binary input stream.
      *
@@ -53,7 +53,7 @@ class LLSDBinaryParser {
     @Throws(IOException::class, LLSDException::class)
     fun parse(binaryInput: InputStream): LLSD {
         val reader = BinaryReader(binaryInput)
-        
+
         // Check for optional header
         skipWhitespace(reader)
         if (reader.peek() == '<'.code.toByte()) {
@@ -65,11 +65,11 @@ class LLSDBinaryParser {
             }
             skipWhitespace(reader)
         }
-        
+
         val parsedBinary = parseBinaryValue(reader, 0)
         return LLSD(parsedBinary)
     }
-    
+
     /**
      * An internal helper class for reading binary data from an input stream.
      * It provides methods to read specific data types (like integers and doubles)
@@ -79,7 +79,7 @@ class LLSDBinaryParser {
         private val buffer = ByteArray(1)
         private var hasPeeked = false
         private var peekedByte: Byte = 0
-        
+
         /**
          * Peeks at the next byte in the stream without consuming it.
          */
@@ -95,7 +95,7 @@ class LLSDBinaryParser {
             }
             return peekedByte
         }
-        
+
         /**
          * Reads and consumes the next byte from the stream.
          */
@@ -105,14 +105,14 @@ class LLSDBinaryParser {
                 hasPeeked = false
                 return peekedByte
             }
-            
+
             val result = input.read(buffer)
             if (result == -1) {
                 throw LLSDException("Unexpected end of binary stream")
             }
             return buffer[0]
         }
-        
+
         /**
          * Reads a specified number of bytes from the stream.
          */
@@ -123,17 +123,17 @@ class LLSDBinaryParser {
                 count == 0 -> return ByteArray(0)
                 count > 100_000_000 -> throw LLSDException("Attempting to read excessively large amount of data: $count bytes")
             }
-            
+
             val bytes = ByteArray(count)
             var totalRead = 0
-            
+
             // First use any peeked byte
             if (hasPeeked && count > 0) {
                 bytes[0] = peekedByte
                 totalRead = 1
                 hasPeeked = false
             }
-            
+
             while (totalRead < count) {
                 val bytesRead = input.read(bytes, totalRead, count - totalRead)
                 if (bytesRead == -1) {
@@ -141,10 +141,10 @@ class LLSDBinaryParser {
                 }
                 totalRead += bytesRead
             }
-            
+
             return bytes
         }
-        
+
         /**
          * Reads a 32-bit integer in big-endian order.
          */
@@ -153,7 +153,7 @@ class LLSDBinaryParser {
             val bytes = readBytes(4)
             return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).int
         }
-        
+
         /**
          * Reads a 64-bit double-precision floating-point number in big-endian order.
          */
@@ -162,7 +162,7 @@ class LLSDBinaryParser {
             val bytes = readBytes(8)
             return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).double
         }
-        
+
         /**
          * Reads a string, which is prefixed by its 32-bit length.
          */
@@ -177,7 +177,7 @@ class LLSDBinaryParser {
             val bytes = readBytes(length)
             return String(bytes, StandardCharsets.UTF_8)
         }
-        
+
         /**
          * Checks if there is more data available to be read from the stream.
          */
@@ -186,7 +186,7 @@ class LLSDBinaryParser {
             return input.available() > 0 || hasPeeked
         }
     }
-    
+
     /**
      * Skips any whitespace characters from the input stream.
      */
@@ -205,7 +205,7 @@ class LLSDBinaryParser {
             // End of stream is ok when skipping whitespace
         }
     }
-    
+
     /**
      * Parses a single LLSD value from the stream based on its type marker.
      * This is the core of the recursive descent parser.
@@ -215,9 +215,9 @@ class LLSDBinaryParser {
         if (depth > MAX_RECURSION_DEPTH) {
             throw LLSDException("Maximum recursion depth exceeded: $depth")
         }
-        
+
         val marker = reader.readByte()
-        
+
         return when (marker) {
             UNDEF_MARKER -> null // Undefined value represented as null
             TRUE_MARKER -> true
@@ -234,7 +234,7 @@ class LLSDBinaryParser {
             else -> throw LLSDException("Unknown binary LLSD marker: 0x${Integer.toHexString(marker.toInt() and 0xFF).uppercase()}")
         }
     }
-    
+
     /** Parses a 16-byte UUID from the stream. */
     @Throws(IOException::class, LLSDException::class)
     private fun parseUUID(reader: BinaryReader): UUID {
@@ -244,7 +244,7 @@ class LLSDBinaryParser {
         val leastSigBits = buffer.long
         return UUID(mostSigBits, leastSigBits)
     }
-    
+
     /** Parses an 8-byte date value (double-precision seconds since the Unix epoch). */
     @Throws(IOException::class, LLSDException::class)
     private fun parseDate(reader: BinaryReader): Date {
@@ -252,7 +252,7 @@ class LLSDBinaryParser {
         val millisSinceEpoch = (secondsSinceEpoch * 1000.0).toLong()
         return Date(millisSinceEpoch)
     }
-    
+
     /** Parses a URI from the stream. */
     @Throws(IOException::class, LLSDException::class)
     private fun parseURI(reader: BinaryReader): URI {
@@ -263,7 +263,7 @@ class LLSDBinaryParser {
             throw LLSDException("Invalid URI in binary LLSD: $uriString", e)
         }
     }
-    
+
     /** Parses a block of binary data from the stream. */
     @Throws(IOException::class, LLSDException::class)
     private fun parseBinary(reader: BinaryReader): ByteArray {
@@ -274,7 +274,7 @@ class LLSDBinaryParser {
         }
         return reader.readBytes(length)
     }
-    
+
     /**
      * Parses an array from the stream. It reads elements recursively until it
      * encounters an array-end marker.
@@ -283,26 +283,26 @@ class LLSDBinaryParser {
     private fun parseArray(reader: BinaryReader, depth: Int): List<Any?> {
         val array = mutableListOf<Any?>()
         var elementCount = 0
-        
+
         while (reader.isAvailable()) {
             if (elementCount >= MAX_COLLECTION_SIZE) {
                 throw LLSDException("Array size limit exceeded: $MAX_COLLECTION_SIZE")
             }
-            
+
             val marker = reader.peek()
             if (marker == ARRAY_END_MARKER) {
                 reader.readByte() // consume ']'
                 break
             }
-            
+
             val value = parseBinaryValue(reader, depth)
             array.add(value)
             elementCount++
         }
-        
+
         return array
     }
-    
+
     /**
      * Parses a map from the stream. It reads key-value pairs recursively until
      * it encounters a map-end marker.
@@ -311,41 +311,41 @@ class LLSDBinaryParser {
     private fun parseMap(reader: BinaryReader, depth: Int): Map<String, Any?> {
         val map = mutableMapOf<String, Any?>()
         var elementCount = 0
-        
+
         while (reader.isAvailable()) {
             if (elementCount >= MAX_COLLECTION_SIZE) {
                 throw LLSDException("Map size limit exceeded: $MAX_COLLECTION_SIZE")
             }
-            
+
             val marker = reader.peek()
             if (marker == MAP_END_MARKER) {
                 reader.readByte() // consume '}'
                 break
             }
-            
+
             // Read key
             if (reader.readByte() != KEY_MARKER) {
                 throw LLSDException("Expected key marker 'k' in binary LLSD map")
             }
-            
+
             val key = reader.readString()
             val value = parseBinaryValue(reader, depth)
             map[key] = value
             elementCount++
         }
-        
+
         return map
     }
-    
+
     companion object {
         private const val LLSD_BINARY_HEADER = "<?llsd/binary?>"
         private val LLSD_BINARY_HEADER_BYTES = LLSD_BINARY_HEADER.toByteArray(StandardCharsets.US_ASCII)
         private const val ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-        
+
         // Security limits to prevent memory exhaustion attacks
         private const val MAX_COLLECTION_SIZE = 1_000_000 // Maximum array/map size
         private const val MAX_RECURSION_DEPTH = 1000 // Maximum nesting depth
-        
+
         // Binary markers
         private const val UNDEF_MARKER = '!'.code.toByte()
         private const val TRUE_MARKER = '1'.code.toByte()

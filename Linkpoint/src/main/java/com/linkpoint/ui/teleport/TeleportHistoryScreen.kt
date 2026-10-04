@@ -50,7 +50,7 @@ data class TeleportHistoryEntry(
 
 /**
  * Compose version of TeleportHistoryActivity.
- * 
+ *
  * Features:
  * - List of recent teleport locations
  * - Click to teleport
@@ -139,7 +139,7 @@ fun TeleportHistoryCard(
     modifier: Modifier = Modifier
 ) {
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -160,9 +160,9 @@ fun TeleportHistoryCard(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = entry.regionName,
@@ -181,7 +181,7 @@ fun TeleportHistoryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,

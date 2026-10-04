@@ -155,7 +155,7 @@ transformManager.setTransform(ti, transformMatrix)
 private fun updateTransform(prim: PrimInstance) {
     val matrix = FloatArray(16)
     android.opengl.Matrix.setIdentityM(matrix, 0)
-    android.opengl.Matrix.translateM(matrix, 0, 
+    android.opengl.Matrix.translateM(matrix, 0,
         prim.position.x, prim.position.y, prim.position.z)
     // Apply rotation quaternion and scale...
     transformManager.setTransform(prim.transformInstance, matrix)
@@ -184,7 +184,7 @@ private fun updatePrimMaterial(prim: PrimInstance, textureEntry: ByteArray) {
     try {
         val buffer = ByteBuffer.wrap(textureEntry)
             .order(ByteOrder.LITTLE_ENDIAN)
-        
+
         // Extract default texture UUID (first 16 bytes, big-endian)
         val uuidBytes = ByteArray(16)
         buffer.get(uuidBytes)
@@ -238,7 +238,7 @@ val entity = EntityManager.get().create()
 
 RenderableManager.Builder(1)
     .boundingBox(Box(-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f))
-    .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, 
+    .geometry(0, RenderableManager.PrimitiveType.TRIANGLES,
               vertexBuffer, indexBuffer)
     .material(0, materialInstance)
     .culling(true)
@@ -253,7 +253,7 @@ scene.addEntity(entity)
 
 ```kotlin
 // Filament MaterialInstance
-materialInstance.setParameter("baseColor", 
+materialInstance.setParameter("baseColor",
     Colors.RgbaType.SRGB, 1.0f, 1.0f, 1.0f, 1.0f)
 materialInstance.setParameter("metallic", 0.0f)
 materialInstance.setParameter("roughness", 0.5f)

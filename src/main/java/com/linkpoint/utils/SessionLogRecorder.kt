@@ -15,23 +15,23 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Thread-safe Session Log Recorder using coroutines.
- * 
+ *
  * This implementation replaces unsafe threading with coroutines
  * for thread-safe, efficient logging operations.
- * 
+ *
  * Features:
  * - Thread-safe logging operations
  * - Asynchronous file writes
  * - Automatic log rotation
  * - Memory-efficient buffering
  * - Graceful shutdown
- * 
+ *
  * Thread-safe: All operations are thread-safe
- * 
+ *
  * @property context Application context
  */
 class SessionLogRecorder(private val context: Context) {
-    
+
     companion object {
         private const val TAG = "SessionLogRecorder"
         private const val LOG_FILE = "session_log.txt"
@@ -40,7 +40,7 @@ class SessionLogRecorder(private val context: Context) {
         private const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS"
         private const val LOG_CHANNEL_CAPACITY = 2048
     }
-    
+
     // Log entry data class
     data class LogEntry(
         val timestamp: Long,
@@ -49,29 +49,29 @@ class SessionLogRecorder(private val context: Context) {
         val message: String,
         val threadName: String
     )
-    
+
     // Channel for thread-safe log submission
     private val logChannel = Channel<LogEntry>(
         capacity = LOG_CHANNEL_CAPACITY,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-    
+
     // Coroutine scope for log processing
     private val scope = CoroutineScope(
-        Dispatchers.IO + 
-        SupervisorJob() + 
+        Dispatchers.IO +
+        SupervisorJob() +
         CoroutineName("SessionLogRecorder")
     )
-    
+
     // State tracking
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording
-    
+
     private val isInitialized = AtomicBoolean(false)
     private val isShuttingDown = AtomicBoolean(false)
-    
+
     private val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
-    
+
     init {
         if (isInitialized.compareAndSet(false, true)) {
             startLogProcessor()
@@ -79,7 +79,7 @@ class SessionLogRecorder(private val context: Context) {
             Log.d(TAG, "SessionLogRecorder initialized")
         }
     }
-    
+
     /**
      * Start the log processing coroutine
      */
@@ -88,7 +88,7 @@ class SessionLogRecorder(private val context: Context) {
             processLogs()
         }
     }
-    
+
     /**
      * Process log entries from channel and write to file
      */
@@ -97,32 +97,32 @@ class SessionLogRecorder(private val context: Context) {
             if (isShuttingDown.get()) {
                 break
             }
-            
+
             try {
                 writeLogEntry(entry)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to write log entry", e)
             }
         }
-        
+
         Log.d(TAG, "Log processor stopped")
     }
-    
+
     /**
      * Write a log entry to file
      */
     private suspend fun writeLogEntry(entry: LogEntry) = withContext(Dispatchers.IO) {
         val logFile = getLogFile()
-        
+
         // Check file size and rotate if needed
         if (logFile.length() > MAX_LOG_SIZE) {
             rotateLogs()
         }
-        
+
         // Format log entry
         val formattedDate = dateFormat.format(Date(entry.timestamp))
         val logLine = "$formattedDate ${entry.level}/${entry.tag} [${entry.threadName}]: ${entry.message}\n"
-        
+
         // Write to file
         try {
             FileWriter(logFile, true).use { writer ->
@@ -133,7 +133,7 @@ class SessionLogRecorder(private val context: Context) {
             Log.e(TAG, "Failed to write to log file", e)
         }
     }
-    
+
     /**
      * Add a log entry (thread-safe)
      */
@@ -141,7 +141,7 @@ class SessionLogRecorder(private val context: Context) {
         if (isShuttingDown.get() || !_isRecording.value) {
             return
         }
-        
+
         val entry = LogEntry(
             timestamp = System.currentTimeMillis(),
             level = level,
@@ -149,34 +149,34 @@ class SessionLogRecorder(private val context: Context) {
             message = message,
             threadName = Thread.currentThread().name
         )
-        
+
         val result = logChannel.trySend(entry)
         if (!result.isSuccess) {
             Log.w(TAG, "Dropped log entry due to channel backpressure")
         }
     }
-    
+
     /**
      * Add a debug log entry
      */
     fun debug(tag: String, message: String) {
         addLog(android.util.Log.DEBUG, tag, message)
     }
-    
+
     /**
      * Add an info log entry
      */
     fun info(tag: String, message: String) {
         addLog(android.util.Log.INFO, tag, message)
     }
-    
+
     /**
      * Add a warning log entry
      */
     fun warn(tag: String, message: String) {
         addLog(android.util.Log.WARN, tag, message)
     }
-    
+
     /**
      * Add an error log entry
      */
@@ -188,14 +188,14 @@ class SessionLogRecorder(private val context: Context) {
         }
         addLog(android.util.Log.ERROR, tag, fullMessage)
     }
-    
+
     /**
      * Get the log file
      */
     private fun getLogFile(): File {
         return File(context.filesDir, LOG_FILE)
     }
-    
+
     /**
      * Rotate log files (keep old logs)
      */
@@ -204,18 +204,18 @@ class SessionLogRecorder(private val context: Context) {
             val currentFile = getLogFile()
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val rotatedFile = File(context.filesDir, "session_log_$timestamp.txt")
-            
+
             currentFile.renameTo(rotatedFile)
-            
+
             // Clean up old log files
             cleanOldLogs()
-            
+
             Log.d(TAG, "Log rotated to ${rotatedFile.name}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to rotate logs", e)
         }
     }
-    
+
     /**
      * Clean up old log files
      */
@@ -223,9 +223,9 @@ class SessionLogRecorder(private val context: Context) {
         try {
             val cutoffTime = System.currentTimeMillis() - (LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000L)
             val filesDir = context.filesDir
-            
+
             filesDir.listFiles()?.forEach { file ->
-                if (file.name.startsWith("session_log_") && 
+                if (file.name.startsWith("session_log_") &&
                     file.lastModified() < cutoffTime) {
                     file.delete()
                     Log.d(TAG, "Deleted old log file: ${file.name}")
@@ -235,7 +235,7 @@ class SessionLogRecorder(private val context: Context) {
             Log.e(TAG, "Failed to clean old logs", e)
         }
     }
-    
+
     /**
      * Get all log file contents
      */
@@ -252,7 +252,7 @@ class SessionLogRecorder(private val context: Context) {
             "Error reading log file: ${e.message}"
         }
     }
-    
+
     /**
      * Clear the current log file
      */
@@ -267,24 +267,24 @@ class SessionLogRecorder(private val context: Context) {
             Log.e(TAG, "Failed to clear log file", e)
         }
     }
-    
+
     /**
      * Stop recording and cleanup
      */
     fun shutdown() {
         if (isShuttingDown.compareAndSet(false, true)) {
             _isRecording.value = false
-            
+
             // Cancel scope
             scope.cancel()
-            
+
             // Close channel
             logChannel.close()
-            
+
             Log.d(TAG, "SessionLogRecorder shut down")
         }
     }
-    
+
     /**
      * Get current log file size in bytes
      */
