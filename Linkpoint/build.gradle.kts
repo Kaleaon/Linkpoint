@@ -32,7 +32,7 @@ data class UiBoundaryRule(
     val allowedUiDependencies: Set<String>
 )
 
-val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs", "notecard", "linkpoint2", "avatar", "chat", "friends", "inventory", "minimap", "people", "settings", "xr", "radar")
+val sharedUiModules = setOf("theme", "navigation", "components", "common", "dialogs", "notecard", "linkpoint2", "avatar", "chat", "friends", "inventory", "minimap", "people", "settings", "xr", "radar", "overlay")
 val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-theme",
@@ -678,9 +678,9 @@ val verifyUiArchitectureBoundaries by tasks.registering {
                     }
                 }
             } else {
-                // Rule 3: Domain/service/runtime modules must not depend on UI packages (except Activity intents for notifications).
+                // Rule 3: Domain/service/runtime modules must not depend on UI packages (except Activity intents and OverlayManager targets).
                 imports.filter { it == "com.linkpoint.ui" || it.startsWith("com.linkpoint.ui.") }
-                    .filterNot { it.endsWith("Activity") }
+                    .filterNot { it.endsWith("Activity") || it.endsWith("OverlayManager") }
                     .forEach { imp ->
                         violations += "$relative creates reverse dependency on UI package: $imp"
                     }
