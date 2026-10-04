@@ -12,9 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.linkpoint.LinkpointApp
+import com.linkpoint.ui.adaptive.AdaptiveListDetailPane
+import com.linkpoint.ui.adaptive.InventoryDetailPane
+import com.linkpoint.ui.adaptive.ListDetailPlaceholder
 import com.linkpoint.ui.avatar.AvatarAppearance
 import com.linkpoint.ui.avatar.MyAvatarScreen
 import com.linkpoint.ui.chat.L2ChatRoute
+import com.linkpoint.ui.friends.FriendData
+import com.linkpoint.ui.inventory.InventoryItemData
 import com.linkpoint.ui.linkpoint2.routes.L2EventsRoute
 import com.linkpoint.ui.linkpoint2.routes.L2FriendsRoute
 import com.linkpoint.ui.linkpoint2.routes.L2GraphicsSettingsRoute
@@ -38,8 +43,10 @@ import com.linkpoint.ui.linkpoint2.routes.L2VoiceDeepRoute
 import com.linkpoint.ui.linkpoint2.routes.L2WalletRoute
 import com.linkpoint.ui.linkpoint2.screens.BuildToolsScreen
 import com.linkpoint.ui.linkpoint2.screens.CameraScreen
+import com.linkpoint.ui.linkpoint2.screens.ConversationSummary
 import com.linkpoint.ui.linkpoint2.screens.EmptyStatesReferenceScreen
 import com.linkpoint.ui.linkpoint2.screens.L2IMListRoute
+import com.linkpoint.ui.linkpoint2.screens.PlaceCard
 import com.linkpoint.ui.linkpoint2.screens.OnboardingAvatarScreen
 import com.linkpoint.ui.linkpoint2.screens.OnboardingPermissionsScreen
 import com.linkpoint.ui.linkpoint2.screens.OnboardingWelcomeScreen
@@ -170,22 +177,71 @@ fun Linkpoint2RouteHost(
                 modifier = modifier,
             )
         }
-        route == Routes.IM_LIST -> L2IMListRoute(
-            onBack = back,
-            onOpenConversation = { navController.navigateTo(Routes.CHAT) },
-            onCompose = { navController.navigateTo(Routes.CHAT) },
-            modifier = modifier,
-        )
+        route == Routes.IM_LIST -> {
+            var selectedConversation by remember { mutableStateOf<ConversationSummary?>(null) }
+            AdaptiveListDetailPane(
+                selectedItem = selectedConversation,
+                onClearSelection = { selectedConversation = null },
+                listPane = {
+                    L2IMListRoute(
+                        onBack = back,
+                        onOpenConversation = { conv -> selectedConversation = conv },
+                        onCompose = { navController.navigateTo(Routes.CHAT) },
+                        modifier = modifier,
+                    )
+                },
+                detailPane = { conv ->
+                    L2ChatRoute(
+                        onNavigateBack = { selectedConversation = null },
+                        modifier = modifier,
+                    )
+                },
+                placeholderPane = {
+                    ListDetailPlaceholder(
+                        title = "No Conversation Selected",
+                        subtitle = "Select a conversation from the list to view and send messages.",
+                    )
+                },
+                modifier = modifier,
+            )
+        }
         route == Routes.CHAT -> L2ChatRoute(
             onNavigateBack = back,
             modifier = modifier,
         )
-        route == Routes.FRIENDS -> L2FriendsRoute(
-            onNavigateBack = back,
-            onOpenIM = { _ -> navController.navigateTo(Routes.CHAT) },
-            onViewProfile = { friend -> navController.navigateTo(Routes.profile(friend.id.toString())) },
-            modifier = modifier,
-        )
+        route == Routes.FRIENDS -> {
+            var selectedFriend by remember { mutableStateOf<FriendData?>(null) }
+            AdaptiveListDetailPane(
+                selectedItem = selectedFriend,
+                onClearSelection = { selectedFriend = null },
+                listPane = {
+                    L2FriendsRoute(
+                        onNavigateBack = back,
+                        onOpenIM = { friend -> navController.navigateTo(Routes.CHAT) },
+                        onViewProfile = { friend -> selectedFriend = friend },
+                        modifier = modifier,
+                    )
+                },
+                detailPane = { friend ->
+                    L2ProfileRoute(
+                        userId = friend.id.toString(),
+                        isMe = false,
+                        onNavigateBack = { selectedFriend = null },
+                        onSendIM = { navController.navigateTo(Routes.CHAT) },
+                        onTeleportToMe = {},
+                        onEditMyProfile = {},
+                        modifier = modifier,
+                    )
+                },
+                placeholderPane = {
+                    ListDetailPlaceholder(
+                        title = "No Friend Selected",
+                        subtitle = "Select a friend from the list to view their profile details.",
+                    )
+                },
+                modifier = modifier,
+            )
+        }
         route == Routes.WALLET -> L2WalletRoute(
             onBack = back,
             modifier = modifier,
@@ -202,11 +258,34 @@ fun Linkpoint2RouteHost(
             onBack = back,
             modifier = modifier,
         )
-        route == Routes.PLACES_SEARCH -> L2PlacesRoute(
-            onBack = back,
-            onSelect = { p -> navController.navigateTo(Routes.placeDetail(p.id)) },
-            modifier = modifier,
-        )
+        route == Routes.PLACES_SEARCH -> {
+            var selectedPlace by remember { mutableStateOf<PlaceCard?>(null) }
+            AdaptiveListDetailPane(
+                selectedItem = selectedPlace,
+                onClearSelection = { selectedPlace = null },
+                listPane = {
+                    L2PlacesRoute(
+                        onBack = back,
+                        onSelect = { place -> selectedPlace = place },
+                        modifier = modifier,
+                    )
+                },
+                detailPane = { place ->
+                    L2PlaceDetailRoute(
+                        placeId = place.id,
+                        onBack = { selectedPlace = null },
+                        modifier = modifier,
+                    )
+                },
+                placeholderPane = {
+                    ListDetailPlaceholder(
+                        title = "No Place Selected",
+                        subtitle = "Select a place from search results to view details and teleport.",
+                    )
+                },
+                modifier = modifier,
+            )
+        }
         baseRoute == "places" && route != Routes.PLACES_EVENTS && route != Routes.PLACES_SEARCH -> {
             L2PlaceDetailRoute(
                 placeId = entry.arguments?.getString("placeId"),
@@ -258,10 +337,34 @@ fun Linkpoint2RouteHost(
             modifier = modifier,
         )
         route == Routes.EMPTY_STATES_REF -> EmptyStatesReferenceScreen(onBack = back, modifier = modifier)
-        route == Routes.INVENTORY -> L2InventoryRoute(
-            onNavigateBack = back,
-            modifier = modifier,
-        )
+        route == Routes.INVENTORY -> {
+            var selectedItem by remember { mutableStateOf<InventoryItemData?>(null) }
+            AdaptiveListDetailPane(
+                selectedItem = selectedItem,
+                onClearSelection = { selectedItem = null },
+                listPane = {
+                    L2InventoryRoute(
+                        onNavigateBack = back,
+                        onSelectItem = { item -> selectedItem = item },
+                        modifier = modifier,
+                    )
+                },
+                detailPane = { item ->
+                    InventoryDetailPane(
+                        item = item,
+                        onNavigateBack = { selectedItem = null },
+                        modifier = modifier,
+                    )
+                },
+                placeholderPane = {
+                    ListDetailPlaceholder(
+                        title = "No Item Selected",
+                        subtitle = "Select an inventory item to view properties and details.",
+                    )
+                },
+                modifier = modifier,
+            )
+        }
         route == Routes.MAP -> L2MapRoute(
             onNavigateBack = back,
             modifier = modifier,

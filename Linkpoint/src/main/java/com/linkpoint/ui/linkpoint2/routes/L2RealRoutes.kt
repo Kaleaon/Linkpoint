@@ -256,6 +256,7 @@ fun L2NearbyPeopleRoute(
 @Composable
 fun L2InventoryRoute(
     onNavigateBack: () -> Unit,
+    onSelectItem: ((InventoryItemData) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     DisposableEffect(Unit) {
@@ -362,6 +363,8 @@ fun L2InventoryRoute(
         onItemClick = { tapped ->
             if (tapped.type == InventoryItemType.FOLDER) {
                 pathStack.add(tapped.id to tapped.name)
+            } else {
+                onSelectItem?.invoke(tapped)
             }
         },
         onNavigateBack = onNavigateBack,

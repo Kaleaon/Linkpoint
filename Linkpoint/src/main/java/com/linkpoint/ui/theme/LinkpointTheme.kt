@@ -83,7 +83,9 @@ fun LinkpointTheme(
             typography = typography,
             shapes = shapes
         ) {
-            ProvideLinkpoint2Tokens(content = content)
+            com.linkpoint.ui.adaptive.ProvideWindowSizeClass {
+                ProvideLinkpoint2Tokens(content = content)
+            }
         }
     }
 }
