@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Session Log Recorder - Comprehensive logging from app startup to close.
- * 
+ *
  * Records all diagnostic output including:
  * - All UDP packets (sent and received) with full hex dumps
  * - HTTP requests and responses
@@ -28,55 +28,55 @@ import java.util.concurrent.atomic.AtomicLong
  * - Capability events
  * - Login/logout events
  * - Region transitions
- * 
+ *
  * Designed for full diagnostic output to help debug connection and protocol issues.
- * 
+ *
  * IMPORTANT: Logs are saved to app-private internal storage by default.
  * Public sharing is only done through an explicit export action.
- * 
+ *
  * Usage:
  * - Call `startRecording()` at app startup or when diagnostic logging is needed
  * - Call `stopRecording()` to stop and finalize the log file
  * - Use `exportLog()` to save logs to external storage for sharing
- * 
+ *
  * The recorder automatically manages memory by periodically flushing to disk.
  */
 object SessionLogRecorder {
-    
+
     private const val TAG = "SessionLogRecorder"
-    
+
     // Directory and file names
     private const val LOG_DIR_NAME = "Linkpoint Logs"
     private const val SESSION_LOG_PREFIX = "session_log_"
     private const val SESSION_LOG_SUFFIX = ".txt"
-    
+
     // Buffer management
     private const val MAX_MEMORY_ENTRIES = 500
     private const val FLUSH_INTERVAL_MS = 10000L // Flush every 10 seconds
-    
+
     // Recording state
     private val isRecording = AtomicBoolean(false)
     private val sessionStartTime = AtomicLong(0)
     private val entryCount = AtomicLong(0)
-    
+
     // In-memory buffer for log entries
     private val logBuffer = ConcurrentLinkedQueue<LogEntry>()
-    
+
     // File output
     private var currentLogFile: File? = null
     private var logWriter: BufferedWriter? = null
-    
+
     // Context for file operations
     private var appContext: Context? = null
-    
+
     // Coroutine scope for background operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var flushJob: Job? = null
-    
+
     // Date formatters
     private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     private val fileNameFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
-    
+
     /**
      * Log entry types for categorization
      */
@@ -114,7 +114,7 @@ object SessionLogRecorder {
         /** Renderer lifecycle / OpenGL / Filament event */
         RENDER
     }
-    
+
     /**
      * Single log entry with timestamp, type, and content
      */
@@ -142,7 +142,7 @@ object SessionLogRecorder {
             appendLine()
         }
     }
-    
+
     /**
      * Recording statistics
      */
@@ -155,7 +155,7 @@ object SessionLogRecorder {
         val currentLogFile: String?,
         val logFileSizeBytes: Long
     )
-    
+
     /**
      * Initialize the recorder with application context.
      * Must be called before starting recording.
@@ -164,7 +164,7 @@ object SessionLogRecorder {
         appContext = context.applicationContext
         Log.i(TAG, "SessionLogRecorder initialized")
     }
-    
+
     /**
      * Start recording session logs.
      * Creates a new log file and begins capturing all diagnostic output.
@@ -174,12 +174,12 @@ object SessionLogRecorder {
             Log.w(TAG, "Recording already in progress")
             return false
         }
-        
+
         try {
             sessionStartTime.set(System.currentTimeMillis())
             entryCount.set(0)
             logBuffer.clear()
-            
+
             // Create log file
             val logDir = getLogDirectory() ?: run {
                 Log.e(TAG, "Could not get log directory")
@@ -194,30 +194,30 @@ object SessionLogRecorder {
                     retentionDays = DiagnosticsLoggingConfig.getRetentionDays(context)
                 )
             }
-            
+
             val timestamp = fileNameFormat.format(Date())
             currentLogFile = File(logDir, "$SESSION_LOG_PREFIX$timestamp$SESSION_LOG_SUFFIX")
             logWriter = BufferedWriter(FileWriter(currentLogFile, true))
-            
+
             // Write header
             writeHeader()
-            
+
             // Start periodic flush
             startFlushJob()
-            
+
             // Log start event
             log(EntryType.APP_LIFECYCLE, TAG, "Session recording STARTED")
-            
+
             Log.i(TAG, "Session recording started: ${currentLogFile?.absolutePath}")
             return true
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start recording", e)
             isRecording.set(false)
             return false
         }
     }
-    
+
     /**
      * Stop recording and finalize the log file.
      */
@@ -226,42 +226,42 @@ object SessionLogRecorder {
             Log.w(TAG, "Recording not in progress")
             return null
         }
-        
+
         try {
             // Log stop event
             log(EntryType.APP_LIFECYCLE, TAG, "Session recording STOPPED")
-            
+
             // Stop flush job
             flushJob?.cancel()
             flushJob = null
-            
+
             // Final flush
             flushToFile()
-            
+
             // Write footer
             writeFooter()
-            
+
             // Close writer
             logWriter?.close()
             logWriter = null
-            
+
             val resultFile = currentLogFile
             currentLogFile = null
-            
+
             Log.i(TAG, "Session recording stopped: ${resultFile?.absolutePath}")
             return resultFile
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping recording", e)
             return null
         }
     }
-    
+
     /**
      * Check if recording is active
      */
     fun isRecording(): Boolean = isRecording.get()
-    
+
     /**
      * Get current recording statistics
      */
@@ -277,13 +277,13 @@ object SessionLogRecorder {
             logFileSizeBytes = currentLogFile?.length() ?: 0
         )
     }
-    
+
     /**
      * Log a general message
      */
     fun log(type: EntryType, tag: String, message: String) {
         if (!isRecording.get()) return
-        
+
         val entry = LogEntry(
             timestamp = System.currentTimeMillis(),
             type = type,
@@ -292,13 +292,13 @@ object SessionLogRecorder {
         )
         addEntry(entry)
     }
-    
+
     /**
      * Log a message with hex dump (for packets)
      */
     fun logWithHex(type: EntryType, tag: String, message: String, data: ByteArray) {
         if (!isRecording.get()) return
-        
+
         val context = appContext
         val includeHexDump = context != null && DiagnosticsLoggingConfig.isVerbosePacketLoggingEnabled(context)
         val hexDump = if (includeHexDump) data.joinToString(" ") { "%02X".format(it) } else null
@@ -311,13 +311,13 @@ object SessionLogRecorder {
         )
         addEntry(entry)
     }
-    
+
     /**
      * Log an error with stack trace
      */
     fun logError(tag: String, message: String, error: Throwable? = null) {
         if (!isRecording.get()) return
-        
+
         val entry = LogEntry(
             timestamp = System.currentTimeMillis(),
             type = EntryType.ERROR,
@@ -327,7 +327,7 @@ object SessionLogRecorder {
         )
         addEntry(entry)
     }
-    
+
     /**
      * Log a UDP packet sent
      */
@@ -339,7 +339,7 @@ object SessionLogRecorder {
         reliable: Boolean
     ) {
         if (!isRecording.get()) return
-        
+
         val message = buildString {
             append("→ SENT: $messageName")
             append(" (ID: 0x${MessageIdNameRegistry.formatHex(messageId)}")
@@ -351,7 +351,7 @@ object SessionLogRecorder {
 
         logWithHex(EntryType.PACKET_SENT, "UDP", message, data)
     }
-    
+
     /**
      * Log a UDP packet received
      */
@@ -363,7 +363,7 @@ object SessionLogRecorder {
         handlerFound: Boolean
     ) {
         if (!isRecording.get()) return
-        
+
         val handlerStatus = if (handlerFound) "✓" else "⚠️ NO HANDLER"
         val message = buildString {
             append("← RECV: $messageName $handlerStatus")
@@ -371,16 +371,16 @@ object SessionLogRecorder {
             append(", seq: $sequenceNumber")
             append(", size: ${data.size}B)")
         }
-        
+
         logWithHex(EntryType.PACKET_RECEIVED, "UDP", message, data)
     }
-    
+
     /**
      * Log HTTP request
      */
     fun logHttpRequest(method: String, url: String, headers: Map<String, String>? = null) {
         if (!isRecording.get()) return
-        
+
         val message = buildString {
             append("→ HTTP $method $url")
             headers?.let {
@@ -401,13 +401,13 @@ object SessionLogRecorder {
         }
         log(EntryType.HTTP_REQUEST, "HTTP", message)
     }
-    
+
     /**
      * Log HTTP response
      */
     fun logHttpResponse(url: String, statusCode: Int, durationMs: Long, protocol: String? = null) {
         if (!isRecording.get()) return
-        
+
         val message = buildString {
             append("← HTTP $statusCode (${durationMs}ms)")
             protocol?.let { append(" [$it]") }
@@ -415,26 +415,26 @@ object SessionLogRecorder {
         }
         log(EntryType.HTTP_RESPONSE, "HTTP", message)
     }
-    
+
     /**
      * Log connection state change
      */
     fun logConnectionState(oldState: String, newState: String, details: String? = null) {
         if (!isRecording.get()) return
-        
+
         val message = buildString {
             append("Connection: $oldState → $newState")
             details?.let { append("\n  Details: $it") }
         }
         log(EntryType.CONNECTION_STATE, "CONN", message)
     }
-    
+
     /**
      * Log capability event
      */
     fun logCapability(capName: String, available: Boolean, url: String? = null) {
         if (!isRecording.get()) return
-        
+
         val status = if (available) "✓ AVAILABLE" else "✗ UNAVAILABLE"
         val message = buildString {
             append("$capName: $status")
@@ -442,7 +442,7 @@ object SessionLogRecorder {
         }
         log(EntryType.CAPABILITY, "CAP", message)
     }
-    
+
     /**
      * Log a renderer lifecycle / OpenGL / Filament event. Convenience
      * wrapper used by [com.linkpoint.render.RenderDiagnostics] so every
@@ -468,7 +468,7 @@ object SessionLogRecorder {
      */
     fun logLogin(success: Boolean, grid: String, username: String, error: String? = null) {
         if (!isRecording.get()) return
-        
+
         val status = if (success) "✓ SUCCESS" else "✗ FAILED"
         val message = buildString {
             append("LOGIN $status")
@@ -478,7 +478,7 @@ object SessionLogRecorder {
         }
         log(EntryType.AUTH, "AUTH", message)
     }
-    
+
     /**
      * Log region change. `regionHandle` is null when invoked from RegionHandshake
      * (the LL message body does not carry it — only EnableSimulator and
@@ -496,7 +496,7 @@ object SessionLogRecorder {
         }
         log(EntryType.REGION, "REGION", message)
     }
-    
+
     /**
      * Export current recording to a shareable file
      */
@@ -505,22 +505,22 @@ object SessionLogRecorder {
             Log.w(TAG, "Cannot export - not recording")
             return currentLogFile
         }
-        
+
         // Flush current buffer
         flushToFile()
-        
+
         return currentLogFile
     }
-    
+
     /**
      * Get the app-private path where logs are stored.
      */
     fun getLogDirectoryPath(): String {
         return getLogDirectory()?.absolutePath ?: "unavailable"
     }
-    
+
     // ==================== PRIVATE METHODS ====================
-    
+
     private fun addEntry(entry: LogEntry) {
         val sanitizedEntry = entry.copy(
             message = DiagnosticsLogSanitizer.sanitize(entry.message),
@@ -529,7 +529,7 @@ object SessionLogRecorder {
         )
         logBuffer.offer(sanitizedEntry)
         entryCount.incrementAndGet()
-        
+
         // Trigger flush if buffer is getting large
         if (logBuffer.size > MAX_MEMORY_ENTRIES) {
             scope.launch {
@@ -537,7 +537,7 @@ object SessionLogRecorder {
             }
         }
     }
-    
+
     private fun startFlushJob() {
         flushJob = scope.launch {
             while (isActive && isRecording.get()) {
@@ -546,10 +546,10 @@ object SessionLogRecorder {
             }
         }
     }
-    
+
     private fun flushToFile() {
         val writer = logWriter ?: return
-        
+
         try {
             synchronized(writer) {
                 while (logBuffer.isNotEmpty()) {
@@ -562,11 +562,11 @@ object SessionLogRecorder {
             Log.e(TAG, "Error flushing to file", e)
         }
     }
-    
+
     private fun writeHeader() {
         val writer = logWriter ?: return
         val now = System.currentTimeMillis()
-        
+
         try {
             writer.write("╔══════════════════════════════════════════════════════════════════╗\n")
             writer.write("║               LINKPOINT SESSION LOG                               ║\n")
@@ -590,12 +590,12 @@ object SessionLogRecorder {
             Log.e(TAG, "Error writing header", e)
         }
     }
-    
+
     private fun writeFooter() {
         val writer = logWriter ?: return
         val now = System.currentTimeMillis()
         val duration = now - sessionStartTime.get()
-        
+
         try {
             writer.write("\n")
             writer.write("═".repeat(70) + "\n")
@@ -604,7 +604,7 @@ object SessionLogRecorder {
             writer.write("Duration: ${formatDuration(duration)}\n")
             writer.write("Total Entries: ${entryCount.get()}\n")
             writer.write("\n")
-            
+
             // Include EnhancedPacketLogger statistics
             try {
                 val packetStats = EnhancedPacketLogger.getStatistics()
@@ -619,7 +619,7 @@ object SessionLogRecorder {
             } catch (e: Exception) {
                 writer.write("Packet Statistics: unavailable\n")
             }
-            
+
             writer.write("\n")
             writer.write("╔══════════════════════════════════════════════════════════════════╗\n")
             writer.write("║               END OF SESSION LOG                                  ║\n")
@@ -629,7 +629,7 @@ object SessionLogRecorder {
             Log.e(TAG, "Error writing footer", e)
         }
     }
-    
+
     /**
      * Get the app-private diagnostics directory.
      */
@@ -649,7 +649,7 @@ object SessionLogRecorder {
 
         return null
     }
-    
+
     private fun formatDuration(ms: Long): String {
         return when {
             ms < 1000 -> "${ms}ms"
@@ -658,7 +658,7 @@ object SessionLogRecorder {
             else -> String.format(Locale.US, "%.1fh", ms / 3600000.0)
         }
     }
-    
+
     private fun formatBytes(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"
@@ -666,7 +666,7 @@ object SessionLogRecorder {
             else -> String.format(Locale.US, "%.2f MB", bytes / (1024.0 * 1024.0))
         }
     }
-    
+
     /**
      * Shutdown the recorder and release resources
      */

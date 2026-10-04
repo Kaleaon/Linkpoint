@@ -35,13 +35,13 @@ class ItemPropertiesDialog : DialogFragment() {
 
     private fun setupView(view: View) {
         view.findViewById<TextView>(R.id.prop_name).text = item.name
-        view.findViewById<TextView>(R.id.prop_description).text = 
+        view.findViewById<TextView>(R.id.prop_description).text =
             item.description.ifEmpty { getString(R.string.no_description) }
         view.findViewById<TextView>(R.id.prop_type).text = item.assetTypeEnum.toString()
         view.findViewById<TextView>(R.id.prop_asset_id).text = item.assetId.toString()
         view.findViewById<TextView>(R.id.prop_item_id).text = item.itemId.toString()
         view.findViewById<TextView>(R.id.prop_parent_id).text = item.parentId.toString()
-        
+
         // Flags
         val flagsText = buildString {
             if (item.flags and 0x01 != 0) append("Shared, ")
@@ -50,8 +50,8 @@ class ItemPropertiesDialog : DialogFragment() {
             if (item.flags and 0x08 != 0) append("Hidden, ")
             if (item.flags and 0x10 != 0) append("Broken, ")
         }.dropLastWhile { it == ',' || it == ' ' }
-        
-        view.findViewById<TextView>(R.id.prop_flags).text = 
+
+        view.findViewById<TextView>(R.id.prop_flags).text =
             flagsText.ifEmpty { "None" }
     }
 

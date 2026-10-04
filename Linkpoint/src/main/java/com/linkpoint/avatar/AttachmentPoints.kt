@@ -4,14 +4,14 @@ import java.util.UUID
 
 /**
  * Attachment Points - Defines all attachment points on an avatar.
- * 
+ *
  * Based on the reference viewer's SLAttachmentPoint.java
- * 
+ *
  * Second Life avatars have 59+ attachment points where objects can be attached.
  * Each point has a unique ID, name, and bone/joint association.
  */
 object AttachmentPoints {
-    
+
     // Attachment point IDs (from SL protocol)
     const val ATTACH_CHEST = 1
     const val ATTACH_HEAD = 2
@@ -53,7 +53,7 @@ object AttachmentPoints {
     const val ATTACH_HUD_BOTTOM_RIGHT = 38
     const val ATTACH_NECK = 39
     const val ATTACH_ROOT = 40
-    
+
     // Extended attachment points (added in later SL versions)
     const val ATTACH_AVATAR_CENTER = 40
     const val ATTACH_LHAND_RING1 = 41
@@ -71,10 +71,10 @@ object AttachmentPoints {
     const val ATTACH_GROIN = 53
     const val ATTACH_HIND_LFOOT = 54
     const val ATTACH_HIND_RFOOT = 55
-    
+
     // All attachment points with position and rotation data from Second Life
     val ALL_POINTS: Map<Int, AttachmentPoint> = mapOf(
-        ATTACH_CHEST to AttachmentPoint(ATTACH_CHEST, "Chest", "mChest", false, 
+        ATTACH_CHEST to AttachmentPoint(ATTACH_CHEST, "Chest", "mChest", false,
             Triple(0.15f, 0f, -0.1f), Triple(0f, 90f, 90f), true, 6, 2),
         ATTACH_HEAD to AttachmentPoint(ATTACH_HEAD, "Skull", "mHead", false,
             Triple(0f, 0f, 0.15f), Triple(0f, 0f, 90f), false, 2, 2),
@@ -134,7 +134,7 @@ object AttachmentPoints {
             Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 0),
         ATTACH_LPEC to AttachmentPoint(ATTACH_LPEC, "Left Pec", "mChest", false,
             Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 4),
-        
+
         // HUD points
         ATTACH_HUD_CENTER_2 to AttachmentPoint(ATTACH_HUD_CENTER_2, "HUD Center 2", null, true),
         ATTACH_HUD_TOP_RIGHT to AttachmentPoint(ATTACH_HUD_TOP_RIGHT, "HUD Top Right", null, true),
@@ -144,13 +144,13 @@ object AttachmentPoints {
         ATTACH_HUD_BOTTOM_LEFT to AttachmentPoint(ATTACH_HUD_BOTTOM_LEFT, "HUD Bottom Left", null, true),
         ATTACH_HUD_BOTTOM to AttachmentPoint(ATTACH_HUD_BOTTOM, "HUD Bottom", null, true),
         ATTACH_HUD_BOTTOM_RIGHT to AttachmentPoint(ATTACH_HUD_BOTTOM_RIGHT, "HUD Bottom Right", null, true),
-        
+
         // More avatar points
         ATTACH_NECK to AttachmentPoint(ATTACH_NECK, "Neck", "mNeck", false,
             Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true, 6, 3),
         ATTACH_ROOT to AttachmentPoint(ATTACH_ROOT, "Avatar Center", "mPelvis", false,
             Triple(0f, 0f, 0f), Triple(0f, 0f, 0f), true),
-        
+
         // Extended/Bento points
         ATTACH_LHAND_RING1 to AttachmentPoint(ATTACH_LHAND_RING1, "Left Ring Finger", "mHandRing1Left", false),
         ATTACH_RHAND_RING1 to AttachmentPoint(ATTACH_RHAND_RING1, "Right Ring Finger", "mHandRing1Right", false),
@@ -168,7 +168,7 @@ object AttachmentPoints {
         ATTACH_HIND_LFOOT to AttachmentPoint(ATTACH_HIND_LFOOT, "Left Hind Foot", "mHindLimb4Left", false),
         ATTACH_HIND_RFOOT to AttachmentPoint(ATTACH_HIND_RFOOT, "Right Hind Foot", "mHindLimb4Right", false)
     )
-    
+
     // HUD attachment point IDs
     val HUD_POINTS = setOf(
         ATTACH_HUD_CENTER_2,
@@ -180,50 +180,50 @@ object AttachmentPoints {
         ATTACH_HUD_BOTTOM,
         ATTACH_HUD_BOTTOM_RIGHT
     )
-    
+
     /**
      * Get attachment point by ID.
      */
     fun getPoint(id: Int): AttachmentPoint? = ALL_POINTS[id]
-    
+
     /**
      * Get attachment point name.
      */
     fun getPointName(id: Int): String = ALL_POINTS[id]?.name ?: "Unknown ($id)"
-    
+
     /**
      * Check if attachment point is a HUD point.
      */
     fun isHudPoint(id: Int): Boolean = HUD_POINTS.contains(id)
-    
+
     /**
      * Get all body (non-HUD) attachment points.
      */
     fun getBodyPoints(): List<AttachmentPoint> {
         return ALL_POINTS.values.filter { !it.isHud }
     }
-    
+
     /**
      * Get all HUD attachment points.
      */
     fun getHudPoints(): List<AttachmentPoint> {
         return ALL_POINTS.values.filter { it.isHud }
     }
-    
+
     /**
      * Get attachment points for a specific bone.
      */
     fun getPointsForBone(boneName: String): List<AttachmentPoint> {
         return ALL_POINTS.values.filter { it.jointName == boneName }
     }
-    
+
     /**
      * Get attachment points visible in first person view.
      */
     fun getFirstPersonVisiblePoints(): List<AttachmentPoint> {
         return ALL_POINTS.values.filter { it.visibleInFirstPerson }
     }
-    
+
     /**
      * Get attachment points by group.
      */

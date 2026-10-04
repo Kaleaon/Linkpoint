@@ -37,7 +37,7 @@ import com.google.android.filament.Engine
 
 /**
  * Compose-based 3D World View using SceneView (Filament wrapper).
- * 
+ *
  * This composable provides a full 3D rendering surface for the Second Life/OpenSim world,
  * with support for:
  * - glTF/GLB model loading (avatars, objects, terrain)
@@ -45,7 +45,7 @@ import com.google.android.filament.Engine
  * - Camera manipulation (orbit, pan, zoom)
  * - Collision detection
  * - HDR environment lighting
- * 
+ *
  * Integration with libGDX is handled through the WorldBridge class which
  * provides game logic, input processing, and cross-platform compatibility.
  */
@@ -62,40 +62,40 @@ fun WorldScene(
     val view = rememberView(engine)
     val renderer = rememberRenderer(engine)
     val scene = rememberScene(engine)
-    
+
     // Asset loaders
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val environmentLoader = rememberEnvironmentLoader(engine)
-    
+
     // Collision system for hit testing
     val collisionSystem = rememberCollisionSystem(view)
-    
+
     // Main directional light (sun)
     val mainLightNode = rememberMainLightNode(engine) {
         intensity = worldState.sunIntensity
         // Direction will be updated based on world time
     }
-    
+
     // Camera node
     val cameraNode = rememberCameraNode(engine) {
         position = worldState.cameraPosition
     }
-    
+
     // Camera manipulator for user interaction
     val cameraManipulator = rememberCameraManipulator()
-    
+
     // Environment (skybox + IBL) - uses default environment from SceneView
     // Custom HDR environment loading can be implemented later if needed
     val environment = rememberEnvironment(environmentLoader)
-    
+
     // Dynamic nodes from world state
     val childNodes = rememberNodes {
         worldState.modelNodes.forEach { modelData ->
             add(createModelNode(engine, modelLoader, materialLoader, modelData))
         }
     }
-    
+
     // Update nodes when world state changes
     DisposableEffect(worldState.modelNodes) {
         // Nodes are automatically managed by SceneView through rememberNodes
@@ -105,7 +105,7 @@ fun WorldScene(
             // Additional cleanup (e.g., canceling pending loads) can be added here
         }
     }
-    
+
     Box(modifier = modifier.fillMaxSize()) {
         Scene(
             modifier = Modifier.fillMaxSize(),
@@ -124,7 +124,7 @@ fun WorldScene(
             childNodes = childNodes,
             onFrame = { frameTimeNanos ->
                 onFrameUpdate?.invoke(frameTimeNanos)
-                
+
                 // Update camera from world state
                 cameraNode.position = worldState.cameraPosition
                 cameraNode.lookAt(worldState.cameraTarget)
@@ -185,15 +185,15 @@ private fun rememberOnGestureListener(
             override fun onSingleTapConfirmed(e: android.view.MotionEvent, node: Node?) {
                 onSingleTapConfirmed?.invoke(e, node)
             }
-            
+
             override fun onDoubleTap(e: android.view.MotionEvent, node: Node?) {
                 onDoubleTap?.invoke(e, node)
             }
-            
+
             override fun onLongPress(e: android.view.MotionEvent, node: Node?) {
                 onLongPress?.invoke(e, node)
             }
-            
+
             override fun onDown(e: android.view.MotionEvent, node: Node?) {}
             override fun onShowPress(e: android.view.MotionEvent, node: Node?) {}
             override fun onSingleTapUp(e: android.view.MotionEvent, node: Node?) {}

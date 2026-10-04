@@ -64,4 +64,3 @@ void main() {
 	vLightColor = vColor * vec4 (min (lightColor, 1.0), 1.0);
 
 }
-

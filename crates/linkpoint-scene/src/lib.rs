@@ -1,5 +1,12 @@
 //! Renderer-neutral scene representation and normalization.
 
+pub mod spatial;
+
+pub use spatial::{
+    AABB, ChunkGrid, ChunkId, Octree, SpatialChunk, SpatialEntity, SpatialManager,
+    SpatialWorkerPool,
+};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

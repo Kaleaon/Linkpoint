@@ -15,14 +15,14 @@ import java.util.*
 
 /**
  * Kotlin-native LLSD serialization with type safety.
- * 
+ *
  * <p>This class provides modern Kotlin serialization capabilities including
  * streaming and type-safe serialization.</p>
- * 
+ *
  * @since 1.0
  */
 class LLSDKotlinSerializer {
-    
+
     /**
      * Serialization formats
      */
@@ -32,7 +32,7 @@ class LLSDKotlinSerializer {
         XML,
         BINARY
     }
-    
+
     /**
      * Serialization options
      */
@@ -43,16 +43,16 @@ class LLSDKotlinSerializer {
         val bufferSize: Int = 8192,
         val charset: java.nio.charset.Charset = Charsets.UTF_8
     )
-    
+
     /**
      * Serialize LLSD value to string
      */
     fun serialize(
-        value: LLSDValue, 
+        value: LLSDValue,
         options: SerializationOptions = SerializationOptions()
     ): String {
         val javaLLSD = value.toJavaLLSD()
-        
+
         return when (options.format) {
             Format.JSON -> {
                 val serializer = LLSDJsonSerializer()
@@ -75,7 +75,7 @@ class LLSDKotlinSerializer {
             }
         }
     }
-    
+
     /**
      * Serialize LLSD value to OutputStream
      */
@@ -96,7 +96,7 @@ class LLSDKotlinSerializer {
             }
         }
     }
-    
+
     /**
      * Parse LLSD from string
      */
@@ -123,10 +123,10 @@ class LLSDKotlinSerializer {
                 parser.parse(ByteArrayInputStream(data))
             }
         }
-        
+
         return javaLLSD.toKotlinLLSD()
     }
-    
+
     /**
      * Parse LLSD from InputStream
      */
@@ -152,10 +152,10 @@ class LLSDKotlinSerializer {
                 parser.parse(input)
             }
         }
-        
+
         return javaLLSD.toKotlinLLSD()
     }
-    
+
     /**
      * Auto-detect format from content
      */
@@ -269,7 +269,7 @@ inline fun <reified T> buildValidatedLLSD(
     val mapBuilder = LLSDMapBuilder()
     mapBuilder.builder()
     val result = mapBuilder.build()
-    
+
     // Validate against schema
     schema.validate(result)
     result
@@ -290,11 +290,11 @@ class PersonSchema : LLSDSchema<Person> {
         val name = value["name"].asString()
         val age = value["age"].asInt()
         val email = value["email"].asString()
-        
+
         require(name.isNotBlank()) { "Name cannot be blank" }
         require(age >= 0) { "Age must be non-negative" }
         require(email.contains("@")) { "Email must contain @" }
-        
+
         return Person(name, age, email)
     }
 }

@@ -23,37 +23,37 @@ import com.linkpoint.protocol.types.LLQuaternion
  * Based on the reference viewer's CardboardActivity but modernized for Android XR
  */
 class XRWorldActivity : AppCompatActivity() {
-    
+
     companion object {
         private const val TAG = "XRWorldActivity"
     }
-    
+
     private lateinit var xrContainer: FrameLayout
     private lateinit var surfaceView: SurfaceView
-    
+
     private val app by lazy { LinkpointApp.getInstance() }
     private var isRendering = false
-    
+
     // Track trigger state to prevent rapid-fire interactions
     private val triggerState = mutableMapOf<ControllerState.Hand, Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Immersive mode
         setupImmersiveMode()
-        
+
         setContentView(R.layout.activity_xr_world)
-        
+
         initViews()
         initXR()
         setupBackPressHandler()
     }
-    
+
     private fun setupImmersiveMode() {
         // Keep screen on
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        
+
         // Fullscreen immersive
         window.decorView.systemUiVisibility = (
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
@@ -64,14 +64,14 @@ class XRWorldActivity : AppCompatActivity() {
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         )
     }
-    
+
     private fun initViews() {
         xrContainer = findViewById(R.id.xrContainer)
-        
+
         surfaceView = SurfaceView(this)
         xrContainer.addView(surfaceView)
     }
-    
+
     private fun initXR() {
         val xrManager = app.xrManager
         val entryCapability = xrManager.getEntryCapability()
@@ -104,7 +104,7 @@ class XRWorldActivity : AppCompatActivity() {
             exitToStandardWorld("XR session failed to initialize")
         }
     }
-    
+
     private fun startXRRenderLoop() {
         app.renderManager.dispatcher.post(object : Runnable {
             override fun run() {
@@ -115,13 +115,13 @@ class XRWorldActivity : AppCompatActivity() {
             }
         })
     }
-    
+
     private fun renderXRFrame() {
         val xrManager = app.xrManager
-        
+
         // Get XR frame data
         val frameData = xrManager.beginFrame()
-        
+
         if (frameData != null) {
             // Render in stereo
             runCatching {
@@ -136,16 +136,16 @@ class XRWorldActivity : AppCompatActivity() {
             // Fallback to mono rendering
             app.renderManager.renderFrame()
         }
-        
+
         xrManager.endFrame()
-        
+
         // Handle controller input
         handleControllerInput()
     }
-    
+
     private fun handleControllerInput() {
         val controllers = app.xrManager.getControllers()
-        
+
         // Ensure we have access to managers
         if (!app.isAvatarManagerInitialized() || !app.isObjectManagerInitialized()) return
 
@@ -153,7 +153,7 @@ class XRWorldActivity : AppCompatActivity() {
 
         for (controller in controllers) {
             val (thumbX, thumbY) = controller.thumbstick[0] to controller.thumbstick[1]
-            
+
             // Map controls based on hand
             when (controller.hand) {
                 com.linkpoint.xr.ControllerState.Hand.LEFT -> {
@@ -179,7 +179,7 @@ class XRWorldActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun performInteraction(controller: ControllerState, avatar: com.linkpoint.avatar.Avatar) {
         // 1. Get controller pose in local tracking space
         // Controller orientation (quaternion x,y,z,w)
@@ -234,20 +234,20 @@ class XRWorldActivity : AppCompatActivity() {
         super.onPause()
         isRendering = false
     }
-    
+
     override fun onResume() {
         super.onResume()
         setupImmersiveMode()
         isRendering = true
         startXRRenderLoop()
     }
-    
+
     override fun onDestroy() {
         super.onDestroy()
         isRendering = false
         app.xrManager.shutdown()
     }
-    
+
     /**
      * Setup back press handler using modern OnBackPressedCallback
      */

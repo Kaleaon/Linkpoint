@@ -34,12 +34,12 @@ get_file_category() {
     local file="$1"
     local basename=$(basename "$file")
     local extension="${basename##*.}"
-    
+
     case "$extension" in
         java) echo "HIGH_PRIORITY_SOURCE" ;;
         kt) echo "HIGH_PRIORITY_SOURCE" ;;
         cpp|h|hpp|c) echo "MEDIUM_PRIORITY_NATIVE" ;;
-        xml) 
+        xml)
             if [[ "$file" == *"/res/"* ]]; then
                 echo "HIGH_PRIORITY_ANDROID_RESOURCE"
             elif [[ "$basename" == "AndroidManifest.xml" ]]; then
@@ -64,12 +64,12 @@ get_complexity_estimate() {
     local file="$1"
     local file_size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
     local lines=0
-    
+
     # Try to count lines for text files
     if file "$file" | grep -q text; then
         lines=$(wc -l < "$file" 2>/dev/null || echo "0")
     fi
-    
+
     if [ "$lines" -gt 1000 ] || [ "$file_size" -gt 50000 ]; then
         echo "HIGH"
     elif [ "$lines" -gt 200 ] || [ "$file_size" -gt 10000 ]; then
@@ -84,7 +84,7 @@ get_review_focus() {
     local file="$1"
     local basename=$(basename "$file")
     local extension="${basename##*.}"
-    
+
     case "$extension" in
         java)
             if [[ "$file" == *"/test/"* ]]; then
@@ -120,31 +120,31 @@ get_review_focus() {
 # Function to generate individual file review items
 generate_individual_reviews() {
     echo "Generating individual file review items..."
-    
+
     # Create master review list
     echo "# Linkpoint Individual File Reviews" > "$OUTPUT_DIR/master_review_list.md"
     echo "Generated: $(date)" >> "$OUTPUT_DIR/master_review_list.md"
     echo "" >> "$OUTPUT_DIR/master_review_list.md"
     echo "This document lists every file in the Linkpoint repository as an individual review item for automated copilot analysis." >> "$OUTPUT_DIR/master_review_list.md"
     echo "" >> "$OUTPUT_DIR/master_review_list.md"
-    
+
     # Counters
     local total_files=0
     local critical_count=0
     local high_count=0
     local medium_count=0
     local low_count=0
-    
+
     # Process each file
     find "$PROJECT_ROOT" -type f -not -path "*/.*" -not -path "*/file_inventory/*" -not -path "*/copilot_review_files/*" | sort | while read file; do
         total_files=$((total_files + 1))
-        
+
         relative_path=${file#$PROJECT_ROOT/}
         file_size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
         category=$(get_file_category "$file")
         complexity=$(get_complexity_estimate "$file")
         focus_areas=$(get_review_focus "$file")
-        
+
         # Update counters based on category
         case "$category" in
             CRITICAL_*) critical_count=$((critical_count + 1)) ;;
@@ -152,22 +152,22 @@ generate_individual_reviews() {
             MEDIUM_*) medium_count=$((medium_count + 1)) ;;
             LOW_*) low_count=$((low_count + 1)) ;;
         esac
-        
+
         # Create individual review file
         review_file="$OUTPUT_DIR/review_$(echo "$relative_path" | sed 's/[^a-zA-Z0-9._-]/_/g').md"
-        
+
         cat > "$review_file" << EOF
 # File Review: $relative_path
 
-**Generated:** $(date)  
-**Category:** $category  
-**Complexity:** $complexity  
+**Generated:** $(date)
+**Category:** $category
+**Complexity:** $complexity
 **Size:** $file_size bytes
 
 ## Review Checklist
 
 - [ ] **Code Quality**: Review for coding standards, best practices, and maintainability
-- [ ] **Security**: Check for security vulnerabilities and sensitive data exposure  
+- [ ] **Security**: Check for security vulnerabilities and sensitive data exposure
 - [ ] **Performance**: Analyze for performance bottlenecks and optimization opportunities
 - [ ] **Documentation**: Verify code comments and documentation quality
 - [ ] **Testing**: Assess test coverage and test quality (if applicable)
@@ -190,7 +190,7 @@ $focus_areas
 - Review for memory leaks and resource management
 - Assess algorithm efficiency and data structure usage
 
-### For Configuration Files  
+### For Configuration Files
 - Validate configuration syntax and schema compliance
 - Check for hardcoded secrets or credentials
 - Verify environment-specific settings are properly externalized
@@ -198,7 +198,7 @@ $focus_areas
 
 ### For Documentation Files
 - Assess completeness and accuracy of information
-- Check for outdated references or broken links  
+- Check for outdated references or broken links
 - Verify examples are working and up-to-date
 - Review for clarity and readability
 
@@ -210,7 +210,7 @@ $focus_areas
 
 ## Review Status
 - [ ] Initial Review Completed
-- [ ] Security Review Completed  
+- [ ] Security Review Completed
 - [ ] Performance Review Completed
 - [ ] Final Approval
 
@@ -238,13 +238,13 @@ EOF
         echo "" >> "$OUTPUT_DIR/master_review_list.md"
         echo "---" >> "$OUTPUT_DIR/master_review_list.md"
         echo "" >> "$OUTPUT_DIR/master_review_list.md"
-        
+
         # Progress indicator
         if [ $((total_files % 100)) -eq 0 ]; then
             echo "Processed $total_files files..."
         fi
     done
-    
+
     # Add summary to master list
     cat >> "$OUTPUT_DIR/master_review_list.md" << EOF
 
@@ -252,7 +252,7 @@ EOF
 
 - **Total Files to Review:** $total_files
 - **Critical Priority:** $critical_count files
-- **High Priority:** $high_count files  
+- **High Priority:** $high_count files
 - **Medium Priority:** $medium_count files
 - **Low Priority:** $low_count files
 
@@ -261,7 +261,7 @@ EOF
 ### Phase 1: Critical and High Priority ($(($critical_count + $high_count)) files)
 Focus on Android manifests, build configurations, and core Java source files.
 
-### Phase 2: Medium Priority ($(medium_count) files)  
+### Phase 2: Medium Priority ($(medium_count) files)
 Review documentation, scripts, and supporting configuration files.
 
 ### Phase 3: Low Priority ($(low_count) files)
@@ -282,17 +282,17 @@ EOF
 # Function to create review priority lists
 create_priority_lists() {
     echo "Creating priority-based review lists..."
-    
+
     # Critical Priority Files
     find "$PROJECT_ROOT" -name "AndroidManifest.xml" -type f > "$OUTPUT_DIR/critical_priority_files.txt"
-    
-    # High Priority Files  
+
+    # High Priority Files
     find "$PROJECT_ROOT" \( -name "*.java" -o -name "*.gradle" -o -path "*/res/*.xml" \) -type f > "$OUTPUT_DIR/high_priority_files.txt"
-    
+
     # Medium Priority Files
     find "$PROJECT_ROOT" \( -name "*.cpp" -o -name "*.h" -o -name "*.md" -o -name "*.sh" -o -name "*.py" -o -name "*.json" -o -name "*.properties" \) -type f > "$OUTPUT_DIR/medium_priority_files.txt"
-    
-    # Low Priority Files  
+
+    # Low Priority Files
     find "$PROJECT_ROOT" \( -name "*.png" -o -name "*.jpg" -o -name "*.apk" -o -name "*.jar" -o -name "*.zip" \) -type f > "$OUTPUT_DIR/low_priority_files.txt"
 }
 

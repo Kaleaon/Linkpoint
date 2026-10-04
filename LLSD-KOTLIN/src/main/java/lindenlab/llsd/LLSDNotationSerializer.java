@@ -123,7 +123,7 @@ public class LLSDNotationSerializer {
     @SuppressWarnings("unchecked")
     private void serializeMap(Object value, Writer writer) throws IOException, LLSDException {
         Map<String, Object> map = (Map<String, Object>) value;
-        
+
         writer.write("{");
         boolean first = true;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -131,7 +131,7 @@ public class LLSDNotationSerializer {
                 writer.write(",");
             }
             first = false;
-            
+
             // Serialize key
             String key = entry.getKey();
             if (isValidIdentifier(key)) {
@@ -139,7 +139,7 @@ public class LLSDNotationSerializer {
             } else {
                 serializeString(key, writer);
             }
-            
+
             writer.write(":");
             serializeValue(entry.getValue(), writer);
         }
@@ -150,7 +150,7 @@ public class LLSDNotationSerializer {
     @SuppressWarnings("unchecked")
     private void serializeArray(Object value, Writer writer) throws IOException, LLSDException {
         List<Object> list = (List<Object>) value;
-        
+
         writer.write("[");
         boolean first = true;
         for (Object item : list) {
@@ -158,7 +158,7 @@ public class LLSDNotationSerializer {
                 writer.write(",");
             }
             first = false;
-            
+
             serializeValue(item, writer);
         }
         writer.write("]");
@@ -214,19 +214,19 @@ public class LLSDNotationSerializer {
         if (str.isEmpty()) {
             return false;
         }
-        
+
         char first = str.charAt(0);
         if (!Character.isLetter(first) && first != '_') {
             return false;
         }
-        
+
         for (int i = 1; i < str.length(); i++) {
             char c = str.charAt(i);
             if (!Character.isLetterOrDigit(c) && c != '_') {
                 return false;
             }
         }
-        
+
         return true;
     }
 }

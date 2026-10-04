@@ -1,6 +1,6 @@
 /**
  * LLSD XML Parser - TypeScript Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer XML parsing
  * Copyright (C) 2024 Linden Lab
  */
@@ -16,7 +16,7 @@ export class LLSDXMLParser {
             errorHandler: {
                 warning: () => {
                     // Just log warnings, don't fail on them
-                }, 
+                },
                 error: (error: string) => {
                     throw new LLSDException(`XML parsing error: ${error}`);
                 },
@@ -36,17 +36,17 @@ export class LLSDXMLParser {
             if (!xmlString || xmlString.trim() === '') {
                 throw new LLSDException('Empty XML string');
             }
-            
+
             const doc = this.parser.parseFromString(xmlString, 'text/xml');
-            
+
             // Check for parsing errors
             const parseError = doc.getElementsByTagName('parsererror')[0];
             if (parseError) {
                 throw new LLSDException(`XML parsing error: ${parseError.textContent}`);
             }
-            
+
             const llsdElement = doc.getElementsByTagName('llsd')[0];
-            
+
             if (!llsdElement) {
                 throw new LLSDException('Invalid LLSD XML: missing <llsd> root element');
             }
@@ -165,7 +165,7 @@ export class LLSDXMLParser {
             case 'map':
                 const map: LLSDMap = {};
                 let currentKey: string | null = null;
-                
+
                 for (let i = 0; i < element.childNodes.length; i++) {
                     const node = element.childNodes[i];
                     if (node.nodeType === 1) { // Element node

@@ -16,7 +16,7 @@ import java.util.logging.Logger
 
 /**
  * Advanced rendering system with fine-grained controls (Kotlin implementation).
- * 
+ *
  * Features:
  * - Detailed graphics settings control using Kotlin idioms
  * - Battery conservation mode with coroutines
@@ -24,7 +24,7 @@ import java.util.logging.Logger
  * - Real-time quality adjustment
  */
 class AdvancedRenderingSystem {
-    companion object { 
+    companion object {
         private val LOGGER = Logger.getLogger(AdvancedRenderingSystem::class.java.name)
     }
 
@@ -328,7 +328,7 @@ class AdvancedRenderingSystem {
         settings["performance"]?.let { performanceSettings.fromMap(it as Map<String, Any>) }
         settings["effects"]?.let { effectsSettings.fromMap(it as Map<String, Any>) }
         // Import other categories...
-        
+
         LOGGER.info("Imported rendering settings")
     }
 
@@ -436,7 +436,7 @@ data class TextureSettings(
     )
 
     fun fromMap(map: Map<String, Any>) {
-        map["textureQuality"]?.let { 
+        map["textureQuality"]?.let {
             textureQuality = AdvancedRenderingSystem.TextureQuality.valueOf(it as String)
         }
         map["anisotropicFiltering"]?.let { anisotropicFiltering = it as Boolean }
@@ -458,7 +458,7 @@ data class ShadowSettings(
 
     fun fromMap(map: Map<String, Any>) {
         map["shadowsEnabled"]?.let { shadowsEnabled = it as Boolean }
-        map["shadowQuality"]?.let { 
+        map["shadowQuality"]?.let {
             shadowQuality = AdvancedRenderingSystem.ShadowQuality.valueOf(it as String)
         }
         map["shadowDistance"]?.let { shadowDistance = (it as Number).toInt() }

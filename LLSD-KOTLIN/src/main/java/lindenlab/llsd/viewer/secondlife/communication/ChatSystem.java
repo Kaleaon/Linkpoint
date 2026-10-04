@@ -22,13 +22,13 @@ import java.time.format.DateTimeFormatter;
  * instant messaging, group chat, voice integration, and advanced features.
  */
 public class ChatSystem {
-    
+
     private static final int MAX_CHAT_HISTORY = 10000;
     private static final int MAX_MESSAGE_LENGTH = 1024;
     private static final double LOCAL_CHAT_RANGE = 20.0; // meters
-    private static final double WHISPER_RANGE = 10.0; // meters  
+    private static final double WHISPER_RANGE = 10.0; // meters
     private static final double SHOUT_RANGE = 100.0; // meters
-    
+
     private final Map<String, ChatChannel> chatChannels = new ConcurrentHashMap<>();
     private final Map<UUID, IMSession> imSessions = new ConcurrentHashMap<>();
     private final Map<UUID, GroupChatSession> groupSessions = new ConcurrentHashMap<>();
@@ -36,7 +36,7 @@ public class ChatSystem {
     private final Set<ChatListener> listeners = ConcurrentHashMap.newKeySet();
     private final ExecutorService chatExecutor = Executors.newCachedThreadPool();
     private final AtomicLong messageIdCounter = new AtomicLong(0);
-    
+
     // Chat settings
     private final ChatSettings settings = new ChatSettings();
     private boolean voiceChatEnabled = true;
@@ -45,24 +45,24 @@ public class ChatSystem {
     private boolean chatModerationEnabled = true;
     private final Set<String> blockedUsers = ConcurrentHashMap.newKeySet();
     private final Set<String> mutedUsers = ConcurrentHashMap.newKeySet();
-    
+
     // Voice chat integration
     private VoiceChatManager voiceManager = new VoiceChatManager();
     private boolean voiceEnabled = false;
     private float voiceVolume = 1.0f;
     private boolean voiceMuted = false;
-    
+
     public ChatSystem() {
         initializeDefaultChannels();
         startChatProcessing();
     }
-    
+
     /**
      * Chat message types supported by the system
      */
     public enum ChatType {
         SAY(0, "Say", LOCAL_CHAT_RANGE),
-        WHISPER(1, "Whisper", WHISPER_RANGE), 
+        WHISPER(1, "Whisper", WHISPER_RANGE),
         SHOUT(2, "Shout", SHOUT_RANGE),
         INSTANT_MESSAGE(3, "IM", Double.MAX_VALUE),
         GROUP_CHAT(4, "Group", Double.MAX_VALUE),
@@ -71,22 +71,22 @@ public class ChatSystem {
         DEBUG_CHANNEL(7, "Debug", LOCAL_CHAT_RANGE),
         OBJECT_CHAT(8, "Object", LOCAL_CHAT_RANGE),
         SYSTEM_MESSAGE(9, "System", Double.MAX_VALUE);
-        
+
         private final int channel;
         private final String displayName;
         private final double range;
-        
+
         ChatType(int channel, String displayName, double range) {
             this.channel = channel;
             this.displayName = displayName;
             this.range = range;
         }
-        
+
         public int getChannel() { return channel; }
         public String getDisplayName() { return displayName; }
         public double getRange() { return range; }
     }
-    
+
     // Essential classes for chat functionality
     public static class ChatMessage {
         private final long messageId;
@@ -102,8 +102,8 @@ public class ChatSystem {
         private String translatedText = null;
         private boolean moderated = false;
         private String moderationReason = null;
-        
-        public ChatMessage(UUID sourceId, String sourceName, String message, 
+
+        public ChatMessage(UUID sourceId, String sourceName, String message,
                           ChatType chatType, int channel, Vector3 position, UUID sessionId) {
             this.messageId = System.currentTimeMillis();
             this.sourceId = sourceId;
@@ -115,7 +115,7 @@ public class ChatSystem {
             this.position = position != null ? position : new Vector3(0, 0, 0);
             this.sessionId = sessionId;
         }
-        
+
         // Getters
         public long getMessageId() { return messageId; }
         public UUID getSourceId() { return sourceId; }
@@ -130,26 +130,26 @@ public class ChatSystem {
         public String getTranslatedText() { return translatedText; }
         public boolean isModerated() { return moderated; }
         public String getModerationReason() { return moderationReason; }
-        
+
         public void setTranslation(String translatedText) {
             this.translatedText = translatedText;
             this.translated = true;
         }
-        
+
         public void setModerated(String reason) {
             this.moderated = true;
             this.moderationReason = reason;
         }
-        
+
         @Override
         public String toString() {
             String timeStr = timestamp.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            return String.format("[%s] %s (%s): %s", 
-                timeStr, sourceName, chatType.getDisplayName(), 
+            return String.format("[%s] %s (%s): %s",
+                timeStr, sourceName, chatType.getDisplayName(),
                 moderated ? "[MODERATED]" : (translated ? translatedText : message));
         }
     }
-    
+
     public static class ChatChannel {
         private final String name;
         private final int channelNumber;
@@ -159,25 +159,25 @@ public class ChatSystem {
         private boolean enabled = true;
         private boolean logged = true;
         private String color = "#FFFFFF";
-        
+
         public ChatChannel(String name, int channelNumber, ChatType defaultType) {
             this.name = name;
             this.channelNumber = channelNumber;
             this.defaultType = defaultType;
         }
-        
+
         public void addMessage(ChatMessage message) {
             if (!enabled) return;
-            
+
             messages.add(message);
             if (messages.size() > MAX_CHAT_HISTORY) {
                 messages.remove(0);
             }
         }
-        
+
         public void subscribe(UUID userId) { subscribers.add(userId); }
         public void unsubscribe(UUID userId) { subscribers.remove(userId); }
-        
+
         // Getters/Setters
         public String getName() { return name; }
         public int getChannelNumber() { return channelNumber; }
@@ -191,7 +191,7 @@ public class ChatSystem {
         public String getColor() { return color; }
         public void setColor(String color) { this.color = color; }
     }
-    
+
     public static class IMSession {
         private final UUID sessionId;
         private final UUID targetUserId;
@@ -202,13 +202,13 @@ public class ChatSystem {
         private boolean active = true;
         private boolean typing = false;
         private boolean targetTyping = false;
-        
+
         public IMSession(UUID targetUserId, String targetUserName) {
             this.sessionId = UUID.randomUUID();
             this.targetUserId = targetUserId;
             this.targetUserName = targetUserName;
         }
-        
+
         public void addMessage(ChatMessage message) {
             messages.add(message);
             lastActivity = LocalDateTime.now();
@@ -216,7 +216,7 @@ public class ChatSystem {
                 messages.remove(0);
             }
         }
-        
+
         // Getters/Setters
         public UUID getSessionId() { return sessionId; }
         public UUID getTargetUserId() { return targetUserId; }
@@ -231,7 +231,7 @@ public class ChatSystem {
         public boolean isTargetTyping() { return targetTyping; }
         public void setTargetTyping(boolean targetTyping) { this.targetTyping = targetTyping; }
     }
-    
+
     public static class GroupChatSession {
         private final UUID sessionId;
         private final UUID groupId;
@@ -245,40 +245,40 @@ public class ChatSystem {
         private boolean moderated = false;
         private final Set<UUID> moderators = ConcurrentHashMap.newKeySet();
         private final Set<UUID> mutedMembers = ConcurrentHashMap.newKeySet();
-        
+
         public GroupChatSession(UUID groupId, String groupName) {
             this.sessionId = UUID.randomUUID();
             this.groupId = groupId;
             this.groupName = groupName;
         }
-        
+
         public void addMessage(ChatMessage message) {
             if (mutedMembers.contains(message.getSourceId()) && !moderators.contains(message.getSourceId())) {
                 return; // Muted member cannot post
             }
-            
+
             messages.add(message);
             lastActivity = LocalDateTime.now();
             if (messages.size() > MAX_CHAT_HISTORY) {
                 messages.remove(0);
             }
         }
-        
+
         public void addParticipant(UUID userId, String userName) {
             participants.add(userId);
             participantNames.put(userId, userName);
         }
-        
+
         public void removeParticipant(UUID userId) {
             participants.remove(userId);
             participantNames.remove(userId);
         }
-        
+
         public void addModerator(UUID userId) { moderators.add(userId); }
         public void removeModerator(UUID userId) { moderators.remove(userId); }
         public void muteMember(UUID userId) { mutedMembers.add(userId); }
         public void unmuteMember(UUID userId) { mutedMembers.remove(userId); }
-        
+
         // Getters/Setters
         public UUID getSessionId() { return sessionId; }
         public UUID getGroupId() { return groupId; }
@@ -295,7 +295,7 @@ public class ChatSystem {
         public Set<UUID> getModerators() { return new HashSet<>(moderators); }
         public Set<UUID> getMutedMembers() { return new HashSet<>(mutedMembers); }
     }
-    
+
     public static class VoiceChatManager {
         private boolean initialized = false;
         private boolean connected = false;
@@ -305,32 +305,32 @@ public class ChatSystem {
         private boolean microphoneMuted = false;
         private float microphoneGain = 1.0f;
         private final Set<UUID> mutedUsers = ConcurrentHashMap.newKeySet();
-        
+
         public boolean initializeVoice() {
             // Initialize voice chat system (placeholder for actual implementation)
             initialized = true;
             System.out.println("Voice chat system initialized");
             return true;
         }
-        
+
         public boolean connectToVoiceServer(String server) {
             if (!initialized) return false;
-            
+
             this.voiceServer = server;
             connected = true;
             System.out.println("Connected to voice server: " + server);
             return true;
         }
-        
+
         public VoiceSession startVoiceSession(UUID sessionId, List<UUID> participants) {
             if (!connected) return null;
-            
+
             VoiceSession session = new VoiceSession(sessionId, participants);
             voiceSessions.put(sessionId, session);
             System.out.println("Started voice session: " + sessionId);
             return session;
         }
-        
+
         public void endVoiceSession(UUID sessionId) {
             VoiceSession session = voiceSessions.remove(sessionId);
             if (session != null) {
@@ -338,10 +338,10 @@ public class ChatSystem {
                 System.out.println("Ended voice session: " + sessionId);
             }
         }
-        
+
         public void muteUser(UUID userId) { mutedUsers.add(userId); }
         public void unmuteUser(UUID userId) { mutedUsers.remove(userId); }
-        
+
         // Getters/Setters
         public boolean isInitialized() { return initialized; }
         public boolean isConnected() { return connected; }
@@ -355,7 +355,7 @@ public class ChatSystem {
         public Set<UUID> getMutedUsers() { return new HashSet<>(mutedUsers); }
         public Map<UUID, VoiceSession> getVoiceSessions() { return new HashMap<>(voiceSessions); }
     }
-    
+
     public static class VoiceSession {
         private final UUID sessionId;
         private final List<UUID> participants;
@@ -363,7 +363,7 @@ public class ChatSystem {
         private boolean active = true;
         private final Map<UUID, Float> participantVolumes = new ConcurrentHashMap<>();
         private final Set<UUID> mutedParticipants = ConcurrentHashMap.newKeySet();
-        
+
         public VoiceSession(UUID sessionId, List<UUID> participants) {
             this.sessionId = sessionId;
             this.participants = new ArrayList<>(participants);
@@ -372,29 +372,29 @@ public class ChatSystem {
                 participantVolumes.put(participant, 1.0f);
             }
         }
-        
+
         public void addParticipant(UUID userId) {
             if (!participants.contains(userId)) {
                 participants.add(userId);
                 participantVolumes.put(userId, 1.0f);
             }
         }
-        
+
         public void removeParticipant(UUID userId) {
             participants.remove(userId);
             participantVolumes.remove(userId);
             mutedParticipants.remove(userId);
         }
-        
+
         public void setParticipantVolume(UUID userId, float volume) {
             if (participants.contains(userId)) {
                 participantVolumes.put(userId, Math.max(0, Math.min(1, volume)));
             }
         }
-        
+
         public void muteParticipant(UUID userId) { mutedParticipants.add(userId); }
         public void unmuteParticipant(UUID userId) { mutedParticipants.remove(userId); }
-        
+
         // Getters/Setters
         public UUID getSessionId() { return sessionId; }
         public List<UUID> getParticipants() { return new ArrayList<>(participants); }
@@ -404,7 +404,7 @@ public class ChatSystem {
         public Map<UUID, Float> getParticipantVolumes() { return new HashMap<>(participantVolumes); }
         public Set<UUID> getMutedParticipants() { return new HashSet<>(mutedParticipants); }
     }
-    
+
     public static class ChatSettings {
         private boolean timestampsEnabled = true;
         private boolean soundEnabled = true;
@@ -420,7 +420,7 @@ public class ChatSystem {
         private int chatFadeTime = 10; // seconds
         private final Map<ChatType, Boolean> typeVisibility = new EnumMap<>(ChatType.class);
         private final Map<ChatType, String> typeColors = new EnumMap<>(ChatType.class);
-        
+
         public ChatSettings() {
             // Initialize default visibility and colors
             for (ChatType type : ChatType.values()) {
@@ -428,7 +428,7 @@ public class ChatSystem {
                 typeColors.put(type, getDefaultColor(type));
             }
         }
-        
+
         private String getDefaultColor(ChatType type) {
             switch (type) {
                 case SAY: return "#FFFFFF";
@@ -440,7 +440,7 @@ public class ChatSystem {
                 default: return "#FFFFFF";
             }
         }
-        
+
         // Getters/Setters
         public boolean isTimestampsEnabled() { return timestampsEnabled; }
         public void setTimestampsEnabled(boolean enabled) { this.timestampsEnabled = enabled; }
@@ -466,13 +466,13 @@ public class ChatSystem {
         public void setChatFadeEnabled(boolean enabled) { this.chatFadeEnabled = enabled; }
         public int getChatFadeTime() { return chatFadeTime; }
         public void setChatFadeTime(int seconds) { this.chatFadeTime = Math.max(1, Math.min(60, seconds)); }
-        
+
         public boolean isTypeVisible(ChatType type) { return typeVisibility.getOrDefault(type, true); }
         public void setTypeVisible(ChatType type, boolean visible) { typeVisibility.put(type, visible); }
         public String getTypeColor(ChatType type) { return typeColors.getOrDefault(type, "#FFFFFF"); }
         public void setTypeColor(ChatType type, String color) { typeColors.put(type, color); }
     }
-    
+
     public interface ChatListener {
         void onChatMessage(ChatMessage message);
         void onIMReceived(ChatMessage message, IMSession session);
@@ -483,51 +483,51 @@ public class ChatSystem {
         void onUserMuted(UUID userId);
         void onUserUnmuted(UUID userId);
     }
-    
+
     // Simple Vector3 class for position data
     public static class Vector3 {
         public final double x, y, z;
-        
+
         public Vector3(double x, double y, double z) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
-        
+
         public double distanceTo(Vector3 other) {
             double dx = x - other.x;
             double dy = y - other.y;
             double dz = z - other.z;
             return Math.sqrt(dx*dx + dy*dy + dz*dz);
         }
-        
+
         @Override
         public String toString() {
             return String.format("(%.2f, %.2f, %.2f)", x, y, z);
         }
     }
-    
+
     // UUID class for user/object identification
     public static class UUID {
         private final String value;
-        
+
         private UUID(String value) {
             this.value = value;
         }
-        
+
         public static UUID randomUUID() {
             return new UUID(java.util.UUID.randomUUID().toString());
         }
-        
+
         public static UUID fromString(String uuidString) {
             return new UUID(uuidString);
         }
-        
+
         @Override
         public String toString() {
             return value;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
@@ -535,21 +535,21 @@ public class ChatSystem {
             UUID uuid = (UUID) obj;
             return Objects.equals(value, uuid.value);
         }
-        
+
         @Override
         public int hashCode() {
             return Objects.hash(value);
         }
     }
-    
+
     // Public API Methods
-    
+
     private void initializeDefaultChannels() {
         addChatChannel(new ChatChannel("Local Chat", 0, ChatType.SAY));
         addChatChannel(new ChatChannel("Debug", 2147483647, ChatType.DEBUG_CHANNEL));
         System.out.println("Chat system initialized with default channels");
     }
-    
+
     private void startChatProcessing() {
         chatExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
@@ -567,7 +567,7 @@ public class ChatSystem {
             }
         });
     }
-    
+
     public CompletableFuture<Boolean> sendChatMessage(String message, ChatType type, int channel, Vector3 position) {
         return CompletableFuture.supplyAsync(() -> {
             String processedMessage = message;
@@ -575,96 +575,96 @@ public class ChatSystem {
                 if (processedMessage == null || processedMessage.trim().isEmpty()) {
                     return false;
                 }
-                
+
                 if (processedMessage.length() > MAX_MESSAGE_LENGTH) {
                     processedMessage = processedMessage.substring(0, MAX_MESSAGE_LENGTH);
                 }
-                
+
                 UUID currentUserId = getCurrentUserId();
                 String currentUserName = getCurrentUserName();
                 ChatMessage chatMessage = new ChatMessage(
                     currentUserId, currentUserName, processedMessage.trim(),
                     type, channel, position, null
                 );
-                
+
                 if (chatModerationEnabled && !moderateMessage(chatMessage)) {
                     return false;
                 }
-                
+
                 if (chatTranslationEnabled && !translationLanguage.equals("en")) {
                     translateMessage(chatMessage);
                 }
-                
+
                 addToHistory(chatMessage);
-                
+
                 ChatChannel chatChannel = chatChannels.get(String.valueOf(channel));
                 if (chatChannel != null) {
                     chatChannel.addMessage(chatMessage);
                 }
-                
+
                 notifyListeners(chatMessage);
-                
+
                 System.out.println("Chat sent: " + chatMessage);
                 return true;
-                
+
             } catch (Exception e) {
                 System.err.println("Error sending chat message: " + e.getMessage());
                 return false;
             }
         }, chatExecutor);
     }
-    
+
     public CompletableFuture<Boolean> sendInstantMessage(UUID targetUserId, String message) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 if (message == null || message.trim().isEmpty() || targetUserId == null) {
                     return false;
                 }
-                
+
                 if (blockedUsers.contains(targetUserId.toString())) {
                     System.out.println("Cannot send IM to blocked user: " + targetUserId);
                     return false;
                 }
-                
-                IMSession session = imSessions.computeIfAbsent(targetUserId, 
+
+                IMSession session = imSessions.computeIfAbsent(targetUserId,
                     id -> new IMSession(id, "User_" + id.toString().substring(0, 8)));
-                
+
                 UUID currentUserId = getCurrentUserId();
                 String currentUserName = getCurrentUserName();
                 ChatMessage imMessage = new ChatMessage(
                     currentUserId, currentUserName, message.trim(),
                     ChatType.INSTANT_MESSAGE, 0, null, session.getSessionId()
                 );
-                
+
                 if (chatModerationEnabled && !moderateMessage(imMessage)) {
                     return false;
                 }
-                
+
                 if (chatTranslationEnabled) {
                     translateMessage(imMessage);
                 }
-                
+
                 session.addMessage(imMessage);
                 addToHistory(imMessage);
                 notifyIMListeners(imMessage, session);
-                
+
                 System.out.println("IM sent to " + targetUserId + ": " + message);
                 return true;
-                
+
             } catch (Exception e) {
                 System.err.println("Error sending IM: " + e.getMessage());
                 return false;
             }
         }, chatExecutor);
     }
-    
+
     // More essential methods...
     public void addChatChannel(ChatChannel channel) {
         if (channel != null) {
             chatChannels.put(String.valueOf(channel.getChannelNumber()), channel);
         }
     }
-    
+
     public void blockUser(String userId) {
         if (userId != null) {
             blockedUsers.add(userId);
@@ -672,7 +672,7 @@ public class ChatSystem {
             System.out.println("Blocked user: " + userId);
         }
     }
-    
+
     public void muteUser(String userId) {
         if (userId != null) {
             mutedUsers.add(userId);
@@ -680,7 +680,7 @@ public class ChatSystem {
             System.out.println("Muted user: " + userId);
         }
     }
-    
+
     public void shutdown() {
         System.out.println("Shutting down chat system...");
         chatExecutor.shutdown();
@@ -692,42 +692,42 @@ public class ChatSystem {
             chatExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        
+
         for (IMSession session : imSessions.values()) {
             session.setActive(false);
         }
         for (GroupChatSession session : groupSessions.values()) {
             session.setActive(false);
         }
-        
+
         imSessions.clear();
         groupSessions.clear();
         chatChannels.clear();
         listeners.clear();
-        
+
         System.out.println("Chat system shutdown complete");
     }
-    
+
     // Helper methods
     private UUID getCurrentUserId() {
         return UUID.fromString("user-" + System.currentTimeMillis());
     }
-    
+
     private String getCurrentUserName() {
         return "CurrentUser";
     }
-    
+
     private void addToHistory(ChatMessage message) {
         chatHistory.add(message);
         if (chatHistory.size() > MAX_CHAT_HISTORY) {
             chatHistory.remove(0);
         }
     }
-    
+
     private boolean moderateMessage(ChatMessage message) {
         String lowerMessage = message.getMessage().toLowerCase();
         String[] bannedWords = {"spam", "scam", "hack", "exploit"};
-        
+
         for (String bannedWord : bannedWords) {
             if (lowerMessage.contains(bannedWord)) {
                 message.setModerated("Contains banned word: " + bannedWord);
@@ -736,33 +736,33 @@ public class ChatSystem {
         }
         return true;
     }
-    
+
     private void translateMessage(ChatMessage message) {
         if (!translationLanguage.equals("en")) {
             message.setTranslation("[TRANSLATED] " + message.getMessage());
         }
     }
-    
+
     private void processPendingTranslations() {
         // Process any pending translation requests
     }
-    
+
     private void cleanupOldSessions() {
         LocalDateTime cutoff = LocalDateTime.now().minusHours(24);
-        
-        imSessions.entrySet().removeIf(entry -> 
+
+        imSessions.entrySet().removeIf(entry ->
             !entry.getValue().isActive() && entry.getValue().getLastActivity().isBefore(cutoff));
-        
-        groupSessions.entrySet().removeIf(entry -> 
+
+        groupSessions.entrySet().removeIf(entry ->
             !entry.getValue().isActive() && entry.getValue().getLastActivity().isBefore(cutoff));
     }
-    
+
     private void updateVoiceChatStatus() {
         if (voiceEnabled && !voiceManager.isConnected()) {
             // Attempt reconnection logic here
         }
     }
-    
+
     private void notifyListeners(ChatMessage message) {
         for (ChatListener listener : listeners) {
             try {
@@ -772,7 +772,7 @@ public class ChatSystem {
             }
         }
     }
-    
+
     private void notifyIMListeners(ChatMessage message, IMSession session) {
         for (ChatListener listener : listeners) {
             try {
@@ -782,7 +782,7 @@ public class ChatSystem {
             }
         }
     }
-    
+
     // Getters
     public ChatSettings getSettings() { return settings; }
     public boolean isVoiceChatEnabled() { return voiceEnabled; }
