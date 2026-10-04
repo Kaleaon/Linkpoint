@@ -6,28 +6,29 @@ package lindenlab.llsd.viewer.secondlife.libraries.physics;
 
 import lindenlab.llsd.viewer.secondlife.engine.Quaternion;
 import lindenlab.llsd.viewer.secondlife.engine.Vector3;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SpatialGridBroadphaseTest {
 
     private PhysicsEngine engine;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         engine = new PhysicsEngine();
-        assertTrue("Engine should initialize successfully", engine.initialize());
+        assertTrue(engine.initialize(), "Engine should initialize successfully");
     }
 
     @Test
     public void testInitialization() {
-        assertNotNull("Broadphase should not be null", engine.getBroadphase());
-        assertTrue("Broadphase should be an instance of SpatialGridBroadphase",
-                engine.getBroadphase() instanceof PhysicsEngine.SpatialGridBroadphase);
+        assertNotNull(engine.getBroadphase(), "Broadphase should not be null");
+        assertTrue(
+                engine.getBroadphase() instanceof PhysicsEngine.SpatialGridBroadphase,
+                "Broadphase should be an instance of SpatialGridBroadphase");
     }
 
     @Test
@@ -37,7 +38,7 @@ public class SpatialGridBroadphaseTest {
         engine.createBody(UUID.randomUUID(), shape, new Vector3(500, 500, 500), Quaternion.IDENTITY, 1.0f);
 
         List<PhysicsEngine.CollisionPair> pairs = engine.getBroadphase().detectPotentialCollisions();
-        assertEquals("Far objects should not produce potential collision pairs", 0, pairs.size());
+        assertEquals(0, pairs.size(), "Far objects should not produce potential collision pairs");
     }
 
     @Test
@@ -50,12 +51,12 @@ public class SpatialGridBroadphaseTest {
         PhysicsEngine.PhysicsBody body2 = engine.createBody(id2, shape, new Vector3(10.5, 10.5, 10.5), Quaternion.IDENTITY, 1.0f);
 
         List<PhysicsEngine.CollisionPair> pairs = engine.getBroadphase().detectPotentialCollisions();
-        assertEquals("Overlapping objects must produce exactly 1 collision pair", 1, pairs.size());
+        assertEquals(1, pairs.size(), "Overlapping objects must produce exactly 1 collision pair");
 
         PhysicsEngine.CollisionPair pair = pairs.get(0);
         Set<UUID> pairIds = new HashSet<>(Arrays.asList(pair.getBodyA().getBodyId(), pair.getBodyB().getBodyId()));
-        assertTrue("Pair should contain body1 ID", pairIds.contains(id1));
-        assertTrue("Pair should contain body2 ID", pairIds.contains(id2));
+        assertTrue(pairIds.contains(id1), "Pair should contain body1 ID");
+        assertTrue(pairIds.contains(id2), "Pair should contain body2 ID");
     }
 
     @Test
@@ -70,7 +71,7 @@ public class SpatialGridBroadphaseTest {
         engine.createBody(id2, largeShape, new Vector3(12, 12, 12), Quaternion.IDENTITY, 1.0f);
 
         List<PhysicsEngine.CollisionPair> pairs = engine.getBroadphase().detectPotentialCollisions();
-        assertEquals("Pair spanning multiple cells must enter the list exactly once", 1, pairs.size());
+        assertEquals(1, pairs.size(), "Pair spanning multiple cells must enter the list exactly once");
     }
 
     @Test
@@ -114,15 +115,17 @@ public class SpatialGridBroadphaseTest {
         List<PhysicsEngine.CollisionPair> spatialPairs = spatialBroadphase.detectPotentialCollisions();
         List<PhysicsEngine.CollisionPair> baselinePairs = baselineBroadphase.detectPotentialCollisions();
 
-        assertEquals("Spatial grid pair count should match brute-force baseline pair count",
-                baselinePairs.size(), spatialPairs.size());
+        assertEquals(
+                baselinePairs.size(), spatialPairs.size(),
+                "Spatial grid pair count should match brute-force baseline pair count");
 
         // Verify set of pairs match
         Set<String> baselineSet = canonicalPairSet(baselinePairs);
         Set<String> spatialSet = canonicalPairSet(spatialPairs);
 
-        assertEquals("Spatial grid pair set should match brute-force baseline pair set exactly",
-                baselineSet, spatialSet);
+        assertEquals(
+                baselineSet, spatialSet,
+                "Spatial grid pair set should match brute-force baseline pair set exactly");
     }
 
     @Test
@@ -142,7 +145,7 @@ public class SpatialGridBroadphaseTest {
         engine.createBody(outsideId, smallShape, new Vector3(100, 100, 100), Quaternion.IDENTITY, 1.0f);
 
         List<PhysicsEngine.CollisionPair> pairs = engine.getBroadphase().detectPotentialCollisions();
-        assertEquals("Only huge object and inside object should collide", 1, pairs.size());
+        assertEquals(1, pairs.size(), "Only huge object and inside object should collide");
 
         PhysicsEngine.CollisionPair pair = pairs.get(0);
         Set<UUID> ids = new HashSet<>(Arrays.asList(pair.getBodyA().getBodyId(), pair.getBodyB().getBodyId()));
@@ -188,15 +191,17 @@ public class SpatialGridBroadphaseTest {
         }
         long durationSpatial = System.nanoTime() - startSpatial;
 
-        assertEquals("Pair counts must be identical between baseline and spatial grid",
-                baselinePairs.size(), spatialPairs.size());
+        assertEquals(
+                baselinePairs.size(), spatialPairs.size(),
+                "Pair counts must be identical between baseline and spatial grid");
 
         System.out.println("Performance Benchmark over 20 runs (N=400):");
         System.out.println("  Brute-force Baseline time: " + (durationBaseline / 1_000_000.0) + " ms");
         System.out.println("  Spatial Hash Grid time:   " + (durationSpatial / 1_000_000.0) + " ms");
 
-        assertTrue("Spatial grid broadphase should be faster than brute force baseline",
-                durationSpatial < durationBaseline);
+        assertTrue(
+                durationSpatial < durationBaseline,
+                "Spatial grid broadphase should be faster than brute force baseline");
     }
 
     private Set<String> canonicalPairSet(List<PhysicsEngine.CollisionPair> pairs) {
@@ -213,3 +218,4 @@ public class SpatialGridBroadphaseTest {
         return set;
     }
 }
+
