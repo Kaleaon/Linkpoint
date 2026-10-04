@@ -20,7 +20,7 @@ public class CacheStatistics {
     private final Map<CacheManager.CacheType, Long> typeLimits;
     private final CacheManager.StorageLocation storageLocation;
     private final String basePath;
-    
+
     public CacheStatistics(long totalSize, long maxSize, long totalHits, long totalMisses,
                           long totalWrites, long totalCleanups,
                           Map<CacheManager.CacheType, Long> typeSizes,
@@ -38,7 +38,7 @@ public class CacheStatistics {
         this.storageLocation = storageLocation;
         this.basePath = basePath;
     }
-    
+
     // Basic statistics
     public long getTotalSize() { return totalSize; }
     public long getMaxSize() { return maxSize; }
@@ -46,46 +46,46 @@ public class CacheStatistics {
     public long getTotalMisses() { return totalMisses; }
     public long getTotalWrites() { return totalWrites; }
     public long getTotalCleanups() { return totalCleanups; }
-    
+
     // Derived statistics
     public double getUsagePercent() {
         return maxSize == 0 ? 0.0 : (double) totalSize / maxSize * 100.0;
     }
-    
+
     public double getHitRatio() {
         long total = totalHits + totalMisses;
         return total == 0 ? 0.0 : (double) totalHits / total;
     }
-    
+
     public long getAvailableSpace() {
         return maxSize - totalSize;
     }
-    
+
     public long getTotalRequests() {
         return totalHits + totalMisses;
     }
-    
+
     // Type-specific statistics
     public Map<CacheManager.CacheType, Long> getTypeSizes() { return typeSizes; }
     public Map<CacheManager.CacheType, Long> getTypeLimits() { return typeLimits; }
-    
+
     public long getTypeSize(CacheManager.CacheType type) {
         return typeSizes.getOrDefault(type, 0L);
     }
-    
+
     public long getTypeLimit(CacheManager.CacheType type) {
         return typeLimits.getOrDefault(type, 0L);
     }
-    
+
     public double getTypeUsagePercent(CacheManager.CacheType type) {
         long limit = getTypeLimit(type);
         return limit == 0 ? 0.0 : (double) getTypeSize(type) / limit * 100.0;
     }
-    
+
     // Configuration
     public CacheManager.StorageLocation getStorageLocation() { return storageLocation; }
     public String getBasePath() { return basePath; }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -101,7 +101,7 @@ public class CacheStatistics {
         sb.append("  Cleanups: ").append(totalCleanups).append("\n");
         sb.append("  Storage: ").append(storageLocation.getDisplayName()).append("\n");
         sb.append("  Path: ").append(basePath).append("\n");
-        
+
         sb.append("\n  Type Breakdown:\n");
         for (CacheManager.CacheType type : CacheManager.CacheType.values()) {
             long size = getTypeSize(type);
@@ -112,7 +112,7 @@ public class CacheStatistics {
               .append(" / ").append(CacheManager.formatBytes(limit))
               .append(" (").append(String.format("%.1f", percent)).append("%)\n");
         }
-        
+
         return sb.toString();
     }
 }

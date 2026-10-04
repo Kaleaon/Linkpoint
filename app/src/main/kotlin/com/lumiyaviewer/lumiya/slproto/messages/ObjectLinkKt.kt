@@ -18,9 +18,9 @@ import java.util.UUID
  * - Advanced LLSD features (JSON, Notation, Binary formats)
  */
 class ObjectLinkKt : SLMessage() {
-    
+
     private var messageLLSD: LLSD = createDefaultLLSD()
-    
+
     // Legacy compatibility fields
     var AgentData_Field: AgentData = AgentData()
     val ObjectData_Fields: MutableList<ObjectData> = mutableListOf()
@@ -37,7 +37,7 @@ class ObjectLinkKt : SLMessage() {
     init {
         zeroCoded = false
     }
-    
+
     private fun createDefaultLLSD(): LLSD {
         val messageData = mapOf(
             "AgentData" to mapOf(
@@ -70,7 +70,7 @@ class ObjectLinkKt : SLMessage() {
     fun addObjectLocalID(localID: Int) {
         val content = messageLLSD.content as? MutableMap<String, Any> ?: return
         val objectDataList = content["ObjectData"] as? MutableList<Any> ?: return
-        
+
         val objectItem = mapOf("ObjectLocalID" to localID)
         objectDataList.add(objectItem)
         syncToLegacyFields()
@@ -79,7 +79,7 @@ class ObjectLinkKt : SLMessage() {
     fun removeObjectLocalID(localID: Int) {
         val content = messageLLSD.content as? MutableMap<String, Any> ?: return
         val objectDataList = content["ObjectData"] as? MutableList<Any> ?: return
-        
+
         objectDataList.removeAll { item ->
             (item as? Map<*, *>)?.get("ObjectLocalID") == localID
         }
@@ -122,7 +122,7 @@ class ObjectLinkKt : SLMessage() {
     private fun syncToLegacyFields() {
         AgentData_Field.AgentID = agentID
         AgentData_Field.SessionID = sessionID
-        
+
         ObjectData_Fields.clear()
         objectLocalIDs.forEach { localID ->
             ObjectData_Fields.add(ObjectData(localID))
@@ -132,7 +132,7 @@ class ObjectLinkKt : SLMessage() {
     private fun syncFromLegacyFields() {
         agentID = AgentData_Field.AgentID
         sessionID = AgentData_Field.SessionID
-        
+
         setObjectLocalIDs(ObjectData_Fields.map { it.ObjectLocalID })
     }
 
@@ -204,7 +204,7 @@ class ObjectLinkKt : SLMessage() {
     fun isValid(): Boolean = try {
         val missing = EnhancedLLSDUtils.validateRequiredFields(
             messageLLSD,
-            "AgentData.AgentID", 
+            "AgentData.AgentID",
             "AgentData.SessionID"
         )
         missing.isEmpty()

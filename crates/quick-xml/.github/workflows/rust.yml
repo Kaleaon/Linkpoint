@@ -24,4 +24,3 @@ jobs:
       run: cargo test --features escape-html,serialize
     - name: Check fmt
       run: cargo fmt -- --check
-

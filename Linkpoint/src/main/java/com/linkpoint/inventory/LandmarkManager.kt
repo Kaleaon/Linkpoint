@@ -17,13 +17,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * LandmarkManager - Handles landmark creation, storage, and teleportation.
- * 
+ *
  * Features:
  * - Create landmarks at current location
  * - Parse landmark assets
  * - Store favorite landmarks
  * - Teleport to landmarks
- * 
+ *
  * Based on the reference viewer's landmark implementation.
  */
 class LandmarkManager(
@@ -44,24 +44,24 @@ class LandmarkManager(
 ) {
     companion object {
         private const val TAG = "LandmarkManager"
-        
+
         // Landmark asset version
         private const val LANDMARK_VERSION = 3
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Cached landmarks
     private val landmarks = ConcurrentHashMap<UUID, Landmark>()
-    
+
     // Favorites
     private val _favorites = MutableStateFlow<List<Landmark>>(emptyList())
     val favorites: StateFlow<List<Landmark>> = _favorites
-    
+
     // Recent landmarks
     private val _recentLandmarks = MutableStateFlow<List<Landmark>>(emptyList())
     val recentLandmarks: StateFlow<List<Landmark>> = _recentLandmarks
-    
+
     /**
      * Create a landmark at the current location.
      */
@@ -76,7 +76,7 @@ class LandmarkManager(
             try {
                 // Create landmark asset data
                 val assetData = buildLandmarkAsset(regionHandle, position)
-                
+
                 // Create the inventory item via CreateInventoryItem capability
                 val createCap = capabilityManager.getCapability(CapabilityManager.CAP_CREATE_INVENTORY_ITEM)
                 if (createCap != null) {
@@ -85,13 +85,13 @@ class LandmarkManager(
                         this["name"] = LLSDString(name)
                         this["description"] = LLSDString(description)
                         this["asset_data"] = LLSDBinary(assetData)
-                        
+
                         // Put in Landmarks folder
                         inventoryManager.getSystemFolder(InventoryManager.FOLDER_TYPE_LANDMARK)?.let { folderId ->
                             this["folder_id"] = LLSDUUID(folderId)
                         }
                     }
-                    
+
                     val response = capabilityManager.request(CapabilityManager.CAP_CREATE_INVENTORY_ITEM, request)
                     if (response is LLSDMap) {
                         val itemId = response.getUUID("item_id") ?: return@withContext null
@@ -110,7 +110,7 @@ class LandmarkManager(
                         return@withContext itemId
                     }
                 }
-                
+
                 // Fallback to UDP CreateInventoryItem
                 createLandmarkViaUDP(name, description, regionHandle, position)
             } catch (e: Exception) {
@@ -119,7 +119,7 @@ class LandmarkManager(
             }
         }
     }
-    
+
     /**
      * Parse a landmark asset to extract location data.
      */
@@ -128,11 +128,11 @@ class LandmarkManager(
             try {
                 // Check cache first
                 landmarks[assetId]?.let { return@withContext it }
-                
+
                 // Fetch asset data - asset type 3 is Landmark
                 val assetData = transferManager.fetchAsset(assetId, 3)
                     ?: return@withContext null
-                
+
                 parseLandmarkData(assetId, assetData)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse landmark $assetId", e)
@@ -140,7 +140,7 @@ class LandmarkManager(
             }
         }
     }
-    
+
     /**
      * Add landmark to favorites.
      */
@@ -151,45 +151,45 @@ class LandmarkManager(
             _favorites.value = current
         }
     }
-    
+
     /**
      * Remove landmark from favorites.
      */
     fun removeFromFavorites(landmarkId: UUID) {
         _favorites.value = _favorites.value.filter { it.itemId != landmarkId }
     }
-    
+
     /**
      * Get cached landmark.
      */
     fun getLandmark(itemId: UUID): Landmark? = landmarks[itemId]
-    
+
     // ==================== PRIVATE METHODS ====================
-    
+
     private fun buildLandmarkAsset(regionHandle: Long, position: LLVector3): ByteArray {
         // Landmark format (text-based):
         // Landmark version 2
         // region_id <uuid>
         // local_pos <x> <y> <z>
         // region_handle <handle>
-        
+
         val builder = StringBuilder()
         builder.appendLine("Landmark version $LANDMARK_VERSION")
         builder.appendLine("region_handle $regionHandle")
         builder.appendLine("local_pos ${position.x} ${position.y} ${position.z}")
-        
+
         return builder.toString().toByteArray(Charsets.UTF_8)
     }
-    
+
     private fun parseLandmarkData(assetId: UUID, data: ByteArray): Landmark? {
         try {
             val text = String(data, Charsets.UTF_8)
             val lines = text.lines()
-            
+
             var regionHandle: Long = 0
             var position = LLVector3(128f, 128f, 25f)
             var regionId: UUID? = null
-            
+
             for (line in lines) {
                 val parts = line.trim().split(" ")
                 when {
@@ -208,7 +208,7 @@ class LandmarkManager(
                     }
                 }
             }
-            
+
             val resolvedName = regionNameForHandle?.invoke(regionHandle).orEmpty()
             val landmark = Landmark(
                 itemId = assetId,
@@ -219,7 +219,7 @@ class LandmarkManager(
                 regionHandle = regionHandle,
                 position = position
             )
-            
+
             landmarks[assetId] = landmark
             return landmark
         } catch (e: Exception) {
@@ -227,7 +227,7 @@ class LandmarkManager(
             return null
         }
     }
-    
+
     private suspend fun createLandmarkViaUDP(
         name: String,
         description: String,
@@ -238,7 +238,7 @@ class LandmarkManager(
         // For now, return null as capability is preferred
         return null
     }
-    
+
     private fun addToRecent(landmark: Landmark) {
         val current = _recentLandmarks.value.toMutableList()
         current.removeAll { it.itemId == landmark.itemId }
@@ -248,7 +248,7 @@ class LandmarkManager(
         }
         _recentLandmarks.value = current
     }
-    
+
     fun shutdown() {
         scope.cancel()
     }
@@ -270,6 +270,6 @@ data class Landmark(
 ) {
     val globalX: Int get() = ((regionHandle shr 32) and 0xFFFF).toInt() * 256 + position.x.toInt()
     val globalY: Int get() = (regionHandle and 0xFFFF).toInt() * 256 + position.y.toInt()
-    
+
     val slurl: String get() = "secondlife://$regionName/${position.x.toInt()}/${position.y.toInt()}/${position.z.toInt()}"
 }

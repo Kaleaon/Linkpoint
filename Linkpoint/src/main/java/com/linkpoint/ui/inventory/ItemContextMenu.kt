@@ -24,17 +24,17 @@ object ItemContextMenu {
         onActionSelected: (Action) -> Unit
     ) {
         val popup = PopupMenu(anchorView.context, anchorView, Gravity.END)
-        
+
         popup.menuInflater.inflate(R.menu.menu_inventory_item, popup.menu)
-        
+
         // Enable/disable items based on permissions
         val canCopy = item.permissions.ownerMask and 0x00000010 != 0
         val canModify = item.permissions.ownerMask and 0x00000004 != 0
         val canTransfer = item.permissions.ownerMask and 0x00000008 != 0
-        
+
         popup.menu.findItem(R.id.action_copy)?.isEnabled = canCopy
         popup.menu.findItem(R.id.action_delete)?.isEnabled = canModify && canTransfer
-        
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_wear -> {
@@ -56,7 +56,7 @@ object ItemContextMenu {
                 else -> false
             }
         }
-        
+
         popup.show()
     }
 }

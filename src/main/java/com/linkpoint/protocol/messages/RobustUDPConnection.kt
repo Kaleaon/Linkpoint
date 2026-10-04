@@ -16,16 +16,16 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Robust UDP Connection with automatic reconnection and error handling.
- * 
+ *
  * Features:
  * - Automatic reconnection with exponential backoff
  * - Connection state tracking
  * - Graceful error handling
  * - Thread-safe operations
  * - Heartbeat/ping mechanism
- * 
+ *
  * Thread-safe: All operations are thread-safe
- * 
+ *
  * @property simIP Simulator IP address
  * @property simPort Simulator port
  */
@@ -35,12 +35,12 @@ class RobustUDPConnection(
 ) {
     companion object {
         private const val TAG = "RobustUDPConnection"
-        
+
         // Reconnection settings
         private const val MAX_RECONNECT_ATTEMPTS = 5
         private const val INITIAL_RECONNECT_DELAY_MS = 2000L
         private const val MAX_RECONNECT_DELAY_MS = 30000L
-        
+
         // Heartbeat settings
         private const val HEARTBEAT_INTERVAL_MS = 30000L
         private const val RECEIVE_SELECT_TIMEOUT_MS = 1000L
@@ -52,7 +52,7 @@ class RobustUDPConnection(
         // Packet buffering
         private const val PACKET_CHANNEL_CAPACITY = 512
     }
-    
+
     // Connection state
     enum class ConnectionState {
         DISCONNECTED,
@@ -61,44 +61,44 @@ class RobustUDPConnection(
         RECONNECTING,
         FAILED
     }
-    
+
     // State tracking
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     val connectionState: StateFlow<ConnectionState> = _connectionState
-    
+
     private val _connectionError = MutableStateFlow<String?>(null)
     val connectionError: StateFlow<String?> = _connectionError
-    
+
     // Network components
     private var datagramChannel: DatagramChannel? = null
     private var receiveJob: Job? = null
     private var heartbeatJob: Job? = null
-    
+
     // Reconnection tracking
     private val reconnectAttempts = AtomicInteger(0)
     private val isShuttingDown = AtomicBoolean(false)
     private val missedHeartbeats = AtomicInteger(0)
     private val firstInboundReceived = AtomicBoolean(false)
     @Volatile private var connectedAtMs: Long = 0L
-    
+
     // Coroutine scope
     private val scope = CoroutineScope(
-        Dispatchers.IO + 
-        SupervisorJob() + 
+        Dispatchers.IO +
+        SupervisorJob() +
         CoroutineName("RobustUDPConnection")
     )
-    
+
     // Packet handling
     private val packetChannel = Channel<PacketData>(
         capacity = PACKET_CHANNEL_CAPACITY,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-    
+
     data class PacketData(
         val data: ByteArray,
         val timestamp: Long
     )
-    
+
     /**
      * Connect to the simulator
      */
@@ -106,18 +106,18 @@ class RobustUDPConnection(
         if (isShuttingDown.get()) {
             return@withContext false
         }
-        
+
         _connectionState.value = ConnectionState.CONNECTING
         _connectionError.value = null
-        
+
         try {
             Log.d(TAG, "Connecting to $simIP:$simPort...")
-            
+
             val address = InetSocketAddress(simIP, simPort)
             datagramChannel = DatagramChannel.open()
             datagramChannel?.configureBlocking(false)
             datagramChannel?.connect(address)
-            
+
             _connectionState.value = ConnectionState.CONNECTED
             reconnectAttempts.set(0)
             missedHeartbeats.set(0)
@@ -127,49 +127,49 @@ class RobustUDPConnection(
             // Start loops after state is CONNECTED so their guards are true
             startReceiveLoop()
             startHeartbeat()
-            
+
             Log.i(TAG, "✓ Connected to $simIP:$simPort")
             true
-            
+
         } catch (e: Exception) {
             val error = "Connection failed: ${e.message}"
             Log.e(TAG, error, e)
-            
+
             _connectionState.value = ConnectionState.FAILED
             _connectionError.value = error
             disconnectInternal()
-            
+
             // Attempt reconnection
             scheduleReconnect()
-            
+
             false
         }
     }
-    
+
     /**
      * Disconnect from the simulator
      */
     fun disconnect() {
         if (isShuttingDown.compareAndSet(false, true)) {
             Log.d(TAG, "Disconnecting...")
-            
+
             // Cancel jobs
             receiveJob?.cancel()
             heartbeatJob?.cancel()
-            
+
             // Close channel
             disconnectInternal()
-            
+
             // Cancel scope
             scope.cancel()
-            
+
             _connectionState.value = ConnectionState.DISCONNECTED
             _connectionError.value = null
-            
+
             Log.i(TAG, "✓ Disconnected")
         }
     }
-    
+
     /**
      * Internal disconnect logic
      */
@@ -181,7 +181,7 @@ class RobustUDPConnection(
             Log.e(TAG, "Error closing channel", e)
         }
     }
-    
+
     /**
      * Send data
      */
@@ -190,7 +190,7 @@ class RobustUDPConnection(
             Log.w(TAG, "Cannot send data - not connected")
             return@withContext false
         }
-        
+
         try {
             val channel = datagramChannel ?: return@withContext false
             val buffer = ByteBuffer.wrap(data)
@@ -216,7 +216,7 @@ class RobustUDPConnection(
             false
         }
     }
-    
+
     /**
      * Start the receive loop
      */
@@ -271,7 +271,7 @@ class RobustUDPConnection(
             }
         }
     }
-    
+
     /**
      * Start heartbeat mechanism
      */
@@ -279,14 +279,14 @@ class RobustUDPConnection(
         heartbeatJob = scope.launch {
             while (isActive && _connectionState.value == ConnectionState.CONNECTED) {
                 delay(HEARTBEAT_INTERVAL_MS)
-                
+
                 if (_connectionState.value == ConnectionState.CONNECTED) {
                     sendHeartbeat()
                 }
             }
         }
     }
-    
+
     /**
      * Send heartbeat packet
      */
@@ -325,78 +325,78 @@ class RobustUDPConnection(
 
         Log.v(TAG, "Heartbeat check ok")
     }
-    
+
     /**
      * Handle connection error
      */
     private fun handleConnectionError(error: String) {
         Log.e(TAG, "Connection error: $error")
-        
+
         _connectionState.value = ConnectionState.FAILED
         _connectionError.value = error
-        
+
         disconnectInternal()
-        
+
         // Schedule reconnection
         if (!isShuttingDown.get()) {
             scheduleReconnect()
         }
     }
-    
+
     /**
      * Schedule reconnection attempt
      */
     private fun scheduleReconnect() {
         val currentAttempts = reconnectAttempts.incrementAndGet()
-        
+
         if (currentAttempts > MAX_RECONNECT_ATTEMPTS) {
             Log.e(TAG, "Max reconnection attempts reached")
             _connectionState.value = ConnectionState.FAILED
             _connectionError.value = "Max reconnection attempts reached"
             return
         }
-        
+
         _connectionState.value = ConnectionState.RECONNECTING
-        
+
         // Calculate exponential backoff delay
         val reconnectDelayMs = minOf(
             INITIAL_RECONNECT_DELAY_MS * (1 shl (currentAttempts - 1)),
             MAX_RECONNECT_DELAY_MS
         )
-        
+
         Log.i(TAG, "Reconnecting in ${reconnectDelayMs}ms (attempt $currentAttempts/$MAX_RECONNECT_ATTEMPTS)")
-        
+
         scope.launch {
             delay(reconnectDelayMs)
-            
+
             if (!isShuttingDown.get()) {
                 Log.i(TAG, "Attempting reconnection...")
                 connect()
             }
         }
     }
-    
+
     /**
      * Get packet channel for receiving data
      */
     fun getPacketChannel(): Channel<PacketData> {
         return packetChannel
     }
-    
+
     /**
      * Check if connected
      */
     fun isConnected(): Boolean {
         return _connectionState.value == ConnectionState.CONNECTED
     }
-    
+
     /**
      * Get current connection state
      */
     fun getConnectionState(): ConnectionState {
         return _connectionState.value
     }
-    
+
     /**
      * Get reconnection attempt count
      */

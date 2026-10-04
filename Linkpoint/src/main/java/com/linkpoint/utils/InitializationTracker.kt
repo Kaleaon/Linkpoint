@@ -7,27 +7,27 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Tracks initialization events for diagnostic purposes.
- * 
+ *
  * This allows us to understand the sequence of events during login
  * and post-login initialization, which is critical for debugging
  * issues like "world not loading" or "capabilities not ready".
- * 
+ *
  * Events are timestamped and stored for inclusion in debug reports.
  */
 object InitializationTracker {
     private const val TAG = "InitTracker"
     private const val MAX_EVENTS = 200
-    
+
     private val events = ConcurrentLinkedQueue<InitEvent>()
     @Volatile private var sessionStartTime: Long = 0
-    
+
     // Phase tracking (thread-safe collections and volatile for cross-thread access)
     @Volatile private var currentPhase: Phase = Phase.NOT_STARTED
     private val phaseTimings = java.util.concurrent.ConcurrentHashMap<Phase, Long>()
     // Track completed phases with non-null values to avoid ConcurrentHashMap nulls.
     private val phaseCompletions = java.util.concurrent.ConcurrentHashMap<Phase, Boolean>()
     private val phasesFailed = java.util.concurrent.ConcurrentHashMap.newKeySet<Phase>()
-    
+
     enum class Phase {
         NOT_STARTED,
         LOGIN_STARTING,
@@ -47,7 +47,7 @@ object InitializationTracker {
         WORLD_LOADING,
         FULLY_CONNECTED
     }
-    
+
     enum class EventType {
         INFO,
         WARNING,
@@ -56,7 +56,7 @@ object InitializationTracker {
         PHASE_COMPLETE,
         CRITICAL
     }
-    
+
     data class InitEvent(
         val timestamp: Long,
         val relativeMs: Long,
@@ -65,7 +65,7 @@ object InitializationTracker {
         val message: String,
         val details: String? = null
     )
-    
+
     /**
      * Start a new session tracking.
      * Call this at the beginning of login.
@@ -77,14 +77,14 @@ object InitializationTracker {
         phasesFailed.clear()
         sessionStartTime = System.currentTimeMillis()
         currentPhase = Phase.NOT_STARTED
-        
+
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ INITIALIZATION TRACKING STARTED")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
-        
+
         logEvent(EventType.INFO, Phase.NOT_STARTED, "Session tracking started")
     }
-    
+
     /**
      * Record a phase starting.
      */
@@ -94,12 +94,12 @@ object InitializationTracker {
         // Reset any prior failure/completion state when a phase restarts.
         phasesFailed.remove(phase)
         phaseCompletions.remove(phase)
-        
+
         val msg = if (message.isNotEmpty()) "$phase: $message" else "$phase started"
         logEvent(EventType.PHASE_START, phase, msg)
         Log.i(TAG, "[${getRelativeTimeString()}] ▶ $msg")
     }
-    
+
     /**
      * Record a phase completing successfully.
      */
@@ -133,7 +133,7 @@ object InitializationTracker {
         logEvent(EventType.PHASE_COMPLETE, phase, msg)
         Log.i(TAG, "[${getRelativeTimeString()}] ✓ $msg")
     }
-    
+
     /**
      * Record a phase failing.
      */
@@ -141,12 +141,12 @@ object InitializationTracker {
         phaseCompletions.remove(phase)
         phasesFailed.add(phase)
         val duration = phaseTimings[phase]?.let { System.currentTimeMillis() - it } ?: 0
-        
+
         val msg = "$phase FAILED after ${duration}ms: $reason"
         logEvent(EventType.ERROR, phase, msg)
         Log.e(TAG, "[${getRelativeTimeString()}] ✗ $msg")
     }
-    
+
     /**
      * Log an informational event.
      */
@@ -154,7 +154,7 @@ object InitializationTracker {
         logEvent(EventType.INFO, currentPhase, message, details)
         Log.d(TAG, "[${getRelativeTimeString()}] $message")
     }
-    
+
     /**
      * Log a warning event.
      */
@@ -162,7 +162,7 @@ object InitializationTracker {
         logEvent(EventType.WARNING, currentPhase, message, details)
         Log.w(TAG, "[${getRelativeTimeString()}] ⚠ $message")
     }
-    
+
     /**
      * Log an error event.
      */
@@ -170,7 +170,7 @@ object InitializationTracker {
         logEvent(EventType.ERROR, currentPhase, message, details)
         Log.e(TAG, "[${getRelativeTimeString()}] ✗ $message")
     }
-    
+
     /**
      * Log a critical event (major milestone or issue).
      */
@@ -178,47 +178,47 @@ object InitializationTracker {
         logEvent(EventType.CRITICAL, currentPhase, message, details)
         Log.w(TAG, "[${getRelativeTimeString()}] ⭐ $message")
     }
-    
+
     private fun logEvent(type: EventType, phase: Phase, message: String, details: String? = null) {
         val now = System.currentTimeMillis()
         val relative = if (sessionStartTime > 0) now - sessionStartTime else 0
-        
+
         events.add(InitEvent(now, relative, type, phase, message, details))
-        
+
         // Keep queue size bounded
         while (events.size > MAX_EVENTS) {
             events.poll()
         }
     }
-    
+
     private fun getRelativeTimeString(): String {
         val relative = if (sessionStartTime > 0) System.currentTimeMillis() - sessionStartTime else 0
         return "${relative}ms"
     }
-    
+
     /**
      * Get diagnostic summary for debug reports.
      */
     fun getDiagnostics(): InitializationDiagnostics {
         val now = System.currentTimeMillis()
         val sessionDuration = if (sessionStartTime > 0) now - sessionStartTime else 0
-        
+
         // Count events by type
         val infos = events.count { it.type == EventType.INFO }
         val warnings = events.count { it.type == EventType.WARNING }
         val errors = events.count { it.type == EventType.ERROR }
-        
+
         // Get completed phases (phaseCompletions[phase] == true)
         val completedPhases = phaseCompletions.keys.toList()
-        
+
         // Get failed phases (tracked in phasesFailed set)
         val failedPhasesList = phasesFailed.toList()
-        
+
         // Get pending phases (started but not completed or failed)
         val pendingPhases = phaseTimings.keys.filter { phase ->
             !phasesFailed.contains(phase) && !phaseCompletions.containsKey(phase)
         }
-        
+
         return InitializationDiagnostics(
             sessionStartTime = sessionStartTime,
             sessionDurationMs = sessionDuration,
@@ -233,7 +233,7 @@ object InitializationTracker {
             recentEvents = events.toList().takeLast(30)
         )
     }
-    
+
     /**
      * Get formatted timeline for debug report.
      */
@@ -244,7 +244,7 @@ object InitializationTracker {
             appendLine()
             appendLine("Event Timeline:")
             appendLine("─".repeat(60))
-            
+
             events.toList().forEach { event ->
                 val icon = when (event.type) {
                     EventType.PHASE_START -> "▶"
@@ -257,23 +257,23 @@ object InitializationTracker {
                 appendLine("[${event.relativeMs}ms] $icon ${event.message}")
                 event.details?.let { appendLine("         $it") }
             }
-            
+
             appendLine("─".repeat(60))
             appendLine()
-            
+
             // Phase summary - simplified to avoid O(n²) complexity
             appendLine("Phase Summary:")
             Phase.values().forEach { phase ->
                 val started = phaseTimings.containsKey(phase)
                 val failed = phasesFailed.contains(phase)
-                
+
                 val status = when {
                     phaseCompletions.containsKey(phase) -> "✓ Complete"
                     failed -> "✗ Failed"
                     started -> "⏳ In Progress"
                     else -> "○ Not Started"
                 }
-                
+
                 appendLine("  $phase: $status")
             }
         }
@@ -287,7 +287,7 @@ object InitializationTracker {
         val phaseStart = phaseTimings[phase] ?: return null
         return (nowMs - phaseStart).coerceAtLeast(0L)
     }
-    
+
     private fun formatTimestamp(timestamp: Long): String {
         if (timestamp == 0L) return "Not started"
         // Use DateTimeFormatter for API 26+ (thread-safe), fallback to creating new SimpleDateFormat (also thread-safe since we create new instance each call)
@@ -299,7 +299,7 @@ object InitializationTracker {
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
         }
     }
-    
+
     /**
      * Diagnostic data class for initialization tracking.
      */

@@ -1,6 +1,6 @@
 /**
  * LLSD Binary Parser - TypeScript Implementation
- * 
+ *
  * Based on Java implementation and Second Life viewer binary parsing
  * Copyright (C) 2024 Linden Lab
  */
@@ -177,7 +177,7 @@ export class LLSDBinaryParser {
         if (this.position + length > this.data.length) {
             throw new LLSDException(`Cannot read ${length} bytes: not enough data`);
         }
-        
+
         const result = this.data.slice(this.position, this.position + length);
         this.position += length;
         return result;

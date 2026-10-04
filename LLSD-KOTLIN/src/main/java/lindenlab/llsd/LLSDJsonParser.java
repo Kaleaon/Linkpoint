@@ -74,7 +74,7 @@ public class LLSDJsonParser {
                 sb.append(buffer, 0, charsRead);
             }
         }
-        
+
         String jsonString = sb.toString().trim();
         JsonTokenizer tokenizer = new JsonTokenizer(jsonString);
         Object parsedJson = parseJsonValue(tokenizer);
@@ -135,7 +135,7 @@ public class LLSDJsonParser {
         public String consumeString() throws LLSDException {
             expect('"');
             StringBuilder sb = new StringBuilder();
-            
+
             while (position < json.length()) {
                 char c = json.charAt(position++);
                 if (c == '"') {
@@ -186,14 +186,14 @@ public class LLSDJsonParser {
                     sb.append(c);
                 }
             }
-            
+
             throw new LLSDException("Unterminated string");
         }
 
         public Object consumeNumber() throws LLSDException {
             StringBuilder sb = new StringBuilder();
             boolean hasDecimal = false;
-            
+
             while (position < json.length()) {
                 char c = json.charAt(position);
                 if (Character.isDigit(c) || c == '-' || c == '+') {
@@ -351,17 +351,17 @@ public class LLSDJsonParser {
         if (jsonObj == null) {
             return "";  // LLSD represents undefined as empty string
         }
-        
+
         if (jsonObj instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> jsonMap = (Map<String, Object>) jsonObj;
-            
+
             // Check for LLSD type indicators
             if (jsonMap.size() == 1) {
                 Map.Entry<String, Object> entry = jsonMap.entrySet().iterator().next();
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                
+
                 switch (key) {
                     case "d": // Date
                         if (value instanceof String) {
@@ -385,7 +385,7 @@ public class LLSDJsonParser {
                         break;
                 }
             }
-            
+
             // Regular map - convert all values recursively
             Map<String, Object> llsdMap = new HashMap<>();
             for (Map.Entry<String, Object> entry : jsonMap.entrySet()) {
@@ -393,7 +393,7 @@ public class LLSDJsonParser {
             }
             return llsdMap;
         }
-        
+
         if (jsonObj instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> jsonList = (List<Object>) jsonObj;
@@ -403,7 +403,7 @@ public class LLSDJsonParser {
             }
             return llsdList;
         }
-        
+
         // Primitive types remain as-is
         return jsonObj;
     }

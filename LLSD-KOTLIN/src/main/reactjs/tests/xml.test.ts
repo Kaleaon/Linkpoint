@@ -51,7 +51,7 @@ describe('LLSD XML Parser', () => {
                 <llsd>
                     <string>Hello World</string>
                 </llsd>`;
-            
+
             // Note: This test will use the mock implementation
             const llsd = parser.parse(xml);
             expect(llsd).toBeInstanceOf(LLSD);
@@ -59,7 +59,7 @@ describe('LLSD XML Parser', () => {
 
         test('should handle malformed XML gracefully', () => {
             const invalidXml = '<llsd><string>unclosed';
-            
+
             // The parser should handle malformed XML and return a result or throw
             // For now, let's test that it doesn't crash
             expect(() => {
@@ -71,7 +71,7 @@ describe('LLSD XML Parser', () => {
 
         test('should handle missing root element', () => {
             const xml = '<?xml version="1.0"?><root><string>test</string></root>';
-            
+
             // This should throw because there's no <llsd> element
             expect(() => {
                 parser.parse(xml);
@@ -91,7 +91,7 @@ describe('LLSD XML Serializer', () => {
         test('should serialize null/undefined values', () => {
             const llsd = new LLSD(null);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
             expect(xml).toContain('<llsd>');
             expect(xml).toContain('<undef />');
@@ -101,28 +101,28 @@ describe('LLSD XML Serializer', () => {
         test('should serialize boolean values', () => {
             const llsd = new LLSD(true);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<boolean>1</boolean>');
         });
 
         test('should serialize integer values', () => {
             const llsd = new LLSD(42);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<integer>42</integer>');
         });
 
         test('should serialize real values', () => {
             const llsd = new LLSD(3.14);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<real>3.14</real>');
         });
 
         test('should serialize string values with escaping', () => {
             const llsd = new LLSD('Hello <World> & "Friends"');
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<string>Hello &lt;World&gt; &amp; &quot;Friends&quot;</string>');
         });
 
@@ -130,7 +130,7 @@ describe('LLSD XML Serializer', () => {
             const uuid = '550e8400-e29b-41d4-a716-446655440000';
             const llsd = new LLSD(uuid);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain(`<uuid>${uuid}</uuid>`);
         });
 
@@ -138,7 +138,7 @@ describe('LLSD XML Serializer', () => {
             const date = new Date('2023-01-01T12:00:00.000Z');
             const llsd = new LLSD(date);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<date>2023-01-01T12:00:00.000Z</date>');
         });
 
@@ -146,7 +146,7 @@ describe('LLSD XML Serializer', () => {
             const uri = new URL('https://example.com/test');
             const llsd = new LLSD(uri);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<uri>https://example.com/test</uri>');
         });
 
@@ -154,7 +154,7 @@ describe('LLSD XML Serializer', () => {
             const binary = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
             const llsd = new LLSD(binary);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<binary>SGVsbG8=</binary>'); // "Hello" in base64
         });
 
@@ -162,7 +162,7 @@ describe('LLSD XML Serializer', () => {
             const array = [1, 'hello', true];
             const llsd = new LLSD(array);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<array>');
             expect(xml).toContain('<integer>1</integer>');
             expect(xml).toContain('<string>hello</string>');
@@ -178,7 +178,7 @@ describe('LLSD XML Serializer', () => {
             };
             const llsd = new LLSD(map);
             const xml = serializer.serialize(llsd);
-            
+
             expect(xml).toContain('<map>');
             expect(xml).toContain('<key>name</key>');
             expect(xml).toContain('<string>Alice</string>');
@@ -202,7 +202,7 @@ describe('LLSD XML Serializer', () => {
             };
             const llsd = new LLSD(nested);
             const xml = serializer.serialize(llsd);
-            
+
             // Check structure
             expect(xml).toContain('<map>');
             expect(xml).toContain('<key>user</key>');
@@ -217,7 +217,7 @@ describe('LLSD XML Serializer', () => {
             const customSerializer = new LLSDXMLSerializer(4);
             const llsd = new LLSD({ key: 'value' });
             const xml = customSerializer.serialize(llsd);
-            
+
             // Should have 4-space indentation
             expect(xml).toContain('    <map>');
             expect(xml).toContain('        <key>key</key>');
@@ -236,15 +236,15 @@ describe('LLSD XML Serializer', () => {
                     value: 'nested'
                 }
             };
-            
+
             const llsd = new LLSD(original);
             const xml = serializer.serialize(llsd);
-            
+
             // For this test to work fully, we'd need a real XML parser
             // In a real implementation, we would do:
             // const parsed = parser.parse(xml);
             // expect(parsed.getContent()).toEqual(original);
-            
+
             // For now, just verify XML structure
             expect(xml).toContain('<llsd>');
             expect(xml).toContain('</llsd>');

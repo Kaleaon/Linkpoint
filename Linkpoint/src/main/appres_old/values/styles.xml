@@ -45,7 +45,7 @@
         <item name="IconExpandDown">@android:drawable/arrow_down_float</item>
         <item name="IconExpandRight">@android:drawable/ic_media_play</item>
         <item name="objectPopupsCounterBackground">@android:color/holo_orange_dark</item>
-        
+
         <!-- Missing attributes for layout compatibility -->
         <item name="MenuIconSearchThemed">@android:drawable/ic_menu_search</item>
         <item name="colorContentBackground">@android:color/background_dark</item>
@@ -54,7 +54,7 @@
         <item name="IconMaterialMicOffThemed">@android:drawable/ic_btn_speak_now</item>
         <item name="IconMaterialLoudspeakerThemed">@android:drawable/stat_sys_speakerphone</item>
         <item name="IconMaterialBluetoothThemed">@android:drawable/stat_sys_data_bluetooth</item>
-        
+
         <!-- All menu icon attributes mapped to Android system icons -->
         <item name="MenuIconAddToOutfit">@android:drawable/ic_input_add</item>
         <item name="MenuIconArrowRight">@android:drawable/ic_media_play</item>
@@ -112,7 +112,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="Theme.Lumiya.Light" parent="Theme.MaterialComponents.DayNight">
         <item name="colorPrimary">@color/primary_light</item>
         <item name="colorPrimaryVariant">@color/primary</item>
@@ -139,7 +139,7 @@
         <item name="dashedSeparatorColor">@android:color/darker_gray</item>
         <item name="IconMaterialVoiceCallThemed">@android:drawable/ic_btn_speak_now</item>
         <item name="roundRectShape">@android:drawable/dialog_frame</item>
-        
+
         <!-- Missing attributes for layout compatibility -->
         <item name="MenuIconSearchThemed">@android:drawable/ic_menu_search</item>
         <item name="colorContentBackground">@android:color/background_light</item>
@@ -148,7 +148,7 @@
         <item name="IconMaterialMicOffThemed">@android:drawable/ic_btn_speak_now</item>
         <item name="IconMaterialLoudspeakerThemed">@android:drawable/stat_sys_speakerphone</item>
         <item name="IconMaterialBluetoothThemed">@android:drawable/stat_sys_data_bluetooth</item>
-        
+
         <!-- All menu icon attributes mapped to Android system icons -->
         <item name="MenuIconAddToOutfit">@android:drawable/ic_input_add</item>
         <item name="MenuIconArrowRight">@android:drawable/ic_media_play</item>
@@ -206,7 +206,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="Theme.Lumiya.Light.NoActionBar" parent="Theme.Lumiya.Light">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
@@ -217,7 +217,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="Theme.Lumiya.NoActionBar" parent="Theme.Lumiya">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
@@ -228,7 +228,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Additional theme variants -->
     <style name="Theme.Lumiya.Pink" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/primary_pink</item>
@@ -244,7 +244,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="Theme.Lumiya.Pink.NoActionBar" parent="Theme.Lumiya.Pink">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
@@ -267,7 +267,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Additional button styles -->
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
@@ -278,7 +278,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Card view styles -->
     <style name="BorderlessCardButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
@@ -301,7 +301,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Additional card styles -->
     <style name="CardLargeDetails">
         <item name="android:textSize">18sp</item>
@@ -311,7 +311,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="CardView.Dark">
         <item name="cardBackgroundColor">@color/cardview_dark_background</item>
             <item name="pageResource">@android:drawable/ic_menu_info_details</item>
@@ -319,7 +319,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="CardView.Light">
         <item name="cardBackgroundColor">@color/cardview_light_background</item>
             <item name="pageResource">@android:drawable/ic_menu_info_details</item>
@@ -337,10 +337,10 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Additional UI components -->
     <style name="NoSystemUI" />
-    
+
     <style name="UiButton">
         <item name="android:padding">9dp</item>
         <item name="android:layout_width">wrap_content</item>
@@ -350,7 +350,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="GvrDialogTheme">
         <item name="android:windowBackground">@android:color/transparent</item>
             <item name="pageResource">@android:drawable/ic_menu_info_details</item>
@@ -358,7 +358,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="VrActivityTheme">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@null</item>
@@ -370,7 +370,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Missing theme styles -->
     <style name="Theme.Light.Panel" parent="Theme.MaterialComponents.Light">
         <!-- Light panel style for inventory -->
@@ -379,7 +379,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="Widget.ProgressBar.Small" parent="Widget.AppCompat.ProgressBar">
         <item name="android:layout_width">16dp</item>
         <item name="android:layout_height">16dp</item>
@@ -389,7 +389,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <!-- Missing styles causing build errors -->
     <style name="TextAppearance.Material.Body2" parent="TextAppearance.AppCompat.Body2">
         <item name="android:textSize">14sp</item>
@@ -399,7 +399,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="Preference_TextAppearanceMaterialSubhead" parent="TextAppearance.AppCompat.Subhead">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -408,7 +408,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="ThemeOverlay.Lumiya.PopupMenu" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:popupBackground">@android:drawable/dialog_frame</item>
             <item name="pageResource">@android:drawable/ic_menu_info_details</item>
@@ -416,7 +416,7 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
     <style name="ThemeOverlay.Lumiya.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="colorControlNormal">?attr/colorOnPrimary</item>
             <item name="pageResource">@android:drawable/ic_menu_info_details</item>
@@ -424,5 +424,5 @@
         <item name="defaultRawResource">@android:drawable/ic_dialog_info</item>
             <item name="notificationType">Default</item>
     </style>
-    
+
 </resources>

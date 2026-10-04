@@ -49,4 +49,3 @@ class WorldHomeHostActivity : ComponentActivity() {
         }
     }
 }
-

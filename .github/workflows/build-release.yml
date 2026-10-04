@@ -117,4 +117,3 @@ jobs:
             Linkpoint/build/outputs/apk/*/release/*.apk
             Linkpoint/build/outputs/apk/SHA256SUMS
             Linkpoint/build/outputs/apk/checksums.sha256
-
