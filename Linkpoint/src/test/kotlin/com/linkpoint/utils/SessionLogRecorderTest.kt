@@ -5,6 +5,11 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.nio.file.Files
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class SessionLogRecorderTest {
 
@@ -182,5 +187,71 @@ class SessionLogRecorderTest {
         val logFile = SessionLogRecorder.stopRecording()
         assertNotNull(logFile)
         assertTrue(logFile!!.exists())
+    }
+
+    @Test
+    fun `LogEntry format uses HH mm ss SSS date format matching SimpleDateFormat`() {
+        val timestamp = 1713500000000L // Fixed timestamp
+        val expectedTimeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+
+        val entry = SessionLogRecorder.LogEntry(
+            timestamp = timestamp,
+            type = SessionLogRecorder.EntryType.INFO,
+            tag = "TestTag",
+            message = "Hello world"
+        )
+
+        val formatted = entry.format()
+
+        assertTrue(formatted.startsWith("[$expectedTimeStr] [INFO] [TestTag]\nHello world"))
+    }
+
+    @Test
+    fun `LogEntry format includes hex dump and stack trace when provided`() {
+        val timestamp = System.currentTimeMillis()
+        val expectedTimeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+
+        val entry = SessionLogRecorder.LogEntry(
+            timestamp = timestamp,
+            type = SessionLogRecorder.EntryType.PACKET_SENT,
+            tag = "UDP",
+            message = "Sent packet",
+            hexDump = "00 01 02 03",
+            stackTrace = "java.lang.Exception: test trace"
+        )
+
+        val formatted = entry.format()
+
+        assertTrue(formatted.contains("[$expectedTimeStr] [PACKET_SENT] [UDP]"))
+        assertTrue(formatted.contains("Sent packet"))
+        assertTrue(formatted.contains("Hex: 00 01 02 03"))
+        assertTrue(formatted.contains("Stack: java.lang.Exception: test trace"))
+    }
+
+    @Test
+    fun `LogEntry format is thread safe under high concurrency`() {
+        val executor = Executors.newFixedThreadPool(16)
+        val iterations = 500
+        val futures = (0 until iterations).map { i ->
+            executor.submit<Boolean> {
+                val timestamp = 1700000000000L + (i * 1000L)
+                val expectedTimeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+                val entry = SessionLogRecorder.LogEntry(
+                    timestamp = timestamp,
+                    type = SessionLogRecorder.EntryType.DEBUG,
+                    tag = "ThreadTest",
+                    message = "Iteration $i"
+                )
+                val formatted = entry.format()
+                formatted.contains("[$expectedTimeStr]") && formatted.contains("Iteration $i")
+            }
+        }
+
+        executor.shutdown()
+        assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS))
+
+        futures.forEach { future ->
+            assertTrue("Format mismatch or corruption during concurrent execution", future.get())
+        }
     }
 }
