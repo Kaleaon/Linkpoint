@@ -4,6 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.File
 
 /**
@@ -36,6 +38,7 @@ import java.io.File
  * branch produces a focused regression rather than a generic "all the
  * tests fail" cascade.
  */
+@RunWith(RobolectricTestRunner::class)
 class LLSDConformanceTest {
 
     private val vectorsDir: File by lazy {

@@ -2,16 +2,10 @@ package com.linkpoint.network.feeds
 
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-/**
- * Unit tests for [LiveDataFeedClient]'s parsing logic.
- *
- * The HTTP layer is not exercised here — these tests focus on the two
- * pure parsing functions ([LiveDataFeedClient.parseKeyValueText] and
- * [LiveDataFeedClient.parseStatusRss]) that convert raw feed bodies into
- * typed data classes.  Each test uses a representative fixture payload
- * that matches the format documented on the Linden Lab wiki / feed URLs.
- */
+@RunWith(RobolectricTestRunner::class)
 class LiveDataFeedClientTest {
 
     private val client = LiveDataFeedClient()

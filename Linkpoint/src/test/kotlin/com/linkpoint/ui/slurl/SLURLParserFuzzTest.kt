@@ -1,11 +1,14 @@
 package com.linkpoint.ui.slurl
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import android.net.Uri
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class SLURLParserFuzzTest {
 
     @Test

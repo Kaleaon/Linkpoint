@@ -96,12 +96,19 @@ jobs:
       continue-on-error: true
       id: unit-tests
 
-    - name: Run Paparazzi snapshot tests
+    - name: Run Roborazzi Visual Snapshot Verification
       if: steps.compile.outcome == 'success'
-      run: ./gradlew paparazziDebugCheck --continue
-      continue-on-error: true
-      id: paparazzi-tests
-      
+      run: ./gradlew verifyRoborazziDebug
+      id: roborazzi-verify
+
+    - name: Upload Roborazzi Visual Diffs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: roborazzi-diffs
+        path: |
+          build/outputs/roborazzi/
+          Linkpoint/build/outputs/roborazzi/
     - name: Run lint checks
       if: steps.compile.outcome == 'success'
       run: ./gradlew lintDebug --continue

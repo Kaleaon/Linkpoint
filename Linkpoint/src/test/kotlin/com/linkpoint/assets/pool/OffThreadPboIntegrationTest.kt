@@ -1,22 +1,23 @@
 package com.linkpoint.assets.pool
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.assets.AssetCache
 import com.linkpoint.assets.MeshManager
 import com.linkpoint.assets.TextureManager
+import com.linkpoint.protocol.capabilities.CapabilityManager
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class OffThreadPboIntegrationTest {
 
     @Test
     fun testTextureAndMeshManagerWorkerPoolIntegration() {
-        val mockContext = mock(android.content.Context::class.java)
-        val mockCache = mock(AssetCache::class.java)
-        val mockCapManager = mock(com.linkpoint.protocol.capabilities.CapabilityManager::class.java)
+        val mockContext = RuntimeEnvironment.getApplication()
+        val mockCache = AssetCache(mockContext)
+        val mockCapManager = CapabilityManager()
 
         val textureManager = TextureManager(mockContext, mockCache, mockCapManager)
         val meshManager = MeshManager(mockContext, mockCache, mockCapManager)

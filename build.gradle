@@ -58,6 +58,14 @@ tasks.register('testDebugUnitTest') {
     dependsOn gradle.includedBuild('Linkpoint').task(':testStableDebugUnitTest')
 }
 
+tasks.register('verifyRoborazziDebug') {
+    dependsOn gradle.includedBuild('Linkpoint').task(':verifyRoborazziDebug')
+}
+
+tasks.register('recordRoborazziDebug') {
+    dependsOn gradle.includedBuild('Linkpoint').task(':recordRoborazziDebug')
+}
+
 tasks.register('assembleDebug') {
     dependsOn gradle.includedBuild('Linkpoint').task(':assembleDebug')
 }
