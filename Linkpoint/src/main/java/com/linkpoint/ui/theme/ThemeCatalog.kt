@@ -40,8 +40,20 @@ object ThemeCatalog {
 
         val themeMap = linkedMapOf<String, Theme>()
 
-        // 1. Try loading from Android AssetManager if context is provided
-        if (context != null) {
+        // 1. Try loading from official com.ktheme.library.KthemeAPI
+        try {
+            val apiThemes = com.ktheme.library.KthemeAPI.getAvailableThemes()
+            for (theme in apiThemes) {
+                if (theme.metadata.id.isNotBlank()) {
+                    themeMap[theme.metadata.id] = theme
+                }
+            }
+        } catch (e: Exception) {
+            // Fallback
+        }
+
+        // 2. Try loading from Android AssetManager if context is provided
+        if (themeMap.isEmpty() && context != null) {
             try {
                 val assetFiles = context.assets.list("themes").orEmpty()
                 for (fileName in assetFiles.sorted()) {

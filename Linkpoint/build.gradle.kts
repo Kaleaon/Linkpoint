@@ -285,6 +285,9 @@ kotlin {
 }
 
 dependencies {
+    // Official Ktheme Multiplatform runtime library
+    implementation("com.ktheme:ktheme-runtime:1.0.0")
+
     // Core library desugaring for Java 8+ APIs on older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
@@ -589,25 +592,9 @@ tasks.register("copyNatives") {
     }
 }
 
-// Task to copy central and community JSON theme files into Android app assets
-tasks.register<Copy>("copyThemeAssets") {
-    group = "build"
-    description = "Copies central and community theme JSON files into Android app assets."
-    val dsThemes = file("../packages/design-system/themes")
-    val communityThemes = file("../ktheme-pr/themes/community")
-    from(dsThemes) {
-        include("*.json")
-    }
-    from(communityThemes) {
-        include("*.json")
-    }
-    into(file("src/main/assets/themes"))
-}
-
-// Hook copyNatives and copyThemeAssets into preBuild
+// Hook copyNatives into preBuild
 tasks.named("preBuild") {
     dependsOn("copyNatives")
-    dependsOn("copyThemeAssets")
 }
 
 
