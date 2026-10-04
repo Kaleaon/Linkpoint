@@ -145,7 +145,18 @@ export default function OutfitCarouselDrawer({ open = false, onClose }) {
       >
         {/* Drag Handle Bar */}
         <div
-          aria-label="Drag handle"
+          role="button"
+          tabIndex={0}
+          aria-label="Toggle outfit drawer"
+          title="Toggle outfit drawer"
+          onClick={() => onClose?.()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " " || e.key === "Space") {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose?.();
+            }
+          }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -155,7 +166,8 @@ export default function OutfitCarouselDrawer({ open = false, onClose }) {
             padding: "8px 0 4px 0",
             display: "flex",
             justifyContent: "center",
-            cursor: "grab",
+            cursor: "pointer",
+            outline: "none",
           }}
         >
           <div
