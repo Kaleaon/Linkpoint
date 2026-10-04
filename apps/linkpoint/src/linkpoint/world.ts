@@ -44,6 +44,7 @@ export class WorldViewer extends Utils.EventEmitter {
   public region: any = null;
   public objects: any[] = [];
   public nearbyUsers: any[] = [];
+  public getNearbyUsers(): any[] { return this.nearbyUsers || []; }
   public avatarPosition: [number, number, number] | null = null;
   public environment: any = null;
   public simSunHour: number | null = null;

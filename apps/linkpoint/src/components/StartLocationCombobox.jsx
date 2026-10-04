@@ -60,6 +60,7 @@ export function clearRecentLocations(storageKey = RECENT_LOCATIONS_KEY) {
 }
 
 export default function StartLocationCombobox({
+  id,
   value = "last",
   onChange,
   style,
@@ -190,6 +191,7 @@ export default function StartLocationCombobox({
     <div ref={containerRef} style={{ position: "relative", width: "100%", marginTop: 6 }}>
       <div style={controlStyle}>
         <input
+          id={id}
           type="text"
           role="combobox"
           aria-expanded={isOpen}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { app } from "../linkpoint/app.ts";
@@ -21,6 +22,7 @@ const DIRECTORY_TABS = [
 const ALL_TABS = [...LOCAL_TABS, ...DIRECTORY_TABS];
 
 export default function Search() {
+  const { t: translate } = useTranslation();
   const { state, actions } = useApp();
   const { V, t } = useTheme();
 
@@ -408,10 +410,15 @@ export default function Search() {
 
       <div style={{ flex: "none", margin: "0 16px 10px", height: "44px", display: "flex", alignItems: "center", gap: "8px", padding: "0 12px", border: "1px solid " + V.outv, borderRadius: V.rs, background: V.surf }}>
         <Icon name="search" size={16} style={{ color: V.ink2 }} />
+        <label htmlFor="search-resident-input" className="sr-only">
+          {translate("search_placeholder") || "Filter or search residents"}
+        </label>
         <input
+          id="search-resident-input"
           value={state.searchQuery}
           onChange={(e) => actions.setSearchQuery(e.target.value)}
           placeholder={activeDirTab ? `search ${activeDirTab.category}...` : "filter by name"}
+          aria-label={translate("search_placeholder") || "Filter or search residents"}
           style={{ flex: 1, minWidth: 0, border: "none", outline: "none", background: "transparent", font: "400 13px/1 " + t.font, color: V.ink }}
         />
       </div>
