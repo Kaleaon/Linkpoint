@@ -2,11 +2,12 @@ package com.linkpoint.protocol.llsd
 
 import java.io.BufferedInputStream
 import java.io.InputStream
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.Base64
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import java.util.UUID
 
 /**
@@ -44,6 +45,15 @@ internal object LLSDNotationParser {
     private const val MAX_STRING_BYTES = 1024 * 1024
     private const val MAX_BINARY_BYTES = 1024 * 1024
     private const val MAX_COLLECTION_ELEMENTS = 20_000
+
+    private val ISO_8601_MS: DateTimeFormatter = DateTimeFormatterBuilder()
+        .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+        .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
+        .appendLiteral('Z')
+        .toFormatter()
+        .withZone(ZoneOffset.UTC)
+
+    private val ISO_8601_S: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC)
 
     fun parse(bytes: ByteArray): LLSDValue {
         if (bytes.isEmpty()) return LLSDUndefined
@@ -351,16 +361,10 @@ internal object LLSDNotationParser {
 
     private fun parseDate(text: String): Long {
         return try {
-            val fmtMs = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-            fmtMs.parse(text)?.time ?: 0L
+            ISO_8601_MS.parse(text, Instant::from).toEpochMilli()
         } catch (_: Exception) {
             try {
-                val fmtS = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-                fmtS.parse(text)?.time ?: 0L
+                ISO_8601_S.parse(text, Instant::from).toEpochMilli()
             } catch (_: Exception) { 0L }
         }
     }
