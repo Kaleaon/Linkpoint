@@ -199,7 +199,10 @@ export function useTheme(): LayoutTheme {
     light: P.light,
     pad: L.s.pad,
     nav: "tabs",
-    d
+    d,
+    density: "standard",
+    layoutMode: "grid",
+    breakpoint: "desktop"
   };
 }
 
