@@ -49,6 +49,7 @@ remain useful for migration parity but do not describe the default application.
 | [Second_Life_Integration_Guide.md](Second_Life_Integration_Guide.md) | SL protocol implementation |
 | [LibreMetaverse_Integration.md](LibreMetaverse_Integration.md) | LibreMetaverse patterns in Kotlin |
 | [OpenSimulator_Compatibility.md](OpenSimulator_Compatibility.md) | OpenSim grid support |
+| [guides/docker-opensim-grid-proxy.md](guides/docker-opensim-grid-proxy.md) | Docker Compose multi-container OpenSim grid & NGINX proxy guide |
 | [Second_Life_Open_Source_Portal_Integration_Guide.md](Second_Life_Open_Source_Portal_Integration_Guide.md) | Comprehensive integration guide |
 
 ## Technical Guides

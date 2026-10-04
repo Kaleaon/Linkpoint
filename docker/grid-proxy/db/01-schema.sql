@@ -1,0 +1,136 @@
+-- OpenSim 0.9.x Grid Database Initial Schema
+
+CREATE DATABASE IF NOT EXISTS opensim;
+USE opensim;
+
+-- 1. UserAccount Service Table
+CREATE TABLE IF NOT EXISTS `useraccounts` (
+  `PrincipalID` CHAR(36) NOT NULL,
+  `ScopeID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `FirstName` VARCHAR(64) NOT NULL,
+  `LastName` VARCHAR(64) NOT NULL,
+  `Email` VARCHAR(64) DEFAULT NULL,
+  `ServiceURLs` TEXT DEFAULT NULL,
+  `Created` INT(11) NOT NULL DEFAULT 0,
+  `UserLevel` INT(11) NOT NULL DEFAULT 0,
+  `UserFlags` INT(11) NOT NULL DEFAULT 0,
+  `UserTitle` VARCHAR(64) NOT NULL DEFAULT '',
+  PRIMARY KEY (`PrincipalID`),
+  KEY `FirstName_LastName` (`FirstName`, `LastName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. Authentication Service Table
+CREATE TABLE IF NOT EXISTS `auth` (
+  `UUID` CHAR(36) NOT NULL,
+  `passwordHash` CHAR(32) NOT NULL DEFAULT '',
+  `passwordSalt` CHAR(32) NOT NULL DEFAULT '',
+  `webLoginKey` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `accountType` VARCHAR(32) NOT NULL DEFAULT 'UserAccount',
+  PRIMARY KEY (`UUID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3. GridUser Service Table
+CREATE TABLE IF NOT EXISTS `griduser` (
+  `UserID` VARCHAR(36) NOT NULL,
+  `HomeRegionID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `HomePosition` VARCHAR(64) NOT NULL DEFAULT '<0,0,0>',
+  `HomeLookAt` VARCHAR(64) NOT NULL DEFAULT '<0,0,0>',
+  `LastRegionID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `LastPosition` VARCHAR(64) NOT NULL DEFAULT '<0,0,0>',
+  `LastLookAt` VARCHAR(64) NOT NULL DEFAULT '<0,0,0>',
+  `Online` VARCHAR(5) NOT NULL DEFAULT 'false',
+  `Login` INT(11) NOT NULL DEFAULT 0,
+  `Logout` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 4. Presence Service Table
+CREATE TABLE IF NOT EXISTS `presence` (
+  `UserID` VARCHAR(36) NOT NULL,
+  `SessionID` CHAR(36) NOT NULL,
+  `SecureSessionID` CHAR(36) NOT NULL,
+  `RegionID` CHAR(36) NOT NULL,
+  PRIMARY KEY (`UserID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 5. Inventory Service Tables
+CREATE TABLE IF NOT EXISTS `inventoryfolders` (
+  `folderName` VARCHAR(64) DEFAULT NULL,
+  `type` SMALLINT(6) NOT NULL DEFAULT 0,
+  `version` INT(11) NOT NULL DEFAULT 0,
+  `folderID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `agentID` CHAR(36) DEFAULT NULL,
+  `parentFolderID` CHAR(36) DEFAULT NULL,
+  PRIMARY KEY (`folderID`),
+  KEY `agentID` (`agentID`),
+  KEY `parentFolderID` (`parentFolderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `inventoryitems` (
+  `assetID` VARCHAR(36) DEFAULT NULL,
+  `assetType` INT(11) DEFAULT NULL,
+  `inventoryName` VARCHAR(64) DEFAULT NULL,
+  `inventoryDescription` VARCHAR(128) DEFAULT NULL,
+  `inventoryNextPermissions` INT(10) UNSIGNED DEFAULT NULL,
+  `inventoryCurrentPermissions` INT(10) UNSIGNED DEFAULT NULL,
+  `invType` INT(11) DEFAULT NULL,
+  `creatorID` VARCHAR(255) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `inventoryBasePermissions` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `inventoryEveryOnePermissions` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `inventoryGroupPermissions` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `inventoryID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `avatarID` CHAR(36) DEFAULT NULL,
+  `parentFolderID` CHAR(36) DEFAULT NULL,
+  `groupID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `groupOwned` TINYINT(4) NOT NULL DEFAULT 0,
+  `flags` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `creationDate` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`inventoryID`),
+  KEY `avatarID` (`avatarID`),
+  KEY `parentFolderID` (`parentFolderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. Asset Service Table
+CREATE TABLE IF NOT EXISTS `assets` (
+  `id` CHAR(36) NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `description` VARCHAR(64) NOT NULL,
+  `assetType` TINYINT(4) NOT NULL,
+  `local` TINYINT(1) NOT NULL,
+  `temporary` TINYINT(1) NOT NULL,
+  `data` LONGBLOB NOT NULL,
+  `create_time` INT(11) DEFAULT 0,
+  `access_time` INT(11) DEFAULT 0,
+  `asset_flags` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 7. Grid Service (Regions) Table
+CREATE TABLE IF NOT EXISTS `regions` (
+  `uuid` CHAR(36) NOT NULL,
+  `regionHandle` BIGINT(20) UNSIGNED NOT NULL,
+  `regionName` VARCHAR(128) NOT NULL,
+  `serverIP` VARCHAR(64) DEFAULT NULL,
+  `serverPort` INT(10) UNSIGNED DEFAULT NULL,
+  `serverURI` VARCHAR(255) DEFAULT NULL,
+  `locX` INT(10) UNSIGNED NOT NULL,
+  `locY` INT(10) UNSIGNED NOT NULL,
+  `locZ` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `sizeX` INT(10) UNSIGNED NOT NULL DEFAULT 256,
+  `sizeY` INT(10) UNSIGNED NOT NULL DEFAULT 256,
+  `sizeZ` INT(10) UNSIGNED NOT NULL DEFAULT 4096,
+  `owner_uuid` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `access` INT(10) UNSIGNED DEFAULT 13,
+  `scopeID` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `flags` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`uuid`),
+  KEY `regionName` (`regionName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Friends Table
+CREATE TABLE IF NOT EXISTS `friends` (
+  `PrincipalID` VARCHAR(36) NOT NULL,
+  `Friend` VARCHAR(255) NOT NULL,
+  `Flags` INT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`PrincipalID`, `Friend`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

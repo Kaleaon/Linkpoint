@@ -1,0 +1,29 @@
+[DatabaseService]
+    StorageProvider = "OpenSim.Data.MySQL.dll"
+    ConnectionString = "Data Source={{ MYSQL_HOST | default('db') }};Database={{ MYSQL_DATABASE | default('opensim') }};User ID={{ MYSQL_USER | default('opensim') }};Password={{ MYSQL_PASSWORD | default('opensimpass') }};Port={{ MYSQL_PORT | default(3306) }};"
+
+[AssetService]
+    DefaultAssetLoader = "OpenSim.Framework.AssetLoader.Filesystem.dll"
+    AssetLoaderArgs = "assets/AssetSets.xml"
+    AssetServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[InventoryService]
+    InventoryServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[GridService]
+    GridServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[UserAccountService]
+    UserAccountServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[AuthenticationService]
+    AuthenticationServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[PresenceService]
+    PresenceServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[FriendsService]
+    FriendsServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"
+
+[GridUserService]
+    GridUserServerURI = "http://{{ ROBUST_HOST | default('robust-grid') }}:{{ ROBUST_PORT | default(8002) }}"

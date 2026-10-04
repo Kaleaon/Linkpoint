@@ -1,0 +1,21 @@
+[Startup]
+    ConsolePrompt = "OpenSim (#"
+    gridmode = true
+
+[Network]
+    http_listener_port = {{ REGION_PORT | default(8003) }}
+    ExternalHostName = "{{ EXTERNAL_HOSTNAME | default('localhost') }}"
+
+[Architecture]
+    Include-Grid = "config/GridCommon.ini"
+
+[SimStatus]
+    Enabled = true
+
+[Region]
+    RegionName = "{{ REGION_NAME | default('Welcome Region') }}"
+    RegionID = "{{ REGION_ID | default('11111111-2222-3333-4444-555555555555') }}"
+    Location = "{{ REGION_LOC_X | default(1000) }},{{ REGION_LOC_Y | default(1000) }}"
+    InternalAddress = "0.0.0.0"
+    InternalPort = {{ UDP_PORT | default(9000) }}
+    ExternalHostName = "{{ EXTERNAL_HOSTNAME | default('localhost') }}"
