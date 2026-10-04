@@ -5,15 +5,15 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.FakeCapabilityRequester
 import com.linkpoint.protocol.llsd.LLSDMap
 import com.linkpoint.protocol.llsd.LLSDString
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlinx.coroutines.runBlocking
+import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class AdaptiveAppearanceCompositorTest {
 
     private class TestableCapabilityManager : CapabilityManager() {
@@ -90,7 +90,7 @@ class AdaptiveAppearanceCompositorTest {
 
     @Test
     fun testBakesOnMeshChannelBindingForMeshAttachments() {
-        val context: android.content.Context = org.mockito.Mockito.mock(android.content.Context::class.java)
+        val context: android.content.Context = org.robolectric.RuntimeEnvironment.getApplication()
         val textureManager = com.linkpoint.assets.TextureManager(
             context,
             com.linkpoint.assets.AssetCache(context),

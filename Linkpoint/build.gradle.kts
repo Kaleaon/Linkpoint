@@ -9,17 +9,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
     jacoco
-    // NOTE: Paparazzi's Gradle plugin (`app.cash.paparazzi`) is intentionally
-    // *not* applied here. The project's production classpath bundles
-    // `org.conscrypt:conscrypt-android` whose AAR ships an `org.conscrypt.R`
-    // class signed differently from `org.conscrypt:conscrypt-openjdk-uber`
-    // (the Robolectric/Paparazzi-friendly variant). Paparazzi's resource
-    // bootstrap loads every R class on the test classpath, hitting a
-    // SecurityException for org.conscrypt.R. Until upstream Paparazzi adds
-    // a way to exclude library-AAR R classes, the existing
-    // StateComponentsSnapshotTest is annotated with @Ignore so Robolectric
-    // tests remain green; the snapshots will move to the AndroidJUnit4
-    // instrumented suite.
+    id("io.github.takahirom.roborazzi") version "1.32.0"
 }
 
 jacoco {
@@ -492,7 +482,11 @@ dependencies {
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.json:json:20240303")
-    testImplementation("app.cash.paparazzi:paparazzi:1.3.5")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.32.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.32.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-junit-rule:1.32.0")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("androidx.compose.ui:ui-test-manifest")
 
     // ── Robolectric + AndroidX test stack ────────────────────────────────
     // Robolectric provides JVM-friendly Android framework stubs (android.util.Log,
@@ -520,13 +514,17 @@ dependencies {
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
 }
 
+roborazzi {
+    outputDir.set(file("build/outputs/roborazzi"))
+}
+
 // The production classpath uses `org.conscrypt:conscrypt-android` (which only
 // ships its native lib for ARM/x86 Android) but the JVM unit-test classpath
 // needs `org.conscrypt:conscrypt-openjdk-uber`. They share the same
 // `org.conscrypt` package but are signed by different entities — keeping
 // both on the same classpath triggers a `SecurityException: signer
 // information does not match`. Substitute the Android variant on every
-// unit-test configuration so Robolectric/Paparazzi see a single, JVM-friendly
+// unit-test configuration so Robolectric/Roborazzi see a single, JVM-friendly
 // Conscrypt provider.
 configurations.matching {
     it.name.contains("UnitTest", ignoreCase = true) ||
@@ -794,4 +792,16 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             "jacoco/test.exec"
         )
     })
+}
+
+tasks.register("verifyRoborazziDebug") {
+    group = "verification"
+    description = "Runs Roborazzi verification for debug build"
+    dependsOn("verifyRoborazziStableDebug")
+}
+
+tasks.register("recordRoborazziDebug") {
+    group = "verification"
+    description = "Records Roborazzi golden images for debug build"
+    dependsOn("recordRoborazziStableDebug")
 }

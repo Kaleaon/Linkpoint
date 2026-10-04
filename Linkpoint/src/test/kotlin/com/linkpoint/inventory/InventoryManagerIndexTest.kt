@@ -32,8 +32,8 @@ class InventoryManagerIndexTest {
 
     @Before
     fun setUp() {
-        capabilityManager = mock()
-        udpConnection = mock()
+        capabilityManager = CapabilityManager()
+        udpConnection = UDPConnectionFixed()
         agentId = UUID.randomUUID()
         inventoryManager = InventoryManager(
             capabilityManager = capabilityManager,

@@ -1,26 +1,41 @@
 package com.linkpoint.assets
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.*
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import java.util.UUID
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class MeshDownloadManagerTest {
 
     private lateinit var fetcher: LLMeshFetcher
-    private lateinit var meshManager: MeshManager
+    private lateinit var meshManager: FakeMeshManager
     private lateinit var downloadManager: MeshDownloadManager
+
+    private class FakeMeshManager : MeshManager(
+        RuntimeEnvironment.getApplication(),
+        AssetCache(RuntimeEnvironment.getApplication()),
+        CapabilityManager()
+    ) {
+        var mockDataMap = mutableMapOf<UUID, MeshData?>()
+        val getMeshCalls = mutableListOf<Pair<UUID, MeshLOD>>()
+
+        override suspend fun getMesh(meshId: UUID, lod: MeshLOD): MeshData? {
+            getMeshCalls.add(meshId to lod)
+            return mockDataMap[meshId]
+        }
+    }
 
     @Before
     fun setUp() {
         fetcher = LLMeshFetcher()
-        meshManager = mock()
+        meshManager = FakeMeshManager()
         downloadManager = MeshDownloadManager(fetcher, meshManager)
     }
 
@@ -28,7 +43,7 @@ class MeshDownloadManagerTest {
     fun testRequestMeshNearObjectNotDeferred() = runBlocking {
         val meshId = UUID.randomUUID()
         val mockData = MeshData(meshId = meshId, faces = emptyList())
-        whenever(meshManager.getMesh(eq(meshId), any())).thenReturn(mockData)
+        meshManager.mockDataMap[meshId] = mockData
 
         // Close object at 5m
         val result = downloadManager.requestMesh(
@@ -38,7 +53,7 @@ class MeshDownloadManagerTest {
         )
 
         assertNotNull(result)
-        verify(meshManager).getMesh(meshId, MeshLOD.HIGHEST)
+        assertTrue(meshManager.getMeshCalls.contains(meshId to MeshLOD.HIGHEST))
 
         val diag = downloadManager.getDiagnostics()
         assertEquals(1, diag.totalRequests)
@@ -50,7 +65,7 @@ class MeshDownloadManagerTest {
     fun testRequestMeshDistantAvatarGated() = runBlocking {
         val meshId = UUID.randomUUID()
         val mockData = MeshData(meshId = meshId, faces = emptyList())
-        whenever(meshManager.getMesh(eq(meshId), any())).thenReturn(mockData)
+        meshManager.mockDataMap[meshId] = mockData
 
         // Avatar at 60m (>50m threshold)
         val result = downloadManager.requestMesh(
@@ -62,7 +77,7 @@ class MeshDownloadManagerTest {
 
         assertNotNull(result)
         // Verify gated to MEDIUM (LOD2)
-        verify(meshManager).getMesh(meshId, MeshLOD.MEDIUM)
+        assertTrue(meshManager.getMeshCalls.contains(meshId to MeshLOD.MEDIUM))
 
         val diag = downloadManager.getDiagnostics()
         assertEquals(1, diag.lod2Requests)
@@ -82,7 +97,7 @@ class MeshDownloadManagerTest {
         )
 
         assertNull("Sub-pixel attachment should return null when deferred", result)
-        verify(meshManager, never()).getMesh(any(), any())
+        assertTrue(meshManager.getMeshCalls.isEmpty())
 
         val diag = downloadManager.getDiagnostics()
         assertEquals(1, diag.deferredRequestsCount)

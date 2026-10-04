@@ -11,16 +11,19 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.kotlin.mock
 
-@RunWith(AndroidJUnit4::class)
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+
+@RunWith(RobolectricTestRunner::class)
 class RenderEngineSwitcherTest {
 
     @Test
     fun `switch from filament to lumiya initializes new engine and renders frames`() {
-        // Both Context and Surface are passed through opaquely to the
-        // FakeRenderEngine, so mocks suffice. `SurfaceTexture(int)` is a
-        // native call that fails on the JVM unit test classpath.
-        val context: Context = mock()
-        val surface: Surface = mock()
+        // Context is obtained via Robolectric RuntimeEnvironment.
+        // Surface is passed through opaquely to FakeRenderEngine, so mock suffices.
+        val context: Context = RuntimeEnvironment.getApplication()
+        val surfaceTexture = android.graphics.SurfaceTexture(0)
+        val surface = Surface(surfaceTexture)
         val switcher = RenderEngineSwitcher(context)
         val filamentEngine = FakeRenderEngine("Filament")
         val lumiyaEngine = FakeRenderEngine("Lumiya")

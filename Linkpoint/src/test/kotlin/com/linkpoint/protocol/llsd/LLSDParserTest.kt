@@ -1,5 +1,7 @@
 package com.linkpoint.protocol.llsd
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.text.SimpleDateFormat
@@ -11,6 +13,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class LLSDParserTest {
 
     @Test

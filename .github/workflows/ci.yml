@@ -91,17 +91,15 @@ jobs:
       - name: Run unit tests and lint
         run: ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace
 
-      - name: Run Paparazzi snapshot tests
-        run: ./gradlew paparazziDebugCheck
+      - name: Run Roborazzi Visual Snapshot Verification
+        run: ./gradlew verifyRoborazziDebug
 
-      - name: Upload Paparazzi snapshot reports on failure
+      - name: Upload Roborazzi Visual Diffs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: paparazzi-reports
-          path: |
-            Linkpoint/ui-components/build/reports/paparazzi/
-            Linkpoint/ui-components/src/test/snapshots/
+          name: roborazzi-diffs
+          path: Linkpoint/build/outputs/roborazzi/
 
       - name: Assemble Debug build
         run: ./gradlew :Linkpoint:assembleDebug --stacktrace

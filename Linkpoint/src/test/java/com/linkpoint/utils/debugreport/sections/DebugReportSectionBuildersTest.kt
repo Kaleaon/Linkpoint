@@ -1,13 +1,17 @@
 package com.linkpoint.utils.debugreport.sections
 
-import android.content.Context
 import com.linkpoint.utils.debugreport.DebugReportContext
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.mockito.Mockito.mock
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
+@RunWith(RobolectricTestRunner::class)
 class DebugReportSectionBuildersTest {
-    private val context = DebugReportContext(mock(Context::class.java), null, System.currentTimeMillis())
+    private val context by lazy {
+        DebugReportContext(RuntimeEnvironment.getApplication(), null, System.currentTimeMillis())
+    }
 
     @Test
     fun connectionBuilder_handlesUnavailableApp() {
