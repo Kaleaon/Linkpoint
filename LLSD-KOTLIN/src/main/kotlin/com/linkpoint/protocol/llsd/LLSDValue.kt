@@ -16,7 +16,7 @@ sealed class LLSDValue {
 
     fun toNotation(includeHeader: Boolean = false): String =
         LLSDNotationFormatter.format(this, includeHeader)
-    
+
     companion object {
         // Binary format markers
         const val MARKER_UNDEF = '!'
@@ -70,7 +70,7 @@ data class LLSDReal(val value: Double) : LLSDValue() {
 
 data class LLSDUUID(val value: UUID) : LLSDValue() {
     constructor(uuidString: String) : this(UUID.fromString(uuidString))
-    
+
     override fun toXML() = "<uuid>$value</uuid>"
     override fun toBinary(): ByteArray {
         val buffer = ByteBuffer.allocate(17).order(ByteOrder.BIG_ENDIAN)
@@ -79,7 +79,7 @@ data class LLSDUUID(val value: UUID) : LLSDValue() {
         buffer.putLong(value.leastSignificantBits)
         return buffer.array()
     }
-    
+
     companion object {
         val ZERO = LLSDUUID(UUID(0, 0))
     }
@@ -93,7 +93,7 @@ data class LLSDString(val value: String) : LLSDValue() {
             .replace(">", "&gt;")
         return "<string>$escaped</string>"
     }
-    
+
     override fun toBinary(): ByteArray {
         val bytes = value.toByteArray(Charsets.UTF_8)
         val buffer = ByteBuffer.allocate(5 + bytes.size).order(ByteOrder.BIG_ENDIAN)
@@ -109,7 +109,7 @@ data class LLSDBinary(val value: ByteArray) : LLSDValue() {
         val base64 = Base64.getEncoder().encodeToString(value)
         return "<binary>$base64</binary>"
     }
-    
+
     override fun toBinary(): ByteArray {
         val buffer = ByteBuffer.allocate(5 + value.size).order(ByteOrder.BIG_ENDIAN)
         buffer.put(MARKER_BINARY.code.toByte())
@@ -117,26 +117,26 @@ data class LLSDBinary(val value: ByteArray) : LLSDValue() {
         buffer.put(value)
         return buffer.array()
     }
-    
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is LLSDBinary) return false
         return value.contentEquals(other.value)
     }
-    
+
     override fun hashCode() = value.contentHashCode()
 }
 
 data class LLSDDate(val value: Date) : LLSDValue() {
     constructor(timestamp: Long) : this(Date(timestamp))
-    
+
     override fun toXML(): String {
         val iso8601 = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }.format(value)
         return "<date>$iso8601</date>"
     }
-    
+
     override fun toBinary(): ByteArray {
         val seconds = value.time / 1000.0
         // Date payload is LITTLE-endian per the python-llsd v1.2.4
@@ -157,7 +157,7 @@ data class LLSDDate(val value: Date) : LLSDValue() {
 
 data class LLSDURI(val value: String) : LLSDValue() {
     override fun toXML() = "<uri>$value</uri>"
-    
+
     override fun toBinary(): ByteArray {
         val bytes = value.toByteArray(Charsets.UTF_8)
         val buffer = ByteBuffer.allocate(5 + bytes.size).order(ByteOrder.BIG_ENDIAN)
@@ -171,7 +171,7 @@ data class LLSDURI(val value: String) : LLSDValue() {
 data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : LLSDValue() {
     operator fun get(key: String): LLSDValue? = value[key]
     operator fun set(key: String, llsdValue: LLSDValue) { value[key] = llsdValue }
-    
+
     fun getString(key: String): String? = when (val entry = value[key]) {
         is LLSDString -> entry.value
         is LLSDURI -> entry.value
@@ -191,7 +191,7 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
     fun getArray(key: String): LLSDArray? = value[key] as? LLSDArray
     fun getMapOrEmpty(key: String): LLSDMap = getMap(key) ?: LLSDMap()
     fun getArrayOrEmpty(key: String): LLSDArray = getArray(key) ?: LLSDArray()
-    
+
     override fun toXML(): String {
         val sb = StringBuilder("<map>")
         for ((k, v) in value) {
@@ -201,7 +201,7 @@ data class LLSDMap(val value: MutableMap<String, LLSDValue> = mutableMapOf()) : 
         sb.append("</map>")
         return sb.toString()
     }
-    
+
     override fun toBinary(): ByteArray {
         val out = ByteArrayOutputStream()
         out.write(MARKER_MAP.code)
@@ -234,7 +234,7 @@ data class LLSDArray(val value: MutableList<LLSDValue> = mutableListOf()) : LLSD
     fun add(llsdValue: LLSDValue) { value.add(llsdValue) }
     val size: Int get() = value.size
     fun asStringList(): List<String> = value.map { it.toString() }
-    
+
     override fun toXML(): String {
         val sb = StringBuilder("<array>")
         for (v in value) {
@@ -243,7 +243,7 @@ data class LLSDArray(val value: MutableList<LLSDValue> = mutableListOf()) : LLSD
         sb.append("</array>")
         return sb.toString()
     }
-    
+
     override fun toBinary(): ByteArray {
         val out = ByteArrayOutputStream()
         out.write(MARKER_ARRAY.code)

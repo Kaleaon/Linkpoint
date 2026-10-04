@@ -9,40 +9,40 @@ import javax.annotation.Nonnull
 
 /**
  * Grid Connection Manager
- * 
+ *
  * Manages multiple SL grid connections using a thread-safe WeakHashMap.
  * Based on the reference viewer's GridConnectionManager implementation.
- * 
+ *
  * Features:
  * - Thread-safe connection management
  * - UUID-based connection tracking
  * - Automatic cleanup via weak references
  * - Mobile-optimized for resource efficiency
- * 
+ *
  * Mobile-First Considerations:
  * - WeakHashMap prevents memory leaks on mobile devices
  * - Thread-safe operations prevent race conditions
  * - Efficient connection pooling for better performance
  */
 object GridConnectionManager {
-    
+
     private const val TAG = "GridConnectionManager"
-    
+
     /**
      * Thread-safe lock for connection operations
      */
     private val lock = Any()
-    
+
     /**
      * WeakHashMap for connection storage
      * Automatically cleans up unused connections
      * Prevents memory leaks on mobile devices
      */
     private val connections: MutableMap<UUID, GridConnection> = WeakHashMap()
-    
+
     /**
      * Get a connection by UUID
-     * 
+     *
      * @param connectionId The UUID of the connection to retrieve
      * @return The connection if found, null otherwise
      */
@@ -52,7 +52,7 @@ object GridConnectionManager {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "getConnection: null connectionId provided")
             return null
         }
-        
+
         synchronized(lock) {
             val connection = connections[connectionId]
             if (connection != null) {
@@ -63,10 +63,10 @@ object GridConnectionManager {
             return connection
         }
     }
-    
+
     /**
      * Add a new connection
-     * 
+     *
      * @param connectionId The UUID for the connection
      * @param connection The GridConnection to add
      */
@@ -77,10 +77,10 @@ object GridConnectionManager {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Active connections: ${connections.size}")
         }
     }
-    
+
     /**
      * Remove a connection
-     * 
+     *
      * @param connectionId The UUID of the connection to remove
      * @param connection The connection being removed (for verification)
      */
@@ -94,10 +94,10 @@ object GridConnectionManager {
             }
         }
     }
-    
+
     /**
      * Get all active connections
-     * 
+     *
      * @return List of all active connections
      */
     fun getAllConnections(): List<GridConnection> {
@@ -105,10 +105,10 @@ object GridConnectionManager {
             return connections.values.toList()
         }
     }
-    
+
     /**
      * Get the number of active connections
-     * 
+     *
      * @return Number of active connections
      */
     fun getConnectionCount(): Int {
@@ -116,10 +116,10 @@ object GridConnectionManager {
             return connections.size
         }
     }
-    
+
     /**
      * Check if a connection exists
-     * 
+     *
      * @param connectionId The UUID to check
      * @return true if the connection exists, false otherwise
      */
@@ -128,7 +128,7 @@ object GridConnectionManager {
             return connections.containsKey(connectionId)
         }
     }
-    
+
     /**
      * Clear all connections
      * Used for cleanup or testing
@@ -140,10 +140,10 @@ object GridConnectionManager {
             NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Cleared all connections: $count")
         }
     }
-    
+
     /**
      * Get connection statistics
-     * 
+     *
      * @return Map containing connection statistics
      */
     fun getStatistics(): Map<String, Any> {
@@ -155,10 +155,10 @@ object GridConnectionManager {
             )
         }
     }
-    
+
     /**
      * Estimate memory usage of connections
-     * 
+     *
      * @return Estimated memory usage in bytes
      */
     private fun estimateMemoryUsage(): Long {

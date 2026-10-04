@@ -59,7 +59,7 @@ import java.util.UUID
 
 /**
  * Compose-based LSL Script Editor Screen.
- * 
+ *
  * Features:
  * - LSL syntax highlighting with complete language support
  * - Line numbers
@@ -68,7 +68,7 @@ import java.util.UUID
  * - Reset script (for object scripts)
  * - Toggle running state (for object scripts)
  * - Dark theme optimized for code editing
- * 
+ *
  * Based on Firestorm/reference viewer script editor design.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,7 +89,7 @@ fun ScriptEditorScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
-    
+
     var scriptContent by remember { mutableStateOf("") }
     var highlightedContent by remember { mutableStateOf(AnnotatedString("")) }
     var isLoading by remember { mutableStateOf(true) }
@@ -102,7 +102,7 @@ fun ScriptEditorScreen(
     LaunchedEffect(scriptContent, isReadOnly) {
         hasUnsavedChanges = !isReadOnly && scriptContent != originalScriptContent
     }
-    
+
     // Load script on mount
     LaunchedEffect(assetId) {
         if (assetId != null) {
@@ -168,7 +168,7 @@ fun ScriptEditorScreen(
             }
         )
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -201,7 +201,7 @@ fun ScriptEditorScreen(
                     }) {
                         Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
                     }
-                    
+
                     if (!isReadOnly && itemId != null) {
                         IconButton(
                             onClick = {
@@ -227,7 +227,7 @@ fun ScriptEditorScreen(
                         IconButton(onClick = { showMenu = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More options")
                         }
-                        
+
                         DropdownMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false }
@@ -245,7 +245,7 @@ fun ScriptEditorScreen(
                                     }
                                 }
                             )
-                            
+
                             DropdownMenuItem(
                                 text = { Text(if (isRunning) "Stop Script" else "Start Script") },
                                 leadingIcon = {
@@ -330,10 +330,10 @@ fun LSLCodeEditor(
 ) {
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
-    
+
     val lines = code.split("\n")
     val lineCount = lines.size
-    
+
     Row(
         modifier = modifier
             .background(LSLLanguage.Colors.BACKGROUND)
@@ -356,7 +356,7 @@ fun LSLCodeEditor(
                 )
             }
         }
-        
+
         // Code content
         SelectionContainer {
             Box(

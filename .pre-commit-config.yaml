@@ -1,3 +1,5 @@
+exclude: '^((lumiya_extracted|secondlife_decompiled|android-sdk|disassembled-apps|Gauss|vendor|apk_analysis|lumiya_decompiled_source|cmdline-temp|file_bundle|kotlin-translations|builds)/|Linkpoint/src/test/resources/)'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

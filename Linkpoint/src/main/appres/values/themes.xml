@@ -9,7 +9,7 @@
         <item name="colorOnSecondary">@color/white</item>
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
     </style>
-    
+
     <style name="Theme.Linkpoint.Fullscreen" parent="Theme.Linkpoint">
         <item name="android:windowFullscreen">true</item>
         <item name="windowNoTitle">true</item>

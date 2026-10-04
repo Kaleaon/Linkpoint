@@ -25,7 +25,7 @@ Compiles the application and generates APKs.
 1. **Checkout**: Retrieves source code with full history
 2. **Java Setup**: Configures JDK 17 (Temurin distribution)
 3. **Android SDK**: Installs Android SDK 34, NDK 25.2.9519653
-4. **Caching**: 
+4. **Caching**:
    - Gradle packages and wrappers
    - Kotlin compiler artifacts
    - Android build cache
@@ -375,6 +375,6 @@ For build issues or questions:
 
 ---
 
-**Last Updated:** October 5, 2025  
-**Pipeline Version:** 2.0 (Post-Kotlin Migration)  
+**Last Updated:** October 5, 2025
+**Pipeline Version:** 2.0 (Post-Kotlin Migration)
 **Status:** ✅ Fully Operational
