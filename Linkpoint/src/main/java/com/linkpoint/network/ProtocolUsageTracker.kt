@@ -8,6 +8,7 @@ class ProtocolUsageTracker {
         var http2Requests: Int = 0,
         var http11Requests: Int = 0,
         var http10Requests: Int = 0,
+        var alpnWarnings: Int = 0,
         var textureHttp2Count: Int = 0,
         var textureHttp11Count: Int = 0,
         var meshHttp2Count: Int = 0,
@@ -29,6 +30,7 @@ class ProtocolUsageTracker {
                 appendLine("  HTTP/2 Requests: $http2Requests (${String.format("%.1f", getHttp2Percentage())}%)")
                 appendLine("  HTTP/1.1 Requests: $http11Requests")
                 appendLine("  HTTP/1.0 Requests: $http10Requests")
+                appendLine("  ALPN Fallback Warnings: $alpnWarnings")
                 appendLine()
                 appendLine("  By Request Type:")
                 appendLine("    Textures: HTTP/2=$textureHttp2Count, HTTP/1.1=$textureHttp11Count")
@@ -56,6 +58,10 @@ class ProtocolUsageTracker {
     private val protocolStats = ProtocolStatistics()
 
     fun getProtocolStatistics(): ProtocolStatistics = protocolStats.copy()
+
+    fun trackAlpnWarning() {
+        protocolStats.alpnWarnings++
+    }
 
     fun trackByType(type: RequestType, protocol: String) {
         val flags = resolveProtocolFlags(protocol)

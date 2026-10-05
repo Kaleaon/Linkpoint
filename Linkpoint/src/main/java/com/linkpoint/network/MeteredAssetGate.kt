@@ -68,7 +68,11 @@ class MeteredAssetGate(
         if (metered == meteredNow) return
         meteredNow = metered
         current = buildSemaphore(metered)
-        Log.i(TAG, "Asset-fetch concurrency cap → ${if (metered) METERED_PERMITS else UNMETERED_PERMITS} (metered=$metered)")
+        try {
+            Log.i(TAG, "Asset-fetch concurrency cap → ${if (metered) METERED_PERMITS else UNMETERED_PERMITS} (metered=$metered)")
+        } catch (e: Throwable) {
+            // Unit test fallback
+        }
     }
 
     /**
@@ -108,12 +112,10 @@ class MeteredAssetGate(
         const val METERED_PERMITS = 2
 
         /**
-         * Concurrency cap on unmetered links. 8 is generous enough to
-         * saturate a residential Wi-Fi but not so large that we exhaust
-         * Cronet's per-host pool (default 6) — matches the OkHttp
-         * `dispatcher.maxRequestsPerHost` we use elsewhere.
+         * Concurrency cap on unmetered links. Expanded to 64 concurrent
+         * multiplexed HTTP/2 or HTTP/3 streams on unmetered links.
          */
-        const val UNMETERED_PERMITS = 8
+        const val UNMETERED_PERMITS = 64
 
         /**
          * Process-wide shared instance. Built lazily so it's safe to

@@ -9,6 +9,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlin.coroutines.resume
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +45,7 @@ class TextureManager(
         capabilityManager?.getTextureFetchURL() ?: capabilityManager?.getCapability(com.linkpoint.protocol.capabilities.CapabilityManager.CAP_GET_TEXTURE)
     companion object {
         private const val TAG = "TextureManager"
-        private const val MAX_CONCURRENT_DOWNLOADS = 4
+        private const val MAX_CONCURRENT_DOWNLOADS = 64
         private const val TEXTURE_FETCH_TIMEOUT_MS = 30000L
         private const val MAX_DECODE_RETRIES = 2
         private const val MAX_DECODE_MEMORY_BYTES = 64 * 1024 * 1024
@@ -88,6 +89,10 @@ class TextureManager(
     // wasn't being explicitly set on this builder.
     private val httpClient = SSLHelper.configureForCdn(
         OkHttpClient.Builder()
+            .dispatcher(okhttp3.Dispatcher().apply {
+                maxRequests = 64
+                maxRequestsPerHost = 64
+            })
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
@@ -95,7 +100,13 @@ class TextureManager(
 
     // Download queue with priority
     private val downloadQueue = PriorityBlockingQueue<TextureRequest>(100)
+    private val workSignal = Channel<Unit>(Channel.UNLIMITED)
     private val activeDownloads = AtomicInteger(0)
+
+    private fun enqueueDownloadRequest(request: TextureRequest) {
+        downloadQueue.offer(request)
+        workSignal.trySend(Unit)
+    }
     private val pendingTextures = ConcurrentHashMap<UUID, Deferred<Bitmap?>>()
 
     // Off-thread asset decoding worker pool & frustum priority queue
@@ -180,7 +191,7 @@ class TextureManager(
         val discard = computeDiscardLevel(priority, distanceMeters = 256f)
         textureIds.forEach { id ->
             if (!textureCache.containsKey(id)) {
-                downloadQueue.offer(TextureRequest(id, priority, discard))
+                enqueueDownloadRequest(TextureRequest(id, priority, discard))
             }
         }
     }
@@ -304,6 +315,7 @@ class TextureManager(
                 )
                 if (cronetResult is CronetResult.Success && cronetResult.code in 200..299) {
                     val durationMs = System.currentTimeMillis() - startTime
+                    trackNegotiatedProtocol(url, cronetResult.protocol)
                     Log.d(TAG, "🖼️ Texture downloaded via Cronet/${cronetResult.protocol}: " +
                         "$textureId (${cronetResult.body.size} bytes, ${durationMs}ms)")
                     NetworkLogger.logTextureResult(
@@ -333,7 +345,9 @@ class TextureManager(
                 .header("Accept", "image/x-j2c, image/jp2, image/jpeg, image/*")
                 .build()
 
-            val response = httpClient.newCall(request).execute()
+            val response = com.linkpoint.network.MeteredAssetGate.shared.withPermit {
+                httpClient.newCall(request).execute()
+            }
             val durationMs = System.currentTimeMillis() - startTime
             val protocol = response.protocol.toString()
 
@@ -344,7 +358,7 @@ class TextureManager(
                 if (response.isSuccessful) {
                     val data = response.body?.bytes()
                     val sizeBytes = data?.size ?: 0
-
+                    trackNegotiatedProtocol(url, protocol)
                     Log.d(TAG, "🖼️ Texture downloaded: $textureId ($sizeBytes bytes, ${durationMs}ms, $protocol)")
                     NetworkLogger.logTextureResult(
                         textureId = textureId.toString(),
@@ -698,8 +712,20 @@ class TextureManager(
     }
 
     private suspend fun downloadWorker() {
-        while (true) {
-            val request = downloadQueue.take()
+        while (currentCoroutineContext().isActive) {
+            val request = downloadQueue.poll()
+            if (request == null) {
+                try {
+                    withTimeoutOrNull(500L) {
+                        workSignal.receive()
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Throwable) {
+                    // Ignore closed/cancelled signal
+                }
+                continue
+            }
             if (activeDownloads.get() < MAX_CONCURRENT_DOWNLOADS) {
                 activeDownloads.incrementAndGet()
                 try {
@@ -712,7 +738,7 @@ class TextureManager(
             } else {
                 // Re-queue if too many active
                 downloadQueue.offer(request)
-                delay(100)
+                delay(50L)
             }
         }
     }
@@ -722,6 +748,7 @@ class TextureManager(
     }
 
     fun shutdown() {
+        workSignal.close()
         scope.cancel()
         clearDecodedCache()
     }
@@ -758,7 +785,7 @@ class TextureManager(
 
         retryList.forEach { req ->
             if (!textureCache.containsKey(req.textureId)) {
-                downloadQueue.offer(req)
+                enqueueDownloadRequest(req)
             }
         }
     }
@@ -789,14 +816,42 @@ class TextureManager(
     // Additional tracking for diagnostics (volatile for thread safety)
     @Volatile private var lastError: String? = null
     @Volatile private var lastErrorTime: Long = 0
+    @Volatile private var lastNegotiatedProtocol: String? = null
+    private val http2DownloadCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private val http11DownloadCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private val alpnWarningCount = java.util.concurrent.atomic.AtomicInteger(0)
     private var j2kDecodeAttempts = java.util.concurrent.atomic.AtomicInteger(0)
     private var j2kDecodeSuccesses = java.util.concurrent.atomic.AtomicInteger(0)
+
+    private fun trackNegotiatedProtocol(url: String, protocol: String) {
+        lastNegotiatedProtocol = protocol
+        val isH2OrH3 = protocol.contains("h2", ignoreCase = true) ||
+                      protocol.contains("http/2", ignoreCase = true) ||
+                      protocol.contains("h3", ignoreCase = true) ||
+                      protocol.contains("quic", ignoreCase = true)
+        if (isH2OrH3) {
+            http2DownloadCount.incrementAndGet()
+        } else {
+            http11DownloadCount.incrementAndGet()
+            alpnWarningCount.incrementAndGet()
+            NetworkLogger.logAlpnWarning(url, protocol)
+        }
+    }
 
     /**
      * Get comprehensive diagnostic data for debug reports
      */
     fun getDiagnostics(): TextureManagerDiagnostics {
         val currentStats = _stats.value
+        val h2Count = http2DownloadCount.get()
+        val h11Count = http11DownloadCount.get()
+        val warnings = alpnWarningCount.get()
+        val alpnState = when {
+            warnings > 0 && h2Count == 0 -> "FALLBACK_HTTP11"
+            h2Count > 0 && warnings > 0 -> "MIXED"
+            h2Count > 0 -> "NEGOTIATED_H2"
+            else -> "UNTESTED"
+        }
         return TextureManagerDiagnostics(
             pendingDownloads = currentStats.pendingDownloads,
             downloadedCount = currentStats.downloadedCount,
@@ -817,7 +872,12 @@ class TextureManager(
             j2kDecodeSuccesses = j2kDecodeSuccesses.get(),
             lastError = lastError,
             lastErrorTimeAgo = if (lastErrorTime > 0) System.currentTimeMillis() - lastErrorTime else null,
-            textureErrorStateCount = textureErrorStates.size
+            textureErrorStateCount = textureErrorStates.size,
+            lastNegotiatedProtocol = lastNegotiatedProtocol,
+            http2DownloadCount = h2Count,
+            http11DownloadCount = h11Count,
+            alpnWarningCount = warnings,
+            alpnState = alpnState
         )
     }
 
@@ -843,7 +903,12 @@ class TextureManager(
         val j2kDecodeSuccesses: Int,
         val lastError: String?,
         val lastErrorTimeAgo: Long?,
-        val textureErrorStateCount: Int
+        val textureErrorStateCount: Int,
+        val lastNegotiatedProtocol: String? = null,
+        val http2DownloadCount: Int = 0,
+        val http11DownloadCount: Int = 0,
+        val alpnWarningCount: Int = 0,
+        val alpnState: String = "UNTESTED"
     )
 }
 
