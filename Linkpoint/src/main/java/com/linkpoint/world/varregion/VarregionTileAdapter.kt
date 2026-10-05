@@ -70,7 +70,7 @@ class VarregionTileAdapter(
         safeLog("Initialized VarregionTileAdapter: region ${regionWidth}x${regionHeight}m -> grid ${gridWidth}x${gridHeight} sub-tiles")
     }
 
-    // ── Coordinate Translation & Routing ───────────────────────────────────
+    // --- Coordinate Translation & Routing ---
 
     /**
      * Calculate tile indices (tileX, tileY) for a world coordinate (x, y).
@@ -200,7 +200,7 @@ class VarregionTileAdapter(
         }
     }
 
-    // ── Multi-Octree Spatial Query & Culling ───────────────────────────────
+    // --- Multi-Octree Spatial Query & Culling ---
 
     /**
      * Aggregates frustum culling queries across all active sub-tile spatial octrees.
@@ -234,7 +234,7 @@ class VarregionTileAdapter(
         return aggregatedResults
     }
 
-    // ── Water Level Management ─────────────────────────────────────────────
+    // --- Water Level Management ---
 
     /**
      * Set water height across all virtual sub-tiles.
@@ -249,7 +249,7 @@ class VarregionTileAdapter(
         }
     }
 
-    // ── Composite Minimap Generation ─────────────────────────────────────────
+    // --- Composite Minimap Generation ---
 
     /**
      * Stitches individual sub-tile terrain bitmaps into a unified Varregion overview map.
@@ -288,7 +288,7 @@ class VarregionTileAdapter(
         }
     }
 
-    // ── Region Crossing Resolution ─────────────────────────────────────────
+    // --- Region Crossing Resolution ---
 
     /**
      * Determines whether a movement vector is an internal virtual sub-tile transition

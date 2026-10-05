@@ -75,7 +75,7 @@ class MinimapManager(
         this.regionHeight = maxOf(256f, height)
         renderMinimap()
     }
-    
+
     // Rendered minimap
     private val _minimapBitmap = MutableStateFlow<Bitmap?>(null)
     val minimapBitmap: StateFlow<Bitmap?> = _minimapBitmap
@@ -251,7 +251,7 @@ class MinimapManager(
     private fun drawMarker(canvas: Canvas, marker: MinimapMarker, paint: Paint, textPaint: Paint) {
         val x = (marker.x / regionWidth) * MINIMAP_SIZE
         val y = MINIMAP_SIZE - (marker.y / regionHeight) * MINIMAP_SIZE // Flip Y
-        
+
         paint.color = when (marker.type) {
             MARKER_SELF -> COLOR_SELF
             MARKER_FRIEND -> COLOR_FRIEND
@@ -295,7 +295,7 @@ class MinimapManager(
     fun getMarkerAt(screenX: Float, screenY: Float, mapWidth: Float, mapHeight: Float): MinimapMarker? {
         val mapX = (screenX / mapWidth) * regionWidth
         val mapY = regionHeight - (screenY / mapHeight) * regionHeight
-        
+
         // Find closest marker within 5 meters
         return avatarMarkers.values.minByOrNull {
             val dx = it.x - mapX

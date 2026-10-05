@@ -108,7 +108,7 @@ object LayerDataParser {
             // Decompress patches until end marker (supporting Varregions up to 4096m)
             while (!buffer.isEOF()) {
                 val patch = TerrainPatch.decompressPatch(buffer, patchSize) ?: break
-                
+
                 if (patch.x >= 0 && patch.y >= 0 && patch.x < 256 && patch.y < 256) {
                     patches.add(patch)
                 }
