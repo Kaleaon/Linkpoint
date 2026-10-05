@@ -808,7 +808,7 @@ class LinkpointApp : Application() {
         cacheManager = CacheManager(this)
 
         // Asset system
-        assetCache = AssetCache(this)
+        assetCache = AssetCache(this, cacheManager)
         textureManager = TextureManager(this, assetCache, capabilityManager)
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)

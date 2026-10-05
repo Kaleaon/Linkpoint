@@ -438,6 +438,18 @@ class CacheManager(private val context: Context) {
     }
 
     /**
+     * Get general public asset directory for fallback asset types.
+     * Structure: Linkpoint/Public/<GridName>/asset_cache/
+     */
+    fun getGeneralAssetDirectory(): File {
+        val dir = File(getPublicCacheDirectory(), GENERAL_DIR)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
+    }
+
+    /**
      * Get private cache directory for a specific data type.
      * Structure: Linkpoint/Private/<GridName>/<UserID>/<dataType>/
      */
