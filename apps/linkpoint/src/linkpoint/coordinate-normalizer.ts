@@ -1,6 +1,6 @@
 /**
  * Linkpoint - Coordinate Normalizer
- *
+ * 
  * Normalizes 3D spatial coordinates between region-local vectors (0 to 256 meters)
  * and global grid coordinates for SL and OpenSim worlds.
  */

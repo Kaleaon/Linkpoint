@@ -26,11 +26,11 @@ const SUN_DISTANCE = 10000;
 export class Scene3D extends Utils.EventEmitter {
   public graphics: Graphics3D;
   public camera: Camera3D;
-
+  
   // Scene objects
   public objects: Map<string, any> = new Map();
   public lights: any[] = [];
-
+  
   // Grid
   public showGrid: boolean = true;
   public gridSize: number = 256;
@@ -102,12 +102,12 @@ export class Scene3D extends Utils.EventEmitter {
     // Create default primitives
     this.createDefaultPrimitives();
     this.createEnvironmentMeshes();
-
+    
     // Create grid
     if (this.showGrid) {
       this.createGrid();
     }
-
+    
     // Add default light
     this.addLight({
       type: 'directional',
@@ -115,7 +115,7 @@ export class Scene3D extends Utils.EventEmitter {
       color: [1, 1, 1],
       intensity: 1.0
     });
-
+    
     this.emit('initialized');
   }
 
@@ -126,17 +126,17 @@ export class Scene3D extends Utils.EventEmitter {
     // Cube
     const cube = Primitives3D.createCube(1);
     this.graphics.createMesh('cube', cube.vertices, cube.indices, cube.normals, cube.texCoords);
-
+    
     // Sphere
     const sphere = Primitives3D.createSphere(0.5, 32, 16);
     this.graphics.createMesh('sphere', sphere.vertices, sphere.indices, sphere.normals, sphere.texCoords);
-
+    
     // Plane
     const plane = Primitives3D.createPlane(10, 10, 10, 10);
     this.graphics.createMesh('plane', plane.vertices, plane.indices, plane.normals, plane.texCoords);
     const particleSprite = Primitives3D.createPlane(1, 1);
     this.graphics.createMesh('particle-sprite', particleSprite.vertices, particleSprite.indices, particleSprite.normals, particleSprite.texCoords);
-
+    
     // Cylinder
     const cylinder = Primitives3D.createCylinder(0.5, 0.5, 1, 32);
     this.graphics.createMesh('cylinder', cylinder.vertices, cylinder.indices, cylinder.normals, cylinder.texCoords);
@@ -368,7 +368,7 @@ export class Scene3D extends Utils.EventEmitter {
       // Packed joint matrices (see skinning.ts packJointRows) for rigged meshes.
       skin: config.skin || null,
     };
-
+    
     this.objects.set(id, object);
     this.emit('object_added', object);
     return object;
@@ -407,7 +407,7 @@ export class Scene3D extends Utils.EventEmitter {
       color: config.color || [1, 1, 1],
       intensity: config.intensity || 1.0
     };
-
+    
     this.lights.push(light);
     this.emit('light_added', light);
     return light;
@@ -701,9 +701,9 @@ export class Scene3D extends Utils.EventEmitter {
   renderGrid(viewMatrix: Float32Array, projectionMatrix: Float32Array) {
     const modelMatrix = this.mat4Identity();
     const normalMatrix = this.mat3FromMat4(modelMatrix);
-
+    
     const light = this.lights[0] || { position: [100, 100, 200], color: [1, 1, 1] };
-
+    
     if (this.terrainTextured && this.terrainMaterials) {
       const names = this.terrainMaterials.textureNames;
       const use = [0, 1, 2, 3].map((i) => (this.graphics.hasTexture(names[i]) ? 1 : 0));
@@ -762,10 +762,10 @@ export class Scene3D extends Utils.EventEmitter {
       object.rotation,
       object.scale
     );
-
+    
     const normalMatrix = this.mat3FromMat4(modelMatrix);
     const light = this.lights[0] || { position: [100, 100, 200], color: [1, 1, 1] };
-
+    
     const draws = object.meshes?.length ? object.meshes : [{ mesh: object.mesh, materialIndex: 0 }];
     for (const draw of draws) {
       const face = object.faces?.[draw.materialIndex];
@@ -817,7 +817,7 @@ export class Scene3D extends Utils.EventEmitter {
     if (rotation[1] !== 0) this.mat4RotateY(matrix, rotation[1]);
     if (rotation[2] !== 0) this.mat4RotateZ(matrix, rotation[2]);
     this.mat4Translate(matrix, position);
-
+    
     return matrix;
   }
 

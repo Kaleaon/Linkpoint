@@ -40,7 +40,7 @@ export class WorldViewer extends Utils.EventEmitter {
   public interactionMode: 'navigate' | 'interact' = 'navigate';
   private dragVelocityThreshold = 0.05;
   private dragDisplacementThreshold = 3;
-
+  
   public region: any = null;
   public objects: any[] = [];
   public nearbyUsers: any[] = [];
