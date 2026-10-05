@@ -2,8 +2,8 @@ import { execSync } from 'node:child_process';
 
 // Known unfixable upstream security advisories (with no available patched release)
 const IGNORED_ADVISORIES = new Set([
-  'GHSA-vfj7-8cjw-p6xm', // braces <= 3.0.3
-  'GHSA-ch52-4w7c-c8xp', // http-cache-semantics <= 4.2.0
+  'GHSA-VFJ7-8CJW-P6XM', // braces <= 3.0.3
+  'GHSA-CH52-4W7C-C8XP', // http-cache-semantics <= 4.2.0
 ]);
 
 let output = '';
@@ -37,18 +37,19 @@ const unhandledAdvisories = [];
 for (const [pkgName, vuln] of Object.entries(vulnerabilities)) {
   const viaList = Array.isArray(vuln.via) ? vuln.via : [];
   for (const item of viaList) {
-    if (item && typeof item === 'object' && item.url) {
-      const match = item.url.match(/GHSA-[a-zA-Z0-9-]+/i);
-      const ghsaId = match ? match[0] : item.url.split('/').pop();
+    if (item && typeof item === 'object') {
+      const url = item.url || '';
+      const match = url.match(/GHSA-[a-zA-Z0-9-]+/i);
+      const ghsaId = match ? match[0].toUpperCase() : (url ? url.split('/').pop().toUpperCase() : 'UNKNOWN');
       const rawSeverity = item.severity || vuln.severity || '';
       const severity = rawSeverity.toLowerCase();
       if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
         unhandledAdvisories.push({
           package: pkgName,
           ghsaId,
-          title: item.title,
+          title: item.title || vuln.name || pkgName,
           severity,
-          url: item.url,
+          url,
         });
       }
     }
