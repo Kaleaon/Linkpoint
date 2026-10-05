@@ -872,7 +872,7 @@ class LinkpointApp : Application() {
         )
 
         // World features
-        worldMap = WorldMap(capabilityManager)
+        worldMap = WorldMap(capabilityManager, assetCache = assetCache)
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
         regionExperienceManager = RegionExperienceManager(capabilityManager)
@@ -882,7 +882,7 @@ class LinkpointApp : Application() {
         // this method). VoiceManager.joinSpatialVoice consults
         // `voiceServerType` to pick between Vivox and the new WebRTC
         // path (`WebRtcVoiceSession`).
-        voiceManager = VoiceManager(this, capabilityManager, simulatorFeatures, parcelManager)
+        voiceManager = VoiceManager(this, capabilityManager, simulatorFeatures, parcelManager = parcelManager)
 
         // NEW: Environment/Windlight
         environmentManager = EnvironmentManager(capabilityManager)

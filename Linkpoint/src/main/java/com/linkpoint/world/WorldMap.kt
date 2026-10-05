@@ -3,6 +3,10 @@ package com.linkpoint.world
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import android.util.LruCache
+import com.linkpoint.assets.AssetCache
+import com.linkpoint.assets.AssetType
+import com.linkpoint.assets.CacheManager
 import com.linkpoint.assets.TextureManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
@@ -11,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -20,13 +25,19 @@ import java.util.concurrent.TimeUnit
  * Handles map tile loading and region information
  */
 class WorldMap(
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    private val assetCache: AssetCache? = null,
+    private val cacheManager: CacheManager? = null,
+    private val tileCacheDir: File? = null
 ) {
     companion object {
         private const val TAG = "WorldMap"
 
         // Map tile URLs
         private const val MAP_URL_TEMPLATE = "https://map.secondlife.com/map-{zoom}-{x}-{y}-objects.jpg"
+
+        // Byte-bounded memory LRU cache size limit for decoded tile bitmaps (24 MB)
+        const val TILE_MEMORY_CACHE_MAX_BYTES = 24 * 1024 * 1024
 
         // Zoom levels (1 = full grid, higher = more detail)
         const val ZOOM_GRID = 1
@@ -88,8 +99,22 @@ class WorldMap(
         Log.d(TAG, "Cached region info: $name at ($gridX, $gridY)")
     }
 
-    // Cached map tiles
-    private val mapTiles = ConcurrentHashMap<String, Bitmap>()
+    // Byte-bounded memory LRU cache for decoded tile bitmaps
+    private val mapTiles = object : LruCache<String, Bitmap>(TILE_MEMORY_CACHE_MAX_BYTES) {
+        override fun sizeOf(key: String, bitmap: Bitmap): Int {
+            val bytes = bitmap.byteCount
+            return if (bytes > 0) bytes else (bitmap.width * bitmap.height * 4)
+        }
+    }
+
+    private fun getDiskTileFile(key: String): File? {
+        val dir = tileCacheDir ?: cacheManager?.let { File(it.getPublicCacheDirectory(), "map_tiles") }
+        if (dir != null) {
+            if (!dir.exists()) dir.mkdirs()
+            return File(dir, "tile_$key.jpg")
+        }
+        return null
+    }
 
     // Known regions
     private val regions = ConcurrentHashMap<String, RegionMapInfo>()
@@ -131,25 +156,64 @@ class WorldMap(
     suspend fun getMapTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
         val key = "$zoom-$x-$y"
 
-        mapTiles[key]?.let { return it }
+        // Check memory LRU cache first
+        mapTiles.get(key)?.let {
+            if (!it.isRecycled) return it
+        }
 
         return withContext(Dispatchers.IO) {
             try {
-                val url = getEffectiveMapUrlTemplate()
-                    .replace("{zoom}", zoom.toString())
-                    .replace("{x}", x.toString())
-                    .replace("{y}", y.toString())
+                val tileUuid = UUID.nameUUIDFromBytes("maptile_$key".toByteArray())
+                var data: ByteArray? = null
 
-                val request = Request.Builder().url(url).build()
-                val response = httpClient.newCall(request).execute()
+                // Tier 2: Check disk cache (AssetCache or disk tile file)
+                if (assetCache != null) {
+                    data = assetCache.get(tileUuid, AssetType.IMAGE_JPEG)
+                }
 
-                if (!response.isSuccessful) return@withContext null
+                if (data == null) {
+                    val diskFile = getDiskTileFile(key)
+                    if (diskFile != null && diskFile.exists()) {
+                        try {
+                            data = diskFile.readBytes()
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Failed to read cached tile from disk: $key", e)
+                        }
+                    }
+                }
 
-                val data = response.body?.bytes() ?: return@withContext null
+                // If not in disk cache, fetch over network
+                if (data == null) {
+                    val url = getEffectiveMapUrlTemplate()
+                        .replace("{zoom}", zoom.toString())
+                        .replace("{x}", x.toString())
+                        .replace("{y}", y.toString())
+
+                    val request = Request.Builder().url(url).build()
+                    val response = httpClient.newCall(request).execute()
+
+                    if (!response.isSuccessful) return@withContext null
+
+                    data = response.body?.bytes() ?: return@withContext null
+
+                    // Persist downloaded raw JPEG tile bytes to disk
+                    if (assetCache != null) {
+                        assetCache.put(tileUuid, AssetType.IMAGE_JPEG, data)
+                    }
+                    val diskFile = getDiskTileFile(key)
+                    if (diskFile != null) {
+                        try {
+                            diskFile.writeBytes(data)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Failed to write tile to disk: $key", e)
+                        }
+                    }
+                }
+
                 val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
 
                 if (bitmap != null) {
-                    mapTiles[key] = bitmap
+                    mapTiles.put(key, bitmap)
                 }
 
                 bitmap
@@ -384,11 +448,35 @@ class WorldMap(
     }
 
     /**
+     * Get memory LRU cache current size in bytes
+     */
+    fun getMemoryTileCacheSize(): Int = mapTiles.size()
+
+    /**
+     * Get memory LRU cache max size in bytes
+     */
+    fun getMemoryTileCacheMaxSize(): Int = mapTiles.maxSize()
+
+    /**
+     * Get bitmap from memory LRU cache directly without network or disk I/O
+     */
+    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
+        val bitmap = mapTiles.get("$zoom-$x-$y")
+        return if (bitmap != null && !bitmap.isRecycled) bitmap else null
+    }
+
+    /**
+     * Store a tile bitmap directly into the memory LRU cache.
+     */
+    fun putMemoryCachedTile(x: Int, y: Int, bitmap: Bitmap, zoom: Int = ZOOM_REGION) {
+        mapTiles.put("$zoom-$x-$y", bitmap)
+    }
+
+    /**
      * Clear cached tiles
      */
     fun clearCache() {
-        mapTiles.values.forEach { it.recycle() }
-        mapTiles.clear()
+        mapTiles.evictAll()
     }
 
     fun shutdown() {
