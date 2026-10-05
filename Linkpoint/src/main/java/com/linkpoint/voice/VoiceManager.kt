@@ -46,6 +46,7 @@ class VoiceManager(
      * Tests pass null and exercise the legacy flow directly.
      */
     private val simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager? = null,
+    private val parcelManager: com.linkpoint.world.ParcelManager? = null,
     initialGridKind: GridKind = GridKind.SECOND_LIFE,
     initialVoiceConfig: VoiceConfig? = null,
     adapterFactory: VoiceTransportAdapterFactory? = null,
@@ -330,6 +331,11 @@ class VoiceManager(
     }
 
     /**
+     * Connect to spatial voice channel. Convenience delegate to [joinSpatialVoice].
+     */
+    suspend fun connect(parcelLocalId: Int? = null): Boolean = joinSpatialVoice(parcelLocalId)
+
+    /**
      * Top-level entry point for spatial voice. Picks the WebRTC flow
      * for WebRTC-enabled regions or OpenSim grids via [VoiceTransportAdapter], and falls back to legacy
      * parcel voice for non-WebRTC regions.
@@ -348,12 +354,6 @@ class VoiceManager(
                 _isConnected.value = true
                 return@withContext true
             }
-        }
-        val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
-        if (isWebRtcVoiceRegion()) {
-            joinSpatialVoiceWebRtc(targetParcel)
-        } else {
-            joinOpenSimVoice(parcelLocalId)
         }
 
         joinParcelVoice()
