@@ -889,7 +889,7 @@ class LinkpointApp : Application() {
         // this method). VoiceManager.joinSpatialVoice consults
         // `voiceServerType` to pick between Vivox and the new WebRTC
         // path (`WebRtcVoiceSession`).
-        voiceManager = VoiceManager(this, capabilityManager, simulatorFeatures, parcelManager)
+        voiceManager = VoiceManager(this, capabilityManager, simulatorFeatures, parcelManager = parcelManager)
 
         // NEW: Environment/Windlight
         environmentManager = EnvironmentManager(capabilityManager)
