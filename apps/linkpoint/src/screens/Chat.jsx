@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useApp } from "../context/AppContext.jsx";
 import { useAnnouncer } from "../context/AnnouncerContext.jsx";
+import { useRlvSafe } from "../viewer/RlvContext";
 import Icon from "../components/Icon.jsx";
 import { app } from "../linkpoint/app";
 
@@ -165,8 +166,23 @@ export default function Chat() {
     setTimeout(() => setSavedNotice(false), 2000);
   };
 
+  // RLV Restrictions
+  const rlv = useRlvSafe();
+  const sendChatRestricted = rlv.restricted("sendchat");
+  const sendChatReason = rlv.reasonFor("sendchat");
+  const sendImRestricted = rlv.restricted("sendim");
+  const sendImReason = rlv.reasonFor("sendim");
+  const recvChatRestricted = rlv.restricted("recvchat");
+
+  const isCurrentSendRestricted = activeTab === "LOCAL" ? sendChatRestricted : activeTab === "IM" ? sendImRestricted : false;
+  const currentSendReason = activeTab === "LOCAL" ? sendChatReason : activeTab === "IM" ? sendImReason : null;
+
   const send = async (event) => {
     event.preventDefault();
+    if (isCurrentSendRestricted) {
+      setError(currentSendReason || "Action restricted by RLV.");
+      return;
+    }
     const text = draft.trim();
     if (!text || sending) return;
     if (!connected) return setError("Chat is unavailable while disconnected.");
@@ -503,9 +519,12 @@ export default function Chat() {
             id="chat-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            disabled={!connected || sending}
+            disabled={!connected || sending || isCurrentSendRestricted}
+            title={isCurrentSendRestricted ? (currentSendReason || "Restricted by RLV") : ""}
             placeholder={
-              !connected
+              isCurrentSendRestricted
+                ? (currentSendReason || "Blocked by RLV")
+                : !connected
                 ? "Disconnected"
                 : activeTab === "IM"
                 ? (selectedContact ? `Instant Message to ${selectedContact}…` : "Select a friend above or enter message…")
@@ -528,7 +547,8 @@ export default function Chat() {
           />
           <button
             type="submit"
-            disabled={!connected || !draft.trim() || sending}
+            disabled={!connected || !draft.trim() || sending || isCurrentSendRestricted}
+            title={isCurrentSendRestricted ? (currentSendReason || "Restricted by RLV") : ""}
             aria-label={activeTab === "IM" ? "Send Instant Message" : activeTab === "GROUP" ? "Send group message" : "Send local chat"}
             style={{ width: 48, border: 0, borderRadius: V.rs, background: V.pri, color: V.onpri, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
           >

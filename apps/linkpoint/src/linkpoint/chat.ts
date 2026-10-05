@@ -20,6 +20,17 @@ export class ChatManager extends Utils.EventEmitter {
   private autoReplyRecipients: Set<string> = new Set();
   public openSessions: Map<string, { contactId: string; contactName: string; openedAt: number }> = new Map();
   public closedSessions: Set<string> = new Set();
+  public rlvHandler: {
+    enabled: boolean;
+    processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, channel?: number) => void;
+  } | null = null;
+
+  public setRlvHandler(handler: {
+    enabled: boolean;
+    processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, channel?: number) => void;
+  } | null) {
+    this.rlvHandler = handler;
+  }
 
   constructor(protocolManager: any, authManager: any) {
     super();
@@ -336,9 +347,34 @@ export class ChatManager extends Utils.EventEmitter {
   async handleIncomingMessage(data: any): Promise<void> {
     const isGroup = data.type === 'group' || data.chatType === 'group' || data.chatType === 9;
     const isIM = !isGroup && (data.type === 'im' || data.chatType === 'im' || data.chatType === 4 || data.dialog !== undefined);
-    const senderId = data.fromId || data.from || data.OwnerID || data.senderId;
+    const senderId = data.fromId || data.from || data.OwnerID || data.senderId || 'default';
     const msgText = data.message || data.Message || data.text || '';
     const senderName = data.fromName || data.FromName || data.sender || 'Unknown';
+
+    // RLV Spatial Chat Interception Pipeline
+    const rlvEnabled = this.rlvHandler?.enabled || (typeof window !== 'undefined' && (window as any).rlvEnabled);
+    if (rlvEnabled && typeof msgText === 'string' && msgText.trim().startsWith('@')) {
+      let isOwner = true;
+      if (typeof data.isOwner === 'boolean') {
+        isOwner = data.isOwner;
+      } else {
+        const rawOwnerId = data.ownerId || data.OwnerID || data.owner_id;
+        const myId = this.auth?.user?.id;
+        if (rawOwnerId && myId) {
+          isOwner = String(rawOwnerId).toLowerCase() === String(myId).toLowerCase();
+        }
+      }
+
+      const channel = data.channel ?? 0;
+      if (this.rlvHandler && typeof this.rlvHandler.processCommand === 'function') {
+        this.rlvHandler.processCommand(msgText, senderId, isOwner, channel);
+      } else if (typeof window !== 'undefined' && typeof (window as any).rlvProcessor === 'function') {
+        (window as any).rlvProcessor(msgText, senderId, isOwner, channel);
+      }
+
+      // Suppress raw protocol @-commands from spatial chat logs
+      return;
+    }
     const isScriptError = Boolean(
       data.isScriptError ||
       data.chatType === 6 ||

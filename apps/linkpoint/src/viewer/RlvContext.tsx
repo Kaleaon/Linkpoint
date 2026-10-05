@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ViewerClient } from '@linkpoint/viewer-client';
+import { app } from '../linkpoint/app';
 
 /**
  * RLV (Restrained Life Viewer) restrictions.
@@ -161,7 +162,7 @@ export interface RlvContextValue {
   clearAllRestrictions: () => void;
 }
 
-const RlvContext = createContext<RlvContextValue | null>(null);
+export const RlvContext = createContext<RlvContextValue | null>(null);
 
 export const RlvProvider: React.FC<{
   children?: React.ReactNode;
@@ -245,6 +246,9 @@ export const RlvProvider: React.FC<{
           type: 'chat.send',
           payload: { body: `/${channel} ${reply}` },
         });
+      }
+      if (app?.auth?.isLoggedIn?.() && typeof app?.protocol?.sendChat === 'function') {
+        void app.protocol.sendChat(reply, channel);
       }
     },
     [client, onQueryReply],
@@ -376,6 +380,22 @@ export const RlvProvider: React.FC<{
     [active, sendReply],
   );
 
+  useEffect(() => {
+    if (app?.chat) {
+      app.chat.setRlvHandler({
+        enabled,
+        processCommand: (cmd: string, objId?: string, isOwner?: boolean) => {
+          processCommand(cmd, objId, isOwner);
+        },
+      });
+    }
+    return () => {
+      if (app?.chat) {
+        app.chat.setRlvHandler(null);
+      }
+    };
+  }, [enabled, processCommand]);
+
   const value = useMemo<RlvContextValue>(
     () => ({
       enabled,
@@ -439,4 +459,21 @@ export function useRlv(): RlvContextValue {
   const ctx = useContext(RlvContext);
   if (!ctx) throw new Error('useRlv must be used inside an RlvProvider');
   return ctx;
+}
+
+export function useRlvSafe(): RlvContextValue {
+  const ctx = useContext(RlvContext);
+  if (ctx) return ctx;
+  return {
+    enabled: false,
+    setEnabled: () => {},
+    active: new Set(),
+    objectRestrictions: new Map(),
+    restricted: () => false,
+    reasonFor: () => null,
+    setRestriction: () => {},
+    processCommand: () => {},
+    clearObjectRestrictions: () => {},
+    clearAllRestrictions: () => {},
+  };
 }
