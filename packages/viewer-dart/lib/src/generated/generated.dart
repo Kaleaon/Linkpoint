@@ -6802,13 +6802,15 @@ class GameControlInputPacket {
   }
 }
 
-class EventQueueGetCapabilities {
-  final int? ack;
-  final List<String>? events;
+class CapabilitiesRequestResponseCapabilities {
+  final List<String>? capabilities;
+  final String? seed_response;
+  final String? fetch_inventory;
 
-  EventQueueGetCapabilities({
-    this.ack,
-    this.events,
+  CapabilitiesRequestResponseCapabilities({
+    this.capabilities,
+    this.seed_response,
+    this.fetch_inventory,
   });
 }
 
@@ -6834,14 +6836,12 @@ class AgentDomainCapabilitiesCapabilities {
   });
 }
 
-class CapabilitiesRequestResponseCapabilities {
-  final List<String>? capabilities;
-  final String? seed_response;
-  final String? fetch_inventory;
+class EventQueueGetCapabilities {
+  final int? ack;
+  final List<String>? events;
 
-  CapabilitiesRequestResponseCapabilities({
-    this.capabilities,
-    this.seed_response,
-    this.fetch_inventory,
+  EventQueueGetCapabilities({
+    this.ack,
+    this.events,
   });
 }

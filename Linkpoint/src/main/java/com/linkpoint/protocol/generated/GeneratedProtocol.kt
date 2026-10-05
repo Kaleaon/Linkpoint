@@ -12,9 +12,9 @@ object GeneratedProtocolCatalog {
     const val TEMPLATE_VERSION = "2.0"
     val REGISTERED_MESSAGES = mapOf(
         "TestMessage" to 1,
-        "PacketAck" to 4294967291,
-        "OpenCircuit" to 4294967292,
-        "CloseCircuit" to 4294967293,
+        "PacketAck" to (4294967291L).toInt(),
+        "OpenCircuit" to (4294967292L).toInt(),
+        "CloseCircuit" to (4294967293L).toInt(),
         "StartPingCheck" to 1,
         "CompletePingCheck" to 2,
         "AddCircuitCode" to 2,
@@ -543,14 +543,14 @@ data class TestMessagePacket(
 // Message: PacketAck (Fixed 4294967291)
 data class PacketAckPacket(
     val messageName: String = "PacketAck",
-    val messageNumber: Int = 4294967291,
+    val messageNumber: Int = (4294967291L).toInt(),
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967291)
+        buffer.putInt((4294967291L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -559,14 +559,14 @@ data class PacketAckPacket(
 // Message: OpenCircuit (Fixed 4294967292)
 data class OpenCircuitPacket(
     val messageName: String = "OpenCircuit",
-    val messageNumber: Int = 4294967292,
+    val messageNumber: Int = (4294967292L).toInt(),
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967292)
+        buffer.putInt((4294967292L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -575,14 +575,14 @@ data class OpenCircuitPacket(
 // Message: CloseCircuit (Fixed 4294967293)
 data class CloseCircuitPacket(
     val messageName: String = "CloseCircuit",
-    val messageNumber: Int = 4294967293,
+    val messageNumber: Int = (4294967293L).toInt(),
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967293)
+        buffer.putInt((4294967293L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 

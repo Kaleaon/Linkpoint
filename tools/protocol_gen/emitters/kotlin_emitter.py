@@ -37,7 +37,8 @@ class KotlinEmitter(BaseEmitter):
         out.append(f'    const val TEMPLATE_VERSION = "{ast.version}"')
         out.append("    val REGISTERED_MESSAGES = mapOf(")
         for msg in ast.messages:
-            out.append(f'        "{msg.name}" to {msg.message_number},')
+            num_str = f"({msg.message_number}L).toInt()" if msg.message_number > 2147483647 else str(msg.message_number)
+            out.append(f'        "{msg.name}" to {num_str},')
         out.append("    )\n")
 
         # Zero-coding decompression helper
@@ -72,16 +73,17 @@ class KotlinEmitter(BaseEmitter):
 
         # Message data classes
         for msg in ast.messages:
+            num_str = f"({msg.message_number}L).toInt()" if msg.message_number > 2147483647 else str(msg.message_number)
             out.append(f"// Message: {msg.name} ({msg.frequency} {msg.message_number})")
             out.append(f"data class {msg.name}Packet(")
             out.append(f'    val messageName: String = "{msg.name}",')
-            out.append(f"    val messageNumber: Int = {msg.message_number},")
+            out.append(f"    val messageNumber: Int = {num_str},")
             out.append(f'    val frequency: String = "{msg.frequency}",')
             out.append(f'    val isZerocoded: Boolean = {"true" if msg.encoding == "Zerocoded" else "false"}')
             out.append(") {\n")
             out.append("    fun serialize(): ByteArray {")
             out.append("        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)")
-            out.append(f"        buffer.putInt({msg.message_number})")
+            out.append(f"        buffer.putInt({num_str})")
             out.append("        return buffer.array().copyOf(buffer.position())")
             out.append("    }\n")
             out.append("}\n")
@@ -108,8 +110,10 @@ class KotlinEmitter(BaseEmitter):
                 elif prop.data_type == "array":
                     kt_type = "List<String>"
 
-                opt = "?" if not prop.required else ""
-                fields_def.append(f"    val {p_name}: {kt_type}{opt} = null")
+                if prop.required:
+                    fields_def.append(f"    val {p_name}: {kt_type}")
+                else:
+                    fields_def.append(f"    val {p_name}: {kt_type}? = null")
             out.append(",\n".join(fields_def))
             out.append(")\n")
 

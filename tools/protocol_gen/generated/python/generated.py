@@ -5351,9 +5351,10 @@ class GameControlInputPacket:
 
 # Generated LLSD Capability Schemas
 @dataclass
-class EventQueueGetCapabilities:
-    ack: Optional[int] = None
-    events: List[str] = field(default_factory=list)
+class CapabilitiesRequestResponseCapabilities:
+    capabilities: List[str] = field(default_factory=list)
+    seed_response: Optional[str] = None
+    fetch_inventory: Optional[str] = None
 
 @dataclass
 class AgentDomainCapabilitiesCapabilities:
@@ -5367,7 +5368,6 @@ class AgentDomainCapabilitiesCapabilities:
     maturity_rating: Optional[str] = None
 
 @dataclass
-class CapabilitiesRequestResponseCapabilities:
-    capabilities: List[str] = field(default_factory=list)
-    seed_response: Optional[str] = None
-    fetch_inventory: Optional[str] = None
+class EventQueueGetCapabilities:
+    ack: Optional[int] = None
+    events: List[str] = field(default_factory=list)
