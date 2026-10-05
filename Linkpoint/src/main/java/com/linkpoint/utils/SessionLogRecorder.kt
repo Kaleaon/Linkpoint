@@ -97,6 +97,7 @@ object SessionLogRecorder {
     private val logTimeFormatter = ThreadLocal.withInitial {
         SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
     }
+
     /**
      * Internal event hierarchy processed asynchronously off network threads
      */

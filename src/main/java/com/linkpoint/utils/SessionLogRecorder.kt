@@ -69,9 +69,11 @@ class SessionLogRecorder(private val context: Context) {
 
     private val isInitialized = AtomicBoolean(false)
     private val isShuttingDown = AtomicBoolean(false)
+
     private val dateFormat = ThreadLocal.withInitial {
         SimpleDateFormat(DATE_FORMAT, Locale.US)
     }
+
     init {
         if (isInitialized.compareAndSet(false, true)) {
             startLogProcessor()
