@@ -128,7 +128,13 @@ class CacheManager(private val context: Context) {
             get() = "${Environment.getExternalStorageDirectory().absolutePath}/$LINKPOINT_CACHE_ROOT"
     }
 
-    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences? by lazy {
+        try {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     // Current grid name (e.g., "Agni", "Aditi")
     private var currentGridName: String = "SecondLife"
@@ -170,7 +176,7 @@ class CacheManager(private val context: Context) {
      * Get configured disk cache size in MB
      */
     fun getDiskCacheSizeMB(): Int {
-        return prefs.getInt(KEY_DISK_CACHE_SIZE_MB, DEFAULT_DISK_CACHE_MB)
+        return prefs?.getInt(KEY_DISK_CACHE_SIZE_MB, DEFAULT_DISK_CACHE_MB) ?: DEFAULT_DISK_CACHE_MB
     }
 
     /**
@@ -178,7 +184,7 @@ class CacheManager(private val context: Context) {
      */
     fun setDiskCacheSizeMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_DISK_CACHE_MB, MAX_DISK_CACHE_MB)
-        prefs.edit().putInt(KEY_DISK_CACHE_SIZE_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_DISK_CACHE_SIZE_MB, clampedSize)?.apply()
         Log.i(TAG, "Disk cache size set to ${clampedSize}MB")
     }
 
@@ -186,7 +192,7 @@ class CacheManager(private val context: Context) {
      * Get configured memory cache size in MB
      */
     fun getMemoryCacheSizeMB(): Int {
-        return prefs.getInt(KEY_MEMORY_CACHE_SIZE_MB, DEFAULT_MEMORY_CACHE_MB)
+        return prefs?.getInt(KEY_MEMORY_CACHE_SIZE_MB, DEFAULT_MEMORY_CACHE_MB) ?: DEFAULT_MEMORY_CACHE_MB
     }
 
     /**
@@ -194,7 +200,7 @@ class CacheManager(private val context: Context) {
      */
     fun setMemoryCacheSizeMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_MEMORY_CACHE_MB, MAX_MEMORY_CACHE_MB)
-        prefs.edit().putInt(KEY_MEMORY_CACHE_SIZE_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_MEMORY_CACHE_SIZE_MB, clampedSize)?.apply()
         Log.i(TAG, "Memory cache size set to ${clampedSize}MB")
     }
 
@@ -204,7 +210,7 @@ class CacheManager(private val context: Context) {
      * Get texture cache size limit in MB
      */
     fun getTextureCacheSizeMB(): Int {
-        return prefs.getInt(KEY_TEXTURE_CACHE_SIZE_MB, DEFAULT_TEXTURE_CACHE_MB)
+        return prefs?.getInt(KEY_TEXTURE_CACHE_SIZE_MB, DEFAULT_TEXTURE_CACHE_MB) ?: DEFAULT_TEXTURE_CACHE_MB
     }
 
     /**
@@ -212,7 +218,7 @@ class CacheManager(private val context: Context) {
      */
     fun setTextureCacheSizeMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_TEXTURE_CACHE_MB, MAX_TEXTURE_CACHE_MB)
-        prefs.edit().putInt(KEY_TEXTURE_CACHE_SIZE_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_TEXTURE_CACHE_SIZE_MB, clampedSize)?.apply()
         Log.i(TAG, "Texture cache size set to ${clampedSize}MB")
     }
 
@@ -220,7 +226,7 @@ class CacheManager(private val context: Context) {
      * Get mesh cache size limit in MB
      */
     fun getMeshCacheSizeMB(): Int {
-        return prefs.getInt(KEY_MESH_CACHE_SIZE_MB, DEFAULT_MESH_CACHE_MB)
+        return prefs?.getInt(KEY_MESH_CACHE_SIZE_MB, DEFAULT_MESH_CACHE_MB) ?: DEFAULT_MESH_CACHE_MB
     }
 
     /**
@@ -228,7 +234,7 @@ class CacheManager(private val context: Context) {
      */
     fun setMeshCacheSizeMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_MESH_CACHE_MB, MAX_MESH_CACHE_MB)
-        prefs.edit().putInt(KEY_MESH_CACHE_SIZE_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_MESH_CACHE_SIZE_MB, clampedSize)?.apply()
         Log.i(TAG, "Mesh cache size set to ${clampedSize}MB")
     }
 
@@ -236,7 +242,7 @@ class CacheManager(private val context: Context) {
      * Get sound cache size limit in MB
      */
     fun getSoundCacheSizeMB(): Int {
-        return prefs.getInt(KEY_SOUND_CACHE_SIZE_MB, DEFAULT_SOUND_CACHE_MB)
+        return prefs?.getInt(KEY_SOUND_CACHE_SIZE_MB, DEFAULT_SOUND_CACHE_MB) ?: DEFAULT_SOUND_CACHE_MB
     }
 
     /**
@@ -244,7 +250,7 @@ class CacheManager(private val context: Context) {
      */
     fun setSoundCacheSizeMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_SOUND_CACHE_MB, MAX_SOUND_CACHE_MB)
-        prefs.edit().putInt(KEY_SOUND_CACHE_SIZE_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_SOUND_CACHE_SIZE_MB, clampedSize)?.apply()
         Log.i(TAG, "Sound cache size set to ${clampedSize}MB")
     }
 
@@ -252,7 +258,7 @@ class CacheManager(private val context: Context) {
      * Get animation cache size limit in MB
      */
     fun getAnimationCacheSizeMB(): Int {
-        return prefs.getInt(KEY_ANIMATION_CACHE_SIZE_MB, DEFAULT_ANIMATION_CACHE_MB)
+        return prefs?.getInt(KEY_ANIMATION_CACHE_SIZE_MB, DEFAULT_ANIMATION_CACHE_MB) ?: DEFAULT_ANIMATION_CACHE_MB
     }
 
     /**
@@ -260,7 +266,7 @@ class CacheManager(private val context: Context) {
      */
     fun setAnimationCacheSizeMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_ANIMATION_CACHE_MB, MAX_ANIMATION_CACHE_MB)
-        prefs.edit().putInt(KEY_ANIMATION_CACHE_SIZE_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_ANIMATION_CACHE_SIZE_MB, clampedSize)?.apply()
         Log.i(TAG, "Animation cache size set to ${clampedSize}MB")
     }
 
@@ -271,7 +277,7 @@ class CacheManager(private val context: Context) {
      * This is separate from disk cache - it's how much RAM to use for decoded textures.
      */
     fun getTextureMemoryMB(): Int {
-        return prefs.getInt(KEY_TEXTURE_MEMORY_MB, DEFAULT_TEXTURE_MEMORY_MB)
+        return prefs?.getInt(KEY_TEXTURE_MEMORY_MB, DEFAULT_TEXTURE_MEMORY_MB) ?: DEFAULT_TEXTURE_MEMORY_MB
     }
 
     /**
@@ -280,7 +286,7 @@ class CacheManager(private val context: Context) {
      */
     fun setTextureMemoryMB(sizeMB: Int) {
         val clampedSize = sizeMB.coerceIn(MIN_TEXTURE_MEMORY_MB, MAX_TEXTURE_MEMORY_MB)
-        prefs.edit().putInt(KEY_TEXTURE_MEMORY_MB, clampedSize).apply()
+        prefs?.edit()?.putInt(KEY_TEXTURE_MEMORY_MB, clampedSize)?.apply()
         Log.i(TAG, "Texture memory set to ${clampedSize}MB")
     }
 
@@ -291,7 +297,7 @@ class CacheManager(private val context: Context) {
      * Returns "documents" (default), "internal", "external", or "custom".
      */
     fun getCacheLocation(): String {
-        return prefs.getString(KEY_CACHE_LOCATION, LOCATION_DOCUMENTS) ?: LOCATION_DOCUMENTS
+        return prefs?.getString(KEY_CACHE_LOCATION, LOCATION_DOCUMENTS) ?: LOCATION_DOCUMENTS
     }
 
     /**
@@ -302,10 +308,10 @@ class CacheManager(private val context: Context) {
         if (location != LOCATION_INTERNAL && location != LOCATION_EXTERNAL &&
             location != LOCATION_CUSTOM && location != LOCATION_DOCUMENTS) {
             Log.w(TAG, "Invalid cache location: $location, using documents")
-            prefs.edit().putString(KEY_CACHE_LOCATION, LOCATION_DOCUMENTS).apply()
+            prefs?.edit()?.putString(KEY_CACHE_LOCATION, LOCATION_DOCUMENTS)?.apply()
             return
         }
-        prefs.edit().putString(KEY_CACHE_LOCATION, location).apply()
+        prefs?.edit()?.putString(KEY_CACHE_LOCATION, location)?.apply()
         Log.i(TAG, "Cache location set to $location (requires restart)")
     }
 
@@ -313,7 +319,7 @@ class CacheManager(private val context: Context) {
      * Get the custom cache path (user-specified location).
      */
     fun getCustomCachePath(): String {
-        return prefs.getString(KEY_CUSTOM_CACHE_PATH, DEFAULT_EXTERNAL_CACHE_PATH) ?: DEFAULT_EXTERNAL_CACHE_PATH
+        return prefs?.getString(KEY_CUSTOM_CACHE_PATH, DEFAULT_EXTERNAL_CACHE_PATH) ?: DEFAULT_EXTERNAL_CACHE_PATH
     }
 
     /**
@@ -321,7 +327,7 @@ class CacheManager(private val context: Context) {
      * @param path The absolute path to use for cache (e.g., "/sdcard/Linkpoint")
      */
     fun setCustomCachePath(path: String) {
-        prefs.edit().putString(KEY_CUSTOM_CACHE_PATH, path).apply()
+        prefs?.edit()?.putString(KEY_CUSTOM_CACHE_PATH, path)?.apply()
         Log.i(TAG, "Custom cache path set to: $path")
     }
 
@@ -431,6 +437,18 @@ class CacheManager(private val context: Context) {
             CacheableAssetType.ANIMATIONS -> ANIMATIONS_DIR
         }
         val dir = File(getPublicCacheDirectory(), dirName)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
+    }
+
+    /**
+     * Get general public asset directory for fallback asset types.
+     * Structure: Linkpoint/Public/<GridName>/asset_cache/
+     */
+    fun getGeneralAssetDirectory(): File {
+        val dir = File(getPublicCacheDirectory(), GENERAL_DIR)
         if (!dir.exists()) {
             dir.mkdirs()
         }
@@ -566,14 +584,14 @@ class CacheManager(private val context: Context) {
      * Check if auto-clear on low space is enabled
      */
     fun isAutoClearOnLowSpaceEnabled(): Boolean {
-        return prefs.getBoolean(KEY_AUTO_CLEAR_ON_LOW_SPACE, true)
+        return prefs?.getBoolean(KEY_AUTO_CLEAR_ON_LOW_SPACE, true) ?: true
     }
 
     /**
      * Set auto-clear on low space
      */
     fun setAutoClearOnLowSpace(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_AUTO_CLEAR_ON_LOW_SPACE, enabled).apply()
+        prefs?.edit()?.putBoolean(KEY_AUTO_CLEAR_ON_LOW_SPACE, enabled)?.apply()
     }
 
     // ========== Per-Asset-Type Caching Enable/Disable ==========
@@ -588,7 +606,7 @@ class CacheManager(private val context: Context) {
             CacheableAssetType.SOUNDS -> KEY_CACHE_SOUNDS
             CacheableAssetType.ANIMATIONS -> KEY_CACHE_ANIMATIONS
         }
-        return prefs.getBoolean(key, true)
+        return prefs?.getBoolean(key, true) ?: true
     }
 
     /**
@@ -601,7 +619,7 @@ class CacheManager(private val context: Context) {
             CacheableAssetType.SOUNDS -> KEY_CACHE_SOUNDS
             CacheableAssetType.ANIMATIONS -> KEY_CACHE_ANIMATIONS
         }
-        prefs.edit().putBoolean(key, enabled).apply()
+        prefs?.edit()?.putBoolean(key, enabled)?.apply()
     }
 
     /**
