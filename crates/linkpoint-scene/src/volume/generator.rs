@@ -17,7 +17,16 @@ pub struct VolumeFace {
 const DEFAULT_DETAIL: f32 = 3.0;
 const MIN_DETAIL_FACES: f32 = 6.0;
 const MIN_LOD: f32 = 0.5;
-const TABLE_SCALE: [f32; 8] = [1.0, 1.0, 1.0, 0.5, 0.707107, 0.53, 0.525, 0.5];
+const TABLE_SCALE: [f32; 8] = [
+    1.0,
+    1.0,
+    1.0,
+    0.5,
+    std::f32::consts::FRAC_1_SQRT_2,
+    0.53,
+    0.525,
+    0.5,
+];
 
 const PROFILE_MASK: u8 = 0x0f;
 const HOLE_MASK: u8 = 0xf0;
@@ -48,7 +57,11 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 }
 
 fn mix(a: P3, b: P3, f: f32) -> P3 {
-    [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)]
+    [
+        lerp(a[0], b[0], f),
+        lerp(a[1], b[1], f),
+        lerp(a[2], b[2], f),
+    ]
 }
 
 #[allow(dead_code)]
@@ -124,7 +137,9 @@ fn gen_ngon(
     let push_split = |profile: &mut Profile, to: P3| {
         if let Some(&last) = profile.points.last() {
             for i in 0..split {
-                profile.points.push(mix(last, to, (1.0 / (split + 1) as f32) * (i + 1) as f32));
+                profile
+                    .points
+                    .push(mix(last, to, (1.0 / (split + 1) as f32) * (i + 1) as f32));
             }
         }
     };
@@ -189,6 +204,7 @@ fn add_cap(profile: &mut Profile, kind: &str) {
     });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn add_hole(
     profile: &mut Profile,
     p: &VolumeParams,
@@ -257,7 +273,14 @@ fn generate_profile(
             let start = (begin * 4.0).floor() as i32;
             let finish = (end * 4.0 + 0.999).floor() as i32;
             for _ in start..finish {
-                add_face(&mut profile, face_num * (split + 1), split + 2, 1.0, "side", true);
+                add_face(
+                    &mut profile,
+                    face_num * (split + 1),
+                    split + 2,
+                    1.0,
+                    "side",
+                    true,
+                );
                 face_num += 1;
             }
             scale_z(&mut profile, 4.0);
@@ -265,7 +288,16 @@ fn generate_profile(
                 if hole_type == HOLE_TRIANGLE {
                     add_hole(&mut profile, p, true, 3.0, -0.375, hollow, 1.0, split);
                 } else if hole_type == HOLE_CIRCLE {
-                    add_hole(&mut profile, p, false, MIN_DETAIL_FACES * detail, -0.375, hollow, 1.0, 0);
+                    add_hole(
+                        &mut profile,
+                        p,
+                        false,
+                        MIN_DETAIL_FACES * detail,
+                        -0.375,
+                        hollow,
+                        1.0,
+                        0,
+                    );
                 } else {
                     add_hole(&mut profile, p, true, 4.0, -0.375, hollow, 1.0, split);
                 }
@@ -283,13 +315,29 @@ fn generate_profile(
             let start = (begin * 3.0).floor() as i32;
             let finish = (end * 3.0 + 0.999).floor() as i32;
             for _ in start..finish {
-                add_face(&mut profile, face_num * (split + 1), split + 2, 1.0, "side", true);
+                add_face(
+                    &mut profile,
+                    face_num * (split + 1),
+                    split + 2,
+                    1.0,
+                    "side",
+                    true,
+                );
                 face_num += 1;
             }
             if hollow > 0.0 {
                 let triangle_hollow = hollow / 2.0;
                 if hole_type == HOLE_CIRCLE {
-                    add_hole(&mut profile, p, false, MIN_DETAIL_FACES * detail, 0.0, triangle_hollow, 1.0, 0);
+                    add_hole(
+                        &mut profile,
+                        p,
+                        false,
+                        MIN_DETAIL_FACES * detail,
+                        0.0,
+                        triangle_hollow,
+                        1.0,
+                        0,
+                    );
                 } else if hole_type == HOLE_SQUARE {
                     add_hole(&mut profile, p, true, 4.0, 0.0, triangle_hollow, 1.0, split);
                 } else {
@@ -367,11 +415,7 @@ fn generate_profile(
         let tot = profile.total;
         let tot_out = profile.total_out;
         add_face(&mut profile, tot - 1, 2, 0.5, "cut-begin", true);
-        let end_idx = if hollow > 0.0 {
-            tot_out - 1
-        } else {
-            tot - 2
-        };
+        let end_idx = if hollow > 0.0 { tot_out - 1 } else { tot - 2 };
         add_face(&mut profile, end_idx, 2, 0.5, "cut-end", true);
     }
     Some(profile)
@@ -398,12 +442,15 @@ fn generate_path(p: &VolumeParams, detail: f32, split: usize) -> Path {
         let t = lerp(p.path_begin, p.path_end, i as f32 / (np - 1) as f32);
         let a = lerp(PI * p.path_twist_begin, PI * p.path_twist, t);
         points.push(PathPoint {
-            pos: [lerp(0.0, p.path_shear_x, t), lerp(0.0, p.path_shear_y, t), t - 0.5],
+            pos: [
+                lerp(0.0, p.path_shear_x, t),
+                lerp(0.0, p.path_shear_y, t),
+                t - 0.5,
+            ],
             scale: [lerp(1.0, p.path_scale_x, t), lerp(1.0, p.path_scale_y, t)],
             tex_t: t,
             angle: a,
-        },
-        );
+        });
     }
 
     Path {
@@ -522,7 +569,11 @@ fn build_cap(
     }
 
     let mut normals = vec![0.0; vertices.len()];
-    let flat_normal = if top { [0.0, 0.0, 1.0] } else { [0.0, 0.0, -1.0] };
+    let flat_normal = if top {
+        [0.0, 0.0, 1.0]
+    } else {
+        [0.0, 0.0, -1.0]
+    };
     for i in 0..(vertices.len() / 3) {
         normals[i * 3] = flat_normal[0];
         normals[i * 3 + 1] = flat_normal[1];

@@ -1,8 +1,10 @@
-use linkpoint_scene::decoder::j2k::{calculate_discard_level, generate_placeholder_rgba, parse_j2k_header};
-use linkpoint_scene::math::{EulerAngles, Matrix4, Quaternion, AABB};
-use linkpoint_scene::volume::{generate_volume, VolumeParams};
+use linkpoint_scene::decoder::j2k::{
+    calculate_discard_level, generate_placeholder_rgba, parse_j2k_header,
+};
+use linkpoint_scene::math::{AABB, EulerAngles, Matrix4, Quaternion};
+use linkpoint_scene::volume::{VolumeParams, generate_volume};
 use linkpoint_scene::wasm::{
-    wasm_generate_volume, wasm_parse_j2k_header, WasmMatrix4, WasmQuaternion,
+    WasmMatrix4, WasmQuaternion, wasm_generate_volume, wasm_parse_j2k_header,
 };
 use linkpoint_scene::{
     AlphaMode, ChunkGrid, ChunkId, EntityKind, Material, Octree, SceneDelta, SceneEntity,
@@ -37,7 +39,13 @@ fn test_quaternion_comprehensive() {
 
     let (angle, axis) = q.to_angle_axis();
     let q_rebuilt = Quaternion::from_angle_axis(angle, axis);
-    assert!(q.is_equal_eps(&q_rebuilt, 1e-3) || q.is_equal_eps(&Quaternion::new(-q_rebuilt.x, -q_rebuilt.y, -q_rebuilt.z, -q_rebuilt.w), 1e-3));
+    assert!(
+        q.is_equal_eps(&q_rebuilt, 1e-3)
+            || q.is_equal_eps(
+                &Quaternion::new(-q_rebuilt.x, -q_rebuilt.y, -q_rebuilt.z, -q_rebuilt.w),
+                1e-3
+            )
+    );
 
     let zero_aa = Quaternion::from_angle_axis(0.0, [0.0, 0.0, 0.0]);
     assert_eq!(zero_aa.to_angle_axis(), (0.0, [0.0, 0.0, 1.0]));
@@ -197,7 +205,7 @@ fn test_decoder_j2k_comprehensive() {
         0x00, 0x00, 0x02, 0x00, // YTsiz
         0x00, 0x00, 0x00, 0x00, // XTOsiz
         0x00, 0x00, 0x00, 0x00, // YTOsiz
-        0x00, 0x04,             // Csiz = 4
+        0x00, 0x04, // Csiz = 4
     ];
     j2c_data.resize(50, 0);
     let j2c_header = parse_j2k_header(&j2c_data);
@@ -240,7 +248,7 @@ fn test_wasm_bindings_comprehensive() {
         0x00, 0x00, 0x02, 0x00, // YTsiz
         0x00, 0x00, 0x00, 0x00, // XTOsiz
         0x00, 0x00, 0x00, 0x00, // YTOsiz
-        0x00, 0x04,             // Csiz = 4
+        0x00, 0x04, // Csiz = 4
     ];
     j2c_data.resize(50, 0);
     let wasm_header = wasm_parse_j2k_header(&j2c_data);

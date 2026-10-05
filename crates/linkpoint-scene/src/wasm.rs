@@ -1,6 +1,6 @@
 use crate::decoder::j2k::parse_j2k_header;
 use crate::math::{Matrix4, Quaternion};
-use crate::volume::{generate_volume, VolumeParams};
+use crate::volume::{VolumeParams, generate_volume};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -12,12 +12,16 @@ pub struct WasmQuaternion {
 impl WasmQuaternion {
     #[wasm_bindgen(constructor)]
     pub fn new(x: f32, y: f32, z: f32, w: f32) -> WasmQuaternion {
-        Self { inner: Quaternion::new(x, y, z, w) }
+        Self {
+            inner: Quaternion::new(x, y, z, w),
+        }
     }
 
     #[wasm_bindgen]
     pub fn identity() -> WasmQuaternion {
-        Self { inner: Quaternion::identity() }
+        Self {
+            inner: Quaternion::identity(),
+        }
     }
 
     #[wasm_bindgen]
@@ -48,12 +52,16 @@ pub struct WasmMatrix4 {
 impl WasmMatrix4 {
     #[wasm_bindgen(constructor)]
     pub fn identity() -> WasmMatrix4 {
-        Self { inner: Matrix4::identity() }
+        Self {
+            inner: Matrix4::identity(),
+        }
     }
 
     #[wasm_bindgen]
     pub fn from_quaternion(q: &WasmQuaternion) -> WasmMatrix4 {
-        Self { inner: Matrix4::from_quaternion(&q.inner) }
+        Self {
+            inner: Matrix4::from_quaternion(&q.inner),
+        }
     }
 
     #[wasm_bindgen]

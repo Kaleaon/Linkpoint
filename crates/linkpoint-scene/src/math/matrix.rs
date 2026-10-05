@@ -15,10 +15,7 @@ impl Default for Matrix4 {
 impl Matrix4 {
     pub const IDENTITY: Self = Self {
         values: [
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ],
     };
 
@@ -55,10 +52,22 @@ impl Matrix4 {
 
         Self {
             values: [
-                1.0 - 2.0 * (yy + zz), 2.0 * (xy + zw),       2.0 * (xz - yw),       0.0,
-                2.0 * (xy - zw),       1.0 - 2.0 * (xx + zz), 2.0 * (yz + xw),       0.0,
-                2.0 * (xz + yw),       2.0 * (yz - xw),       1.0 - 2.0 * (xx + yy), 0.0,
-                0.0,                   0.0,                   0.0,                   1.0,
+                1.0 - 2.0 * (yy + zz),
+                2.0 * (xy + zw),
+                2.0 * (xz - yw),
+                0.0,
+                2.0 * (xy - zw),
+                1.0 - 2.0 * (xx + zz),
+                2.0 * (yz + xw),
+                0.0,
+                2.0 * (xz + yw),
+                2.0 * (yz - xw),
+                1.0 - 2.0 * (xx + yy),
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
             ],
         }
     }
@@ -130,18 +139,24 @@ impl Matrix4 {
         }
 
         let mut t;
-        t = self.values[1]; self.values[1] = self.values[4]; self.values[4] = t;
-        t = self.values[2]; self.values[2] = self.values[8]; self.values[8] = t;
-        t = self.values[6]; self.values[6] = self.values[9]; self.values[9] = t;
+        t = self.values[1];
+        self.values[1] = self.values[4];
+        self.values[4] = t;
+        t = self.values[2];
+        self.values[2] = self.values[8];
+        self.values[8] = t;
+        t = self.values[6];
+        self.values[6] = self.values[9];
+        self.values[9] = t;
 
         for j in 0..3 {
-            self.values[j * 4 + 3] = self.values[12] * self.values[0 * 4 + j]
-                + self.values[13] * self.values[1 * 4 + j]
-                + self.values[14] * self.values[2 * 4 + j];
+            self.values[j * 4 + 3] = self.values[12] * self.values[j]
+                + self.values[13] * self.values[4 + j]
+                + self.values[14] * self.values[8 + j];
         }
-        self.values[12] = -self.values[0 * 4 + 3];
-        self.values[13] = -self.values[1 * 4 + 3];
-        self.values[14] = -self.values[2 * 4 + 3];
+        self.values[12] = -self.values[3];
+        self.values[13] = -self.values[7];
+        self.values[14] = -self.values[11];
         self.values[3] = 0.0;
         self.values[7] = 0.0;
         self.values[11] = 0.0;
@@ -151,21 +166,17 @@ impl Matrix4 {
 
     pub fn inversed(&self) -> Option<Self> {
         let mut m = *self;
-        if m.inverse() {
-            Some(m)
-        } else {
-            None
-        }
+        if m.inverse() { Some(m) } else { None }
     }
 
     pub fn mul_matrix(&self, b: &Self) -> Self {
         let mut r = [0.0f32; 16];
         for j in 0..4 {
             for i in 0..4 {
-                r[j * 4 + i] = self.values[j * 4 + 0] * b.values[0 * 4 + i]
-                    + self.values[j * 4 + 1] * b.values[1 * 4 + i]
-                    + self.values[j * 4 + 2] * b.values[2 * 4 + i]
-                    + self.values[j * 4 + 3] * b.values[3 * 4 + i];
+                r[j * 4 + i] = self.values[j * 4] * b.values[i]
+                    + self.values[j * 4 + 1] * b.values[4 + i]
+                    + self.values[j * 4 + 2] * b.values[8 + i]
+                    + self.values[j * 4 + 3] * b.values[12 + i];
             }
         }
         Self { values: r }
@@ -175,16 +186,31 @@ impl Matrix4 {
         [
             a[0] * self.values[0] + a[1] * self.values[4] + a[2] * self.values[8] + self.values[12],
             a[0] * self.values[1] + a[1] * self.values[5] + a[2] * self.values[9] + self.values[13],
-            a[0] * self.values[2] + a[1] * self.values[6] + a[2] * self.values[10] + self.values[14],
+            a[0] * self.values[2]
+                + a[1] * self.values[6]
+                + a[2] * self.values[10]
+                + self.values[14],
         ]
     }
 
     pub fn transform_vector4(&self, a: [f32; 4]) -> [f32; 4] {
         [
-            a[0] * self.values[0] + a[1] * self.values[4] + a[2] * self.values[8] + a[3] * self.values[12],
-            a[0] * self.values[1] + a[1] * self.values[5] + a[2] * self.values[9] + a[3] * self.values[13],
-            a[0] * self.values[2] + a[1] * self.values[6] + a[2] * self.values[10] + a[3] * self.values[14],
-            a[0] * self.values[3] + a[1] * self.values[7] + a[2] * self.values[11] + a[3] * self.values[15],
+            a[0] * self.values[0]
+                + a[1] * self.values[4]
+                + a[2] * self.values[8]
+                + a[3] * self.values[12],
+            a[0] * self.values[1]
+                + a[1] * self.values[5]
+                + a[2] * self.values[9]
+                + a[3] * self.values[13],
+            a[0] * self.values[2]
+                + a[1] * self.values[6]
+                + a[2] * self.values[10]
+                + a[3] * self.values[14],
+            a[0] * self.values[3]
+                + a[1] * self.values[7]
+                + a[2] * self.values[11]
+                + a[3] * self.values[15],
         ]
     }
 
@@ -218,7 +244,9 @@ impl Matrix4 {
             }
             let j = nxt[i];
             let k = nxt[j];
-            let mut s = ((self.values[diag[i]] - (self.values[diag[j]] + self.values[diag[k]])) + 1.0).sqrt();
+            let mut s = ((self.values[diag[i]] - (self.values[diag[j]] + self.values[diag[k]]))
+                + 1.0)
+                .sqrt();
             q[i] = s * 0.5;
             if s != 0.0 {
                 s = 0.5 / s;

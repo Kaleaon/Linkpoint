@@ -25,20 +25,37 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
     {
         let mut pos = 0;
         while pos + 8 <= data.len() {
-            let box_len = u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]) as usize;
-            let box_type = u32::from_be_bytes([data[pos + 4], data[pos + 5], data[pos + 6], data[pos + 7]]);
+            let box_len =
+                u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]])
+                    as usize;
+            let box_type =
+                u32::from_be_bytes([data[pos + 4], data[pos + 5], data[pos + 6], data[pos + 7]]);
 
             if box_type == 0x69686472 && pos + 16 <= data.len() {
                 // 'ihdr'
-                let height = u32::from_be_bytes([data[pos + 8], data[pos + 9], data[pos + 10], data[pos + 11]]);
-                let width = u32::from_be_bytes([data[pos + 12], data[pos + 13], data[pos + 14], data[pos + 15]]);
+                let height = u32::from_be_bytes([
+                    data[pos + 8],
+                    data[pos + 9],
+                    data[pos + 10],
+                    data[pos + 11],
+                ]);
+                let width = u32::from_be_bytes([
+                    data[pos + 12],
+                    data[pos + 13],
+                    data[pos + 14],
+                    data[pos + 15],
+                ]);
                 let components = if pos + 18 <= data.len() {
                     u16::from_be_bytes([data[pos + 16], data[pos + 17]]) as u32
                 } else {
                     4
                 };
                 if width > 0 && height > 0 {
-                    return Some(J2KHeaderInfo { width, height, components });
+                    return Some(J2KHeaderInfo {
+                        width,
+                        height,
+                        components,
+                    });
                 }
             }
 
@@ -55,10 +72,30 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
         while pos + 22 <= data.len() {
             if data[pos] == 0xFF && data[pos + 1] == 0x51 {
                 // SIZ marker
-                let xsiz = u32::from_be_bytes([data[pos + 6], data[pos + 7], data[pos + 8], data[pos + 9]]);
-                let ysiz = u32::from_be_bytes([data[pos + 10], data[pos + 11], data[pos + 12], data[pos + 13]]);
-                let xosiz = u32::from_be_bytes([data[pos + 14], data[pos + 15], data[pos + 16], data[pos + 17]]);
-                let yosiz = u32::from_be_bytes([data[pos + 18], data[pos + 19], data[pos + 20], data[pos + 21]]);
+                let xsiz = u32::from_be_bytes([
+                    data[pos + 6],
+                    data[pos + 7],
+                    data[pos + 8],
+                    data[pos + 9],
+                ]);
+                let ysiz = u32::from_be_bytes([
+                    data[pos + 10],
+                    data[pos + 11],
+                    data[pos + 12],
+                    data[pos + 13],
+                ]);
+                let xosiz = u32::from_be_bytes([
+                    data[pos + 14],
+                    data[pos + 15],
+                    data[pos + 16],
+                    data[pos + 17],
+                ]);
+                let yosiz = u32::from_be_bytes([
+                    data[pos + 18],
+                    data[pos + 19],
+                    data[pos + 20],
+                    data[pos + 21],
+                ]);
                 let width = xsiz.saturating_sub(xosiz);
                 let height = ysiz.saturating_sub(yosiz);
                 let components = if pos + 38 <= data.len() {
@@ -67,7 +104,11 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
                     4
                 };
                 if width > 0 && height > 0 {
-                    return Some(J2KHeaderInfo { width, height, components });
+                    return Some(J2KHeaderInfo {
+                        width,
+                        height,
+                        components,
+                    });
                 }
             }
             pos += 1;

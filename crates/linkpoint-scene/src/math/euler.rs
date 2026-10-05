@@ -81,7 +81,9 @@ mod tests {
         let q = euler.to_quaternion();
         let euler2 = EulerAngles::from_quaternion(&q);
         assert!((euler.roll - euler2.roll).abs() < 0.1 || (euler.roll + euler2.roll).abs() < 0.1);
-        assert!((euler.pitch - euler2.pitch).abs() < 0.1 || (euler.pitch + euler2.pitch).abs() < 0.1);
+        assert!(
+            (euler.pitch - euler2.pitch).abs() < 0.1 || (euler.pitch + euler2.pitch).abs() < 0.1
+        );
         assert!((euler.yaw - euler2.yaw).abs() < 0.1 || (euler.yaw + euler2.yaw).abs() < 0.1);
     }
 }

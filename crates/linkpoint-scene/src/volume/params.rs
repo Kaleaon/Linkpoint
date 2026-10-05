@@ -26,8 +26,8 @@ pub struct VolumeParams {
 impl Default for VolumeParams {
     fn default() -> Self {
         Self {
-            path_curve: 0x10,     // PATH_LINE
-            profile_curve: 0x01,  // PROFILE_SQUARE
+            path_curve: 0x10,    // PATH_LINE
+            profile_curve: 0x01, // PROFILE_SQUARE
             path_begin: 0.0,
             path_end: 1.0,
             path_scale_x: 1.0,
