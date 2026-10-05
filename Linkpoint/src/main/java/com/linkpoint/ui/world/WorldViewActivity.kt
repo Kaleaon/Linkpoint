@@ -669,7 +669,11 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 // GestureDetector's distance is "previous - current" so a
                 // rightward drag is negative dx; pass through directly to the
                 // controller which handles inversion.
-                controller.applyOrbit(-distanceX, -distanceY)
+                if (controller.panMode) {
+                    controller.applyPan(-distanceX, -distanceY)
+                } else {
+                    controller.applyOrbit(-distanceX, -distanceY)
+                }
                 // Throttle background compute while the user is dragging
                 // — drops particles + lowers terrain LOD until release.
                 lumiyaSurfaceView?.getRenderer()?.beginInteractiveThrottle()
@@ -707,8 +711,26 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Single onTouchListener feeds both detectors; the viewport host
         // is otherwise non-interactive so swallowing every event is fine.
         worldViewportHost.setOnTouchListener { _, ev ->
+            val pointerCount = ev.pointerCount
             cameraScaleDetector?.onTouchEvent(ev)
-            cameraGestureDetector?.onTouchEvent(ev)
+
+            if (pointerCount >= 2) {
+                // Multi-touch two-finger pan
+                if (ev.actionMasked == MotionEvent.ACTION_MOVE && ev.historySize > 0) {
+                    val prevX = ev.getHistoricalX(0, 0)
+                    val prevY = ev.getHistoricalY(0, 0)
+                    val currX = ev.getX(0)
+                    val currY = ev.getY(0)
+                    val dx = currX - prevX
+                    val dy = currY - prevY
+                    if (kotlin.math.hypot(dx, dy) > 0.5f) {
+                        controller.applyPan(dx, dy)
+                    }
+                }
+            } else {
+                cameraGestureDetector?.onTouchEvent(ev)
+            }
+
             if (ev.actionMasked == MotionEvent.ACTION_UP ||
                 ev.actionMasked == MotionEvent.ACTION_CANCEL
             ) {

@@ -50,13 +50,15 @@ export class CameraControls {
 
   private preventMenu = (event: Event) => event.preventDefault();
   private onTouchStart = (event: TouchEvent) => {
-    if (event.touches.length > 1) {
+    if (event.cancelable) {
       event.preventDefault();
     }
   };
   private onTouchMove = (event: TouchEvent) => {
     // Prevent mobile browser page zoom / pull-to-refresh during 3D touch interaction
-    event.preventDefault();
+    if (event.cancelable) {
+      event.preventDefault();
+    }
   };
 
   private sampleTime(event: PointerEvent) {
@@ -83,17 +85,15 @@ export class CameraControls {
     const previous = this.pointers.get(event.pointerId);
     if (!previous) return;
     const time = this.sampleTime(event);
-    const dt = Math.max(time - previous.time, 0.001);
     const dx = event.clientX - previous.x;
     const dy = event.clientY - previous.y;
-    const stepDistance = Math.hypot(dx, dy);
-    const velocity = stepDistance / dt;
 
     const start = this.pointerStart.get(event.pointerId);
-    const totalDisplacement = start ? Math.hypot(event.clientX - start.x, event.clientY - start.y) : stepDistance;
+    const totalDisplacement = start ? Math.hypot(event.clientX - start.x, event.clientY - start.y) : Math.hypot(dx, dy);
 
-    // Filter touch/pointer drag gestures using velocity and displacement thresholds for single pointer
-    if (this.pointers.size === 1 && velocity < this.velocityThreshold && totalDisplacement < this.displacementThreshold) {
+    // Filter single-pointer micro-movements during initial touch/tap using displacement threshold
+    if (this.pointers.size === 1 && totalDisplacement < this.displacementThreshold) {
+      this.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, time });
       return;
     }
 
