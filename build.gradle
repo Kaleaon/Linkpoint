@@ -46,8 +46,14 @@ allprojects {
     }
 }
 
+// Register protocol code generation task
+tasks.register('generateProtocolCode', Exec) {
+    commandLine 'python3', 'tools/protocol_gen/cli.py', 'generate', '--target', 'kotlin,java'
+}
+
 // Delegating tasks for root project to included build Linkpoint
 tasks.register('testDebugUnitTest') {
+    dependsOn generateProtocolCode
     dependsOn gradle.includedBuild('Linkpoint').task(':testStableDebugUnitTest')
 }
 

@@ -115,4 +115,64 @@ describe('Scene3D rendering state', () => {
 
     expect(graphics.drawMesh.mock.calls.map((call) => call[2].uModelMatrix[12])).toEqual([12, 20, 11]);
   });
+
+  it('passes normal mapping, ambient occlusion, and BRDF parameters to drawMesh', () => {
+    const { scene, graphics } = makeScene();
+    scene.addObject('pbr-obj', {
+      mesh: 'cube',
+      position: [0, 0, 0],
+      faces: [{
+        pbr: {
+          metallic: 0.8,
+          roughness: 0.3,
+          occlusionFactor: 0.7,
+          normalTexture: 'norm-tex-1',
+          metallicRoughnessTexture: 'orm-tex-1',
+          emissiveTexture: 'emit-tex-1',
+          emissive: [0.1, 0.2, 0.3],
+        },
+      }],
+    });
+
+    scene.renderObject(scene.objects.get('pbr-obj'), new Float32Array(16), new Float32Array(16));
+
+    const uniforms = graphics.drawMesh.mock.calls[0][2];
+    expect(uniforms).toMatchObject({
+      uMetallic: 0.8,
+      uRoughness: 0.3,
+      uOcclusionFactor: 0.7,
+      uNormalTextureName: 'norm-tex-1',
+      uMetallicRoughnessTextureName: 'orm-tex-1',
+      uEmissiveTextureName: 'emit-tex-1',
+      uUseNormalTexture: true,
+      uUseMetallicRoughnessTexture: true,
+      uUseEmissiveTexture: true,
+    });
+  });
+
+  it('calculates tangents when creating primitive and volume meshes', () => {
+    const { scene, graphics } = makeScene();
+    scene.createDefaultPrimitives();
+
+    // Verify createMesh was called for default primitives with non-empty tangent arrays
+    const calls = graphics.createMesh.mock.calls;
+    const cubeCall = calls.find((call) => call[0] === 'cube');
+    expect(cubeCall).toBeDefined();
+    expect(cubeCall[5]).toBeDefined(); // 6th argument is tangents
+    expect(cubeCall[5].length).toBeGreaterThan(0);
+
+    // Verify addVolumeMeshes computes tangents
+    scene.addVolumeMeshes('v1', [{
+      faceIndex: 0,
+      vertices: [0, 0, 0, 1, 0, 0, 0, 1, 0],
+      indices: [0, 1, 2],
+      normals: [0, 0, 1, 0, 0, 1, 0, 0, 1],
+      texCoords: [0, 0, 1, 0, 0, 1],
+    }]);
+
+    const volumeCall = graphics.createMesh.mock.calls.find((call) => call[0] === 'volume:v1:0');
+    expect(volumeCall).toBeDefined();
+    expect(volumeCall[5]).toBeDefined();
+    expect(volumeCall[5]).toHaveLength(9);
+  });
 });

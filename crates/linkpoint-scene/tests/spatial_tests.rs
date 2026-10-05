@@ -322,7 +322,7 @@ fn test_spatial_worker_pool_additional_coverage() {
 }
 
 #[test]
-fn test_octree_query_ray_and_remove_extended() {
+fn test_octree_query_ray_and_remove_additional() {
     let region_bounds = AABB::new([0.0, 0.0, 0.0], [100.0, 100.0, 100.0]);
     let mut octree = Octree::new(region_bounds, 4, 2);
 

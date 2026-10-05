@@ -18,6 +18,14 @@ import {
   type SkyUniforms, type WaterUniforms,
 } from './sky';
 
+function tangentsFor(shape: { vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[]; tangents?: number[] }) {
+  if (shape.tangents) return shape.tangents;
+  if (shape.normals && shape.texCoords) {
+    return Primitives3D.calculateTangents(shape.vertices, shape.normals, shape.texCoords, shape.indices);
+  }
+  return undefined;
+}
+
 const UNIT_CUBE_BOUNDS = { min: [-0.5, -0.5, -0.5], max: [0.5, 0.5, 0.5] };
 
 /** Distance of the sun light from the origin, in metres; far enough to behave as a directional light. */
@@ -125,32 +133,32 @@ export class Scene3D extends Utils.EventEmitter {
   createDefaultPrimitives() {
     // Cube
     const cube = Primitives3D.createCube(1);
-    this.graphics.createMesh('cube', cube.vertices, cube.indices, cube.normals, cube.texCoords);
+    this.graphics.createMesh('cube', cube.vertices, cube.indices, cube.normals, cube.texCoords, tangentsFor(cube));
 
     // Sphere
     const sphere = Primitives3D.createSphere(0.5, 32, 16);
-    this.graphics.createMesh('sphere', sphere.vertices, sphere.indices, sphere.normals, sphere.texCoords);
+    this.graphics.createMesh('sphere', sphere.vertices, sphere.indices, sphere.normals, sphere.texCoords, tangentsFor(sphere));
 
     // Plane
     const plane = Primitives3D.createPlane(10, 10, 10, 10);
-    this.graphics.createMesh('plane', plane.vertices, plane.indices, plane.normals, plane.texCoords);
+    this.graphics.createMesh('plane', plane.vertices, plane.indices, plane.normals, plane.texCoords, tangentsFor(plane));
     const particleSprite = Primitives3D.createPlane(1, 1);
-    this.graphics.createMesh('particle-sprite', particleSprite.vertices, particleSprite.indices, particleSprite.normals, particleSprite.texCoords);
+    this.graphics.createMesh('particle-sprite', particleSprite.vertices, particleSprite.indices, particleSprite.normals, particleSprite.texCoords, tangentsFor(particleSprite));
 
     // Cylinder
     const cylinder = Primitives3D.createCylinder(0.5, 0.5, 1, 32);
-    this.graphics.createMesh('cylinder', cylinder.vertices, cylinder.indices, cylinder.normals, cylinder.texCoords);
+    this.graphics.createMesh('cylinder', cylinder.vertices, cylinder.indices, cylinder.normals, cylinder.texCoords, tangentsFor(cylinder));
 
     const prism = Primitives3D.createPrism();
-    this.graphics.createMesh('prism', prism.vertices, prism.indices, prism.normals, prism.texCoords);
+    this.graphics.createMesh('prism', prism.vertices, prism.indices, prism.normals, prism.texCoords, tangentsFor(prism));
 
     const torus = Primitives3D.createTorus();
-    this.graphics.createMesh('torus', torus.vertices, torus.indices, torus.normals, torus.texCoords);
+    this.graphics.createMesh('torus', torus.vertices, torus.indices, torus.normals, torus.texCoords, tangentsFor(torus));
 
     // Until LLMesh/JP2 decoding is available in WebGL, uploaded mesh and sculpt
     // assets get an unmistakable non-cube proxy rather than silently vanishing.
     const assetProxy = Primitives3D.createTorus(0.28, 0.22, 16, 8);
-    this.graphics.createMesh('asset-proxy', assetProxy.vertices, assetProxy.indices, assetProxy.normals, assetProxy.texCoords);
+    this.graphics.createMesh('asset-proxy', assetProxy.vertices, assetProxy.indices, assetProxy.normals, assetProxy.texCoords, tangentsFor(assetProxy));
   }
 
   /** Sky dome, star field and water plane (shaders live in sky.ts). */
@@ -169,16 +177,17 @@ export class Scene3D extends Utils.EventEmitter {
    */
   createGrid() {
     const grid = Primitives3D.createGrid(this.gridSize, this.gridDivisions);
-    this.graphics.createMesh('grid', grid.vertices, grid.indices, grid.normals, grid.texCoords);
+    this.graphics.createMesh('grid', grid.vertices, grid.indices, grid.normals, grid.texCoords, tangentsFor(grid));
   }
 
-  addAssetMesh(assetId: string, geometry: { vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[]; parts?: any[] }) {
+  addAssetMesh(assetId: string, geometry: { vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[]; tangents?: number[]; parts?: any[] }) {
     const parts = geometry.parts?.length ? geometry.parts : [geometry];
     return parts.map((part, index) => {
       const name = `asset:${assetId}:${index}`;
       const skin = Array.isArray(part.joints) && Array.isArray(part.jointWeights) ? { joints: part.joints, weights: part.jointWeights } : undefined;
+      const tangents = tangentsFor(part);
       try {
-        this.graphics.createMesh(name, part.vertices, part.indices, part.normals, part.texCoords, undefined, skin);
+        this.graphics.createMesh(name, part.vertices, part.indices, part.normals, part.texCoords, tangents, skin);
         return { mesh: name, materialIndex: Number(part.materialIndex ?? index) };
       } catch (err) {
         console.warn(`[Scene3D] Failed to register mesh ${name}, falling back to asset proxy:`, err);
@@ -188,17 +197,17 @@ export class Scene3D extends Utils.EventEmitter {
   }
 
   /** Register the faces of a generated prim volume; returns one draw per face (material index = texture-entry face). */
-  addVolumeMeshes(key: string, faces: Array<{ faceIndex: number; vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[] }>) {
+  addVolumeMeshes(key: string, faces: Array<{ faceIndex: number; vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[]; tangents?: number[] }>) {
     return faces.map((face) => {
       const name = `volume:${key}:${face.faceIndex}`;
-      this.graphics.createMesh(name, face.vertices, face.indices, face.normals, face.texCoords);
+      this.graphics.createMesh(name, face.vertices, face.indices, face.normals, face.texCoords, tangentsFor(face));
       return { mesh: name, materialIndex: face.faceIndex };
     });
   }
 
   /** Register a skinned mesh (joint indices + weights per vertex) under `name`. */
-  addSkinnedMesh(name: string, geometry: { vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[] }, skin: { joints: number[]; weights: number[] }) {
-    this.graphics.createMesh(name, geometry.vertices, geometry.indices, geometry.normals, geometry.texCoords, undefined, skin);
+  addSkinnedMesh(name: string, geometry: { vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[]; tangents?: number[] }, skin: { joints: number[]; weights: number[] }) {
+    this.graphics.createMesh(name, geometry.vertices, geometry.indices, geometry.normals, geometry.texCoords, tangentsFor(geometry), skin);
     return name;
   }
 
@@ -741,6 +750,7 @@ export class Scene3D extends Utils.EventEmitter {
       uMetallic: 0,
       uRoughness: 1,
       uEmissive: new Float32Array([0, 0, 0]),
+      uOcclusionFactor: 1.0,
       uUseMetallicRoughnessTexture: false,
       uUseNormalTexture: false,
       uUseEmissiveTexture: false,
@@ -791,6 +801,7 @@ export class Scene3D extends Utils.EventEmitter {
         uMetallic: pbr.metallic ?? 0,
         uRoughness: pbr.roughness ?? 1,
         uEmissive: new Float32Array(pbr.emissive || [0, 0, 0]),
+        uOcclusionFactor: pbr.occlusionFactor ?? pbr.occlusion ?? 1.0,
         uMetallicRoughnessTextureName: pbr.metallicRoughnessTexture,
         uNormalTextureName: pbr.normalTexture,
         uEmissiveTextureName: pbr.emissiveTexture,
