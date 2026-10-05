@@ -3,6 +3,8 @@ package com.linkpoint.world
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.WorldTopographyProjection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +31,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class RegionCrossingManager(
     private val udpConnection: UDPConnectionFixed,
-    private val capabilityManager: CapabilityManager
+    private val capabilityManager: CapabilityManager,
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
 ) {
     companion object {
         private const val TAG = "RegionCrossing"
@@ -185,6 +188,14 @@ class RegionCrossingManager(
     }
 
     /**
+     * Resolve neighbor handle for local coordinates using active topography rules.
+     */
+    fun resolveNeighborHandle(localX: Float, localY: Float): Long? {
+        val currentHandle = _currentRegion.value?.handle ?: return null
+        return topographyProjection.getNeighborRegionHandle(currentHandle, localX, localY, REGION_SIZE)
+    }
+
+    /**
      * Get neighboring region that would be entered if moving in given direction.
      *
      * @param localX Region-local X coordinate in meters (0-256 range).
@@ -195,33 +206,7 @@ class RegionCrossingManager(
      *         or no child connection exists to the neighbor.
      */
     fun getNeighborRegion(localX: Float, localY: Float): Long? {
-        val currentHandle = _currentRegion.value?.handle ?: return null
-
-        // Decode current region coordinates from handle
-        val currentRegionX = (currentHandle shr 40).toInt()
-        val currentRegionY = ((currentHandle shr 8) and 0xFFFFFFFF).toInt()
-
-        // Check boundaries
-        val neighborX = when {
-            localX < 0 -> currentRegionX - REGION_SIZE
-            localX >= REGION_SIZE -> currentRegionX + REGION_SIZE
-            else -> currentRegionX
-        }
-
-        val neighborY = when {
-            localY < 0 -> currentRegionY - REGION_SIZE
-            localY >= REGION_SIZE -> currentRegionY + REGION_SIZE
-            else -> currentRegionY
-        }
-
-        // If we're still in current region, no crossing needed
-        if (neighborX == currentRegionX && neighborY == currentRegionY) {
-            return null
-        }
-
-        // Compute neighbor handle
-        val neighborHandle = (neighborX.toLong() shl 40) or (neighborY.toLong() shl 8)
-
+        val neighborHandle = resolveNeighborHandle(localX, localY) ?: return null
         // Check if we have a child connection to this region
         return if (childConnections.containsKey(neighborHandle)) {
             neighborHandle

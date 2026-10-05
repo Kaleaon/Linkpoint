@@ -1,5 +1,7 @@
 package com.linkpoint.render.lumiya.spatial
 
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.WorldTopographyProjection
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -11,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
  * and a diagnostic safety mechanism toggle.
  */
 class SpatialIndex(
-    private val nodePool: OctreeNodePool = OctreeNodePool()
+    private val nodePool: OctreeNodePool = OctreeNodePool(),
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
 ) {
 
     companion object {
@@ -60,10 +63,10 @@ class SpatialIndex(
      */
     @Synchronized
     fun insert(entry: SpatialEntry) {
-        val bounds = EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+        val bounds = topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
         entries[entry.id] = entry
         entryBounds[entry.id] = bounds
-        root.insert(entry, nodePool)
+        root.insert(entry, nodePool, bounds, topographyProjection)
     }
 
     /**
@@ -76,11 +79,8 @@ class SpatialIndex(
         if (bounds != null) {
             root.removeByBounds(id, bounds, nodePool)
         } else if (entry != null) {
-            root.removeByBounds(
-                id,
-                EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ),
-                nodePool
-            )
+            val pBounds = topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+            root.removeByBounds(id, pBounds, nodePool)
         }
     }
 
@@ -99,7 +99,7 @@ class SpatialIndex(
      */
     @Synchronized
     fun updateIncremental(entry: SpatialEntry) {
-        val newBounds = EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+        val newBounds = topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
         val oldBounds = entryBounds[entry.id]
 
         if (oldBounds != null && oldBounds == newBounds && entries.containsKey(entry.id)) {
@@ -112,16 +112,13 @@ class SpatialIndex(
             root.removeByBounds(entry.id, oldBounds, nodePool)
         } else if (entries.containsKey(entry.id)) {
             val existing = entries[entry.id]!!
-            root.removeByBounds(
-                entry.id,
-                EntryBounds(existing.minX, existing.minY, existing.minZ, existing.maxX, existing.maxY, existing.maxZ),
-                nodePool
-            )
+            val eBounds = topographyProjection.getProjectedBounds(existing.minX, existing.minY, existing.minZ, existing.maxX, existing.maxY, existing.maxZ)
+            root.removeByBounds(entry.id, eBounds, nodePool)
         }
 
         entries[entry.id] = entry
         entryBounds[entry.id] = newBounds
-        root.insert(entry, nodePool)
+        root.insert(entry, nodePool, newBounds, topographyProjection)
     }
 
     /**
@@ -148,7 +145,8 @@ class SpatialIndex(
             // Diagnostic fallback: legacy linear scan
             for (entry in entries.values) {
                 if (result.size >= maxResults) break
-                if (culler.isAABBVisible(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)) {
+                val b = topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+                if (culler.isAABBVisible(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)) {
                     result.add(entry)
                 }
             }
@@ -157,7 +155,7 @@ class SpatialIndex(
 
         // Hierarchical octree traversal
         val seenSet = HashSet<Long>(maxResults.coerceAtMost(entries.size + 16))
-        root.queryFrustum(culler, result, seenSet, maxResults)
+        root.queryFrustum(culler, result, seenSet, maxResults, topographyProjection)
         return result
     }
 
@@ -294,8 +292,14 @@ class OctreeNode(
         this.objects.clear()
     }
 
-    fun insert(entry: SpatialEntry, pool: OctreeNodePool? = null) {
-        if (!intersectsEntry(entry)) return
+    fun insert(
+        entry: SpatialEntry,
+        pool: OctreeNodePool? = null,
+        bounds: SpatialIndex.EntryBounds? = null,
+        topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+    ) {
+        val b = bounds ?: topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+        if (!intersectsBounds(b)) return
 
         if (isLeaf) {
             objects.add(entry)
@@ -303,10 +307,10 @@ class OctreeNode(
                 sizeX > SpatialIndex.MIN_CELL_SIZE &&
                 depth < MAX_DEPTH
             ) {
-                subdivide(pool)
+                subdivide(pool, topographyProjection)
             }
         } else {
-            children?.forEach { it?.insert(entry, pool) }
+            children?.forEach { it?.insert(entry, pool, b, topographyProjection) }
         }
     }
 
@@ -329,8 +333,8 @@ class OctreeNode(
         return removed
     }
 
-    fun remove(entry: SpatialEntry, pool: OctreeNodePool? = null) {
-        val bounds = SpatialIndex.EntryBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
+    fun remove(entry: SpatialEntry, pool: OctreeNodePool? = null, topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()) {
+        val bounds = topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
         removeByBounds(entry.id, bounds, pool)
     }
 
@@ -356,7 +360,8 @@ class OctreeNode(
         culler: FrustumCuller,
         result: MutableList<SpatialEntry>,
         seenSet: HashSet<Long>,
-        maxResults: Int
+        maxResults: Int,
+        topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
     ) {
         if (result.size >= maxResults) return
         when (culler.classifyAABB(minX, minY, minZ, maxX, maxY, maxZ)) {
@@ -365,14 +370,15 @@ class OctreeNode(
             FrustumResult.INTERSECTS -> {
                 for (obj in objects) {
                     if (result.size >= maxResults) return
+                    val b = topographyProjection.getProjectedBounds(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)
                     if (!seenSet.contains(obj.id) &&
-                        culler.isAABBVisible(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)
+                        culler.isAABBVisible(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)
                     ) {
                         seenSet.add(obj.id)
                         result.add(obj)
                     }
                 }
-                children?.forEach { it?.queryFrustum(culler, result, seenSet, maxResults) }
+                children?.forEach { it?.queryFrustum(culler, result, seenSet, maxResults, topographyProjection) }
             }
         }
     }
@@ -394,7 +400,7 @@ class OctreeNode(
         }
     }
 
-    private fun subdivide(pool: OctreeNodePool?) {
+    private fun subdivide(pool: OctreeNodePool?, topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()) {
         val hx = sizeX / 2f; val hy = sizeY / 2f; val hz = sizeZ / 2f
         val nextDepth = depth + 1
 
@@ -425,7 +431,8 @@ class OctreeNode(
         val toRedistribute = ArrayList(objects)
         objects.clear()
         for (obj in toRedistribute) {
-            children?.forEach { it?.insert(obj, pool) }
+            val b = topographyProjection.getProjectedBounds(obj.minX, obj.minY, obj.minZ, obj.maxX, obj.maxY, obj.maxZ)
+            children?.forEach { it?.insert(obj, pool, b, topographyProjection) }
         }
     }
 

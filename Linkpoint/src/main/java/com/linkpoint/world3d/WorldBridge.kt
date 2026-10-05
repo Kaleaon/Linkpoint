@@ -5,6 +5,8 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
 import com.badlogic.gdx.math.Vector3
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.WorldTopographyProjection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +27,10 @@ import ktx.log.logger
  * SceneView handles the actual 3D rendering via Filament, while libGDX
  * provides the game logic layer and cross-platform compatibility.
  */
-class WorldBridge(private val context: Context) : KtxApplicationAdapter {
-
+class WorldBridge(
+    private val context: Context,
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+) : KtxApplicationAdapter {
     companion object {
         private val log = logger<WorldBridge>()
 
@@ -88,8 +92,7 @@ class WorldBridge(private val context: Context) : KtxApplicationAdapter {
      */
     private fun fixedUpdate(dt: Float) {
         // Update avatar physics
-        avatarController.fixedUpdate(dt, _inputState.value)
-
+        avatarController.fixedUpdate(dt, _inputState.value, topographyProjection)
         // Update camera
         cameraController.update(dt, avatarController.position)
     }
@@ -238,15 +241,18 @@ class AvatarController {
     var rotation = 0f
         private set
     var isFlying = false
-
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
     private val walkSpeed = 3f      // m/s
     private val runSpeed = 6f       // m/s
     private val flySpeed = 10f      // m/s
     private val jumpVelocity = 5f   // m/s
     private val gravity = -9.8f     // m/s²
     private var isGrounded = true
-
-    fun fixedUpdate(dt: Float, input: InputState) {
+    fun fixedUpdate(
+        dt: Float,
+        input: InputState,
+        topography: WorldTopographyProjection = topographyProjection
+    ) {
         // Calculate movement direction (avoid normalizing zero vector)
         // Deadzone threshold: 0.01f squared length ≈ 0.1 actual length
         val speed = if (isFlying) flySpeed else walkSpeed
@@ -264,10 +270,12 @@ class AvatarController {
         } else {
             velocity.x = moveDir.x * speed
             velocity.z = moveDir.z * speed
-
-            // Apply gravity
+            // Apply gravity vector from topography projection
             if (!isGrounded) {
-                velocity.y += gravity * dt
+                val gVec = topography.getGravityVector(position.x, position.y, position.z, 9.8f)
+                velocity.x += gVec[0] * dt
+                velocity.y += gVec[1] * dt
+                velocity.z += gVec[2] * dt
             }
         }
 
