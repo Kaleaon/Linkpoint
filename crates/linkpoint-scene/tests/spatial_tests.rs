@@ -383,3 +383,25 @@ fn test_aabb_extended_methods() {
     let miss = box1.ray_intersects([0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
     assert!(miss.is_none());
 }
+
+#[test]
+fn test_spatial_manager_rebalance_async_and_worker_count() {
+    let manager = SpatialManager::new(
+        [0.0, 0.0, 0.0],
+        [256.0, 256.0, 256.0],
+        [32.0, 32.0, 32.0],
+        2,
+    );
+
+    assert_eq!(manager.pool.worker_count(), 2);
+
+    let entity = SpatialEntity::new(
+        "prim_rebalance",
+        AABB::new([10.0, 10.0, 10.0], [12.0, 12.0, 12.0]),
+        [11.0, 11.0, 11.0],
+    );
+    manager.insert(entity);
+
+    let duration_ms = manager.rebalance_async();
+    assert!(duration_ms >= 0.0);
+}
