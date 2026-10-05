@@ -662,13 +662,21 @@ export class InventoryManager extends Utils.EventEmitter {
       }
     }
 
-    for (const itemId of itemIds) {
-      const item = this.items.get(itemId);
-      if (item && slBridge.connected) {
-        try {
-          await slBridge.sendChat(`/wear ${item.name || itemId}`, 0, 1);
-        } catch {
-          // Ignore individual packet errors during batch fallback
+    if (slBridge.connected && itemIds.length > 0) {
+      const commands = itemIds.map((itemId) => {
+        const item = this.items.get(itemId);
+        return { message: `/wear ${item?.name || itemId}`, channel: 0, type: 1 };
+      });
+
+      try {
+        await slBridge.sendChatBatch(commands);
+      } catch {
+        for (const cmd of commands) {
+          try {
+            await slBridge.sendChat(cmd.message, cmd.channel, cmd.type);
+          } catch {
+            // Ignore individual packet errors during batch fallback
+          }
         }
       }
     }
