@@ -548,6 +548,8 @@ configurations.matching {
 // suite reliable in proxied CI environments without hard-coding a proxy or
 // changing behavior for developers with direct network access.
 tasks.withType<Test>().configureEach {
+    systemProperty("robolectric.dependency.repo.url", "https://maven-central.storage-download.googleapis.com/maven2")
+    systemProperty("robolectric.dependency.repo.id", "googleCentral")
     listOf(
         "http.proxyHost",
         "http.proxyPort",
