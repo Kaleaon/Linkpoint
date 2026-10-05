@@ -48,7 +48,7 @@ class VoiceManager(
     private val simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager? = null,
     initialGridKind: GridKind = GridKind.SECOND_LIFE,
     initialVoiceConfig: VoiceConfig? = null,
-    adapterFactory: VoiceTransportAdapterFactory? = null
+    adapterFactory: VoiceTransportAdapterFactory? = null,
     private val parcelManager: com.linkpoint.world.ParcelManager? = null,
 ) {
     companion object {
@@ -297,7 +297,6 @@ class VoiceManager(
             }
         }
 
-        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
             Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
@@ -368,14 +367,14 @@ class VoiceManager(
                 _isConnected.value = true
                 return@withContext true
             }
+        }
+
         val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
         if (isWebRtcVoiceRegion()) {
             joinSpatialVoiceWebRtc(targetParcel)
         } else {
             joinOpenSimVoice(parcelLocalId)
         }
-
-        joinParcelVoice()
     }
 
     /**
@@ -431,7 +430,9 @@ class VoiceManager(
     @Volatile private var currentWebRtcSession: WebRtcVoiceSession? = null
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
-        return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
+        if (activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)) {
+            return true
+        }
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC)) {
             Log.w(TAG, "WebRTC voice unavailable: ProvisionVoiceAccountRequest capability missing on this region")
