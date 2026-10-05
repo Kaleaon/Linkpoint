@@ -27,6 +27,7 @@ export function skinnedVertexShader(maxJoints: number): string {
     attribute vec3 aPosition;
     attribute vec3 aNormal;
     attribute vec2 aTexCoord;
+    attribute vec3 aTangent;
     attribute vec4 aJoints;
     attribute vec4 aWeights;
 
@@ -37,10 +38,11 @@ export function skinnedVertexShader(maxJoints: number): string {
     uniform vec4 uJointRows[${maxJoints * 3}];
 
     varying vec3 vNormal;
+    varying vec3 vTangent;
     varying vec2 vTexCoord;
     varying vec3 vPosition;
 
-    void skinInfluence(float joint, float weight, vec4 p, vec3 n, inout vec3 outP, inout vec3 outN, inout float total) {
+    void skinInfluence(float joint, float weight, vec4 p, vec3 n, vec3 t, inout vec3 outP, inout vec3 outN, inout vec3 outT, inout float total) {
       if (weight <= 0.0) return;
       int base = int(joint + 0.5) * 3;
       vec4 r0 = uJointRows[base];
@@ -48,6 +50,7 @@ export function skinnedVertexShader(maxJoints: number): string {
       vec4 r2 = uJointRows[base + 2];
       outP += weight * vec3(dot(r0, p), dot(r1, p), dot(r2, p));
       outN += weight * vec3(dot(r0.xyz, n), dot(r1.xyz, n), dot(r2.xyz, n));
+      outT += weight * vec3(dot(r0.xyz, t), dot(r1.xyz, t), dot(r2.xyz, t));
       total += weight;
     }
 
@@ -55,16 +58,18 @@ export function skinnedVertexShader(maxJoints: number): string {
       vec4 p = vec4(aPosition, 1.0);
       vec3 skinnedPos = vec3(0.0);
       vec3 skinnedNormal = vec3(0.0);
+      vec3 skinnedTangent = vec3(0.0);
       float total = 0.0;
-      skinInfluence(aJoints.x, aWeights.x, p, aNormal, skinnedPos, skinnedNormal, total);
-      skinInfluence(aJoints.y, aWeights.y, p, aNormal, skinnedPos, skinnedNormal, total);
-      skinInfluence(aJoints.z, aWeights.z, p, aNormal, skinnedPos, skinnedNormal, total);
-      skinInfluence(aJoints.w, aWeights.w, p, aNormal, skinnedPos, skinnedNormal, total);
+      skinInfluence(aJoints.x, aWeights.x, p, aNormal, aTangent, skinnedPos, skinnedNormal, skinnedTangent, total);
+      skinInfluence(aJoints.y, aWeights.y, p, aNormal, aTangent, skinnedPos, skinnedNormal, skinnedTangent, total);
+      skinInfluence(aJoints.z, aWeights.z, p, aNormal, aTangent, skinnedPos, skinnedNormal, skinnedTangent, total);
+      skinInfluence(aJoints.w, aWeights.w, p, aNormal, aTangent, skinnedPos, skinnedNormal, skinnedTangent, total);
       // Vertices with no influence stay in bind position instead of collapsing to the origin.
-      if (total <= 0.0) { skinnedPos = aPosition; skinnedNormal = aNormal; }
+      if (total <= 0.0) { skinnedPos = aPosition; skinnedNormal = aNormal; skinnedTangent = aTangent; }
       vec4 worldPos = uModelMatrix * vec4(skinnedPos, 1.0);
       vPosition = worldPos.xyz;
       vNormal = normalize(uNormalMatrix * skinnedNormal);
+      vTangent = normalize(uNormalMatrix * skinnedTangent);
       vTexCoord = aTexCoord;
       gl_Position = uProjectionMatrix * uViewMatrix * worldPos;
     }
