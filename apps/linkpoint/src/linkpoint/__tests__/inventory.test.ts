@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { InventoryManager } from '../inventory';
+import { InventoryCore } from '../phase2/inventory-core';
 
 describe('InventoryManager Tree Pruning Filter API', () => {
   let inventory: InventoryManager;
@@ -177,26 +178,72 @@ describe('InventoryManager Tree Pruning Filter API', () => {
     });
   });
 
-  describe('flattenTree', () => {
-    it('flattens a pruned tree hierarchy into a list of nodes', () => {
-      const treeNode = {
-        id: 'root-id',
-        name: 'My Inventory',
-        children: [
-          {
-            id: 'folder-clothing',
-            name: 'Clothing Folder',
-            folder: true,
-            children: [
-              { id: 'item-shirt', name: 'Shirt', folder: false }
-            ]
-          }
-        ]
-      };
+  describe('Atomic Reconciled Inventory Tree Mutation', () => {
+    it('InventoryCore addItem and moveItem deduplicate parent child ID lists automatically', () => {
+      const core = new InventoryCore();
+      core.createFolder('f1', { name: 'Folder 1' });
+      core.createFolder('f2', { name: 'Folder 2' });
 
-      const flatList = inventory.flattenTree(treeNode);
-      expect(flatList).toHaveLength(3);
-      expect(flatList.map(n => n.id)).toEqual(['root-id', 'folder-clothing', 'item-shirt']);
+      // Repeated add
+      core.addItem('item1', { name: 'Item 1', folderId: 'f1' });
+      core.addItem('item1', { name: 'Item 1 Updated', folderId: 'f1' });
+
+      const f1Contents = core.listFolderContents('f1');
+      expect(f1Contents.items).toHaveLength(1);
+      expect(f1Contents.items[0].id).toBe('item1');
+
+      // Move item
+      core.moveItem('item1', 'f2');
+      const f1AfterMove = core.listFolderContents('f1');
+      const f2AfterMove = core.listFolderContents('f2');
+
+      expect(f1AfterMove.items).toHaveLength(0);
+      expect(f2AfterMove.items).toHaveLength(1);
+      expect(f2AfterMove.items[0].id).toBe('item1');
+
+      // Repeated move call
+      core.moveItem('item1', 'f2');
+      expect(core.listFolderContents('f2').items).toHaveLength(1);
+    });
+
+    it('re-fetching folder contents multiple times produces identical, deduplicated folder child lists', async () => {
+      await inventory.reconcileFolder('folder-clothing', [], [
+        { id: 'item-shirt', name: 'Shirt', parent: 'folder-clothing' },
+        { id: 'item-pants', name: 'Pants', parent: 'folder-clothing' },
+      ]);
+
+      const folder = inventory.folders.get('folder-clothing');
+      expect(folder.children).toEqual(['item-shirt', 'item-pants']);
+
+      // Re-fetch 1
+      await inventory.reconcileFolder('folder-clothing', [], [
+        { id: 'item-shirt', name: 'Shirt', parent: 'folder-clothing' },
+        { id: 'item-pants', name: 'Pants', parent: 'folder-clothing' },
+      ]);
+      expect(folder.children).toEqual(['item-shirt', 'item-pants']);
+
+      // Re-fetch 2 with moved item away
+      await inventory.reconcileFolder('folder-clothing', [], [
+        { id: 'item-shirt', name: 'Shirt', parent: 'folder-clothing' },
+      ]);
+      expect(folder.children).toEqual(['item-shirt']);
+      expect(inventory.items.has('item-pants')).toBe(false);
+    });
+
+    it('moveItemToFolder detaches item from source folder and appends once to target folder', () => {
+      inventory.folders.set('f_src', { id: 'f_sub_src', name: 'Source', children: ['item_x'] });
+      inventory.folders.set('f_target', { id: 'f_target', name: 'Target', children: [] });
+      inventory.items.set('item_x', { id: 'item_x', name: 'Moving Item', parent: 'f_src' });
+
+      const moved = inventory.moveItemToFolder('item_x', 'f_target');
+      expect(moved).toBe(true);
+
+      expect(inventory.folders.get('f_src').children).not.toContain('item_x');
+      expect(inventory.folders.get('f_target').children).toEqual(['item_x']);
+
+      // Duplicate move call
+      inventory.moveItemToFolder('item_x', 'f_target');
+      expect(inventory.folders.get('f_target').children).toEqual(['item_x']);
     });
   });
 });
