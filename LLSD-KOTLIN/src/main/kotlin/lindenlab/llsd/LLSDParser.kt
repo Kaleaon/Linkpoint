@@ -245,7 +245,7 @@ class LLSDParser @Throws(ParserConfigurationException::class) constructor() {
         }
 
         return when (nodeName) {
-            "undef" -> null
+            "undef" -> ""
             "boolean" -> if (isUndefined) LLSDUndefined.BOOLEAN else parseBoolean(nodeText.toString())
             "date" -> if (isUndefined) LLSDUndefined.DATE else parseDate(nodeText.toString())
             "integer" -> if (isUndefined) LLSDUndefined.INTEGER else parseInteger(nodeText.toString())

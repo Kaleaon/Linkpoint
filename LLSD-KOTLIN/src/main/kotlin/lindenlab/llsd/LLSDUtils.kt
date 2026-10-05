@@ -90,7 +90,7 @@ object LLSDUtils {
      * to parse it as a UUID.
      */
     @JvmStatic
-    fun getUUID(root: Any?, path: String, defaultValue: UUID): UUID {
+    fun getUUID(root: Any?, path: String, defaultValue: UUID? = null): UUID? {
         val value = navigatePath(root, path)
         return when (value) {
             is UUID -> value
@@ -122,7 +122,7 @@ object LLSDUtils {
      * is returned.
      */
     @JvmStatic
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     fun asList(obj: Any?): List<Any?> {
         return if (obj is List<*>) obj as List<Any?> else ArrayList()
     }
@@ -254,6 +254,7 @@ object LLSDUtils {
      * @return A pretty-printed string representation of the object.
      */
     @JvmStatic
+    @JvmOverloads
     fun prettyPrint(obj: Any?, indent: Int = 2): String {
         val sb = StringBuilder()
         prettyPrintRecursive(obj, indent, 0, sb)
