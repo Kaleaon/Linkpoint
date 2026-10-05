@@ -695,9 +695,7 @@ object SessionLogRecorder {
 
         // Trigger flush if buffer is getting large
         if (logBuffer.size > MAX_MEMORY_ENTRIES) {
-            scope.launch {
-                flushToFile()
-            }
+            flushToFile()
         }
     }
 
