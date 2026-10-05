@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.secondlife.com/protocol/llsd/event_queue.json",
+  "title": "EventQueueGet",
+  "description": "LLSD Schema for Event Queue messages (EventQueueGet response array)",
+  "type": "object",
+  "properties": {
+    "ack": { "type": "integer" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "body": { "type": "object" }
+        },
+        "required": ["message", "body"]
+      }
+    }
+  },
+  "required": ["events"]
+}
