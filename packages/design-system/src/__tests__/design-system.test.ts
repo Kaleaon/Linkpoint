@@ -238,7 +238,9 @@ describe("@linkpoint/design-system subpath exports & functional requirements", (
   });
 
   it("Constraint: theme loader compatibility", async () => {
-    const artDecoTheme = await loadTheme("art-deco");
-    expect(artDecoTheme).toBeDefined();
+    for (const name of themeNames) {
+      const theme = await loadTheme(name);
+      expect(theme).toBeDefined();
+    }
   });
 });
