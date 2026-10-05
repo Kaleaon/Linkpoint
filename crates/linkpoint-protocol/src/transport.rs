@@ -107,6 +107,7 @@ pub enum TransportError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn rejects_oversized_http_response() {
         let limits = TransportLimits {
@@ -142,6 +143,45 @@ mod tests {
         let circuit2 = UdpCircuit::connect(bind_addr, peer_addr, small_limits).unwrap();
         assert!(matches!(
             circuit2.send(&[1, 2, 3]),
+            Err(TransportError::DatagramTooLarge)
+        ));
+    }
+
+    #[test]
+    fn udp_circuit_connects_sends_and_receives() {
+        let limits = TransportLimits {
+            request_timeout: Duration::from_millis(100),
+            max_datagram_bytes: 64,
+            ..Default::default()
+        };
+        let receiver_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let rec_addr = receiver_socket.local_addr().unwrap();
+
+        let sender = UdpCircuit::connect("127.0.0.1:0".parse().unwrap(), rec_addr, limits).unwrap();
+        assert_eq!(sender.peer(), rec_addr);
+
+        let sent = sender.send(b"hello udp").unwrap();
+        assert_eq!(sent, 9);
+
+        let mut buf = [0u8; 64];
+        let (n, _src) = receiver_socket.recv_from(&mut buf).unwrap();
+        assert_eq!(&buf[..n], b"hello udp");
+    }
+
+    #[test]
+    fn udp_circuit_rejects_oversized_datagram() {
+        let limits = TransportLimits {
+            max_datagram_bytes: 4,
+            ..Default::default()
+        };
+        let circuit = UdpCircuit::connect(
+            "127.0.0.1:0".parse().unwrap(),
+            "127.0.0.1:12345".parse().unwrap(),
+            limits,
+        )
+        .unwrap();
+        assert!(matches!(
+            circuit.send(b"12345"),
             Err(TransportError::DatagramTooLarge)
         ));
     }
