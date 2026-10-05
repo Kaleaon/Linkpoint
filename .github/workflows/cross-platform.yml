@@ -10,6 +10,7 @@ on:
       - "Cargo.lock"
       - "package.json"
       - "package-lock.json"
+      - "platforms/iOS/**"
       - ".github/workflows/cross-platform.yml"
   push:
     branches: [main]
@@ -109,3 +110,14 @@ jobs:
           else
             echo "::notice::Web and Rust core are testable, but Android/iOS/desktop native packaging is not enabled until apps/linkpoint/src-tauri is generated."
           fi
+
+  swift-ios:
+    name: Swift iOS engine (macos-latest)
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Run Swift Package test suite
+        run: |
+          cd platforms/iOS
+          swift test
