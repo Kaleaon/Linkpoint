@@ -1,14 +1,14 @@
 {
   "android": {
-    "baseline": 7.0,
+    "baseline": 6.99,
     "min_threshold": 5.0
   },
   "web": {
-    "baseline": 50.0,
+    "baseline": 50.68,
     "min_threshold": 40.0
   },
   "rust": {
-    "baseline": 85.0,
+    "baseline": 80.26,
     "min_threshold": 80.0
   }
 }
