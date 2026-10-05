@@ -7,19 +7,16 @@ import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.ui.chat.formatTypingIndicator
 import com.linkpoint.ui.people.NearbyPerson
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class SpatialChatTypingIndicatorTest {
 
     @Test
-    fun `test ChatManager handles typing start and stop simulator packets`() = runTest {
+    fun `test ChatManager handles typing start and stop simulator packets`() {
         val agentId = UUID.randomUUID()
         val udpConnection = UDPConnectionFixed()
         val chatManager = ChatManager(udpConnection, agentId)
