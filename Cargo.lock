@@ -460,8 +460,6 @@ dependencies = [
 [[package]]
 name = "serde-llsd-benthic"
 version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a16635913d8add13513cb610de57636ba130fc971ebdc7579ebe5e13220804da"
 dependencies = [
  "anyhow",
  "ascii85",
