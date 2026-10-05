@@ -107,6 +107,7 @@ pub enum TransportError {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn rejects_oversized_http_response() {
         let limits = TransportLimits {
@@ -120,29 +121,46 @@ mod tests {
     }
 
     #[test]
-    fn transport_limits_and_http_response_bounded() {
+    fn accepts_valid_http_response() {
         let limits = TransportLimits::default();
-        let res = HttpResponse::bounded(200, vec![1, 2, 3], limits).unwrap();
-        assert_eq!(res.status, 200);
-        assert_eq!(res.body, vec![1, 2, 3]);
+        let resp = HttpResponse::bounded(200, vec![1, 2, 3], limits).unwrap();
+        assert_eq!(resp.status, 200);
+        assert_eq!(resp.body, vec![1, 2, 3]);
     }
 
     #[test]
-    fn udp_circuit_send_and_receive() {
-        let limits = TransportLimits::default();
-        let bind_addr: SocketAddr = "127.0.0.1:0".parse().unwrap();
-        let peer_addr: SocketAddr = "127.0.0.1:12345".parse().unwrap();
-        let circuit = UdpCircuit::connect(bind_addr, peer_addr, limits).unwrap();
-        assert_eq!(circuit.peer(), peer_addr);
+    fn udp_circuit_send_receive_and_limits() {
+        let server_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let server_addr = server_socket.local_addr().unwrap();
 
-        let small_limits = TransportLimits {
-            max_datagram_bytes: 2,
+        let limits = TransportLimits {
+            max_datagram_bytes: 10,
             ..Default::default()
         };
-        let circuit2 = UdpCircuit::connect(bind_addr, peer_addr, small_limits).unwrap();
+
+        let circuit =
+            UdpCircuit::connect("127.0.0.1:0".parse().unwrap(), server_addr, limits).unwrap();
+        assert_eq!(circuit.peer(), server_addr);
+
+        // Test oversized datagram rejection
+        let oversized = vec![0u8; 15];
         assert!(matches!(
-            circuit2.send(&[1, 2, 3]),
+            circuit.send(&oversized),
             Err(TransportError::DatagramTooLarge)
         ));
+
+        // Test valid send and receive
+        let payload = b"hello";
+        let sent = circuit.send(payload).unwrap();
+        assert_eq!(sent, 5);
+
+        let mut buf = [0u8; 32];
+        let (len, src) = server_socket.recv_from(&mut buf).unwrap();
+        assert_eq!(&buf[..len], payload);
+
+        // Send back from server to circuit
+        server_socket.send_to(b"world", src).unwrap();
+        let received = circuit.receive().unwrap();
+        assert_eq!(received, b"world");
     }
 }

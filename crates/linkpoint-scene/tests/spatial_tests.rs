@@ -356,3 +356,30 @@ fn test_octree_query_ray_and_remove_detailed() {
 
     octree.rebalance();
 }
+
+#[test]
+fn test_aabb_extended_methods() {
+    let box1 = AABB::new([1.0, 2.0, 3.0], [5.0, 6.0, 7.0]);
+    assert_eq!(box1.center(), [3.0, 4.0, 5.0]);
+    assert_eq!(box1.extents(), [4.0, 4.0, 4.0]);
+    assert!(box1.contains_point([3.0, 4.0, 5.0]));
+    assert!(!box1.contains_point([0.0, 0.0, 0.0]));
+
+    let from_ce = AABB::from_center_extents([3.0, 4.0, 5.0], [4.0, 4.0, 4.0]);
+    assert_eq!(from_ce.center(), box1.center());
+    assert_eq!(from_ce.extents(), box1.extents());
+
+    let box2 = AABB::new([10.0, 10.0, 10.0], [12.0, 12.0, 12.0]);
+    let u = box1.union(&box2);
+    assert_eq!(u.min[..3], [1.0, 2.0, 3.0]);
+    assert_eq!(u.max[..3], [12.0, 12.0, 12.0]);
+
+    // Ray intersects box
+    let hit = box1.ray_intersects([0.0, 4.0, 5.0], [1.0, 0.0, 0.0]);
+    assert!(hit.is_some());
+    assert!((hit.unwrap() - 1.0).abs() < 1e-4);
+
+    // Ray misses box
+    let miss = box1.ray_intersects([0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+    assert!(miss.is_none());
+}
