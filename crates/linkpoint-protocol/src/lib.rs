@@ -7,6 +7,7 @@
 pub mod capabilities;
 pub mod circuit;
 pub mod endpoint;
+pub mod generated;
 pub mod llsd;
 pub mod login;
 pub mod packet;

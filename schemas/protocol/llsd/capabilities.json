@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.secondlife.com/protocol/llsd/capabilities.json",
+  "title": "CapabilitiesRequestResponse",
+  "description": "Canonical LLSD Schema for Capability Endpoint Negotiation and Payload Exchange",
+  "type": "object",
+  "properties": {
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of capability names requested by client during seed capability call"
+    },
+    "seed_response": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Map of capability names to granted capability URLs"
+    },
+    "fetch_inventory": {
+      "type": "object",
+      "properties": {
+        "agent_id": { "type": "string", "format": "uuid" },
+        "folder_id": { "type": "string", "format": "uuid" },
+        "owner_id": { "type": "string", "format": "uuid" }
+      },
+      "required": ["agent_id", "folder_id"]
+    }
+  },
+  "required": ["capabilities"]
+}
