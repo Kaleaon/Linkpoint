@@ -126,6 +126,16 @@ class SimulatorFeaturesManager(
             voiceServerType = response.getString("voice_server_type"),
             voiceServerVersion = response.getString("voice-server-version"),
 
+            // Region size (OpenSim varregions transmit RegionSizeX and RegionSizeY)
+            regionSizeX = (response.getInt("RegionSizeX")
+                ?: response.getReal("RegionSizeX")?.toInt()
+                ?: response.getString("RegionSizeX")?.toIntOrNull()
+                ?: 256).coerceIn(256, 2048),
+            regionSizeY = (response.getInt("RegionSizeY")
+                ?: response.getReal("RegionSizeY")?.toInt()
+                ?: response.getString("RegionSizeY")?.toIntOrNull()
+                ?: 256).coerceIn(256, 2048),
+
             // Region maturity (projected from region_flags param when SimFeatures doesn't echo it)
             isAdultRegion = regionFlags?.let { (it and REGION_FLAG_ADULT) != 0 } ?: false
         )
@@ -179,12 +189,16 @@ data class SimulatorFeatureProjection(
     // Voice transport
     val voiceServerType: String?,
     val voiceServerVersion: String?,
+    // Region dimensions
+    val regionSizeX: Int = 256,
+    val regionSizeY: Int = 256,
     // Maturity
     val isAdultRegion: Boolean
 ) {
     override fun toString(): String = "SimFeat(" +
         "pbr=$pbrEnabled, modifyMat=$modifyMaterialEnabled, " +
         "meshUpload=$meshUploadEnabled, bom=$bakesOnMeshEnabled, " +
+        "regionSize=${regionSizeX}x${regionSizeY}, " +
         "maxAttach=$maxAttachments, maxGroups=$maxAgentGroups, " +
         "voice=$voiceServerType v$voiceServerVersion, " +
         "lslSyntaxId=$lslSyntaxId, adult=$isAdultRegion)"
