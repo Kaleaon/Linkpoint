@@ -252,7 +252,11 @@ class VoiceManager(
     }
 
     /**
-     * Connect to spatial voice channel with capability validation.
+     * Primary entry point for voice connection.
+     *
+     * Queries region capability status and parcel local ID prior to initiating
+     * WebRTC peer connections. Fails gracefully if voice capability is missing
+     * on the current region.
      */
     suspend fun connect(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
         val hasVoiceCap = capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) ||
