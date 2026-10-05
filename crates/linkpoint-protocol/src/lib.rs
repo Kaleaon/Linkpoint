@@ -7,12 +7,14 @@
 pub mod capabilities;
 pub mod circuit;
 pub mod endpoint;
+pub mod ffi;
 pub mod generated;
 pub mod llsd;
 pub mod login;
 pub mod packet;
 pub mod reliable;
 pub mod transport;
+pub mod wasm;
 
 pub use capabilities::{CapabilitySet, Event, EventQueue};
 pub use circuit::{CircuitCodecError, USE_CIRCUIT_CODE_MESSAGE_ID, UseCircuitCode};

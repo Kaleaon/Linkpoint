@@ -24,3 +24,10 @@ url = "2"
 [patch.crates-io]
 quick-xml = { path = "crates/quick-xml" }
 serde-llsd-benthic = { path = "crates/serde-llsd-benthic" }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

@@ -1,0 +1,276 @@
+[
+  {
+    "id": 1,
+    "name": "undef",
+    "type": "undefined",
+    "json_value": null,
+    "xml_snippet": "<undef/>",
+    "notation_snippet": "!"
+  },
+  {
+    "id": 2,
+    "name": "bool_true",
+    "type": "boolean",
+    "json_value": true,
+    "xml_snippet": "<boolean>true</boolean>",
+    "notation_snippet": "1"
+  },
+  {
+    "id": 3,
+    "name": "bool_false",
+    "type": "boolean",
+    "json_value": false,
+    "xml_snippet": "<boolean>false</boolean>",
+    "notation_snippet": "0"
+  },
+  {
+    "id": 4,
+    "name": "int_zero",
+    "type": "integer",
+    "json_value": 0,
+    "xml_snippet": "<integer>0</integer>",
+    "notation_snippet": "i0"
+  },
+  {
+    "id": 5,
+    "name": "int_pos",
+    "type": "integer",
+    "json_value": 42,
+    "xml_snippet": "<integer>42</integer>",
+    "notation_snippet": "i42"
+  },
+  {
+    "id": 6,
+    "name": "int_neg",
+    "type": "integer",
+    "json_value": -2147483648,
+    "xml_snippet": "<integer>-2147483648</integer>",
+    "notation_snippet": "i-2147483648"
+  },
+  {
+    "id": 7,
+    "name": "real_zero",
+    "type": "real",
+    "json_value": 0.0,
+    "xml_snippet": "<real>0.0</real>",
+    "notation_snippet": "r0.0"
+  },
+  {
+    "id": 8,
+    "name": "real_pos",
+    "type": "real",
+    "json_value": 3.141592653589793,
+    "xml_snippet": "<real>3.141592653589793</real>",
+    "notation_snippet": "r3.141592653589793"
+  },
+  {
+    "id": 9,
+    "name": "real_neg",
+    "type": "real",
+    "json_value": -2718.2818,
+    "xml_snippet": "<real>-2718.2818</real>",
+    "notation_snippet": "r-2718.2818"
+  },
+  {
+    "id": 10,
+    "name": "real_inf",
+    "type": "real",
+    "json_value": "Infinity",
+    "xml_snippet": "<real>inf</real>",
+    "notation_snippet": "rinf"
+  },
+  {
+    "id": 11,
+    "name": "real_neg_inf",
+    "type": "real",
+    "json_value": "-Infinity",
+    "xml_snippet": "<real>-inf</real>",
+    "notation_snippet": "r-inf"
+  },
+  {
+    "id": 12,
+    "name": "real_nan",
+    "type": "real",
+    "json_value": "NaN",
+    "xml_snippet": "<real>nan</real>",
+    "notation_snippet": "rnan"
+  },
+  {
+    "id": 13,
+    "name": "str_empty",
+    "type": "string",
+    "json_value": "",
+    "xml_snippet": "<string></string>",
+    "notation_snippet": "''"
+  },
+  {
+    "id": 14,
+    "name": "str_plain",
+    "type": "string",
+    "json_value": "Welcome to Second Life",
+    "xml_snippet": "<string>Welcome to Second Life</string>",
+    "notation_snippet": "'Welcome to Second Life'"
+  },
+  {
+    "id": 15,
+    "name": "str_special",
+    "type": "string",
+    "json_value": "<hello & \"world\" 'foo' >",
+    "xml_snippet": "<string>&lt;hello &amp; &quot;world&quot; &apos;foo&apos; &gt;</string>",
+    "notation_snippet": "'<hello & \"world\" \\'foo\\' >'"
+  },
+  {
+    "id": 16,
+    "name": "str_unicode",
+    "type": "string",
+    "json_value": "こんにちは世界 🌐 Linkpoint",
+    "xml_snippet": "<string>こんにちは世界 🌐 Linkpoint</string>",
+    "notation_snippet": "'こんにちは世界 🌐 Linkpoint'"
+  },
+  {
+    "id": 17,
+    "name": "uuid_zero",
+    "type": "uuid",
+    "json_value": "00000000-0000-0000-0000-000000000000",
+    "xml_snippet": "<uuid>00000000-0000-0000-0000-000000000000</uuid>",
+    "notation_snippet": "u00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "id": 18,
+    "name": "uuid_val",
+    "type": "uuid",
+    "json_value": "d7f4aeca-88f1-4680-bcac-6a7f05c48873",
+    "xml_snippet": "<uuid>d7f4aeca-88f1-4680-bcac-6a7f05c48873</uuid>",
+    "notation_snippet": "ud7f4aeca-88f1-4680-bcac-6a7f05c48873"
+  },
+  {
+    "id": 19,
+    "name": "date_iso",
+    "type": "date",
+    "json_value": "2026-10-05T09:38:51.000Z",
+    "xml_snippet": "<date>2026-10-05T09:38:51.000Z</date>",
+    "notation_snippet": "d'2026-10-05T09:38:51.000Z'"
+  },
+  {
+    "id": 20,
+    "name": "uri_val",
+    "type": "uri",
+    "json_value": "http://sim31.secondlife.com:12043/cap/test",
+    "xml_snippet": "<uri>http://sim31.secondlife.com:12043/cap/test</uri>",
+    "notation_snippet": "l'http://sim31.secondlife.com:12043/cap/test'"
+  },
+  {
+    "id": 21,
+    "name": "bin_empty",
+    "type": "binary",
+    "json_value": "",
+    "xml_snippet": "<binary encoding=\"base64\"></binary>",
+    "notation_snippet": "b(0)\"\""
+  },
+  {
+    "id": 22,
+    "name": "bin_base64",
+    "type": "binary",
+    "json_value": "SGVsbG8gTExTRA==",
+    "xml_snippet": "<binary encoding=\"base64\">SGVsbG8gTExTRA==</binary>",
+    "notation_snippet": "b64\"SGVsbG8gTExTRA==\""
+  },
+  {
+    "id": 23,
+    "name": "bin_hex",
+    "type": "binary",
+    "json_value": "4c4c5344",
+    "xml_snippet": "<binary encoding=\"base16\">4c4c5344</binary>",
+    "notation_snippet": "b16\"4c4c5344\""
+  },
+  {
+    "id": 24,
+    "name": "array_empty",
+    "type": "array",
+    "json_value": [],
+    "xml_snippet": "<array></array>",
+    "notation_snippet": "[]"
+  },
+  {
+    "id": 25,
+    "name": "array_primitive",
+    "type": "array",
+    "json_value": [1, "two", true, null],
+    "xml_snippet": "<array><integer>1</integer><string>two</string><boolean>true</boolean><undef/></array>",
+    "notation_snippet": "[i1, 'two', 1, !]"
+  },
+  {
+    "id": 26,
+    "name": "array_nested",
+    "type": "array",
+    "json_value": [[1, 2], [3, 4]],
+    "xml_snippet": "<array><array><integer>1</integer><integer>2</integer></array><array><integer>3</integer><integer>4</integer></array></array>",
+    "notation_snippet": "[[i1, i2], [i3, i4]]"
+  },
+  {
+    "id": 27,
+    "name": "map_empty",
+    "type": "map",
+    "json_value": {},
+    "xml_snippet": "<map></map>",
+    "notation_snippet": "{}"
+  },
+  {
+    "id": 28,
+    "name": "map_primitive",
+    "type": "map",
+    "json_value": {
+      "agent_id": "00000000-0000-0000-0000-000000000000",
+      "balance": 1000,
+      "online": true
+    },
+    "xml_snippet": "<map><key>agent_id</key><uuid>00000000-0000-0000-0000-000000000000</uuid><key>balance</key><integer>1000</integer><key>online</key><boolean>true</boolean></map>",
+    "notation_snippet": "{'agent_id':u00000000-0000-0000-0000-000000000000,'balance':i1000,'online':1}"
+  },
+  {
+    "id": 29,
+    "name": "map_nested",
+    "type": "map",
+    "json_value": {
+      "folder": "My Outfits",
+      "items": [
+        {"id": 1, "name": "Shirt"},
+        {"id": 2, "name": "Pants"}
+      ]
+    },
+    "xml_snippet": "<map><key>folder</key><string>My Outfits</string><key>items</key><array><map><key>id</key><integer>1</integer><key>name</key><string>Shirt</string></map><map><key>id</key><integer>2</integer><key>name</key><string>Pants</string></map></array></map>",
+    "notation_snippet": "{'folder':'My Outfits','items':[{'id':i1,'name':'Shirt'},{'id':i2,'name':'Pants'}]}"
+  },
+  {
+    "id": 30,
+    "name": "uuid_map_ordering",
+    "type": "map",
+    "json_value": {
+      "00000000-0000-0000-0000-000000000000": "first",
+      "ffffffff-ffff-ffff-ffff-ffffffffffff": "last"
+    },
+    "xml_snippet": "<map><key>00000000-0000-0000-0000-000000000000</key><string>first</string><key>ffffffff-ffff-ffff-ffff-ffffffffffff</key><string>last</string></map>",
+    "notation_snippet": "{'00000000-0000-0000-0000-000000000000':'first','ffffffff-ffff-ffff-ffff-ffffffffffff':'last'}"
+  },
+  {
+    "id": 31,
+    "name": "event_queue_capability",
+    "type": "map",
+    "json_value": {
+      "ack": 42,
+      "events": [
+        {
+          "message": "ChatterBoxSessionAgentListUpdates",
+          "body": {
+            "session_id": "d7f4aeca-88f1-4680-bcac-6a7f05c48873",
+            "agent_updates": [
+              {"agent_id": "00000000-0000-0000-0000-000000000000", "can_voice": true}
+            ]
+          }
+        }
+      ]
+    },
+    "xml_snippet": "<map><key>ack</key><integer>42</integer><key>events</key><array><map><key>body</key><map><key>agent_updates</key><array><map><key>agent_id</key><uuid>00000000-0000-0000-0000-000000000000</uuid><key>can_voice</key><boolean>true</boolean></map></array><key>session_id</key><uuid>d7f4aeca-88f1-4680-bcac-6a7f05c48873</uuid></map><key>message</key><string>ChatterBoxSessionAgentListUpdates</string></map></array></map>",
+    "notation_snippet": "{'ack':i42,'events':[{'body':{'agent_updates':[{'agent_id':u00000000-0000-0000-0000-000000000000,'can_voice':1}],'session_id':ud7f4aeca-88f1-4680-bcac-6a7f05c48873},'message':'ChatterBoxSessionAgentListUpdates'}]}"
+  }
+]
