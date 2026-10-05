@@ -58,9 +58,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import com.linkpoint.teleport.TeleportLure
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GlassSurface
 import com.linkpoint.ui.components.linkpoint2.primitives.L2HudTag
 import com.linkpoint.ui.components.linkpoint2.tokens.Linkpoint2
+import com.linkpoint.ui.dialogs.TeleportOfferDialog
 
 private object WorldOverlayZ {
     const val TOP_STATUS = 1f
@@ -154,9 +156,23 @@ fun WorldOverlay(
     onRun: () -> Unit,
     onJump: () -> Unit,
     onSit: () -> Unit,
+    onAcceptLure: (TeleportLure) -> Unit = {},
+    onDeclineLure: (TeleportLure) -> Unit = {},
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val metrics = overlayMetricsFor(maxWidth, maxHeight)
+
+        val lure = state.activeTeleportLure
+        if (lure != null) {
+            TeleportOfferDialog(
+                fromName = lure.senderName,
+                location = lure.regionName,
+                message = lure.message,
+                onAccept = { onAcceptLure(lure) },
+                onDecline = { onDeclineLure(lure) },
+                onDismiss = { onDeclineLure(lure) }
+            )
+        }
 
         if (state.overlaysVisibility.topStatusHud) {
             TopStatusBar(

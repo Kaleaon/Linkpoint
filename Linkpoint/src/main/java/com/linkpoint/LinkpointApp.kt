@@ -994,7 +994,7 @@ class LinkpointApp : Application() {
         // generic system messages so the L2 notifications surface has
         // somewhere to render them. Previously this class was defined
         // but never constructed, so the inbox was always empty.
-        notificationManager = com.linkpoint.notifications.NotificationManager(this)
+        notificationManager = com.linkpoint.notifications.NotificationManager(this, capabilityManager)
 
         // NEW: User Profile Manager
         userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
@@ -1283,6 +1283,9 @@ class LinkpointApp : Application() {
 
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        if (::notificationManager.isInitialized) {
+            notificationManager.teleportManager = teleportManager
+        }
         // Wire region-name lookup so TeleportFinish/CrossedRegion event
         // payloads carry the actual sim name. Prefer the current session
         // (most-recent RegionHandshake) for the active region; otherwise
@@ -5792,6 +5795,7 @@ class LinkpointApp : Application() {
         if (::scriptManager.isInitialized) scriptManager.shutdown()
         if (::sitManager.isInitialized) sitManager.shutdown()
         if (::animationController.isInitialized) animationController.shutdown()
+        if (::notificationManager.isInitialized) notificationManager.clearActiveLure()
 
         capabilityManager.shutdown()
         EventQueueDispatcher.shutdown()
