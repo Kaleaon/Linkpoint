@@ -27,11 +27,11 @@ const BASIC_FRAGMENT_SHADER = `
         #else
         precision mediump float;
         #endif
-        
+
         varying vec3 vNormal;
         varying vec2 vTexCoord;
         varying vec3 vPosition;
-        
+
         uniform vec3 uLightPos;
         uniform vec3 uLightColor;
         uniform vec3 uAmbientColor;
@@ -53,7 +53,7 @@ const BASIC_FRAGMENT_SHADER = `
         uniform bool uUseEmissiveTexture;
         uniform float uAlphaCutoff;
         uniform int uAlphaMode;
-        
+
         void main() {
           // SL applies repeats first, then rotates around the texture centre,
           // then applies the face offset. Rotating before repeat distorted
@@ -67,14 +67,14 @@ const BASIC_FRAGMENT_SHADER = `
           vec3 normal = normalize(vNormal);
           if (uUseNormalTexture) normal = normalize(normal + (texture2D(uNormalTexture, transformedUV).xyz * 2.0 - 1.0));
           vec3 lightDir = normalize(uLightPos - vPosition);
-          
+
           // Ambient
           vec3 ambient = uAmbientColor;
-          
+
           // Diffuse
           float diff = max(dot(normal, lightDir), 0.0);
           vec3 diffuse = diff * uLightColor;
-          
+
           // Final color
           vec4 baseColor = uUseTexture ? texture2D(uTexture, transformedUV) * uColor : uColor;
           if (uAlphaMode == 1 && baseColor.a < uAlphaCutoff) discard;
@@ -92,7 +92,7 @@ const BASIC_FRAGMENT_SHADER = `
           vec3 diffusePbr = baseColor.rgb * (1.0 - metallic) * pow(min(ambient + diffuse, vec3(1.0)), vec3(1.0 / 2.2));
           vec3 emission = uEmissive * (uUseEmissiveTexture ? texture2D(uEmissiveTexture, transformedUV).rgb : vec3(1.0));
           vec3 result = uFullBright ? baseColor.rgb : diffusePbr + f0 * specular + emission;
-          
+
           gl_FragColor = vec4(result, baseColor.a);
         }
 `;
@@ -109,11 +109,11 @@ export class Graphics3D extends Utils.EventEmitter {
   private textureAlpha: Map<string, boolean> = new Map();
   private renderTargets: Map<string, { framebuffer: WebGLFramebuffer; depth: WebGLRenderbuffer; width: number; height: number }> = new Map();
   private clearColor: [number, number, number, number] = [0.53, 0.81, 0.92, 1];
-  
+
   // Rendering state
   public drawCalls: number = 0;
   public triangles: number = 0;
-  
+
   // Capabilities
   public extensions: any = {};
   public maxTextureSize: number = 0;
@@ -202,16 +202,16 @@ export class Graphics3D extends Utils.EventEmitter {
         attribute vec3 aPosition;
         attribute vec3 aNormal;
         attribute vec2 aTexCoord;
-        
+
         uniform mat4 uModelMatrix;
         uniform mat4 uViewMatrix;
         uniform mat4 uProjectionMatrix;
         uniform mat3 uNormalMatrix;
-        
+
         varying vec3 vNormal;
         varying vec2 vTexCoord;
         varying vec3 vPosition;
-        
+
         void main() {
           vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
           vPosition = worldPos.xyz;
@@ -658,7 +658,7 @@ export class Graphics3D extends Utils.EventEmitter {
     if (color) this.setClearColor(color);
     gl.clearColor(...this.clearColor);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+
     this.drawCalls = 0;
     this.triangles = 0;
   }
