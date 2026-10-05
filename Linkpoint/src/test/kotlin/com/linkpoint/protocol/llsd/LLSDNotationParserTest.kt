@@ -147,4 +147,19 @@ class LLSDNotationParserTest {
         assertEquals(LLSDString("こんにちは"), v["jp"])
         assertEquals(LLSDString("🚀"), v["emoji"])
     }
+
+    @Test
+    fun `date variants and malformed fallbacks`() {
+        val vMs = parse("d\"2026-05-01T07:27:22.123456Z\"")
+        assertTrue(vMs is LLSDDate)
+        assertTrue((vMs as LLSDDate).value.time > 0L)
+
+        val vS = parse("d\"2026-05-01T07:27:22Z\"")
+        assertTrue(vS is LLSDDate)
+        assertTrue((vS as LLSDDate).value.time > 0L)
+
+        val vBad = parse("d\"invalid-date\"")
+        assertTrue(vBad is LLSDDate)
+        assertEquals(0L, (vBad as LLSDDate).value.time)
+    }
 }

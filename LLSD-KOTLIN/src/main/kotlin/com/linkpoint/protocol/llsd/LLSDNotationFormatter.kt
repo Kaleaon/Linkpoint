@@ -1,9 +1,8 @@
 package com.linkpoint.protocol.llsd
 
-import java.text.SimpleDateFormat
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Base64
-import java.util.Locale
-import java.util.TimeZone
 
 /**
  * LLSD notation serializer modeled after secondlife/python-llsd
@@ -11,9 +10,8 @@ import java.util.TimeZone
  * notation but could not emit it.
  */
 object LLSDNotationFormatter {
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }
+    private val DATE_FORMATTER: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC)
 
     fun format(value: LLSDValue, includeHeader: Boolean = false): String {
         val body = writeValue(value)
@@ -28,7 +26,7 @@ object LLSDNotationFormatter {
         is LLSDUUID -> "u${value.value}"
         is LLSDString -> quoteAndEscape(value.value)
         is LLSDBinary -> "b64\"${Base64.getEncoder().encodeToString(value.value)}\""
-        is LLSDDate -> "d\"${dateFormat.format(value.value)}\""
+        is LLSDDate -> "d\"${DATE_FORMATTER.format(value.value.toInstant())}\""
         is LLSDURI -> "l${quoteAndEscape(value.value)}"
         is LLSDMap -> value.value.entries.joinToString(prefix = "{", postfix = "}", separator = ",") {
             "${quoteAndEscape(it.key)}:${writeValue(it.value)}"
