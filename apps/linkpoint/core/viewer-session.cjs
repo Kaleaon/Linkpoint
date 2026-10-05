@@ -64,7 +64,7 @@ function watchSunHour(getRegion, send, intervalMs = 2000) {
   };
 }
 const {
-  finite, vector, serializeEnvironment, serializeTerrain, primAppearance, serializeObject, serializeFriend,
+  finite, vector, serializeEnvironment, serializeTerrain, primAppearance, serializeObject, serializeFriend, serializeParcel,
 } = require('./serializers.cjs');
 
 const NOT_CONNECTED = 'Not connected to Second Life';
@@ -374,18 +374,7 @@ class ViewerSession {
       timestamp: Date.now(),
     }));
 
-    this.subscribe(events.onParcelPropertiesEvent, 'parcel-properties', (parcel) => ({
-      id: parcel.LocalID,
-      name: parcel.Name || '',
-      description: parcel.Desc || '',
-      area: parcel.Area,
-      ownerId: parcel.OwnerID?.toString?.() || null,
-      groupId: parcel.GroupID?.toString?.() || null,
-      maxPrims: parcel.MaxPrims,
-      totalPrims: parcel.TotalPrims,
-      musicUrl: parcel.MusicURL || '',
-      mediaUrl: parcel.MediaURL || '',
-    }));
+    this.subscribe(events.onParcelPropertiesEvent, 'parcel-properties', serializeParcel);
 
     this.subscriptions.push(events.onAvatarEnteredRegion.subscribe((avatar) => this.trackAvatar(avatar)));
 
@@ -909,4 +898,4 @@ class ViewerSession {
   }
 }
 
-module.exports = { ViewerSession, serializeObject, serializeEnvironment, serializeTerrain, serializeFriend, serializeTerrainMaterials, PCode };
+module.exports = { ViewerSession, serializeObject, serializeEnvironment, serializeTerrain, serializeFriend, serializeParcel, serializeTerrainMaterials, PCode };
