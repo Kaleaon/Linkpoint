@@ -374,8 +374,6 @@ class VoiceManager(
         } else {
             joinOpenSimVoice(parcelLocalId)
         }
-
-        joinParcelVoice()
     }
 
     /**
