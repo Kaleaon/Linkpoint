@@ -4,8 +4,13 @@ use std::fs;
 use std::path::PathBuf;
 
 fn find_vector_file(relative_subpath: &str) -> PathBuf {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let candidates = [
+        manifest_dir.join("../../test-vectors").join(relative_subpath),
+        manifest_dir.join("../test-vectors").join(relative_subpath),
+        manifest_dir.join("test-vectors").join(relative_subpath),
         PathBuf::from("../../test-vectors").join(relative_subpath),
+        PathBuf::from("../test-vectors").join(relative_subpath),
         PathBuf::from("test-vectors").join(relative_subpath),
         PathBuf::from("/app/Linkpoint/test-vectors").join(relative_subpath),
     ];
