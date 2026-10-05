@@ -27,6 +27,9 @@ if command -v pre-commit >/dev/null 2>&1; then
 else
   echo "[git-hooks] Running native fallback pre-commit checks..."
 
+  echo "[git-hooks] Checking JSON and YAML syntax..."
+  python3 scripts/check_native_syntax_fallback.py "$@"
+
   echo "[git-hooks] Checking viewer contract..."
   npm run check:contract
 
