@@ -2,6 +2,7 @@ package com.linkpoint.voice
 
 import android.content.Context
 import android.util.Log
+import com.linkpoint.protocol.GridKind
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,6 +46,9 @@ class VoiceManager(
      * Tests pass null and exercise the legacy flow directly.
      */
     private val simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager? = null,
+    initialGridKind: GridKind = GridKind.SECOND_LIFE,
+    initialVoiceConfig: VoiceConfig? = null,
+    adapterFactory: VoiceTransportAdapterFactory? = null
 ) {
     companion object {
         private const val TAG = "VoiceManager"
@@ -65,6 +69,19 @@ class VoiceManager(
     private var peerConnectionFactory: PeerConnectionFactory? = null
     private var localAudioTrack: AudioTrack? = null
     private var audioSource: AudioSource? = null
+
+    // Grid and Adapter configuration
+    var currentGridKind: GridKind = initialGridKind
+        private set
+    var currentVoiceConfig: VoiceConfig? = initialVoiceConfig
+        private set
+
+    private val transportAdapterFactory: VoiceTransportAdapterFactory =
+        adapterFactory ?: VoiceTransportAdapterFactory(capabilityManager) { peerConnectionFactory }
+
+    var activeAdapter: VoiceTransportAdapter =
+        transportAdapterFactory.createAdapter(currentGridKind, currentVoiceConfig)
+        private set
 
     // Voice sessions
     private val activeSessions = ConcurrentHashMap<String, VoiceSession>()
@@ -234,12 +251,34 @@ class VoiceManager(
     }
 
     /**
+     * Updates the grid kind and voice configuration, replacing [activeAdapter] if needed.
+     */
+    fun updateGridKind(gridKind: GridKind, voiceConfig: VoiceConfig? = null) {
+        if (gridKind != currentGridKind || voiceConfig != currentVoiceConfig) {
+            activeAdapter.disconnect()
+            activeAdapter.dispose()
+            currentGridKind = gridKind
+            currentVoiceConfig = voiceConfig
+            activeAdapter = transportAdapterFactory.createAdapter(currentGridKind, currentVoiceConfig)
+            Log.i(TAG, "Switched VoiceTransportAdapter to $gridKind (config=$voiceConfig)")
+        }
+    }
+
+    /**
      * Join spatial voice on an OpenSim region or non-SL WebRTC grid.
      * Requests `ParcelVoiceInfoRequest` and `ProvisionVoiceAccountRequest` credentials,
      * converts OpenSim SIP credentials via [OpenSimVoiceSignalingAdapter],
      * and starts a [WebRtcVoiceSession] without calling legacy native Vivox C++ JNI stubs.
      */
     suspend fun joinOpenSimVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
+        if (currentGridKind == GridKind.OPENSIM) {
+            val success = activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
+            if (success) {
+                _isConnected.value = true
+                return@withContext true
+            }
+        }
+
         val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
         val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
 
@@ -280,19 +319,27 @@ class VoiceManager(
     }
 
     /**
-     * Top-level entry point for spatial voice. Picks the SL WebRTC flow
-     * for WebRTC-enabled regions (`voice_server_type == "webrtc"`) and
-     * routes OpenSim grids / non-SL WebRTC regions to [joinOpenSimVoice]
-     * via [OpenSimVoiceSignalingAdapter].
+     * Top-level entry point for spatial voice. Picks the WebRTC flow
+     * for WebRTC-enabled regions or OpenSim grids via [VoiceTransportAdapter], and falls back to legacy
+     * parcel voice for non-WebRTC regions.
      *
      * Bypasses legacy native Vivox C++ JNI stubs completely on 64-bit Android runtimes.
      */
     suspend fun joinSpatialVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
-        if (isWebRtcVoiceRegion()) {
-            joinSpatialVoiceWebRtc(parcelLocalId)
-        } else {
-            joinOpenSimVoice(parcelLocalId)
+        val effectiveConfig = (currentVoiceConfig ?: VoiceConfig()).copy(
+            parcelLocalId = parcelLocalId ?: currentVoiceConfig?.parcelLocalId
+        )
+        currentVoiceConfig = effectiveConfig
+
+        if (currentGridKind == GridKind.OPENSIM || isWebRtcVoiceRegion()) {
+            val success = activeAdapter.connectSpatialVoice(parcelLocalId, effectiveConfig)
+            if (success) {
+                _isConnected.value = true
+                return@withContext true
+            }
         }
+
+        joinParcelVoice()
     }
 
     /**
@@ -312,15 +359,8 @@ class VoiceManager(
      * servers as resilience fallbacks). Used when the sim doesn't
      * advertise its own `ice_servers`.
      */
-    private fun defaultWebRtcIceServers(): List<PeerConnection.IceServer> = listOf(
-        PeerConnection.IceServer.builder("stun:stun1.agni.secondlife.io:3478").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun2.agni.secondlife.io:3478").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun3.agni.secondlife.io:3478").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun.nextcloud.com:443").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun.twilio.com:3478").createIceServer(),
-    )
+    private fun defaultWebRtcIceServers(): List<PeerConnection.IceServer> =
+        activeAdapter.resolveIceServers(emptyList(), currentVoiceConfig)
 
     /**
      * Track for the active WebRTC voice session — at most one for
@@ -331,53 +371,14 @@ class VoiceManager(
     @Volatile private var currentWebRtcSession: WebRtcVoiceSession? = null
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
-        val factory = peerConnectionFactory
-        if (factory == null) {
-            Log.w(TAG, "WebRTC voice requested but PeerConnectionFactory failed to initialise")
-            return false
-        }
-
-        // Tear down any previous session before opening a new one. For
-        // cross-region voice (multiple neighbouring regions) the caller
-        // would manage N sessions and toggle which is primary; that
-        // bookkeeping lives outside this helper.
-        currentWebRtcSession?.close()
-
-        val session = WebRtcVoiceSession(
-            capabilityManager = capabilityManager,
-            factory = factory,
-            channelType = WebRtcVoiceSession.ChannelType.SPATIAL,
-            parcelLocalId = parcelLocalId,
-        )
-        currentWebRtcSession = session
-
-        // The localAudioTrack created in [initializeWebRTC] is per-
-        // VoiceManager so it can be shared across cross-region
-        // sessions. Attach it via the PeerConnection that
-        // WebRtcVoiceSession will create — the ICE servers come from
-        // either a sim-advertised list or the libremetaverse-style
-        // default STUN pool.
-        val ice = defaultWebRtcIceServers()
-        return try {
-            session.connect(ice)
-            // Mark this session primary so its audio is streamed back.
-            // Cross-region setups should override after the fact.
-            session.sendJoin(primary = true)
-            _isConnected.value = true
-            Log.i(TAG, "WebRTC spatial voice connected (parcel=$parcelLocalId)")
-            true
-        } catch (e: Exception) {
-            Log.w(TAG, "WebRTC spatial voice connect failed: ${e.message}", e)
-            session.close()
-            currentWebRtcSession = null
-            false
-        }
+        return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
     }
 
     /**
      * Leave current voice channel
      */
     fun leaveVoice() {
+        activeAdapter.disconnect()
         currentParcelSession?.let { session ->
             session.disconnect()
             activeSessions.remove(session.channelUri)
@@ -744,6 +745,7 @@ class VoiceManager(
 
     fun shutdown() {
         scope.cancel()
+        activeAdapter.dispose()
 
         for (session in activeSessions.values) {
             session.disconnect()
