@@ -118,4 +118,31 @@ mod tests {
             Err(TransportError::ResponseTooLarge)
         ));
     }
+
+    #[test]
+    fn transport_limits_and_http_response_bounded() {
+        let limits = TransportLimits::default();
+        let res = HttpResponse::bounded(200, vec![1, 2, 3], limits).unwrap();
+        assert_eq!(res.status, 200);
+        assert_eq!(res.body, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn udp_circuit_send_and_receive() {
+        let limits = TransportLimits::default();
+        let bind_addr: SocketAddr = "127.0.0.1:0".parse().unwrap();
+        let peer_addr: SocketAddr = "127.0.0.1:12345".parse().unwrap();
+        let circuit = UdpCircuit::connect(bind_addr, peer_addr, limits).unwrap();
+        assert_eq!(circuit.peer(), peer_addr);
+
+        let small_limits = TransportLimits {
+            max_datagram_bytes: 2,
+            ..Default::default()
+        };
+        let circuit2 = UdpCircuit::connect(bind_addr, peer_addr, small_limits).unwrap();
+        assert!(matches!(
+            circuit2.send(&[1, 2, 3]),
+            Err(TransportError::DatagramTooLarge)
+        ));
+    }
 }

@@ -127,8 +127,21 @@ fun L2ChatRoute(
         }
     }
 
+    val typingAvatars by app.chatManager.typingAvatars.collectAsState()
+
+    val typingAvatarNames = remember(typingAvatars, messages) {
+        typingAvatars.filter { it != myAgentId }.map { id ->
+            val avatar = if (app.isAvatarManagerInitialized()) app.avatarManager.getAvatar(id) else null
+            avatar?.displayName?.takeIf { it.isNotBlank() }
+                ?: avatar?.userName?.takeIf { it.isNotBlank() }
+                ?: app.chatManager.getHistory().find { it.sourceId == id && it.fromName.isNotBlank() }?.fromName
+                ?: "Resident"
+        }
+    }
+
     ChatScreen(
         messages = messages,
+        typingAvatarNames = typingAvatarNames,
         currentAvatarName = avatarName,
         threadAvatarName = sessions
             .firstOrNull { it.sessionId == activeImSessionId }
