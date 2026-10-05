@@ -59,6 +59,19 @@ class VoiceManager(
         const val MODERATION_PARCEL_OWNER = 1
         const val MODERATION_ESTATE_MANAGER = 2
         const val MODERATION_REGION_OWNER = 4
+
+        private fun logD(msg: String) {
+            try { Log.d(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg") }
+        }
+        private fun logI(msg: String) {
+            try { Log.i(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg") }
+        }
+        private fun logW(msg: String, tr: Throwable? = null) {
+            try { if (tr != null) Log.w(TAG, msg, tr) else Log.w(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg ${tr?.message ?: ""}") }
+        }
+        private fun logE(msg: String, tr: Throwable? = null) {
+            try { if (tr != null) Log.e(TAG, msg, tr) else Log.e(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg ${tr?.message ?: ""}") }
+        }
     }
 
     private val voiceDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
@@ -158,9 +171,9 @@ class VoiceManager(
             audioSource = peerConnectionFactory?.createAudioSource(audioConstraints)
             localAudioTrack = peerConnectionFactory?.createAudioTrack("localAudio", audioSource)
 
-            Log.i(TAG, "[${Thread.currentThread().name}] WebRTC initialized")
+            logI("[${Thread.currentThread().name}] WebRTC initialized")
         } catch (e: Throwable) {
-            Log.e(TAG, "[${Thread.currentThread().name}] Failed to initialize WebRTC", e)
+            logW("[${Thread.currentThread().name}] Failed to initialize WebRTC: ${e.message}")
         }
     }
 
@@ -250,7 +263,7 @@ class VoiceManager(
                           capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC) ||
                           capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE)
         if (!hasVoiceCap) {
-            Log.w(TAG, "Cannot connect voice: Region lacks voice capabilities (ProvisionVoiceAccountRequest missing)")
+            logW("Cannot connect voice: Region lacks voice capabilities (ProvisionVoiceAccountRequest missing)")
             _lastError.value = "Voice capability is not available in this region"
             return@withContext false
         }
@@ -278,7 +291,7 @@ class VoiceManager(
             currentGridKind = gridKind
             currentVoiceConfig = voiceConfig
             activeAdapter = transportAdapterFactory.createAdapter(currentGridKind, currentVoiceConfig)
-            Log.i(TAG, "Switched VoiceTransportAdapter to $gridKind (config=$voiceConfig)")
+            logI("Switched VoiceTransportAdapter to $gridKind (config=$voiceConfig)")
         }
     }
 
@@ -299,7 +312,7 @@ class VoiceManager(
 
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
-            Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
+            logW("Parcel voice unavailable: capabilities missing on region")
             _lastError.value = "Voice capability is not available in this region"
             return@withContext false
         }
@@ -309,7 +322,7 @@ class VoiceManager(
         }
         val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
 
-        Log.i(TAG, "Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
+        logI("Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
 
         val creds = openSimVoiceSignalingAdapter.parseCredentials(voiceInfo, account)
         val iceServers = if (creds.iceServers.isNotEmpty()) creds.iceServers else resolveDefaultIceServers()
@@ -318,7 +331,7 @@ class VoiceManager(
 
         val factory = peerConnectionFactory
         if (factory == null) {
-            Log.w(TAG, "WebRTC PeerConnectionFactory not initialized for OpenSim voice session")
+            logW("WebRTC PeerConnectionFactory not initialized for OpenSim voice session")
             _lastError.value = "WebRTC PeerConnectionFactory not initialized"
             return@withContext false
         }
@@ -336,10 +349,10 @@ class VoiceManager(
             session.sendJoin(primary = true)
             _isConnected.value = true
             _lastError.value = null
-            Log.i(TAG, "OpenSim WebRTC spatial voice connected successfully (parcel=$parcelLocalId)")
+            logI("OpenSim WebRTC spatial voice connected successfully (parcel=$parcelLocalId)")
             true
         } catch (e: Exception) {
-            Log.w(TAG, "OpenSim WebRTC spatial voice connect failed: ${e.message}", e)
+            logW("OpenSim WebRTC spatial voice connect failed: ${e.message}", e)
             _lastError.value = "WebRTC connection failed: ${e.message}"
             session.close()
             currentWebRtcSession = null
@@ -466,7 +479,7 @@ class VoiceManager(
         currentWebRtcSession?.close()
         currentWebRtcSession = null
         _isConnected.value = false
-        Log.i(TAG, "[${Thread.currentThread().name}] Left voice channel")
+        logI("[${Thread.currentThread().name}] Left voice channel")
     }
 
     /**
@@ -476,7 +489,7 @@ class VoiceManager(
         _isMuted.value = muted
         scope.launch {
             localAudioTrack?.setEnabled(!muted)
-            Log.d(TAG, "[${Thread.currentThread().name}] Set muted=$muted")
+            logD("[${Thread.currentThread().name}] Set muted=$muted")
         }
     }
 
@@ -505,7 +518,7 @@ class VoiceManager(
             for (session in activeSessions.values) {
                 session.setOutputGain(outputGain)
             }
-            Log.d(TAG, "[${Thread.currentThread().name}] Set output gain to $outputGain")
+            logD("[${Thread.currentThread().name}] Set output gain to $outputGain")
         }
     }
 
@@ -525,7 +538,7 @@ class VoiceManager(
             // Send offer via IM
             // (Would send through chat/IM system)
 
-            Log.i(TAG, "[${Thread.currentThread().name}] Started call to $targetAgentId (offer length=${offer.length})")
+            logI("[${Thread.currentThread().name}] Started call to $targetAgentId (offer length=${offer.length})")
             true
         }
     }
@@ -541,7 +554,7 @@ class VoiceManager(
             val answer = session.handleOffer(offer)
             // Send answer back
 
-            Log.i(TAG, "[${Thread.currentThread().name}] Accepted call $callId (answer length=${answer.length})")
+            logI("[${Thread.currentThread().name}] Accepted call $callId (answer length=${answer.length})")
             true
         }
     }
@@ -552,7 +565,7 @@ class VoiceManager(
     fun endCall(callId: String) {
         activeSessions[callId]?.disconnect()
         activeSessions.remove(callId)
-        Log.i(TAG, "[${Thread.currentThread().name}] Ended call $callId")
+        logI("[${Thread.currentThread().name}] Ended call $callId")
     }
 
     // =====================================================================
@@ -583,7 +596,7 @@ class VoiceManager(
         _moderationLevel.value = level
         _canModerate.value = level != MODERATION_NONE
 
-        Log.i(TAG, "[${Thread.currentThread().name}] Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
+        logI("[${Thread.currentThread().name}] Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
     }
 
     /**
@@ -595,7 +608,7 @@ class VoiceManager(
      */
     suspend fun muteParticipant(participantId: UUID): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "[${Thread.currentThread().name}] Cannot mute participant: no moderation permissions")
+            logW("[${Thread.currentThread().name}] Cannot mute participant: no moderation permissions")
             return false
         }
 
@@ -608,7 +621,7 @@ class VoiceManager(
         if (success) {
             currentParticipants[participantId] = participant.copy(isMutedByModerator = true)
             _participants.value = currentParticipants
-            Log.i(TAG, "[${Thread.currentThread().name}] Muted participant: $participantId")
+            logI("[${Thread.currentThread().name}] Muted participant: $participantId")
         }
 
         return success
@@ -623,7 +636,7 @@ class VoiceManager(
      */
     suspend fun unmuteParticipant(participantId: UUID): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "[${Thread.currentThread().name}] Cannot unmute participant: no moderation permissions")
+            logW("[${Thread.currentThread().name}] Cannot unmute participant: no moderation permissions")
             return false
         }
 
@@ -635,7 +648,7 @@ class VoiceManager(
         if (success) {
             currentParticipants[participantId] = participant.copy(isMutedByModerator = false)
             _participants.value = currentParticipants
-            Log.i(TAG, "[${Thread.currentThread().name}] Unmuted participant: $participantId")
+            logI("[${Thread.currentThread().name}] Unmuted participant: $participantId")
         }
 
         return success
@@ -650,7 +663,7 @@ class VoiceManager(
      */
     suspend fun muteAllParticipants(): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "[${Thread.currentThread().name}] Cannot mute all: no moderation permissions")
+            logW("[${Thread.currentThread().name}] Cannot mute all: no moderation permissions")
             return false
         }
 
@@ -663,7 +676,7 @@ class VoiceManager(
                 p.copy(isMutedByModerator = true)
             }
             _participants.value = mutedParticipants
-            Log.i(TAG, "[${Thread.currentThread().name}] Muted all participants")
+            logI("[${Thread.currentThread().name}] Muted all participants")
         }
 
         return success
@@ -677,7 +690,7 @@ class VoiceManager(
      */
     suspend fun unmuteAllParticipants(): Boolean {
         if (!_canModerate.value) {
-            Log.w(TAG, "[${Thread.currentThread().name}] Cannot unmute all: no moderation permissions")
+            logW("[${Thread.currentThread().name}] Cannot unmute all: no moderation permissions")
             return false
         }
 
@@ -690,7 +703,7 @@ class VoiceManager(
                 p.copy(isMutedByModerator = false)
             }
             _participants.value = unmutedParticipants
-            Log.i(TAG, "[${Thread.currentThread().name}] Unmuted all participants")
+            logI("[${Thread.currentThread().name}] Unmuted all participants")
         }
 
         return success
@@ -721,7 +734,7 @@ class VoiceManager(
 
             (response as? LLSDMap)?.getBoolean("success") ?: false
         } catch (e: Exception) {
-            Log.e(TAG, "[${Thread.currentThread().name}] Failed to send moderation request", e)
+            logE("[${Thread.currentThread().name}] Failed to send moderation request", e)
             false
         }
     }
