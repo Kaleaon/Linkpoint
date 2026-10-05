@@ -12,6 +12,7 @@ class SharedTestVectorSuiteTest {
 
     private fun findTestVectorsDir(): File {
         val candidates = listOf(
+            File("../../test-vectors"),
             File("../test-vectors"),
             File("test-vectors"),
             File("/app/Linkpoint/test-vectors")
