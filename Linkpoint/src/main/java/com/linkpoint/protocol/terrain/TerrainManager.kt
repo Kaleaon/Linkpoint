@@ -21,8 +21,13 @@ class TerrainManager {
         const val DEFAULT_WATER_HEIGHT = 20.0f
     }
 
-    // Full heightmap (256x256)
-    private val heightMap = FloatArray(REGION_SIZE * REGION_SIZE)
+    var regionSizeX: Int = REGION_SIZE
+        private set
+    var regionSizeY: Int = REGION_SIZE
+        private set
+
+    // Full heightmap allocated as (RegionSizeX + 1) * (RegionSizeY + 1)
+    private var heightMap = FloatArray((REGION_SIZE + 1) * (REGION_SIZE + 1))
 
     // Track which patches are valid
     private val validPatches = ConcurrentHashMap<Int, Boolean>()
@@ -39,10 +44,28 @@ class TerrainManager {
         private set
 
     /**
+     * Configure active region dimensions and reallocate heightmap.
+     */
+    fun setRegionSize(width: Int, height: Int) {
+        val clampedW = width.coerceIn(256, 2048)
+        val clampedH = height.coerceIn(256, 2048)
+        if (regionSizeX != clampedW || regionSizeY != clampedH) {
+            regionSizeX = clampedW
+            regionSizeY = clampedH
+            heightMap = FloatArray((regionSizeX + 1) * (regionSizeY + 1))
+            validPatches.clear()
+            validPatchCount = 0
+            Log.i(TAG, "Configured region dimensions: ${regionSizeX}x${regionSizeY}")
+            terrainRenderer?.setRegionSize(regionSizeX.toFloat(), regionSizeY.toFloat())
+        }
+    }
+
+    /**
      * Set the terrain renderer for visualization.
      */
     fun setTerrainRenderer(renderer: TerrainRenderer) {
         this.terrainRenderer = renderer
+        renderer.setRegionSize(regionSizeX.toFloat(), regionSizeY.toFloat())
         Log.i(TAG, "TerrainRenderer connected")
 
         // Push any existing terrain data to renderer
@@ -69,17 +92,21 @@ class TerrainManager {
             return
         }
 
+        val patchesPerSideX = regionSizeX / PATCH_SIZE
+        val patchesPerSideY = regionSizeY / PATCH_SIZE
+
         var patchesUpdated = 0
 
         for (patch in result.patches) {
-            if (patch.x < PATCHES_PER_SIDE && patch.y < PATCHES_PER_SIDE) {
+            if (patch.x < patchesPerSideX && patch.y < patchesPerSideY) {
                 applyPatch(patch)
                 patchesUpdated++
             }
         }
 
         if (patchesUpdated > 0) {
-            Log.d(TAG, "Applied $patchesUpdated terrain patches, total valid: $validPatchCount")
+            val totalPatches = patchesPerSideX * patchesPerSideY
+            Log.d(TAG, "Applied $patchesUpdated terrain patches, total valid: $validPatchCount/$totalPatches")
             updateRendererHeightmap()
         }
     }
@@ -90,24 +117,56 @@ class TerrainManager {
     private fun applyPatch(patch: TerrainPatch) {
         val baseX = patch.x * PATCH_SIZE
         val baseY = patch.y * PATCH_SIZE
+        val stride = regionSizeX + 1
+        val patchesPerSideX = regionSizeX / PATCH_SIZE
+        val patchesPerSideY = regionSizeY / PATCH_SIZE
 
         for (y in 0 until PATCH_SIZE) {
             val globalY = baseY + y
-            if (globalY >= REGION_SIZE) continue
+            if (globalY >= regionSizeY) continue
 
             for (x in 0 until PATCH_SIZE) {
                 val globalX = baseX + x
-                if (globalX >= REGION_SIZE) continue
+                if (globalX >= regionSizeX) continue
 
                 val patchIdx = y * PATCH_SIZE + x
-                val globalIdx = globalY * REGION_SIZE + globalX
+                val globalIdx = globalY * stride + globalX
 
                 heightMap[globalIdx] = patch.heightMap[patchIdx]
             }
         }
 
+        // Fill boundary edge +1 vertices for adjacent rendering quads
+        if (patch.x == patchesPerSideX - 1) {
+            for (y in 0 until PATCH_SIZE) {
+                val globalY = baseY + y
+                if (globalY < regionSizeY) {
+                    val patchIdx = y * PATCH_SIZE + (PATCH_SIZE - 1)
+                    val globalIdx = globalY * stride + regionSizeX
+                    heightMap[globalIdx] = patch.heightMap[patchIdx]
+                }
+            }
+        }
+
+        if (patch.y == patchesPerSideY - 1) {
+            for (x in 0 until PATCH_SIZE) {
+                val globalX = baseX + x
+                if (globalX < regionSizeX) {
+                    val patchIdx = (PATCH_SIZE - 1) * PATCH_SIZE + x
+                    val globalIdx = regionSizeY * stride + globalX
+                    heightMap[globalIdx] = patch.heightMap[patchIdx]
+                }
+            }
+        }
+
+        if (patch.x == patchesPerSideX - 1 && patch.y == patchesPerSideY - 1) {
+            val patchIdx = (PATCH_SIZE - 1) * PATCH_SIZE + (PATCH_SIZE - 1)
+            val globalIdx = regionSizeY * stride + regionSizeX
+            heightMap[globalIdx] = patch.heightMap[patchIdx]
+        }
+
         // Mark patch as valid
-        val patchKey = patch.y * PATCHES_PER_SIDE + patch.x
+        val patchKey = patch.y * patchesPerSideX + patch.x
         if (validPatches.put(patchKey, true) == null) {
             validPatchCount++
         }
@@ -118,18 +177,7 @@ class TerrainManager {
      */
     private fun updateRendererHeightmap() {
         terrainRenderer?.let { renderer ->
-            // Create 257x257 heightmap for renderer (includes edge vertices)
-            val rendererHeights = FloatArray(257 * 257)
-
-            for (y in 0..256) {
-                for (x in 0..256) {
-                    val srcX = x.coerceIn(0, 255)
-                    val srcY = y.coerceIn(0, 255)
-                    rendererHeights[y * 257 + x] = heightMap[srcY * 256 + srcX]
-                }
-            }
-
-            renderer.setHeightmap(rendererHeights)
+            renderer.setHeightmap(heightMap, regionSizeX, regionSizeY)
         }
     }
 
@@ -137,23 +185,27 @@ class TerrainManager {
      * Get height at specific coordinates.
      */
     fun getHeightAt(x: Int, y: Int): Float {
-        val clampedX = x.coerceIn(0, REGION_SIZE - 1)
-        val clampedY = y.coerceIn(0, REGION_SIZE - 1)
-        return heightMap[clampedY * REGION_SIZE + clampedX]
+        val clampedX = x.coerceIn(0, regionSizeX)
+        val clampedY = y.coerceIn(0, regionSizeY)
+        val stride = regionSizeX + 1
+        return heightMap[clampedY * stride + clampedX]
     }
 
     /**
      * Check if terrain is fully loaded.
      */
     fun isFullyLoaded(): Boolean {
-        return validPatchCount >= PATCHES_PER_SIDE * PATCHES_PER_SIDE
+        val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
+        return validPatchCount >= totalPatches
     }
 
     /**
      * Get load percentage.
      */
     fun getLoadPercentage(): Float {
-        return (validPatchCount.toFloat() / (PATCHES_PER_SIDE * PATCHES_PER_SIDE)) * 100f
+        val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
+        if (totalPatches == 0) return 0f
+        return (validPatchCount.toFloat() / totalPatches) * 100f
     }
 
     /**
@@ -164,13 +216,14 @@ class TerrainManager {
         validPatches.clear()
         validPatchCount = 0
         waterHeight = DEFAULT_WATER_HEIGHT
-        Log.i(TAG, "Terrain data reset")
+        Log.i(TAG, "Terrain data reset (${regionSizeX}x${regionSizeY})")
     }
 
     /**
      * Get debug info string.
      */
     fun getDebugInfo(): String {
-        return "Terrain: ${validPatchCount}/${PATCHES_PER_SIDE * PATCHES_PER_SIDE} patches (${getLoadPercentage().toInt()}%), water=$waterHeight"
+        val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
+        return "Terrain: ${validPatchCount}/${totalPatches} patches (${getLoadPercentage().toInt()}%), water=$waterHeight"
     }
 }
