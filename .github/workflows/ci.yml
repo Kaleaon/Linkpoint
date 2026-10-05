@@ -296,8 +296,15 @@ jobs:
           fi
 
       - name: Evaluate job status
+        env:
+          PRE_COMMIT_RESULT: ${{ needs.pre-commit.result }}
+          ANDROID_RESULT: ${{ needs.android.result }}
+          WEB_RESULT: ${{ needs.web.result }}
+          RUST_RESULT: ${{ needs.rust.result }}
+          PROTOCOL_RESULT: ${{ needs.protocol.result }}
+          DART_RESULT: ${{ needs.dart.result }}
         run: |
-          if [[ "${{ needs.pre-commit.result }}" != "success" || "${{ needs.android.result }}" != "success" || "${{ needs.web.result }}" != "success" || "${{ needs.rust.result }}" != "success" || "${{ needs.protocol.result }}" != "success" || "${{ needs.dart.result }}" != "success" ]]; then
+          if [[ "$PRE_COMMIT_RESULT" != "success" || "$ANDROID_RESULT" != "success" || "$WEB_RESULT" != "success" || "$RUST_RESULT" != "success" || "$PROTOCOL_RESULT" != "success" || "$DART_RESULT" != "success" ]]; then
             echo "One or more required CI build jobs failed."
             exit 1
           fi
