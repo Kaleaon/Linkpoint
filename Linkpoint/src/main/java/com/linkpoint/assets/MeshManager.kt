@@ -205,7 +205,7 @@ class MeshManager(
             downloadedBytes.addAndGet(lodCompressed.size.toLong())
             val faces = parseGeometryFromLodBytes(meshId, decompressed)
             val skinData = skinMap?.let { parseSkinData(it) }
-            MeshData(meshId = meshId, faces = faces, skinData = skinData)
+            MeshData(meshId = meshId, faces = faces, skinData = skinData, lod = lod)
         } catch (e: Exception) {
             Log.w(TAG, "Ranged-fetch parse failed for $meshId, will retry full asset: ${e.message}")
             null
@@ -467,7 +467,7 @@ class MeshManager(
             val decompressed = decompress(compressedData)
 
             // Parse mesh geometry
-            return parseMeshGeometry(meshId, decompressed, header)
+            return parseMeshGeometry(meshId, decompressed, header, lod)
         } catch (e: Exception) {
             Log.e(TAG, "Mesh parse error: $meshId", e)
             lastError = "Parse: ${e.javaClass.simpleName}: ${e.message}"
@@ -505,7 +505,7 @@ class MeshManager(
         }
     }
 
-    private fun parseMeshGeometry(meshId: UUID, data: ByteArray, header: LLSDMap): MeshData {
+    private fun parseMeshGeometry(meshId: UUID, data: ByteArray, header: LLSDMap, lod: MeshLOD = MeshLOD.HIGH): MeshData {
         // Each LOD blob, after zlib decompression, is itself an LLSD payload:
         // an array of submesh maps. Each submesh has Position / Normal /
         // TexCoord0 binary blobs of U16-quantised values, plus PositionDomain /
@@ -536,7 +536,7 @@ class MeshManager(
         }
 
         val skinData = header.getMap("skin")?.let { parseSkinData(it) }
-        return MeshData(meshId = meshId, faces = faces, skinData = skinData)
+        return MeshData(meshId = meshId, faces = faces, skinData = skinData, lod = lod)
     }
 
     /**
@@ -938,7 +938,8 @@ enum class MeshLOD {
 data class MeshData(
     val meshId: UUID,
     val faces: List<MeshFace>,
-    val skinData: SkinData? = null
+    val skinData: SkinData? = null,
+    val lod: MeshLOD = MeshLOD.HIGH
 ) {
     val hasSkinData: Boolean get() = skinData != null
     val skinJointNames: List<String> get() = skinData?.jointNames ?: emptyList()

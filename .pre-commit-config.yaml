@@ -32,7 +32,7 @@ repos:
 
       - id: cargo-clippy
         name: cargo clippy
-        entry: cargo clippy --workspace --all-targets -- -D warnings
+        entry: cargo clippy --workspace --all-targets --locked -- -D warnings
         language: system
         pass_filenames: false
 

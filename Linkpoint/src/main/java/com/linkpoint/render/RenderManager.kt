@@ -954,6 +954,7 @@ class RenderManager(private val context: Context) {
         try {
             applyRenderUpdates()
             applyCameraController()
+            performLodSweepIfNeeded()
             avatarPoseProvider?.invoke()
             tickAnimatedSubsystems()
 
@@ -1164,12 +1165,117 @@ class RenderManager(private val context: Context) {
         val mp = meshPrimRenderer ?: return
         val pr = primRenderer ?: return
         val compiled = mp.getOrCompile(meshData) ?: return
-        pr.replaceGeometry(localId) { entity ->
+        pr.replaceGeometry(localId, meshData.lod) { entity ->
             engine?.renderableManager?.let { rm ->
                 val inst = rm.getInstance(entity)
                 if (inst != 0) rm.destroy(entity)
             }
             mp.attach(entity, compiled, textureEntry, binder, bomResolver)
+        }
+    }
+
+    @Volatile
+    var meshDownloadManager: com.linkpoint.assets.MeshDownloadManager? = null
+
+    @Volatile private var lastSweepCameraPos: com.linkpoint.protocol.types.LLVector3? = null
+    private var frameSweepCounter = 0
+
+    /**
+     * Perform periodic LOD re-evaluation sweep across registered primitives during camera movement.
+     */
+    fun performLodSweepIfNeeded() {
+        val currentCameraPos = com.linkpoint.protocol.types.LLVector3(cameraEye[0], cameraEye[1], cameraEye[2])
+        val lastPos = lastSweepCameraPos
+
+        frameSweepCounter++
+        val cameraMoved = lastPos == null || currentCameraPos.distance(lastPos) > 0.5f
+        if (!cameraMoved && frameSweepCounter % 15 != 0) {
+            return
+        }
+        lastSweepCameraPos = currentCameraPos
+
+        val cameraParams = com.linkpoint.assets.LLMeshFetcher.CameraParams(
+            position = currentCameraPos,
+            fovRad = Math.toRadians(currentFovDegrees.toDouble()).toFloat(),
+            screenHeightPx = if (viewportHeight > 0) viewportHeight else 1080
+        )
+
+        val pRenderer = primRenderer ?: return
+        val requester = primMeshDataRequester ?: return
+        val mdm = meshDownloadManager
+        mdm?.updateCamera(cameraParams)
+
+        val registeredPrims = pRenderer.getRegisteredMeshPrims()
+        if (registeredPrims.isEmpty()) return
+
+        for (prim in registeredPrims.values) {
+            val meshId = prim.meshId ?: continue
+            val maxScale = kotlin.math.max(prim.scale.x, kotlin.math.max(prim.scale.y, prim.scale.z))
+            val boundingRadius = maxScale * 0.5f
+            val currentDistance = currentCameraPos.distance(prim.position)
+
+            val selection = mdm?.evaluateLodChange(
+                meshId = meshId,
+                objectPos = prim.position,
+                boundingRadius = boundingRadius,
+                currentLod = prim.activeLod,
+                pendingLod = prim.pendingLod,
+                lastEvaluatedDistance = prim.lastEvaluatedDistance
+            ) ?: continue
+
+            val newLod = selection.targetLod
+            if (newLod != prim.activeLod && newLod != prim.pendingLod && !selection.isDeferred) {
+                if (mdm != null && !mdm.canStartUpgradeTask()) {
+                    continue
+                }
+
+                prim.pendingLod = newLod
+                prim.lastEvaluatedDistance = currentDistance
+                mdm?.onUpgradeTaskStarted()
+
+                pRenderer.requestLodChange(prim.localId, meshId, newLod, requester) { result ->
+                    mdm?.onUpgradeTaskCompleted()
+                    when (result) {
+                        is com.linkpoint.render.prims.PrimRenderer.MeshLoadResult.Success -> {
+                            val oldLod = prim.activeLod
+                            prim.activeLod = newLod
+                            prim.pendingLod = null
+
+                            val mp = meshPrimRenderer
+                            if (mp != null) {
+                                val compiled = mp.getOrCompile(result.meshData)
+                                if (compiled != null) {
+                                    pRenderer.replaceGeometry(prim.localId, newLod) { entity ->
+                                        engine?.renderableManager?.let { rm ->
+                                            val inst = rm.getInstance(entity)
+                                            if (inst != 0) rm.destroy(entity)
+                                        }
+                                        mp.attach(entity, compiled, prim.textureEntry)
+                                    }
+                                }
+                            }
+
+                            // Release GPU vertex/index buffers for downgraded LOD if unreferenced by other prims
+                            if (oldLod != null && oldLod != newLod) {
+                                cleanUnusedMeshLodIfUnreferenced(meshId, oldLod)
+                            }
+                        }
+                        else -> {
+                            // Maintain primitive fallback shape / previous LOD on failure or timeout
+                            prim.pendingLod = null
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun cleanUnusedMeshLodIfUnreferenced(meshId: java.util.UUID, oldLod: com.linkpoint.assets.MeshLOD) {
+        val pRenderer = primRenderer ?: return
+        val registeredPrims = pRenderer.getRegisteredMeshPrims()
+        val isStillUsed = registeredPrims.values.any { it.meshId == meshId && it.activeLod == oldLod }
+        if (!isStillUsed) {
+            meshPrimRenderer?.releaseMeshLod(meshId, oldLod)
         }
     }
 

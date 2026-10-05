@@ -22,12 +22,70 @@ class MeshDownloadManager(
 
     companion object {
         private const val TAG = "MeshDownloadManager"
+        private const val MAX_CONCURRENT_LOD_UPGRADES = 4
 
         // Estimated average payload sizes per LOD level for bandwidth savings estimation
         private const val ESTIMATED_LOD0_BYTES = 500_000L // 500 KB
         private const val ESTIMATED_LOD1_BYTES = 150_000L // 150 KB
         private const val ESTIMATED_LOD2_BYTES = 40_000L  // 40 KB
         private const val ESTIMATED_LOD3_BYTES = 10_000L  // 10 KB
+    }
+
+    private val activeUpgradeTasks = AtomicLong(0)
+
+    fun canStartUpgradeTask(): Boolean {
+        return activeUpgradeTasks.get() < MAX_CONCURRENT_LOD_UPGRADES
+    }
+
+    fun onUpgradeTaskStarted() {
+        activeUpgradeTasks.incrementAndGet()
+    }
+
+    fun onUpgradeTaskCompleted() {
+        if (activeUpgradeTasks.get() > 0) {
+            activeUpgradeTasks.decrementAndGet()
+        }
+    }
+
+    /**
+     * Evaluate whether a mesh object's LOD should be changed based on projected pixel coverage
+     * and a 15% distance hysteresis buffer. Returns null if no LOD change is warranted or
+     * if the request would duplicate an active/pending LOD.
+     */
+    fun evaluateLodChange(
+        meshId: UUID,
+        objectPos: LLVector3,
+        boundingRadius: Float,
+        currentLod: MeshLOD?,
+        pendingLod: MeshLOD?,
+        lastEvaluatedDistance: Float,
+        isAvatar: Boolean = false,
+        isAttachment: Boolean = false,
+        header: LLSDMap? = null
+    ): LLMeshFetcher.LodSelection? {
+        val currentDistance = camera.position.distance(objectPos)
+
+        // Apply 15% distance hysteresis buffer guardrail
+        if (currentLod != null && !fetcher.shouldReevaluate(lastEvaluatedDistance, currentDistance, 0.15f)) {
+            return null
+        }
+
+        val selection = fetcher.selectLod(
+            meshId = meshId,
+            objectPos = objectPos,
+            boundingRadius = boundingRadius,
+            camera = camera,
+            isAvatar = isAvatar,
+            isAttachment = isAttachment,
+            header = header
+        )
+
+        // Hysteresis guardrails: prevent duplicate or oscillating LOD fetch requests
+        if (selection.isDeferred || selection.targetLod == currentLod || selection.targetLod == pendingLod) {
+            return null
+        }
+
+        return selection
     }
 
     data class QueuedMeshRequest(

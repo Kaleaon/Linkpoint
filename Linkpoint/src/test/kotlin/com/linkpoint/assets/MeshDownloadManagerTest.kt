@@ -115,4 +115,68 @@ class MeshDownloadManagerTest {
         assertEquals(meshId, promoted[0])
         assertEquals(0, downloadManager.getDiagnostics().activeDeferredQueueSize)
     }
+
+    @Test
+    fun testEvaluateLodChangeWithHysteresisAndDuplicateGuardrails() {
+        val meshId = UUID.randomUUID()
+        val objectPos = LLVector3(10f, 0f, 0f)
+
+        // 1. Initial evaluation at 10m -> target HIGH
+        val selection1 = downloadManager.evaluateLodChange(
+            meshId = meshId,
+            objectPos = objectPos,
+            boundingRadius = 1.0f,
+            currentLod = MeshLOD.HIGH,
+            pendingLod = null,
+            lastEvaluatedDistance = 10f
+        )
+        // Distance did not change beyond 15% -> returns null
+        assertNull(selection1)
+
+        // 2. Small distance change from 10m to 10.5m (5% change < 15%) -> returns null
+        val selection2 = downloadManager.evaluateLodChange(
+            meshId = meshId,
+            objectPos = LLVector3(10.5f, 0f, 0f),
+            boundingRadius = 1.0f,
+            currentLod = MeshLOD.HIGH,
+            pendingLod = null,
+            lastEvaluatedDistance = 10f
+        )
+        assertNull(selection2)
+
+        // 3. Significant distance move from 10m to 100m (> 15% change) -> evaluates new LOD
+        val selection3 = downloadManager.evaluateLodChange(
+            meshId = meshId,
+            objectPos = LLVector3(100f, 0f, 0f),
+            boundingRadius = 1.0f,
+            currentLod = MeshLOD.HIGH,
+            pendingLod = null,
+            lastEvaluatedDistance = 10f
+        )
+        assertNotNull(selection3)
+        assertNotEquals(MeshLOD.HIGH, selection3?.targetLod)
+
+        // 4. Duplicate request guardrail: if targetLod equals pendingLod -> returns null
+        val target = selection3!!.targetLod
+        val selection4 = downloadManager.evaluateLodChange(
+            meshId = meshId,
+            objectPos = LLVector3(100f, 0f, 0f),
+            boundingRadius = 1.0f,
+            currentLod = MeshLOD.HIGH,
+            pendingLod = target,
+            lastEvaluatedDistance = 10f
+        )
+        assertNull(selection4)
+    }
+
+    @Test
+    fun testUpgradeTaskThrottling() {
+        assertTrue(downloadManager.canStartUpgradeTask())
+        for (i in 0 until 4) {
+            downloadManager.onUpgradeTaskStarted()
+        }
+        assertFalse("Should throttle when max concurrent upgrade tasks (4) reached", downloadManager.canStartUpgradeTask())
+        downloadManager.onUpgradeTaskCompleted()
+        assertTrue(downloadManager.canStartUpgradeTask())
+    }
 }

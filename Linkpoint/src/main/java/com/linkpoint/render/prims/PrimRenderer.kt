@@ -128,11 +128,17 @@ class PrimRenderer(
             return false
         }
 
+        val prim = prims.getOrPut(data.localId) {
+            createPrim(data)
+        }
+
         val meshId = data.getMeshAssetId()
         if (meshId != null) {
+            prim.meshId = meshId
             val requestChanged = pendingMeshLoads[data.localId] != meshId && loadedMeshIds[data.localId] != meshId
             if (requestChanged) {
                 pendingMeshLoads[data.localId] = meshId
+                prim.pendingLod = MeshLOD.HIGH
                 logMeshResolution(
                     event = "pending_load",
                     localId = data.localId,
@@ -141,6 +147,7 @@ class PrimRenderer(
                 val requester = meshDataRequester
                 if (requester == null) {
                     pendingMeshLoads.remove(data.localId, meshId)
+                    prim.pendingLod = null
                     logMeshResolution(
                         event = "missing_asset",
                         localId = data.localId,
@@ -154,7 +161,9 @@ class PrimRenderer(
                             is MeshLoadResult.Success -> {
                                 pendingMeshLoads.remove(data.localId, meshId)
                                 loadedMeshIds[data.localId] = meshId
-                                replaceGeometry(data.localId) { entity ->
+                                prim.activeLod = result.meshData.lod
+                                prim.pendingLod = null
+                                replaceGeometry(data.localId, result.meshData.lod) { entity ->
                                     val builder = meshGeometryBuilder
                                     if (builder == null) {
                                         logMeshResolution(
@@ -170,6 +179,7 @@ class PrimRenderer(
                             }
                             is MeshLoadResult.ParseFailure -> {
                                 pendingMeshLoads.remove(data.localId, meshId)
+                                prim.pendingLod = null
                                 logMeshResolution(
                                     event = "parse_failure",
                                     localId = data.localId,
@@ -179,6 +189,7 @@ class PrimRenderer(
                             }
                             is MeshLoadResult.MissingAsset -> {
                                 pendingMeshLoads.remove(data.localId, meshId)
+                                prim.pendingLod = null
                                 logMeshResolution(
                                     event = "missing_asset",
                                     localId = data.localId,
@@ -190,10 +201,6 @@ class PrimRenderer(
                     }
                 }
             }
-        }
-
-        val prim = prims.getOrPut(data.localId) {
-            createPrim(data)
         }
 
         // Update transform
@@ -226,19 +233,61 @@ class PrimRenderer(
      *
      * No-op if no prim with this localId is tracked.
      */
-    fun replaceGeometry(localId: Int, attach: (entity: Int) -> Unit) {
+    fun replaceGeometry(localId: Int, newLod: MeshLOD? = null, attach: (entity: Int) -> Unit) {
         val prim = prims[localId] ?: return
         try {
             attach(prim.entity)
-            // Mark the prim's effective shape as MESH so subsequent
-            // updatePrim calls don't re-create the path/profile geometry.
-            // (We can't mutate `shape` on the data class, so just leave it;
-            // updatePrim's getOrPut won't fire because the prim is already
-            // tracked. If a future updatePrim ever needed to rebuild we'd
-            // route back through replaceGeometry as well.)
+            if (newLod != null) {
+                prim.activeLod = newLod
+                prim.pendingLod = null
+            }
         } catch (e: Exception) {
             Log.w(TAG, "replaceGeometry failed for $localId", e)
         }
+    }
+
+    /**
+     * Issue an asynchronous request to fetch a new LOD level for a registered primitive.
+     * Updates prim.pendingLod during the fetch, and updates prim.activeLod upon success.
+     */
+    fun requestLodChange(
+        localId: Int,
+        meshId: UUID,
+        targetLod: MeshLOD,
+        requester: MeshDataRequester?,
+        onCompleted: (MeshLoadResult) -> Unit
+    ) {
+        val prim = prims[localId] ?: run {
+            onCompleted(MeshLoadResult.MissingAsset("prim_not_found"))
+            return
+        }
+        prim.pendingLod = targetLod
+        val textureEntrySnapshot = prim.textureEntry.copyOf()
+        requester?.request(localId, meshId, targetLod) { result ->
+            when (result) {
+                is MeshLoadResult.Success -> {
+                    prim.activeLod = result.meshData.lod
+                    prim.pendingLod = null
+                    replaceGeometry(localId, result.meshData.lod) { entity ->
+                        meshGeometryBuilder?.attach(entity, result.meshData, textureEntrySnapshot)
+                    }
+                }
+                else -> {
+                    prim.pendingLod = null
+                }
+            }
+            onCompleted(result)
+        } ?: run {
+            prim.pendingLod = null
+            onCompleted(MeshLoadResult.MissingAsset("requester_unavailable"))
+        }
+    }
+
+    /**
+     * Get a map of active primitive instances that are mesh assets.
+     */
+    fun getRegisteredMeshPrims(): Map<Int, PrimInstance> {
+        return prims.filterValues { it.meshId != null }
     }
 
     fun removePrim(localId: Int) {
@@ -1276,5 +1325,9 @@ data class PrimInstance(
     var rotation: LLQuaternion,
     var scale: LLVector3,
     var textureEntry: ByteArray,
-    val materialInstance: MaterialInstance
+    val materialInstance: MaterialInstance,
+    var meshId: UUID? = null,
+    var activeLod: MeshLOD? = null,
+    var pendingLod: MeshLOD? = null,
+    var lastEvaluatedDistance: Float = 0f
 )
