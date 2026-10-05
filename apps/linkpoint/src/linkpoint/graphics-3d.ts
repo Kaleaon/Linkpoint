@@ -28,7 +28,10 @@ const BASIC_FRAGMENT_SHADER = `
         precision mediump float;
         #endif
 
+        #define PI 3.14159265359
+
         varying vec3 vNormal;
+        varying vec3 vTangent;
         varying vec2 vTexCoord;
         varying vec3 vPosition;
 
@@ -45,6 +48,7 @@ const BASIC_FRAGMENT_SHADER = `
         uniform float uMetallic;
         uniform float uRoughness;
         uniform vec3 uEmissive;
+        uniform float uOcclusionFactor;
         uniform sampler2D uMetallicRoughnessTexture;
         uniform sampler2D uNormalTexture;
         uniform sampler2D uEmissiveTexture;
@@ -53,6 +57,37 @@ const BASIC_FRAGMENT_SHADER = `
         uniform bool uUseEmissiveTexture;
         uniform float uAlphaCutoff;
         uniform int uAlphaMode;
+
+        float distributionGGX(vec3 N, vec3 H, float roughness) {
+          float a = roughness * roughness;
+          float a2 = a * a;
+          float NdotH = max(dot(N, H), 0.0);
+          float NdotH2 = NdotH * NdotH;
+          float num = a2;
+          float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+          denom = PI * denom * denom;
+          return num / max(denom, 0.0001);
+        }
+
+        float geometrySchlickGGX(float NdotV, float roughness) {
+          float r = (roughness + 1.0);
+          float k = (r * r) / 8.0;
+          float num = NdotV;
+          float denom = NdotV * (1.0 - k) + k;
+          return num / max(denom, 0.0001);
+        }
+
+        float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
+          float NdotV = max(dot(N, V), 0.0);
+          float NdotL = max(dot(N, L), 0.0);
+          float ggx2 = geometrySchlickGGX(NdotV, roughness);
+          float ggx1 = geometrySchlickGGX(NdotL, roughness);
+          return ggx1 * ggx2;
+        }
+
+        vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+          return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+        }
 
         void main() {
           // SL applies repeats first, then rotates around the texture centre,
@@ -64,34 +99,59 @@ const BASIC_FRAGMENT_SHADER = `
           vec2 rotated = mat2(texCos, -texSin, texSin, texCos) * centered + vec2(0.5);
           vec2 transformedUV = rotated + uTexTransform.zw;
 
-          vec3 normal = normalize(vNormal);
-          if (uUseNormalTexture) normal = normalize(normal + (texture2D(uNormalTexture, transformedUV).xyz * 2.0 - 1.0));
-          vec3 lightDir = normalize(uLightPos - vPosition);
-
-          // Ambient
-          vec3 ambient = uAmbientColor;
-
-          // Diffuse
-          float diff = max(dot(normal, lightDir), 0.0);
-          vec3 diffuse = diff * uLightColor;
-
-          // Final color
           vec4 baseColor = uUseTexture ? texture2D(uTexture, transformedUV) * uColor : uColor;
           if (uAlphaMode == 1 && baseColor.a < uAlphaCutoff) discard;
+
+          vec3 N = normalize(vNormal);
+          vec3 normal = N;
+          if (uUseNormalTexture) {
+            vec3 mapNormal = texture2D(uNormalTexture, transformedUV).xyz * 2.0 - 1.0;
+            vec3 T = vTangent - dot(vTangent, N) * N;
+            if (length(T) > 0.001) {
+              T = normalize(T);
+              vec3 B = cross(N, T);
+              mat3 TBN = mat3(T, B, N);
+              normal = normalize(TBN * mapNormal);
+            } else {
+              vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+              vec3 T_fallback = normalize(cross(up, N));
+              vec3 B_fallback = cross(N, T_fallback);
+              mat3 TBN = mat3(T_fallback, B_fallback, N);
+              normal = normalize(TBN * mapNormal);
+            }
+          }
+
           vec3 orm = uUseMetallicRoughnessTexture ? texture2D(uMetallicRoughnessTexture, transformedUV).rgb : vec3(1.0);
-          float metallic = clamp(uMetallic * orm.b, 0.0, 1.0);
-          float roughness = clamp(uRoughness * orm.g, 0.04, 1.0);
+          float occlusion = clamp(orm.r * uOcclusionFactor, 0.0, 1.0);
+          float roughness = clamp(uRoughness * (uUseMetallicRoughnessTexture ? orm.g : 1.0), 0.04, 1.0);
+          float metallic = clamp(uMetallic * (uUseMetallicRoughnessTexture ? orm.b : 1.0), 0.0, 1.0);
+
+          vec3 lightDir = normalize(uLightPos - vPosition);
           vec3 viewDir = normalize(uCameraPos - vPosition);
           vec3 halfDir = normalize(lightDir + viewDir);
-          float specPower = mix(128.0, 2.0, roughness);
-          float specular = pow(max(dot(normal, halfDir), 0.0), specPower);
-          vec3 f0 = mix(vec3(0.04), baseColor.rgb, metallic);
-          // The combined light is clamped to 1 (as the viewer does), then gamma-encoded: the viewer
-          // lights in linear space and converts to sRGB at the end, which for sRGB surface colours
-          // is the same as scaling them by light^(1/2.2).
-          vec3 diffusePbr = baseColor.rgb * (1.0 - metallic) * pow(min(ambient + diffuse, vec3(1.0)), vec3(1.0 / 2.2));
+
+          float NdotL = max(dot(normal, lightDir), 0.0);
+          float NdotV = max(dot(normal, viewDir), 0.0);
+
+          vec3 F0 = mix(vec3(0.04), baseColor.rgb, metallic);
+
+          float NDF = distributionGGX(normal, halfDir, roughness);
+          float G = geometrySmith(normal, viewDir, lightDir, roughness);
+          vec3 F = fresnelSchlick(max(dot(halfDir, viewDir), 0.0), F0);
+
+          vec3 numerator = NDF * G * F;
+          float denominator = 4.0 * NdotV * NdotL + 0.0001;
+          vec3 specular = numerator / denominator;
+
+          vec3 kS = F;
+          vec3 kD = (vec3(1.0) - kS) * (1.0 - metallic);
+
+          vec3 diffuse = kD * baseColor.rgb * uLightColor * NdotL;
+          vec3 specularLighting = specular * uLightColor * NdotL;
+          vec3 ambientLighting = baseColor.rgb * uAmbientColor * occlusion;
           vec3 emission = uEmissive * (uUseEmissiveTexture ? texture2D(uEmissiveTexture, transformedUV).rgb : vec3(1.0));
-          vec3 result = uFullBright ? baseColor.rgb : diffusePbr + f0 * specular + emission;
+
+          vec3 result = uFullBright ? baseColor.rgb : (diffuse + specularLighting + ambientLighting + emission);
 
           gl_FragColor = vec4(result, baseColor.a);
         }
@@ -202,6 +262,7 @@ export class Graphics3D extends Utils.EventEmitter {
         attribute vec3 aPosition;
         attribute vec3 aNormal;
         attribute vec2 aTexCoord;
+        attribute vec3 aTangent;
 
         uniform mat4 uModelMatrix;
         uniform mat4 uViewMatrix;
@@ -209,6 +270,7 @@ export class Graphics3D extends Utils.EventEmitter {
         uniform mat3 uNormalMatrix;
 
         varying vec3 vNormal;
+        varying vec3 vTangent;
         varying vec2 vTexCoord;
         varying vec3 vPosition;
 
@@ -216,6 +278,7 @@ export class Graphics3D extends Utils.EventEmitter {
           vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
           vPosition = worldPos.xyz;
           vNormal = normalize(uNormalMatrix * aNormal);
+          vTangent = normalize(uNormalMatrix * aTangent);
           vTexCoord = aTexCoord;
           gl_Position = uProjectionMatrix * uViewMatrix * worldPos;
         }

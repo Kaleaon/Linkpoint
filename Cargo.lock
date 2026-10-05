@@ -333,11 +333,15 @@ dependencies = [
 name = "linkpoint-protocol"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "linkpoint-core",
  "serde",
  "serde-llsd-benthic",
+ "serde_json",
  "thiserror",
  "url",
+ "uuid",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -460,8 +464,6 @@ dependencies = [
 [[package]]
 name = "serde-llsd-benthic"
 version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a16635913d8add13513cb610de57636ba130fc971ebdc7579ebe5e13220804da"
 dependencies = [
  "anyhow",
  "ascii85",
@@ -620,7 +622,6 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
- "serde",
 ]
 
 [[package]]
@@ -643,6 +644,7 @@ checksum = "2ef6dac1e96601b4fb3acccccff2139741fcb757cb9a36089bf5be91cfb285ce"
 dependencies = [
  "getrandom",
  "js-sys",
+ "serde_core",
  "wasm-bindgen",
 ]
 
