@@ -599,10 +599,25 @@ class LumiyaRenderer : RenderEngineProvider {
     fun primDefaultTextureId(primId: Long): java.util.UUID =
         primStore.getDefaultTextureId(primId)
 
-    /** Pick the closest visible prim under [screenX], [screenY] (px). */
+    /** Pick the closest visible prim or HUD element under [screenX], [screenY] (px). */
     fun pickPrim(screenX: Float, screenY: Float): Long? {
         requireGlThread("pickPrim")
         if (!isInitialized) return null
+
+        // Pass 1: Orthographic HUD raycast
+        if (hudStore.hasElements()) {
+            val (hudOrigin, hudDir) = com.linkpoint.render.lumiya.picking.GLRayTrace.orthoScreenToWorldRay(
+                screenX, screenY,
+                viewportWidth, viewportHeight,
+                hudViewMatrix, hudProjectionMatrix
+            )
+            val hudHitId = hudStore.pickHudPrim(hudOrigin, hudDir)
+            if (hudHitId != null) {
+                return hudHitId
+            }
+        }
+
+        // Pass 2: Fallback 3D perspective world raycast
         val (origin, dir) = com.linkpoint.render.lumiya.picking.GLRayTrace.screenToWorldRay(
             screenX, screenY,
             viewportWidth, viewportHeight,
