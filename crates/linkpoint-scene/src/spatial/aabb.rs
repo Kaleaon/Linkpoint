@@ -284,3 +284,38 @@ impl AABB {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_aabb_basics() {
+        let default_aabb = AABB::default();
+        assert_eq!(default_aabb.center(), [0.0, 0.0, 0.0]);
+        assert_eq!(default_aabb.extents(), [0.0, 0.0, 0.0]);
+
+        let box1 = AABB::from_center_extents([10.0, 20.0, 30.0], [2.0, 4.0, 6.0]);
+        assert_eq!(box1.center(), [10.0, 20.0, 30.0]);
+        assert_eq!(box1.extents(), [2.0, 4.0, 6.0]);
+
+        assert!(box1.contains_point([10.0, 20.0, 30.0]));
+        assert!(!box1.contains_point([0.0, 0.0, 0.0]));
+
+        let box2 = AABB::new([8.0, 18.0, 28.0], [12.0, 22.0, 32.0]);
+        assert!(box1.intersects_scalar(&box2));
+        assert!(box1.intersects(&box2));
+
+        let batch = box1.intersects_batch(&[box2]);
+        assert_eq!(batch, vec![true]);
+
+        let union_box = box1.union(&AABB::new([0.0, 0.0, 0.0], [1.0, 1.0, 1.0]));
+        assert!(union_box.contains_point([0.5, 0.5, 0.5]));
+        assert!(union_box.contains_point([10.0, 20.0, 30.0]));
+
+        let ray_hit = box1.ray_intersects([10.0, 20.0, 0.0], [0.0, 0.0, 1.0]);
+        assert!(ray_hit.is_some());
+        let ray_miss = box1.ray_intersects([0.0, 0.0, 0.0], [0.0, -1.0, 0.0]);
+        assert!(ray_miss.is_none());
+    }
+}
