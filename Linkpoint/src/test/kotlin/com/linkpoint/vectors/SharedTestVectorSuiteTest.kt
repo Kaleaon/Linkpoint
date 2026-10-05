@@ -19,7 +19,7 @@ import kotlin.math.abs
 class SharedTestVectorSuiteTest {
 
     private fun findTestVectorsDir(): File {
-        val userDir = File(System.getProperty("user.dir", "."))
+        val userDir = File(System.getProperty("user.dir") ?: ".")
         val candidates = listOf(
             userDir.parentFile?.parentFile?.let { File(it, "test-vectors") },
             userDir.parentFile?.let { File(it, "test-vectors") },
