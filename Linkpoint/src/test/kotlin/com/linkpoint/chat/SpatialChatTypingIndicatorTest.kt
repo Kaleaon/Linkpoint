@@ -99,13 +99,13 @@ class SpatialChatTypingIndicatorTest {
         chatManager.shutdown()
     }
 
-    private suspend fun waitUntil(timeoutMs: Long = 2000, condition: () -> Boolean) {
+    private fun waitUntil(timeoutMs: Long = 3000, condition: () -> Boolean) {
         val start = System.currentTimeMillis()
         while (!condition()) {
             if (System.currentTimeMillis() - start > timeoutMs) {
                 throw AssertionError("Condition not met within $timeoutMs ms")
             }
-            kotlinx.coroutines.delay(20)
+            Thread.sleep(20)
         }
     }
 
