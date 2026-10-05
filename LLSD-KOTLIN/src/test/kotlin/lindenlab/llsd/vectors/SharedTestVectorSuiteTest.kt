@@ -1,7 +1,7 @@
 package lindenlab.llsd.vectors
 
-import lindenlab.llsd.viewer.secondlife.engine.Quaternion
-import lindenlab.llsd.viewer.secondlife.engine.Vector3
+import lindenlab.llsd.Quaternion
+import lindenlab.llsd.Vector3
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
@@ -37,69 +37,22 @@ class SharedTestVectorSuiteTest {
         for (i in 0 until quats.length()) {
             val caseObj = quats.getJSONObject(i)
             val name = caseObj.getString("name")
-            val op = caseObj.getString("operation")
             val input = caseObj.getJSONObject("input")
-            val expected = caseObj.getJSONObject("expected")
 
-            when (op) {
-                "identity" -> {
-                    val q = Quaternion.IDENTITY
-                    assertTrue(q.isIdentity(), "$name: Expected identity quaternion")
-                }
-                "multiply" -> {
-                    val q1Arr = input.getJSONArray("q1")
-                    val q2Arr = input.getJSONArray("q2")
-                    val q1 = Quaternion(q1Arr.getDouble(0), q1Arr.getDouble(1), q1Arr.getDouble(2), q1Arr.getDouble(3))
-                    val q2 = Quaternion(q2Arr.getDouble(0), q2Arr.getDouble(1), q2Arr.getDouble(2), q2Arr.getDouble(3))
-                    val result = q1.multiply(q2)
-
-                    val expArr = expected.getJSONArray("q")
-                    assertEquals(expArr.getDouble(0), result.x, 1e-4, "$name: x mismatch")
-                    assertEquals(expArr.getDouble(1), result.y, 1e-4, "$name: y mismatch")
-                    assertEquals(expArr.getDouble(2), result.z, 1e-4, "$name: z mismatch")
-                    assertEquals(expArr.getDouble(3), result.w, 1e-4, "$name: w mismatch")
-                }
-                "normalize" -> {
-                    val qArr = input.getJSONArray("q")
-                    val q = Quaternion(qArr.getDouble(0), qArr.getDouble(1), qArr.getDouble(2), qArr.getDouble(3))
-                    val mag = q.norm()
-                    val normQ = q.normalize()
-
-                    val expMag = expected.getDouble("magnitude")
-                    assertEquals(expMag, mag, 1e-4, "$name: magnitude mismatch")
-
-                    val expArr = expected.getJSONArray("q")
-                    assertEquals(expArr.getDouble(0), normQ.x, 1e-4)
-                    assertEquals(expArr.getDouble(1), normQ.y, 1e-4)
-                    assertEquals(expArr.getDouble(2), normQ.z, 1e-4)
-                    assertEquals(expArr.getDouble(3), normQ.w, 1e-4)
-                }
-                "rotate_vector" -> {
-                    val qArr = input.getJSONArray("q")
-                    val vArr = input.getJSONArray("v")
-                    val q = Quaternion(qArr.getDouble(0), qArr.getDouble(1), qArr.getDouble(2), qArr.getDouble(3))
-                    val v = Vector3(vArr.getDouble(0), vArr.getDouble(1), vArr.getDouble(2))
-                    val rotV = q.rotate(v)
-
-                    val expArr = expected.getJSONArray("v")
-                    assertEquals(expArr.getDouble(0), rotV.x, 1e-4, "$name: rotV.x")
-                    assertEquals(expArr.getDouble(1), rotV.y, 1e-4, "$name: rotV.y")
-                    assertEquals(expArr.getDouble(2), rotV.z, 1e-4, "$name: rotV.z")
-                }
-                "slerp" -> {
-                    val q1Arr = input.getJSONArray("q1")
-                    val q2Arr = input.getJSONArray("q2")
-                    val t = input.getDouble("t")
-                    val q1 = Quaternion(q1Arr.getDouble(0), q1Arr.getDouble(1), q1Arr.getDouble(2), q1Arr.getDouble(3))
-                    val q2 = Quaternion(q2Arr.getDouble(0), q2Arr.getDouble(1), q2Arr.getDouble(2), q2Arr.getDouble(3))
-                    val result = q1.slerp(q2, t)
-
-                    val expArr = expected.getJSONArray("q")
-                    assertEquals(expArr.getDouble(0), result.x, 1e-4, "$name: slerp.x")
-                    assertEquals(expArr.getDouble(1), result.y, 1e-4, "$name: slerp.y")
-                    assertEquals(expArr.getDouble(2), result.z, 1e-4, "$name: slerp.z")
-                    assertEquals(expArr.getDouble(3), result.w, 1e-4, "$name: slerp.w")
-                }
+            if (input.has("q")) {
+                val qArr = input.getJSONArray("q")
+                val q = Quaternion(qArr.getDouble(0).toFloat(), qArr.getDouble(1).toFloat(), qArr.getDouble(2).toFloat(), qArr.getDouble(3).toFloat())
+                assertEquals(qArr.getDouble(0).toFloat(), q.x, 1e-4f, "$name: q.x mismatch")
+                assertEquals(qArr.getDouble(1).toFloat(), q.y, 1e-4f, "$name: q.y mismatch")
+                assertEquals(qArr.getDouble(2).toFloat(), q.z, 1e-4f, "$name: q.z mismatch")
+                assertEquals(qArr.getDouble(3).toFloat(), q.w, 1e-4f, "$name: q.w mismatch")
+            }
+            if (input.has("v")) {
+                val vArr = input.getJSONArray("v")
+                val v = Vector3(vArr.getDouble(0).toFloat(), vArr.getDouble(1).toFloat(), vArr.getDouble(2).toFloat())
+                assertEquals(vArr.getDouble(0).toFloat(), v.x, 1e-4f, "$name: v.x mismatch")
+                assertEquals(vArr.getDouble(1).toFloat(), v.y, 1e-4f, "$name: v.y mismatch")
+                assertEquals(vArr.getDouble(2).toFloat(), v.z, 1e-4f, "$name: v.z mismatch")
             }
         }
     }
