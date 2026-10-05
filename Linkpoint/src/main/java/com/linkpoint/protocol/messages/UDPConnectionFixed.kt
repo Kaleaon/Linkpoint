@@ -910,6 +910,16 @@ open class UDPConnectionFixed(
      */
     fun getCircuitCode(): Int = circuitCode
 
+    /**
+     * Get the simulator IP for this connection
+     */
+    fun getSimIP(): String = simIP
+
+    /**
+     * Get the simulator port for this connection
+     */
+    fun getSimPort(): Int = simPort
+
     private fun outboundIdentity(context: String): AgentIdentity =
         AgentIdentity(
             agentId = agentId,
