@@ -198,3 +198,93 @@ fn test_linear_worker_pool_scaling() {
         time_2
     );
 }
+
+#[test]
+fn test_aabb_ray_intersects_and_union() {
+    let box1 = AABB::new([0.0, 0.0, 0.0], [10.0, 10.0, 10.0]);
+    let box2 = AABB::new([5.0, 5.0, 5.0], [15.0, 15.0, 15.0]);
+
+    let u = box1.union(&box2);
+    assert_eq!(&u.min[..3], &[0.0, 0.0, 0.0]);
+    assert_eq!(&u.max[..3], &[15.0, 15.0, 15.0]);
+
+    // Ray hit
+    let hit = box1.ray_intersects([-5.0, 5.0, 5.0], [1.0, 0.0, 0.0]);
+    assert!(hit.is_some());
+    assert_eq!(hit.unwrap(), 5.0);
+
+    // Ray miss
+    let miss = box1.ray_intersects([-5.0, 20.0, 5.0], [1.0, 0.0, 0.0]);
+    assert!(miss.is_none());
+
+    // Ray parallel miss outside
+    let par_miss = box1.ray_intersects([-5.0, 20.0, 5.0], [0.0, 1.0, 0.0]);
+    assert!(par_miss.is_none());
+}
+
+#[test]
+fn test_octree_query_ray_and_remove() {
+    let bounds = AABB::new([0.0, 0.0, 0.0], [100.0, 100.0, 100.0]);
+    let mut octree = Octree::new(bounds, 4, 2);
+
+    let entity1 = SpatialEntity::new(
+        "e1",
+        AABB::new([10.0, 10.0, 10.0], [20.0, 20.0, 20.0]),
+        [15.0, 15.0, 15.0],
+    )
+    .with_type("avatar");
+    let entity2 = SpatialEntity::new(
+        "e2",
+        AABB::new([50.0, 50.0, 50.0], [60.0, 60.0, 60.0]),
+        [55.0, 55.0, 55.0],
+    );
+
+    octree.insert(entity1);
+    octree.insert(entity2);
+
+    let ray_hits = octree.query_ray([0.0, 15.0, 15.0], [1.0, 0.0, 0.0]);
+    assert!(!ray_hits.is_empty());
+    assert_eq!(ray_hits[0].0.id, "e1");
+
+    assert!(octree.memory_usage_bytes() > 0);
+
+    let removed = octree.remove("e1");
+    assert!(removed.is_some());
+    assert_eq!(octree.count, 1);
+
+    // Test collapse during rebalance
+    octree.rebalance();
+}
+
+#[test]
+fn test_spatial_manager_and_worker_pool_methods() {
+    let manager = SpatialManager::new(
+        [0.0, 0.0, 0.0],
+        [256.0, 256.0, 256.0],
+        [32.0, 32.0, 32.0],
+        2,
+    );
+
+    assert_eq!(manager.pool.worker_count(), 2);
+
+    let entity = SpatialEntity::new(
+        "e1",
+        AABB::new([10.0, 10.0, 10.0], [20.0, 20.0, 20.0]),
+        [15.0, 15.0, 15.0],
+    );
+    assert!(manager.insert(entity.clone()));
+
+    let simd_results = manager.query_aabb_simd(&AABB::new([0.0, 0.0, 0.0], [30.0, 30.0, 30.0]));
+    assert_eq!(simd_results.len(), 1);
+
+    let update_res = manager.update_entity_position(
+        entity,
+        [40.0, 40.0, 5.0],
+        AABB::new([38.0, 38.0, 3.0], [42.0, 42.0, 7.0]),
+        ChunkId::new(0, 0, 0),
+    );
+    assert!(update_res.is_ok());
+
+    let rebalance_ms = manager.rebalance_async();
+    assert!(rebalance_ms >= 0.0);
+}
