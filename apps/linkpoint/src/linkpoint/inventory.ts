@@ -725,4 +725,202 @@ export class InventoryManager extends Utils.EventEmitter {
 
     return collected;
   }
+
+  /**
+   * Helper method to determine if an inventory item matches a specified category or asset type filter.
+   */
+  public matchesCategory(item: any, category: string): boolean {
+    if (!item) return false;
+    const cat = String(category || '').toLowerCase().trim();
+    if (cat === '' || cat === 'all') return true;
+
+    const itemAssetType = item.assetType ?? item.asset_type ?? item.type_default;
+    const itemInventoryType = item.inventoryType ?? item.inventory_type;
+    const itemCat = item.category;
+
+    const rawValues = [
+      itemAssetType !== undefined && itemAssetType !== null ? String(itemAssetType).toLowerCase() : '',
+      itemInventoryType !== undefined && itemInventoryType !== null ? String(itemInventoryType).toLowerCase() : '',
+      itemCat !== undefined && itemCat !== null ? String(itemCat).toLowerCase() : '',
+    ];
+
+    if (rawValues.some(v => v === cat)) return true;
+
+    const numAssetType = Number(itemAssetType);
+
+    switch (cat) {
+      case 'clothing':
+      case '5':
+        return numAssetType === 5 || numAssetType === 15 || rawValues.includes('clothing');
+      case 'bodypart':
+      case 'body':
+      case '13':
+        return numAssetType === 13 || numAssetType === 18 || numAssetType === 19 || numAssetType === 20 || rawValues.includes('bodypart') || rawValues.includes('body');
+      case 'object':
+      case '6':
+        return numAssetType === 6 || rawValues.includes('object');
+      case 'texture':
+      case '0':
+        return numAssetType === 0 || rawValues.includes('texture');
+      case 'sound':
+      case '1':
+        return numAssetType === 1 || rawValues.includes('sound');
+      case 'landmark':
+      case '3':
+        return numAssetType === 3 || rawValues.includes('landmark');
+      case 'notecard':
+      case '7':
+        return numAssetType === 7 || rawValues.includes('notecard');
+      case 'animation':
+      case '20':
+        return numAssetType === 20 || rawValues.includes('animation');
+      case 'gesture':
+      case '21':
+        return numAssetType === 21 || rawValues.includes('gesture');
+      case 'script':
+      case '10':
+      case '4':
+        return numAssetType === 10 || numAssetType === 4 || rawValues.includes('script') || rawValues.includes('lsl');
+      default:
+        return rawValues.some(v => v !== '' && v.includes(cat));
+    }
+  }
+
+  /**
+   * Recursively filters the inventory folder tree by asset category and search query.
+   * Empty subfolders without any matching assets in their subtrees are pruned.
+   */
+  public getFilteredFolderTree(
+    categoryOrOptions?: string | number | { category?: string | number; search?: string; rootId?: string },
+    textFilter?: string,
+    rootIdOverride?: string
+  ): any {
+    let categoryFilter: string | number | undefined;
+    let searchFilter: string | undefined;
+    let rootId: string | undefined;
+
+    if (categoryOrOptions && typeof categoryOrOptions === 'object' && !Array.isArray(categoryOrOptions)) {
+      categoryFilter = categoryOrOptions.category;
+      searchFilter = categoryOrOptions.search;
+      rootId = categoryOrOptions.rootId;
+    } else {
+      categoryFilter = categoryOrOptions as string | number | undefined;
+      searchFilter = textFilter;
+      rootId = rootIdOverride;
+    }
+
+    const normCategory = categoryFilter !== undefined && categoryFilter !== null && categoryFilter !== '' && categoryFilter !== 'all'
+      ? String(categoryFilter).toLowerCase().trim()
+      : undefined;
+    const normSearch = searchFilter && String(searchFilter).trim() !== '' ? String(searchFilter).toLowerCase().trim() : undefined;
+
+    const matchesItem = (item: any): boolean => {
+      if (!item) return false;
+      if (normCategory && !this.matchesCategory(item, normCategory)) {
+        return false;
+      }
+      if (normSearch) {
+        const itemName = String(item.name || '').toLowerCase();
+        const itemDesc = String(item.description || '').toLowerCase();
+        if (!itemName.includes(normSearch) && !itemDesc.includes(normSearch)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const getChildrenForFolder = (folderId: string) => {
+      const folder = this.folders.get(folderId);
+      const knownChildren = new Set<string>(folder?.children || []);
+
+      const folderChildren: any[] = [];
+      const itemChildren: any[] = [];
+
+      for (const item of this.items.values()) {
+        if (item.parent === folderId || knownChildren.has(item.id)) {
+          itemChildren.push(item);
+        }
+      }
+
+      for (const f of this.folders.values()) {
+        if (f.id !== folderId && (f.parent === folderId || knownChildren.has(f.id))) {
+          folderChildren.push(f);
+        }
+      }
+
+      const uniqueItems = Array.from(new Map(itemChildren.map(i => [i.id, i])).values());
+      const uniqueFolders = Array.from(new Map(folderChildren.map(f => [f.id, f])).values());
+
+      return { folderChildren: uniqueFolders, itemChildren: uniqueItems };
+    };
+
+    const pruneFolderNode = (folder: any, visited = new Set<string>()): any | null => {
+      if (!folder || visited.has(folder.id)) return null;
+      visited.add(folder.id);
+
+      const { folderChildren, itemChildren } = getChildrenForFolder(folder.id);
+      const matchingItems = itemChildren.filter(item => matchesItem(item)).map(item => ({ ...item, folder: false, type: 'item' }));
+
+      const prunedSubfolders: any[] = [];
+      for (const subfolder of folderChildren) {
+        const pruned = pruneFolderNode(subfolder, new Set(visited));
+        if (pruned) {
+          prunedSubfolders.push(pruned);
+        }
+      }
+
+      if (matchingItems.length > 0 || prunedSubfolders.length > 0) {
+        return {
+          ...folder,
+          type: 'folder',
+          folder: true,
+          children: [...prunedSubfolders, ...matchingItems],
+        };
+      }
+
+      return null;
+    };
+
+    const effectiveRootId = rootId || this.rootFolder?.id || this.protocol?.inventoryRoot;
+    const rootNode = effectiveRootId ? this.folders.get(effectiveRootId) : null;
+
+    if (rootNode) {
+      const pruned = pruneFolderNode(rootNode);
+      if (pruned) return pruned;
+      return { ...rootNode, type: 'folder', folder: true, children: [] };
+    }
+
+    const topLevelFolders = Array.from(this.folders.values()).filter(f => !f.parent || !this.folders.has(f.parent));
+    const prunedTopLevel = topLevelFolders.map(f => pruneFolderNode(f)).filter(Boolean);
+
+    return prunedTopLevel;
+  }
+
+  /**
+   * Helper to flatten a pruned folder tree into an array of visible nodes.
+   */
+  public flattenTree(treeNodeOrNodes: any): any[] {
+    if (!treeNodeOrNodes) return [];
+    const nodes = Array.isArray(treeNodeOrNodes) ? treeNodeOrNodes : [treeNodeOrNodes];
+    const result: any[] = [];
+    const visited = new Set<string>();
+
+    const traverse = (node: any) => {
+      if (!node || visited.has(node.id)) return;
+      visited.add(node.id);
+      result.push(node);
+
+      if (Array.isArray(node.children)) {
+        for (const child of node.children) {
+          traverse(child);
+        }
+      }
+    };
+
+    for (const node of nodes) {
+      traverse(node);
+    }
+
+    return result;
+  }
 }
