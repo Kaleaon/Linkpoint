@@ -47,7 +47,17 @@ function getAdvisoriesForPackage(pkgName, vulnerabilitiesMap, visited = new Set(
     if (item && typeof item === 'object') {
       advisories.push({ ...item, pkgName, vulnSeverity: vuln.severity });
     } else if (typeof item === 'string') {
-      advisories.push(...getAdvisoriesForPackage(item, vulnerabilitiesMap, visited));
+      if (item.match(/^GHSA-[a-zA-Z0-9-]+$/i)) {
+        advisories.push({
+          url: `https://github.com/advisories/${item}`,
+          title: item,
+          severity: vuln.severity,
+          pkgName,
+          vulnSeverity: vuln.severity,
+        });
+      } else {
+        advisories.push(...getAdvisoriesForPackage(item, vulnerabilitiesMap, visited));
+      }
     }
   }
   return advisories;
@@ -59,9 +69,12 @@ const seenKeys = new Set();
 for (const pkgName of Object.keys(vulnerabilities)) {
   const advisories = getAdvisoriesForPackage(pkgName, vulnerabilities);
   for (const item of advisories) {
-    const url = item.url || '';
-    const match = url.match(/GHSA-[a-zA-Z0-9-]+/i);
-    const ghsaId = match ? match[0].toUpperCase() : (url ? url.split('/').pop().toUpperCase() : 'UNKNOWN');
+    const rawUrl = item.url || (typeof item.source === 'string' ? item.source : '') || item.github_advisory_id || '';
+    let match = typeof rawUrl === 'string' ? rawUrl.match(/GHSA-[a-zA-Z0-9-]+/i) : null;
+    if (!match && typeof item.title === 'string') {
+      match = item.title.match(/GHSA-[a-zA-Z0-9-]+/i);
+    }
+    const ghsaId = match ? match[0].toUpperCase() : (rawUrl ? String(rawUrl).split('/').pop().toUpperCase() : 'UNKNOWN');
     const severity = String(item.severity || item.vulnSeverity || '').toLowerCase();
     if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
       const key = `${pkgName}:${ghsaId}`;
@@ -72,7 +85,7 @@ for (const pkgName of Object.keys(vulnerabilities)) {
           ghsaId,
           title: item.title || item.name || pkgName,
           severity,
-          url,
+          url: rawUrl,
         });
       }
     }
