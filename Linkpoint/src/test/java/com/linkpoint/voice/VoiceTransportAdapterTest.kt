@@ -1,7 +1,6 @@
 package com.linkpoint.voice
 
 import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.linkpoint.protocol.GridKind
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import kotlinx.coroutines.runBlocking
@@ -10,13 +9,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
 class VoiceTransportAdapterTest {
 
     private lateinit var context: Context
@@ -25,7 +19,7 @@ class VoiceTransportAdapterTest {
 
     @Before
     fun setUp() {
-        context = ApplicationProvider.getApplicationContext()
+        context = mock(Context::class.java)
         capabilityManager = mock(CapabilityManager::class.java)
         factory = VoiceTransportAdapterFactory(
             capabilityManager = capabilityManager,
@@ -125,7 +119,7 @@ class VoiceTransportAdapterTest {
         assertEquals(customConfig, voiceManager.currentVoiceConfig)
         assertTrue(voiceManager.activeAdapter is OpenSimVoiceTransportAdapter)
 
-        voiceManager.shutdown()
+        voiceManager.leaveVoice()
     }
 
     @Test
@@ -179,6 +173,6 @@ class VoiceTransportAdapterTest {
 
         assertEquals(42, capturedParcelId)
 
-        voiceManager.shutdown()
+        voiceManager.leaveVoice()
     }
 }
