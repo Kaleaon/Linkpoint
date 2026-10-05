@@ -152,8 +152,36 @@ function normalizeGLTFMaterial(data) {
   };
 }
 
+let openjpegWasm = null;
+try {
+  openjpegWasm = require('@linkpoint/wasm');
+} catch {
+  openjpegWasm = null;
+}
+
 async function decodePixels(buffer) {
+  // Attempt compiled OpenJPEG WASM bindings if available
+  if (openjpegWasm && typeof openjpegWasm.decode_jpeg2000 === 'function') {
+    try {
+      const decoded = openjpegWasm.decode_jpeg2000(new Uint8Array(buffer));
+      if (decoded && decoded.data) {
+        return {
+          data: Buffer.isBuffer(decoded.data) ? decoded.data : Buffer.from(decoded.data),
+          width: decoded.width,
+          height: decoded.height,
+          channels: decoded.channels || 4,
+        };
+      }
+    } catch {
+      // Graceful fallback to sharp / standard decoding routines
+    }
+  }
+
+  // Fast direct native C / sharp pipeline without thread-blocking single-pixel JS array loops
   try {
+    const result = await sharp(buffer, { failOn: 'error' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    return { data: result.data, width: result.info.width, height: result.info.height, channels: result.info.channels };
+  } catch {
     const image = new JpxImage();
     image.parse(new Uint8Array(buffer));
     const rgba = Buffer.alloc(image.width * image.height * 4, 255);
@@ -166,9 +194,6 @@ async function decodePixels(buffer) {
       if (image.componentsCount > 3) rgba[target + 3] = tile.items[source + 3];
     }
     return { data: rgba, width: image.width, height: image.height, channels: 4 };
-  } catch {
-    const result = await sharp(buffer, { failOn: 'error' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    return { data: result.data, width: result.info.width, height: result.info.height, channels: result.info.channels };
   }
 }
 

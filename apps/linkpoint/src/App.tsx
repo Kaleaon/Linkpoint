@@ -12,6 +12,7 @@ import LiveRegionAnnouncerComponent from "./components/LiveRegionAnnouncerCompon
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import type { ViewerClient } from "@linkpoint/viewer-client";
 import { ViewerClientProvider } from "./viewer/ViewerClientContext";
+import { RlvProvider } from "./viewer/RlvContext";
 
 function Viewer() {
   const { state, actions } = useApp();
@@ -56,7 +57,9 @@ export default function App({ client }: { client?: ViewerClient }) {
     <AnnouncerProvider>
       <AppProvider>
         <ThemeProvider>
-          <Viewer />
+          <RlvProvider client={client}>
+            <Viewer />
+          </RlvProvider>
         </ThemeProvider>
       </AppProvider>
     </AnnouncerProvider>

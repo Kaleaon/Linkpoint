@@ -3,11 +3,13 @@ import useGoogleEnabled from "../hooks/useGoogleEnabled.js";
 import Toggle from "../components/Toggle.jsx";
 import { loadGoogle } from "../services/google.ts";
 import { useApp } from "../context/AppContext.jsx";
+import { useRlvSafe } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
 import Icon from "../components/Icon.jsx";
 
 export default function Settings() {
   const { state, actions } = useApp();
+  const rlv = useRlvSafe();
   const [disconnecting, setDisconnecting] = useState(false);
   const googleEnabled = useGoogleEnabled();
   const [googleNote, setGoogleNote] = useState("");
@@ -66,6 +68,24 @@ export default function Settings() {
         <Toggle on={googleEnabled} onClick={() => void toggleGoogle()} ariaLabelledBy="google-label" />
       </div>
       {googleNote ? <p role="status">{googleNote}</p> : null}
+    </section>
+    <section className="runtime-card" aria-labelledby="rlv-heading">
+      <Icon name="shield" size={22} />
+      <h2 id="rlv-heading">Restrained Love Viewer (RLV)</h2>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ flex: 1 }}>
+          <strong id="rlv-label">Enable RLV Directive Parsing &amp; Restriction Enforcement</strong>
+          <p style={{ margin: "4px 0 0", opacity: 0.8 }}>
+            Allows in-world scripted objects to set viewer restrictions and parse RLV commands. Disabling RLV will bypass all restriction checks.
+          </p>
+        </div>
+        <Toggle on={rlv.enabled} onClick={() => rlv.setEnabled(!rlv.enabled)} ariaLabelledBy="rlv-label" />
+      </div>
+      {rlv.enabled && rlv.active.size > 0 ? (
+        <p role="status" style={{ marginTop: 8, color: "var(--color-primary, #38bdf8)", fontSize: 12 }}>
+          {rlv.active.size} active restriction{rlv.active.size > 1 ? "s" : ""} enforced across in-world objects.
+        </p>
+      ) : null}
     </section>
     <section className="runtime-card">
       <Icon name="settings" size={22} />

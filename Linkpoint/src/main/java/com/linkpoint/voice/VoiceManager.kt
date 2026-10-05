@@ -281,6 +281,16 @@ class VoiceManager(
         }
 
         val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
+        if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
+            !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
+            Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
+            _lastError.value = "Voice capability is not available in this region"
+            return@withContext false
+        }
+        val voiceInfo = requestParcelVoiceInfo() ?: run {
+            _lastError.value = "Failed to retrieve parcel voice info"
+            return@withContext false
+        }
         val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
 
         Log.i(TAG, "Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
@@ -339,6 +349,12 @@ class VoiceManager(
                 return@withContext true
             }
         }
+        val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
+        if (isWebRtcVoiceRegion()) {
+            joinSpatialVoiceWebRtc(targetParcel)
+        } else {
+            joinOpenSimVoice(parcelLocalId)
+        }
 
         joinParcelVoice()
     }
@@ -380,6 +396,25 @@ class VoiceManager(
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
         return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
+    }
+
+    /**
+     * Support updating ICE server configuration on active peer connections
+     * when provided in voice provisioning responses.
+     */
+    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+        var updated = false
+        currentWebRtcSession?.let { session ->
+            if (session.updateIceServers(iceServers)) {
+                updated = true
+            }
+        }
+        for (session in activeSessions.values) {
+            if (session.updateIceServers(iceServers)) {
+                updated = true
+            }
+        }
+        return updated
     }
 
     /**

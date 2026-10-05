@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { GENERATED_TOKENS } from "@linkpoint/design-system/tokens";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { useRlvSafe } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app";
 import HudControls from "./HudControls.jsx";
 import OutfitCarouselDrawer from "../components/OutfitCarouselDrawer.jsx";
 
 export default function World3D({ desktopBackdrop = false }) {
   const { V, t } = useTheme();
+  const rlv = useRlvSafe();
   const canvasRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
@@ -85,7 +87,7 @@ export default function World3D({ desktopBackdrop = false }) {
       {!selection.avatar && app.auth.isLoggedIn() ? <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
         <button type="button" onClick={() => void app.world.touchSelected()} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10 }}>TOUCH</button>
         <button type="button" onClick={() => void app.interactions.requestPayment({ objectId: selection.id, objectName: selection.name || "Vendor Item", sellerName: selection.ownerName || "Simulator Resident", price: selection.payPrice || 100 })} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10 }}>PAY L$</button>
-        <button type="button" onClick={() => void app.protocol.sit(selection.id).catch((error) => app.world.emit("action_failed", { action: "sit", message: error instanceof Error ? error.message : "Sit failed" }))} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10 }}>SIT</button>
+        <button type="button" disabled={rlv.restricted("sit")} title={rlv.reasonFor("sit") || undefined} onClick={() => void app.protocol.sit(selection.id).catch((error) => app.world.emit("action_failed", { action: "sit", message: error instanceof Error ? error.message : "Sit failed" }))} style={{ ...button, flex: 1, minHeight: 32, fontSize: 10, opacity: rlv.restricted("sit") ? 0.5 : 1 }}>SIT</button>
       </div> : null}
     </aside>}
     {!desktopBackdrop && <div aria-label="Camera view" style={{ position: "absolute", right: 14, top: 14, display: "flex", gap: 4 }}>

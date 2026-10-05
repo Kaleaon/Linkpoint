@@ -17,14 +17,18 @@ void populate_rgba_buffer(unsigned char* buf, size_t buffer_size, int seed) {
         return;
     }
     uint8_t s = (uint8_t)(seed & 0xFF);
+    size_t num_pixels = buffer_size / 4;
+    uint32_t* p32 = (uint32_t*)buf;
+
     #ifdef _OPENMP
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     #endif
-    for (size_t i = 0; i < buffer_size; i += 4) {
-        uint8_t idx = (uint8_t)(i & 0xFF);
-        buf[i]     = s + idx;
-        buf[i + 1] = s + (uint8_t)(idx * 2);
-        buf[i + 2] = s + (uint8_t)(idx * 3);
-        buf[i + 3] = 255;
+    for (size_t px = 0; px < num_pixels; px++) {
+        uint8_t idx = (uint8_t)((px * 4) & 0xFF);
+        uint8_t r = s + idx;
+        uint8_t g = s + (uint8_t)(idx * 2);
+        uint8_t b = s + (uint8_t)(idx * 3);
+        uint8_t a = 255;
+        p32[px] = ((uint32_t)a << 24) | ((uint32_t)b << 16) | ((uint32_t)g << 8) | (uint32_t)r;
     }
 }

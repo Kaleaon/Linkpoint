@@ -879,7 +879,7 @@ class LinkpointApp : Application() {
         )
 
         // World features
-        worldMap = WorldMap(capabilityManager)
+        worldMap = WorldMap(capabilityManager, assetCache = assetCache)
         searchManager = SearchManager(capabilityManager)
         profileManager = ProfileManager(capabilityManager)
         regionExperienceManager = RegionExperienceManager(capabilityManager)
