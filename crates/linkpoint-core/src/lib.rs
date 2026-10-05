@@ -45,12 +45,71 @@ pub struct ChatMessage {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct TextureTransform {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub offset: Option<[f32; 2]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scale: Option<[f32; 2]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rotation: Option<f32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PbrMaterialAttributes {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metallic: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub roughness: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub base_color: Option<[f32; 4]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub emissive_color: Option<[f32; 3]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metallic_roughness_texture_uri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub base_color_texture_uri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub normal_map_uri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub emissive_texture_uri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub texture_transform: Option<TextureTransform>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JointInfluence {
+    pub joint_name: String,
+    pub weight: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkinningMetadata {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skeleton_root_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub joints: Option<Vec<JointInfluence>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SceneEntity {
     pub id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_id: Option<String>,
     pub position: [f32; 3],
-    pub rotation: [f32; 4],
-    pub scale: [f32; 3],
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rotation: Option<[f32; 4]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scale: Option<[f32; 3]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mesh_uri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub material: Option<PbrMaterialAttributes>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skinning: Option<SkinningMetadata>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -80,6 +139,7 @@ pub enum ViewerCommand {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", content = "payload")]
+#[allow(clippy::large_enum_variant)]
 pub enum ViewerEvent {
     #[serde(rename = "session.connecting")]
     SessionConnecting,

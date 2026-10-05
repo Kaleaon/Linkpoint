@@ -24,12 +24,43 @@ export interface ChatMessage {
   readonly timestamp: string;
 }
 
+export interface TextureTransform {
+  readonly offset?: readonly [number, number];
+  readonly scale?: readonly [number, number];
+  readonly rotation?: number;
+}
+
+export interface PbrMaterialAttributes {
+  readonly metallic?: number;
+  readonly roughness?: number;
+  readonly baseColor?: readonly [number, number, number, number];
+  readonly emissiveColor?: readonly [number, number, number];
+  readonly metallicRoughnessTextureUri?: string;
+  readonly baseColorTextureUri?: string;
+  readonly normalMapUri?: string;
+  readonly emissiveTextureUri?: string;
+  readonly textureTransform?: TextureTransform;
+}
+
+export interface JointInfluence {
+  readonly jointName: string;
+  readonly weight: number;
+}
+
+export interface SkinningMetadata {
+  readonly skeletonRootId?: string;
+  readonly joints?: readonly JointInfluence[];
+}
+
 export interface SceneEntity {
   readonly id: string;
   readonly parentId?: string;
   readonly position: readonly [number, number, number];
   readonly rotation?: readonly [number, number, number, number];
   readonly scale?: readonly [number, number, number];
+  readonly meshUri?: string;
+  readonly material?: PbrMaterialAttributes;
+  readonly skinning?: SkinningMetadata;
 }
 
 export type ViewerCommand =
