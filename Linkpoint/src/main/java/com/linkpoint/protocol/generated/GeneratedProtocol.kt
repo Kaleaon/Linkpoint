@@ -10,490 +10,490 @@ import java.nio.ByteOrder
 
 object GeneratedProtocolCatalog {
     const val TEMPLATE_VERSION = "2.0"
-    val REGISTERED_MESSAGES = mapOf(
-        "TestMessage" to 1,
-        "PacketAck" to 4294967291,
-        "OpenCircuit" to 4294967292,
-        "CloseCircuit" to 4294967293,
-        "StartPingCheck" to 1,
-        "CompletePingCheck" to 2,
-        "AddCircuitCode" to 2,
-        "UseCircuitCode" to 3,
-        "NeighborList" to 3,
-        "AvatarTextureUpdate" to 4,
-        "SimulatorMapUpdate" to 5,
-        "SimulatorSetMap" to 6,
-        "SubscribeLoad" to 7,
-        "UnsubscribeLoad" to 8,
-        "SimulatorReady" to 9,
-        "TelehubInfo" to 10,
-        "SimulatorPresentAtLocation" to 11,
-        "SimulatorLoad" to 12,
-        "SimulatorShutdownRequest" to 13,
-        "RegionPresenceRequestByRegionID" to 14,
-        "RegionPresenceRequestByHandle" to 15,
-        "RegionPresenceResponse" to 16,
-        "UpdateSimulator" to 17,
-        "LogDwellTime" to 18,
-        "FeatureDisabled" to 19,
-        "LogFailedMoneyTransaction" to 20,
-        "UserReportInternal" to 21,
-        "SetSimStatusInDatabase" to 22,
-        "SetSimPresenceInDatabase" to 23,
-        "EconomyDataRequest" to 24,
-        "EconomyData" to 25,
-        "AvatarPickerRequest" to 26,
-        "AvatarPickerRequestBackend" to 27,
-        "AvatarPickerReply" to 28,
-        "PlacesQuery" to 29,
-        "PlacesReply" to 30,
-        "DirFindQuery" to 31,
-        "DirFindQueryBackend" to 32,
-        "DirPlacesQuery" to 33,
-        "DirPlacesQueryBackend" to 34,
-        "DirPlacesReply" to 35,
-        "DirPeopleReply" to 36,
-        "DirEventsReply" to 37,
-        "DirGroupsReply" to 38,
-        "DirClassifiedQuery" to 39,
-        "DirClassifiedQueryBackend" to 40,
-        "DirClassifiedReply" to 41,
-        "AvatarClassifiedReply" to 42,
-        "ClassifiedInfoRequest" to 43,
-        "ClassifiedInfoReply" to 44,
-        "ClassifiedInfoUpdate" to 45,
-        "ClassifiedDelete" to 46,
-        "ClassifiedGodDelete" to 47,
-        "DirLandQuery" to 48,
-        "DirLandQueryBackend" to 49,
-        "DirLandReply" to 50,
-        "DirPopularQuery" to 51,
-        "DirPopularQueryBackend" to 52,
-        "DirPopularReply" to 53,
-        "ParcelInfoRequest" to 54,
-        "ParcelInfoReply" to 55,
-        "ParcelObjectOwnersRequest" to 56,
-        "ParcelObjectOwnersReply" to 57,
-        "GroupNoticesListRequest" to 58,
-        "GroupNoticesListReply" to 59,
-        "GroupNoticeRequest" to 60,
-        "GroupNoticeAdd" to 61,
-        "TeleportRequest" to 62,
-        "TeleportLocationRequest" to 63,
-        "TeleportLocal" to 64,
-        "TeleportLandmarkRequest" to 65,
-        "TeleportProgress" to 66,
-        "DataHomeLocationRequest" to 67,
-        "DataHomeLocationReply" to 68,
-        "TeleportFinish" to 69,
-        "StartLure" to 70,
-        "TeleportLureRequest" to 71,
-        "TeleportCancel" to 72,
-        "TeleportStart" to 73,
-        "TeleportFailed" to 74,
-        "Undo" to 75,
-        "Redo" to 76,
-        "UndoLand" to 77,
-        "AgentPause" to 78,
-        "AgentResume" to 79,
-        "AgentUpdate" to 4,
-        "ChatFromViewer" to 80,
-        "AgentThrottle" to 81,
-        "AgentFOV" to 82,
-        "AgentHeightWidth" to 83,
-        "AgentSetAppearance" to 84,
-        "AgentAnimation" to 5,
-        "AgentRequestSit" to 6,
-        "AgentSit" to 7,
-        "AgentQuitCopy" to 85,
-        "RequestImage" to 8,
-        "ImageNotInDatabase" to 86,
-        "RebakeAvatarTextures" to 87,
-        "SetAlwaysRun" to 88,
-        "ObjectAdd" to 1,
-        "ObjectDelete" to 89,
-        "ObjectDuplicate" to 90,
-        "ObjectDuplicateOnRay" to 91,
-        "MultipleObjectUpdate" to 2,
-        "RequestMultipleObjects" to 3,
-        "ObjectPosition" to 4,
-        "ObjectScale" to 92,
-        "ObjectRotation" to 93,
-        "ObjectFlagUpdate" to 94,
-        "ObjectClickAction" to 95,
-        "ObjectImage" to 96,
-        "ObjectBypassModUpdate" to 431,
-        "ObjectMaterial" to 97,
-        "ObjectShape" to 98,
-        "ObjectExtraParams" to 99,
-        "ObjectOwner" to 100,
-        "ObjectGroup" to 101,
-        "ObjectBuy" to 102,
-        "BuyObjectInventory" to 103,
-        "DerezContainer" to 104,
-        "ObjectPermissions" to 105,
-        "ObjectSaleInfo" to 106,
-        "ObjectName" to 107,
-        "ObjectDescription" to 108,
-        "ObjectCategory" to 109,
-        "ObjectSelect" to 110,
-        "ObjectDeselect" to 111,
-        "ObjectAttach" to 112,
-        "ObjectDetach" to 113,
-        "ObjectDrop" to 114,
-        "ObjectLink" to 115,
-        "ObjectDelink" to 116,
-        "ObjectGrab" to 117,
-        "ObjectGrabUpdate" to 118,
-        "ObjectDeGrab" to 119,
-        "ObjectSpinStart" to 120,
-        "ObjectSpinUpdate" to 121,
-        "ObjectSpinStop" to 122,
-        "ObjectExportSelected" to 123,
-        "ModifyLand" to 124,
-        "VelocityInterpolateOn" to 125,
-        "VelocityInterpolateOff" to 126,
-        "StateSave" to 127,
-        "ReportAutosaveCrash" to 128,
-        "SimWideDeletes" to 129,
-        "RequestObjectPropertiesFamily" to 5,
-        "TrackAgent" to 130,
-        "ViewerStats" to 131,
-        "ScriptAnswerYes" to 132,
-        "UserReport" to 133,
-        "AlertMessage" to 134,
-        "AgentAlertMessage" to 135,
-        "MeanCollisionAlert" to 136,
-        "ViewerFrozenMessage" to 137,
-        "HealthMessage" to 138,
-        "ChatFromSimulator" to 139,
-        "SimStats" to 140,
-        "RequestRegionInfo" to 141,
-        "RegionInfo" to 142,
-        "GodUpdateRegionInfo" to 143,
-        "NearestLandingRegionRequest" to 144,
-        "NearestLandingRegionReply" to 145,
-        "NearestLandingRegionUpdated" to 146,
-        "TeleportLandingStatusChanged" to 147,
-        "RegionHandshake" to 148,
-        "RegionHandshakeReply" to 149,
-        "CoarseLocationUpdate" to 6,
-        "ImageData" to 9,
-        "ImagePacket" to 10,
-        "LayerData" to 11,
-        "ObjectUpdate" to 12,
-        "ObjectUpdateCompressed" to 13,
-        "ObjectUpdateCached" to 14,
-        "ImprovedTerseObjectUpdate" to 15,
-        "KillObject" to 16,
-        "CrossedRegion" to 7,
-        "SimulatorViewerTimeMessage" to 150,
-        "EnableSimulator" to 151,
-        "DisableSimulator" to 152,
-        "ConfirmEnableSimulator" to 8,
-        "TransferRequest" to 153,
-        "TransferInfo" to 154,
-        "TransferPacket" to 17,
-        "TransferAbort" to 155,
-        "RequestXfer" to 156,
-        "SendXferPacket" to 18,
-        "ConfirmXferPacket" to 19,
-        "AbortXfer" to 157,
-        "AvatarAnimation" to 20,
-        "AvatarAppearance" to 158,
-        "AvatarSitResponse" to 21,
-        "SetFollowCamProperties" to 159,
-        "ClearFollowCamProperties" to 160,
-        "CameraConstraint" to 22,
-        "ObjectProperties" to 9,
-        "ObjectPropertiesFamily" to 10,
-        "RequestPayPrice" to 161,
-        "PayPriceReply" to 162,
-        "KickUser" to 163,
-        "KickUserAck" to 164,
-        "GodKickUser" to 165,
-        "SystemKickUser" to 166,
-        "EjectUser" to 167,
-        "FreezeUser" to 168,
-        "AvatarPropertiesRequest" to 169,
-        "AvatarPropertiesRequestBackend" to 170,
-        "AvatarPropertiesReply" to 171,
-        "AvatarInterestsReply" to 172,
-        "AvatarGroupsReply" to 173,
-        "AvatarPropertiesUpdate" to 174,
-        "AvatarInterestsUpdate" to 175,
-        "AvatarNotesReply" to 176,
-        "AvatarNotesUpdate" to 177,
-        "AvatarPicksReply" to 178,
-        "EventInfoRequest" to 179,
-        "EventInfoReply" to 180,
-        "EventNotificationAddRequest" to 181,
-        "EventNotificationRemoveRequest" to 182,
-        "EventGodDelete" to 183,
-        "PickInfoReply" to 184,
-        "PickInfoUpdate" to 185,
-        "PickDelete" to 186,
-        "PickGodDelete" to 187,
-        "ScriptQuestion" to 188,
-        "ScriptControlChange" to 189,
-        "ScriptDialog" to 190,
-        "ScriptDialogReply" to 191,
-        "ForceScriptControlRelease" to 192,
-        "RevokePermissions" to 193,
-        "LoadURL" to 194,
-        "ScriptTeleportRequest" to 195,
-        "ParcelOverlay" to 196,
-        "ParcelPropertiesRequest" to 11,
-        "ParcelPropertiesRequestByID" to 197,
-        "ParcelProperties" to 23,
-        "ParcelPropertiesUpdate" to 198,
-        "ParcelReturnObjects" to 199,
-        "ParcelSetOtherCleanTime" to 200,
-        "ParcelDisableObjects" to 201,
-        "ParcelSelectObjects" to 202,
-        "EstateCovenantRequest" to 203,
-        "EstateCovenantReply" to 204,
-        "ForceObjectSelect" to 205,
-        "ParcelBuyPass" to 206,
-        "ParcelDeedToGroup" to 207,
-        "ParcelReclaim" to 208,
-        "ParcelClaim" to 209,
-        "ParcelJoin" to 210,
-        "ParcelDivide" to 211,
-        "ParcelRelease" to 212,
-        "ParcelBuy" to 213,
-        "ParcelGodForceOwner" to 214,
-        "ParcelAccessListRequest" to 215,
-        "ParcelAccessListReply" to 216,
-        "ParcelAccessListUpdate" to 217,
-        "ParcelDwellRequest" to 218,
-        "ParcelDwellReply" to 219,
-        "RequestParcelTransfer" to 220,
-        "UpdateParcel" to 221,
-        "RemoveParcel" to 222,
-        "MergeParcel" to 223,
-        "LogParcelChanges" to 224,
-        "CheckParcelSales" to 225,
-        "ParcelSales" to 226,
-        "ParcelGodMarkAsContent" to 227,
-        "ViewerStartAuction" to 228,
-        "StartAuction" to 229,
-        "ConfirmAuctionStart" to 230,
-        "CompleteAuction" to 231,
-        "CancelAuction" to 232,
-        "CheckParcelAuctions" to 233,
-        "ParcelAuctions" to 234,
-        "UUIDNameRequest" to 235,
-        "UUIDNameReply" to 236,
-        "UUIDGroupNameRequest" to 237,
-        "UUIDGroupNameReply" to 238,
-        "ChatPass" to 239,
-        "EdgeDataPacket" to 24,
-        "SimStatus" to 12,
-        "ChildAgentUpdate" to 25,
-        "ChildAgentAlive" to 26,
-        "ChildAgentPositionUpdate" to 27,
-        "ChildAgentDying" to 240,
-        "ChildAgentUnknown" to 241,
-        "AtomicPassObject" to 28,
-        "KillChildAgents" to 242,
-        "GetScriptRunning" to 243,
-        "ScriptRunningReply" to 244,
-        "SetScriptRunning" to 245,
-        "ScriptReset" to 246,
-        "ScriptSensorRequest" to 247,
-        "ScriptSensorReply" to 248,
-        "CompleteAgentMovement" to 249,
-        "AgentMovementComplete" to 250,
-        "DataServerLogout" to 251,
-        "LogoutRequest" to 252,
-        "LogoutReply" to 253,
-        "ImprovedInstantMessage" to 254,
-        "RetrieveInstantMessages" to 255,
-        "FindAgent" to 256,
-        "RequestGodlikePowers" to 257,
-        "GrantGodlikePowers" to 258,
-        "GodlikeMessage" to 259,
-        "EstateOwnerMessage" to 260,
-        "GenericMessage" to 261,
-        "GenericStreamingMessage" to 31,
-        "LargeGenericMessage" to 430,
-        "MuteListRequest" to 262,
-        "UpdateMuteListEntry" to 263,
-        "RemoveMuteListEntry" to 264,
-        "CopyInventoryFromNotecard" to 265,
-        "UpdateInventoryItem" to 266,
-        "UpdateCreateInventoryItem" to 267,
-        "MoveInventoryItem" to 268,
-        "CopyInventoryItem" to 269,
-        "RemoveInventoryItem" to 270,
-        "ChangeInventoryItemFlags" to 271,
-        "SaveAssetIntoInventory" to 272,
-        "CreateInventoryFolder" to 273,
-        "UpdateInventoryFolder" to 274,
-        "MoveInventoryFolder" to 275,
-        "RemoveInventoryFolder" to 276,
-        "FetchInventoryDescendents" to 277,
-        "InventoryDescendents" to 278,
-        "FetchInventory" to 279,
-        "FetchInventoryReply" to 280,
-        "BulkUpdateInventory" to 281,
-        "RequestInventoryAsset" to 282,
-        "InventoryAssetResponse" to 283,
-        "RemoveInventoryObjects" to 284,
-        "PurgeInventoryDescendents" to 285,
-        "UpdateTaskInventory" to 286,
-        "RemoveTaskInventory" to 287,
-        "MoveTaskInventory" to 288,
-        "RequestTaskInventory" to 289,
-        "ReplyTaskInventory" to 290,
-        "DeRezObject" to 291,
-        "DeRezAck" to 292,
-        "RezObject" to 293,
-        "RezObjectFromNotecard" to 294,
-        "TransferInventory" to 295,
-        "TransferInventoryAck" to 296,
-        "AcceptFriendship" to 297,
-        "DeclineFriendship" to 298,
-        "FormFriendship" to 299,
-        "TerminateFriendship" to 300,
-        "OfferCallingCard" to 301,
-        "AcceptCallingCard" to 302,
-        "DeclineCallingCard" to 303,
-        "RezScript" to 304,
-        "CreateInventoryItem" to 305,
-        "CreateLandmarkForEvent" to 306,
-        "EventLocationRequest" to 307,
-        "EventLocationReply" to 308,
-        "RegionHandleRequest" to 309,
-        "RegionIDAndHandleReply" to 310,
-        "MoneyTransferRequest" to 311,
-        "MoneyTransferBackend" to 312,
-        "MoneyBalanceRequest" to 313,
-        "MoneyBalanceReply" to 314,
-        "RoutedMoneyBalanceReply" to 315,
-        "ActivateGestures" to 316,
-        "DeactivateGestures" to 317,
-        "MuteListUpdate" to 318,
-        "UseCachedMuteList" to 319,
-        "GrantUserRights" to 320,
-        "ChangeUserRights" to 321,
-        "OnlineNotification" to 322,
-        "OfflineNotification" to 323,
-        "SetStartLocationRequest" to 324,
-        "SetStartLocation" to 325,
-        "NetTest" to 326,
-        "SetCPURatio" to 327,
-        "SimCrashed" to 328,
-        "NameValuePair" to 329,
-        "RemoveNameValuePair" to 330,
-        "UpdateAttachment" to 331,
-        "RemoveAttachment" to 332,
-        "SoundTrigger" to 29,
-        "AttachedSound" to 13,
-        "AttachedSoundGainChange" to 14,
-        "PreloadSound" to 15,
-        "ObjectAnimation" to 30,
-        "AssetUploadRequest" to 333,
-        "AssetUploadComplete" to 334,
-        "EmailMessageRequest" to 335,
-        "EmailMessageReply" to 336,
-        "InternalScriptMail" to 16,
-        "ScriptDataRequest" to 337,
-        "ScriptDataReply" to 338,
-        "CreateGroupRequest" to 339,
-        "CreateGroupReply" to 340,
-        "UpdateGroupInfo" to 341,
-        "GroupRoleChanges" to 342,
-        "JoinGroupRequest" to 343,
-        "JoinGroupReply" to 344,
-        "EjectGroupMemberRequest" to 345,
-        "EjectGroupMemberReply" to 346,
-        "LeaveGroupRequest" to 347,
-        "LeaveGroupReply" to 348,
-        "InviteGroupRequest" to 349,
-        "InviteGroupResponse" to 350,
-        "GroupProfileRequest" to 351,
-        "GroupProfileReply" to 352,
-        "GroupAccountSummaryRequest" to 353,
-        "GroupAccountSummaryReply" to 354,
-        "GroupAccountDetailsRequest" to 355,
-        "GroupAccountDetailsReply" to 356,
-        "GroupAccountTransactionsRequest" to 357,
-        "GroupAccountTransactionsReply" to 358,
-        "GroupActiveProposalsRequest" to 359,
-        "GroupActiveProposalItemReply" to 360,
-        "GroupVoteHistoryRequest" to 361,
-        "GroupVoteHistoryItemReply" to 362,
-        "StartGroupProposal" to 363,
-        "GroupProposalBallot" to 364,
-        "TallyVotes" to 365,
-        "GroupMembersRequest" to 366,
-        "GroupMembersReply" to 367,
-        "ActivateGroup" to 368,
-        "SetGroupContribution" to 369,
-        "SetGroupAcceptNotices" to 370,
-        "GroupRoleDataRequest" to 371,
-        "GroupRoleDataReply" to 372,
-        "GroupRoleMembersRequest" to 373,
-        "GroupRoleMembersReply" to 374,
-        "GroupTitlesRequest" to 375,
-        "GroupTitlesReply" to 376,
-        "GroupTitleUpdate" to 377,
-        "GroupRoleUpdate" to 378,
-        "LiveHelpGroupRequest" to 379,
-        "LiveHelpGroupReply" to 380,
-        "AgentWearablesRequest" to 381,
-        "AgentWearablesUpdate" to 382,
-        "AgentIsNowWearing" to 383,
-        "AgentCachedTexture" to 384,
-        "AgentCachedTextureResponse" to 385,
-        "AgentDataUpdateRequest" to 386,
-        "AgentDataUpdate" to 387,
-        "GroupDataUpdate" to 388,
-        "AgentGroupDataUpdate" to 389,
-        "AgentDropGroup" to 390,
-        "LogTextMessage" to 391,
-        "ViewerEffect" to 17,
-        "CreateTrustedCircuit" to 392,
-        "DenyTrustedCircuit" to 393,
-        "RequestTrustedCircuit" to 394,
-        "RezSingleAttachmentFromInv" to 395,
-        "RezMultipleAttachmentsFromInv" to 396,
-        "DetachAttachmentIntoInv" to 397,
-        "CreateNewOutfitAttachments" to 398,
-        "UserInfoRequest" to 399,
-        "UserInfoReply" to 400,
-        "UpdateUserInfo" to 401,
-        "ParcelRename" to 402,
-        "InitiateDownload" to 403,
-        "SystemMessage" to 404,
-        "MapLayerRequest" to 405,
-        "MapLayerReply" to 406,
-        "MapBlockRequest" to 407,
-        "MapNameRequest" to 408,
-        "MapBlockReply" to 409,
-        "MapItemRequest" to 410,
-        "MapItemReply" to 411,
-        "SendPostcard" to 412,
-        "RpcChannelRequest" to 413,
-        "RpcChannelReply" to 414,
-        "RpcScriptRequestInbound" to 415,
-        "RpcScriptRequestInboundForward" to 416,
-        "RpcScriptReplyInbound" to 417,
-        "ScriptMailRegistration" to 418,
-        "ParcelMediaCommandMessage" to 419,
-        "ParcelMediaUpdate" to 420,
-        "LandStatRequest" to 421,
-        "LandStatReply" to 422,
-        "Error" to 423,
-        "ObjectIncludeInSearch" to 424,
-        "RezRestoreToWorld" to 425,
-        "LinkInventoryItem" to 426,
-        "RetrieveIMsExtended" to 427,
-        "JoinGroupRequestExtended" to 428,
-        "CreateGroupRequestExtended" to 429,
-        "GameControlInput" to 32,
+    val REGISTERED_MESSAGES = mapOf<String, Long>(
+        "TestMessage" to 1L,
+        "PacketAck" to 4294967291L,
+        "OpenCircuit" to 4294967292L,
+        "CloseCircuit" to 4294967293L,
+        "StartPingCheck" to 1L,
+        "CompletePingCheck" to 2L,
+        "AddCircuitCode" to 2L,
+        "UseCircuitCode" to 3L,
+        "NeighborList" to 3L,
+        "AvatarTextureUpdate" to 4L,
+        "SimulatorMapUpdate" to 5L,
+        "SimulatorSetMap" to 6L,
+        "SubscribeLoad" to 7L,
+        "UnsubscribeLoad" to 8L,
+        "SimulatorReady" to 9L,
+        "TelehubInfo" to 10L,
+        "SimulatorPresentAtLocation" to 11L,
+        "SimulatorLoad" to 12L,
+        "SimulatorShutdownRequest" to 13L,
+        "RegionPresenceRequestByRegionID" to 14L,
+        "RegionPresenceRequestByHandle" to 15L,
+        "RegionPresenceResponse" to 16L,
+        "UpdateSimulator" to 17L,
+        "LogDwellTime" to 18L,
+        "FeatureDisabled" to 19L,
+        "LogFailedMoneyTransaction" to 20L,
+        "UserReportInternal" to 21L,
+        "SetSimStatusInDatabase" to 22L,
+        "SetSimPresenceInDatabase" to 23L,
+        "EconomyDataRequest" to 24L,
+        "EconomyData" to 25L,
+        "AvatarPickerRequest" to 26L,
+        "AvatarPickerRequestBackend" to 27L,
+        "AvatarPickerReply" to 28L,
+        "PlacesQuery" to 29L,
+        "PlacesReply" to 30L,
+        "DirFindQuery" to 31L,
+        "DirFindQueryBackend" to 32L,
+        "DirPlacesQuery" to 33L,
+        "DirPlacesQueryBackend" to 34L,
+        "DirPlacesReply" to 35L,
+        "DirPeopleReply" to 36L,
+        "DirEventsReply" to 37L,
+        "DirGroupsReply" to 38L,
+        "DirClassifiedQuery" to 39L,
+        "DirClassifiedQueryBackend" to 40L,
+        "DirClassifiedReply" to 41L,
+        "AvatarClassifiedReply" to 42L,
+        "ClassifiedInfoRequest" to 43L,
+        "ClassifiedInfoReply" to 44L,
+        "ClassifiedInfoUpdate" to 45L,
+        "ClassifiedDelete" to 46L,
+        "ClassifiedGodDelete" to 47L,
+        "DirLandQuery" to 48L,
+        "DirLandQueryBackend" to 49L,
+        "DirLandReply" to 50L,
+        "DirPopularQuery" to 51L,
+        "DirPopularQueryBackend" to 52L,
+        "DirPopularReply" to 53L,
+        "ParcelInfoRequest" to 54L,
+        "ParcelInfoReply" to 55L,
+        "ParcelObjectOwnersRequest" to 56L,
+        "ParcelObjectOwnersReply" to 57L,
+        "GroupNoticesListRequest" to 58L,
+        "GroupNoticesListReply" to 59L,
+        "GroupNoticeRequest" to 60L,
+        "GroupNoticeAdd" to 61L,
+        "TeleportRequest" to 62L,
+        "TeleportLocationRequest" to 63L,
+        "TeleportLocal" to 64L,
+        "TeleportLandmarkRequest" to 65L,
+        "TeleportProgress" to 66L,
+        "DataHomeLocationRequest" to 67L,
+        "DataHomeLocationReply" to 68L,
+        "TeleportFinish" to 69L,
+        "StartLure" to 70L,
+        "TeleportLureRequest" to 71L,
+        "TeleportCancel" to 72L,
+        "TeleportStart" to 73L,
+        "TeleportFailed" to 74L,
+        "Undo" to 75L,
+        "Redo" to 76L,
+        "UndoLand" to 77L,
+        "AgentPause" to 78L,
+        "AgentResume" to 79L,
+        "AgentUpdate" to 4L,
+        "ChatFromViewer" to 80L,
+        "AgentThrottle" to 81L,
+        "AgentFOV" to 82L,
+        "AgentHeightWidth" to 83L,
+        "AgentSetAppearance" to 84L,
+        "AgentAnimation" to 5L,
+        "AgentRequestSit" to 6L,
+        "AgentSit" to 7L,
+        "AgentQuitCopy" to 85L,
+        "RequestImage" to 8L,
+        "ImageNotInDatabase" to 86L,
+        "RebakeAvatarTextures" to 87L,
+        "SetAlwaysRun" to 88L,
+        "ObjectAdd" to 1L,
+        "ObjectDelete" to 89L,
+        "ObjectDuplicate" to 90L,
+        "ObjectDuplicateOnRay" to 91L,
+        "MultipleObjectUpdate" to 2L,
+        "RequestMultipleObjects" to 3L,
+        "ObjectPosition" to 4L,
+        "ObjectScale" to 92L,
+        "ObjectRotation" to 93L,
+        "ObjectFlagUpdate" to 94L,
+        "ObjectClickAction" to 95L,
+        "ObjectImage" to 96L,
+        "ObjectBypassModUpdate" to 431L,
+        "ObjectMaterial" to 97L,
+        "ObjectShape" to 98L,
+        "ObjectExtraParams" to 99L,
+        "ObjectOwner" to 100L,
+        "ObjectGroup" to 101L,
+        "ObjectBuy" to 102L,
+        "BuyObjectInventory" to 103L,
+        "DerezContainer" to 104L,
+        "ObjectPermissions" to 105L,
+        "ObjectSaleInfo" to 106L,
+        "ObjectName" to 107L,
+        "ObjectDescription" to 108L,
+        "ObjectCategory" to 109L,
+        "ObjectSelect" to 110L,
+        "ObjectDeselect" to 111L,
+        "ObjectAttach" to 112L,
+        "ObjectDetach" to 113L,
+        "ObjectDrop" to 114L,
+        "ObjectLink" to 115L,
+        "ObjectDelink" to 116L,
+        "ObjectGrab" to 117L,
+        "ObjectGrabUpdate" to 118L,
+        "ObjectDeGrab" to 119L,
+        "ObjectSpinStart" to 120L,
+        "ObjectSpinUpdate" to 121L,
+        "ObjectSpinStop" to 122L,
+        "ObjectExportSelected" to 123L,
+        "ModifyLand" to 124L,
+        "VelocityInterpolateOn" to 125L,
+        "VelocityInterpolateOff" to 126L,
+        "StateSave" to 127L,
+        "ReportAutosaveCrash" to 128L,
+        "SimWideDeletes" to 129L,
+        "RequestObjectPropertiesFamily" to 5L,
+        "TrackAgent" to 130L,
+        "ViewerStats" to 131L,
+        "ScriptAnswerYes" to 132L,
+        "UserReport" to 133L,
+        "AlertMessage" to 134L,
+        "AgentAlertMessage" to 135L,
+        "MeanCollisionAlert" to 136L,
+        "ViewerFrozenMessage" to 137L,
+        "HealthMessage" to 138L,
+        "ChatFromSimulator" to 139L,
+        "SimStats" to 140L,
+        "RequestRegionInfo" to 141L,
+        "RegionInfo" to 142L,
+        "GodUpdateRegionInfo" to 143L,
+        "NearestLandingRegionRequest" to 144L,
+        "NearestLandingRegionReply" to 145L,
+        "NearestLandingRegionUpdated" to 146L,
+        "TeleportLandingStatusChanged" to 147L,
+        "RegionHandshake" to 148L,
+        "RegionHandshakeReply" to 149L,
+        "CoarseLocationUpdate" to 6L,
+        "ImageData" to 9L,
+        "ImagePacket" to 10L,
+        "LayerData" to 11L,
+        "ObjectUpdate" to 12L,
+        "ObjectUpdateCompressed" to 13L,
+        "ObjectUpdateCached" to 14L,
+        "ImprovedTerseObjectUpdate" to 15L,
+        "KillObject" to 16L,
+        "CrossedRegion" to 7L,
+        "SimulatorViewerTimeMessage" to 150L,
+        "EnableSimulator" to 151L,
+        "DisableSimulator" to 152L,
+        "ConfirmEnableSimulator" to 8L,
+        "TransferRequest" to 153L,
+        "TransferInfo" to 154L,
+        "TransferPacket" to 17L,
+        "TransferAbort" to 155L,
+        "RequestXfer" to 156L,
+        "SendXferPacket" to 18L,
+        "ConfirmXferPacket" to 19L,
+        "AbortXfer" to 157L,
+        "AvatarAnimation" to 20L,
+        "AvatarAppearance" to 158L,
+        "AvatarSitResponse" to 21L,
+        "SetFollowCamProperties" to 159L,
+        "ClearFollowCamProperties" to 160L,
+        "CameraConstraint" to 22L,
+        "ObjectProperties" to 9L,
+        "ObjectPropertiesFamily" to 10L,
+        "RequestPayPrice" to 161L,
+        "PayPriceReply" to 162L,
+        "KickUser" to 163L,
+        "KickUserAck" to 164L,
+        "GodKickUser" to 165L,
+        "SystemKickUser" to 166L,
+        "EjectUser" to 167L,
+        "FreezeUser" to 168L,
+        "AvatarPropertiesRequest" to 169L,
+        "AvatarPropertiesRequestBackend" to 170L,
+        "AvatarPropertiesReply" to 171L,
+        "AvatarInterestsReply" to 172L,
+        "AvatarGroupsReply" to 173L,
+        "AvatarPropertiesUpdate" to 174L,
+        "AvatarInterestsUpdate" to 175L,
+        "AvatarNotesReply" to 176L,
+        "AvatarNotesUpdate" to 177L,
+        "AvatarPicksReply" to 178L,
+        "EventInfoRequest" to 179L,
+        "EventInfoReply" to 180L,
+        "EventNotificationAddRequest" to 181L,
+        "EventNotificationRemoveRequest" to 182L,
+        "EventGodDelete" to 183L,
+        "PickInfoReply" to 184L,
+        "PickInfoUpdate" to 185L,
+        "PickDelete" to 186L,
+        "PickGodDelete" to 187L,
+        "ScriptQuestion" to 188L,
+        "ScriptControlChange" to 189L,
+        "ScriptDialog" to 190L,
+        "ScriptDialogReply" to 191L,
+        "ForceScriptControlRelease" to 192L,
+        "RevokePermissions" to 193L,
+        "LoadURL" to 194L,
+        "ScriptTeleportRequest" to 195L,
+        "ParcelOverlay" to 196L,
+        "ParcelPropertiesRequest" to 11L,
+        "ParcelPropertiesRequestByID" to 197L,
+        "ParcelProperties" to 23L,
+        "ParcelPropertiesUpdate" to 198L,
+        "ParcelReturnObjects" to 199L,
+        "ParcelSetOtherCleanTime" to 200L,
+        "ParcelDisableObjects" to 201L,
+        "ParcelSelectObjects" to 202L,
+        "EstateCovenantRequest" to 203L,
+        "EstateCovenantReply" to 204L,
+        "ForceObjectSelect" to 205L,
+        "ParcelBuyPass" to 206L,
+        "ParcelDeedToGroup" to 207L,
+        "ParcelReclaim" to 208L,
+        "ParcelClaim" to 209L,
+        "ParcelJoin" to 210L,
+        "ParcelDivide" to 211L,
+        "ParcelRelease" to 212L,
+        "ParcelBuy" to 213L,
+        "ParcelGodForceOwner" to 214L,
+        "ParcelAccessListRequest" to 215L,
+        "ParcelAccessListReply" to 216L,
+        "ParcelAccessListUpdate" to 217L,
+        "ParcelDwellRequest" to 218L,
+        "ParcelDwellReply" to 219L,
+        "RequestParcelTransfer" to 220L,
+        "UpdateParcel" to 221L,
+        "RemoveParcel" to 222L,
+        "MergeParcel" to 223L,
+        "LogParcelChanges" to 224L,
+        "CheckParcelSales" to 225L,
+        "ParcelSales" to 226L,
+        "ParcelGodMarkAsContent" to 227L,
+        "ViewerStartAuction" to 228L,
+        "StartAuction" to 229L,
+        "ConfirmAuctionStart" to 230L,
+        "CompleteAuction" to 231L,
+        "CancelAuction" to 232L,
+        "CheckParcelAuctions" to 233L,
+        "ParcelAuctions" to 234L,
+        "UUIDNameRequest" to 235L,
+        "UUIDNameReply" to 236L,
+        "UUIDGroupNameRequest" to 237L,
+        "UUIDGroupNameReply" to 238L,
+        "ChatPass" to 239L,
+        "EdgeDataPacket" to 24L,
+        "SimStatus" to 12L,
+        "ChildAgentUpdate" to 25L,
+        "ChildAgentAlive" to 26L,
+        "ChildAgentPositionUpdate" to 27L,
+        "ChildAgentDying" to 240L,
+        "ChildAgentUnknown" to 241L,
+        "AtomicPassObject" to 28L,
+        "KillChildAgents" to 242L,
+        "GetScriptRunning" to 243L,
+        "ScriptRunningReply" to 244L,
+        "SetScriptRunning" to 245L,
+        "ScriptReset" to 246L,
+        "ScriptSensorRequest" to 247L,
+        "ScriptSensorReply" to 248L,
+        "CompleteAgentMovement" to 249L,
+        "AgentMovementComplete" to 250L,
+        "DataServerLogout" to 251L,
+        "LogoutRequest" to 252L,
+        "LogoutReply" to 253L,
+        "ImprovedInstantMessage" to 254L,
+        "RetrieveInstantMessages" to 255L,
+        "FindAgent" to 256L,
+        "RequestGodlikePowers" to 257L,
+        "GrantGodlikePowers" to 258L,
+        "GodlikeMessage" to 259L,
+        "EstateOwnerMessage" to 260L,
+        "GenericMessage" to 261L,
+        "GenericStreamingMessage" to 31L,
+        "LargeGenericMessage" to 430L,
+        "MuteListRequest" to 262L,
+        "UpdateMuteListEntry" to 263L,
+        "RemoveMuteListEntry" to 264L,
+        "CopyInventoryFromNotecard" to 265L,
+        "UpdateInventoryItem" to 266L,
+        "UpdateCreateInventoryItem" to 267L,
+        "MoveInventoryItem" to 268L,
+        "CopyInventoryItem" to 269L,
+        "RemoveInventoryItem" to 270L,
+        "ChangeInventoryItemFlags" to 271L,
+        "SaveAssetIntoInventory" to 272L,
+        "CreateInventoryFolder" to 273L,
+        "UpdateInventoryFolder" to 274L,
+        "MoveInventoryFolder" to 275L,
+        "RemoveInventoryFolder" to 276L,
+        "FetchInventoryDescendents" to 277L,
+        "InventoryDescendents" to 278L,
+        "FetchInventory" to 279L,
+        "FetchInventoryReply" to 280L,
+        "BulkUpdateInventory" to 281L,
+        "RequestInventoryAsset" to 282L,
+        "InventoryAssetResponse" to 283L,
+        "RemoveInventoryObjects" to 284L,
+        "PurgeInventoryDescendents" to 285L,
+        "UpdateTaskInventory" to 286L,
+        "RemoveTaskInventory" to 287L,
+        "MoveTaskInventory" to 288L,
+        "RequestTaskInventory" to 289L,
+        "ReplyTaskInventory" to 290L,
+        "DeRezObject" to 291L,
+        "DeRezAck" to 292L,
+        "RezObject" to 293L,
+        "RezObjectFromNotecard" to 294L,
+        "TransferInventory" to 295L,
+        "TransferInventoryAck" to 296L,
+        "AcceptFriendship" to 297L,
+        "DeclineFriendship" to 298L,
+        "FormFriendship" to 299L,
+        "TerminateFriendship" to 300L,
+        "OfferCallingCard" to 301L,
+        "AcceptCallingCard" to 302L,
+        "DeclineCallingCard" to 303L,
+        "RezScript" to 304L,
+        "CreateInventoryItem" to 305L,
+        "CreateLandmarkForEvent" to 306L,
+        "EventLocationRequest" to 307L,
+        "EventLocationReply" to 308L,
+        "RegionHandleRequest" to 309L,
+        "RegionIDAndHandleReply" to 310L,
+        "MoneyTransferRequest" to 311L,
+        "MoneyTransferBackend" to 312L,
+        "MoneyBalanceRequest" to 313L,
+        "MoneyBalanceReply" to 314L,
+        "RoutedMoneyBalanceReply" to 315L,
+        "ActivateGestures" to 316L,
+        "DeactivateGestures" to 317L,
+        "MuteListUpdate" to 318L,
+        "UseCachedMuteList" to 319L,
+        "GrantUserRights" to 320L,
+        "ChangeUserRights" to 321L,
+        "OnlineNotification" to 322L,
+        "OfflineNotification" to 323L,
+        "SetStartLocationRequest" to 324L,
+        "SetStartLocation" to 325L,
+        "NetTest" to 326L,
+        "SetCPURatio" to 327L,
+        "SimCrashed" to 328L,
+        "NameValuePair" to 329L,
+        "RemoveNameValuePair" to 330L,
+        "UpdateAttachment" to 331L,
+        "RemoveAttachment" to 332L,
+        "SoundTrigger" to 29L,
+        "AttachedSound" to 13L,
+        "AttachedSoundGainChange" to 14L,
+        "PreloadSound" to 15L,
+        "ObjectAnimation" to 30L,
+        "AssetUploadRequest" to 333L,
+        "AssetUploadComplete" to 334L,
+        "EmailMessageRequest" to 335L,
+        "EmailMessageReply" to 336L,
+        "InternalScriptMail" to 16L,
+        "ScriptDataRequest" to 337L,
+        "ScriptDataReply" to 338L,
+        "CreateGroupRequest" to 339L,
+        "CreateGroupReply" to 340L,
+        "UpdateGroupInfo" to 341L,
+        "GroupRoleChanges" to 342L,
+        "JoinGroupRequest" to 343L,
+        "JoinGroupReply" to 344L,
+        "EjectGroupMemberRequest" to 345L,
+        "EjectGroupMemberReply" to 346L,
+        "LeaveGroupRequest" to 347L,
+        "LeaveGroupReply" to 348L,
+        "InviteGroupRequest" to 349L,
+        "InviteGroupResponse" to 350L,
+        "GroupProfileRequest" to 351L,
+        "GroupProfileReply" to 352L,
+        "GroupAccountSummaryRequest" to 353L,
+        "GroupAccountSummaryReply" to 354L,
+        "GroupAccountDetailsRequest" to 355L,
+        "GroupAccountDetailsReply" to 356L,
+        "GroupAccountTransactionsRequest" to 357L,
+        "GroupAccountTransactionsReply" to 358L,
+        "GroupActiveProposalsRequest" to 359L,
+        "GroupActiveProposalItemReply" to 360L,
+        "GroupVoteHistoryRequest" to 361L,
+        "GroupVoteHistoryItemReply" to 362L,
+        "StartGroupProposal" to 363L,
+        "GroupProposalBallot" to 364L,
+        "TallyVotes" to 365L,
+        "GroupMembersRequest" to 366L,
+        "GroupMembersReply" to 367L,
+        "ActivateGroup" to 368L,
+        "SetGroupContribution" to 369L,
+        "SetGroupAcceptNotices" to 370L,
+        "GroupRoleDataRequest" to 371L,
+        "GroupRoleDataReply" to 372L,
+        "GroupRoleMembersRequest" to 373L,
+        "GroupRoleMembersReply" to 374L,
+        "GroupTitlesRequest" to 375L,
+        "GroupTitlesReply" to 376L,
+        "GroupTitleUpdate" to 377L,
+        "GroupRoleUpdate" to 378L,
+        "LiveHelpGroupRequest" to 379L,
+        "LiveHelpGroupReply" to 380L,
+        "AgentWearablesRequest" to 381L,
+        "AgentWearablesUpdate" to 382L,
+        "AgentIsNowWearing" to 383L,
+        "AgentCachedTexture" to 384L,
+        "AgentCachedTextureResponse" to 385L,
+        "AgentDataUpdateRequest" to 386L,
+        "AgentDataUpdate" to 387L,
+        "GroupDataUpdate" to 388L,
+        "AgentGroupDataUpdate" to 389L,
+        "AgentDropGroup" to 390L,
+        "LogTextMessage" to 391L,
+        "ViewerEffect" to 17L,
+        "CreateTrustedCircuit" to 392L,
+        "DenyTrustedCircuit" to 393L,
+        "RequestTrustedCircuit" to 394L,
+        "RezSingleAttachmentFromInv" to 395L,
+        "RezMultipleAttachmentsFromInv" to 396L,
+        "DetachAttachmentIntoInv" to 397L,
+        "CreateNewOutfitAttachments" to 398L,
+        "UserInfoRequest" to 399L,
+        "UserInfoReply" to 400L,
+        "UpdateUserInfo" to 401L,
+        "ParcelRename" to 402L,
+        "InitiateDownload" to 403L,
+        "SystemMessage" to 404L,
+        "MapLayerRequest" to 405L,
+        "MapLayerReply" to 406L,
+        "MapBlockRequest" to 407L,
+        "MapNameRequest" to 408L,
+        "MapBlockReply" to 409L,
+        "MapItemRequest" to 410L,
+        "MapItemReply" to 411L,
+        "SendPostcard" to 412L,
+        "RpcChannelRequest" to 413L,
+        "RpcChannelReply" to 414L,
+        "RpcScriptRequestInbound" to 415L,
+        "RpcScriptRequestInboundForward" to 416L,
+        "RpcScriptReplyInbound" to 417L,
+        "ScriptMailRegistration" to 418L,
+        "ParcelMediaCommandMessage" to 419L,
+        "ParcelMediaUpdate" to 420L,
+        "LandStatRequest" to 421L,
+        "LandStatReply" to 422L,
+        "Error" to 423L,
+        "ObjectIncludeInSearch" to 424L,
+        "RezRestoreToWorld" to 425L,
+        "LinkInventoryItem" to 426L,
+        "RetrieveIMsExtended" to 427L,
+        "JoinGroupRequestExtended" to 428L,
+        "CreateGroupRequestExtended" to 429L,
+        "GameControlInput" to 32L,
     )
 
     fun decompressZerocoded(src: ByteArray): ByteArray {
@@ -527,14 +527,14 @@ object GeneratedProtocolCatalog {
 // Message: TestMessage (Low 1)
 data class TestMessagePacket(
     val messageName: String = "TestMessage",
-    val messageNumber: Int = 1,
+    val messageNumber: Long = 1L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(1)
+        buffer.putInt((1L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -543,14 +543,14 @@ data class TestMessagePacket(
 // Message: PacketAck (Fixed 4294967291)
 data class PacketAckPacket(
     val messageName: String = "PacketAck",
-    val messageNumber: Int = 4294967291,
+    val messageNumber: Long = 4294967291L,
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967291)
+        buffer.putInt((4294967291L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -559,14 +559,14 @@ data class PacketAckPacket(
 // Message: OpenCircuit (Fixed 4294967292)
 data class OpenCircuitPacket(
     val messageName: String = "OpenCircuit",
-    val messageNumber: Int = 4294967292,
+    val messageNumber: Long = 4294967292L,
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967292)
+        buffer.putInt((4294967292L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -575,14 +575,14 @@ data class OpenCircuitPacket(
 // Message: CloseCircuit (Fixed 4294967293)
 data class CloseCircuitPacket(
     val messageName: String = "CloseCircuit",
-    val messageNumber: Int = 4294967293,
+    val messageNumber: Long = 4294967293L,
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967293)
+        buffer.putInt((4294967293L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -591,14 +591,14 @@ data class CloseCircuitPacket(
 // Message: StartPingCheck (High 1)
 data class StartPingCheckPacket(
     val messageName: String = "StartPingCheck",
-    val messageNumber: Int = 1,
+    val messageNumber: Long = 1L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(1)
+        buffer.putInt((1L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -607,14 +607,14 @@ data class StartPingCheckPacket(
 // Message: CompletePingCheck (High 2)
 data class CompletePingCheckPacket(
     val messageName: String = "CompletePingCheck",
-    val messageNumber: Int = 2,
+    val messageNumber: Long = 2L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(2)
+        buffer.putInt((2L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -623,14 +623,14 @@ data class CompletePingCheckPacket(
 // Message: AddCircuitCode (Low 2)
 data class AddCircuitCodePacket(
     val messageName: String = "AddCircuitCode",
-    val messageNumber: Int = 2,
+    val messageNumber: Long = 2L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(2)
+        buffer.putInt((2L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -639,14 +639,14 @@ data class AddCircuitCodePacket(
 // Message: UseCircuitCode (Low 3)
 data class UseCircuitCodePacket(
     val messageName: String = "UseCircuitCode",
-    val messageNumber: Int = 3,
+    val messageNumber: Long = 3L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(3)
+        buffer.putInt((3L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -655,14 +655,14 @@ data class UseCircuitCodePacket(
 // Message: NeighborList (High 3)
 data class NeighborListPacket(
     val messageName: String = "NeighborList",
-    val messageNumber: Int = 3,
+    val messageNumber: Long = 3L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(3)
+        buffer.putInt((3L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -671,14 +671,14 @@ data class NeighborListPacket(
 // Message: AvatarTextureUpdate (Low 4)
 data class AvatarTextureUpdatePacket(
     val messageName: String = "AvatarTextureUpdate",
-    val messageNumber: Int = 4,
+    val messageNumber: Long = 4L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4)
+        buffer.putInt((4L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -687,14 +687,14 @@ data class AvatarTextureUpdatePacket(
 // Message: SimulatorMapUpdate (Low 5)
 data class SimulatorMapUpdatePacket(
     val messageName: String = "SimulatorMapUpdate",
-    val messageNumber: Int = 5,
+    val messageNumber: Long = 5L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(5)
+        buffer.putInt((5L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -703,14 +703,14 @@ data class SimulatorMapUpdatePacket(
 // Message: SimulatorSetMap (Low 6)
 data class SimulatorSetMapPacket(
     val messageName: String = "SimulatorSetMap",
-    val messageNumber: Int = 6,
+    val messageNumber: Long = 6L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(6)
+        buffer.putInt((6L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -719,14 +719,14 @@ data class SimulatorSetMapPacket(
 // Message: SubscribeLoad (Low 7)
 data class SubscribeLoadPacket(
     val messageName: String = "SubscribeLoad",
-    val messageNumber: Int = 7,
+    val messageNumber: Long = 7L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(7)
+        buffer.putInt((7L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -735,14 +735,14 @@ data class SubscribeLoadPacket(
 // Message: UnsubscribeLoad (Low 8)
 data class UnsubscribeLoadPacket(
     val messageName: String = "UnsubscribeLoad",
-    val messageNumber: Int = 8,
+    val messageNumber: Long = 8L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(8)
+        buffer.putInt((8L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -751,14 +751,14 @@ data class UnsubscribeLoadPacket(
 // Message: SimulatorReady (Low 9)
 data class SimulatorReadyPacket(
     val messageName: String = "SimulatorReady",
-    val messageNumber: Int = 9,
+    val messageNumber: Long = 9L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(9)
+        buffer.putInt((9L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -767,14 +767,14 @@ data class SimulatorReadyPacket(
 // Message: TelehubInfo (Low 10)
 data class TelehubInfoPacket(
     val messageName: String = "TelehubInfo",
-    val messageNumber: Int = 10,
+    val messageNumber: Long = 10L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(10)
+        buffer.putInt((10L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -783,14 +783,14 @@ data class TelehubInfoPacket(
 // Message: SimulatorPresentAtLocation (Low 11)
 data class SimulatorPresentAtLocationPacket(
     val messageName: String = "SimulatorPresentAtLocation",
-    val messageNumber: Int = 11,
+    val messageNumber: Long = 11L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(11)
+        buffer.putInt((11L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -799,14 +799,14 @@ data class SimulatorPresentAtLocationPacket(
 // Message: SimulatorLoad (Low 12)
 data class SimulatorLoadPacket(
     val messageName: String = "SimulatorLoad",
-    val messageNumber: Int = 12,
+    val messageNumber: Long = 12L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(12)
+        buffer.putInt((12L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -815,14 +815,14 @@ data class SimulatorLoadPacket(
 // Message: SimulatorShutdownRequest (Low 13)
 data class SimulatorShutdownRequestPacket(
     val messageName: String = "SimulatorShutdownRequest",
-    val messageNumber: Int = 13,
+    val messageNumber: Long = 13L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(13)
+        buffer.putInt((13L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -831,14 +831,14 @@ data class SimulatorShutdownRequestPacket(
 // Message: RegionPresenceRequestByRegionID (Low 14)
 data class RegionPresenceRequestByRegionIDPacket(
     val messageName: String = "RegionPresenceRequestByRegionID",
-    val messageNumber: Int = 14,
+    val messageNumber: Long = 14L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(14)
+        buffer.putInt((14L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -847,14 +847,14 @@ data class RegionPresenceRequestByRegionIDPacket(
 // Message: RegionPresenceRequestByHandle (Low 15)
 data class RegionPresenceRequestByHandlePacket(
     val messageName: String = "RegionPresenceRequestByHandle",
-    val messageNumber: Int = 15,
+    val messageNumber: Long = 15L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(15)
+        buffer.putInt((15L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -863,14 +863,14 @@ data class RegionPresenceRequestByHandlePacket(
 // Message: RegionPresenceResponse (Low 16)
 data class RegionPresenceResponsePacket(
     val messageName: String = "RegionPresenceResponse",
-    val messageNumber: Int = 16,
+    val messageNumber: Long = 16L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(16)
+        buffer.putInt((16L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -879,14 +879,14 @@ data class RegionPresenceResponsePacket(
 // Message: UpdateSimulator (Low 17)
 data class UpdateSimulatorPacket(
     val messageName: String = "UpdateSimulator",
-    val messageNumber: Int = 17,
+    val messageNumber: Long = 17L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(17)
+        buffer.putInt((17L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -895,14 +895,14 @@ data class UpdateSimulatorPacket(
 // Message: LogDwellTime (Low 18)
 data class LogDwellTimePacket(
     val messageName: String = "LogDwellTime",
-    val messageNumber: Int = 18,
+    val messageNumber: Long = 18L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(18)
+        buffer.putInt((18L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -911,14 +911,14 @@ data class LogDwellTimePacket(
 // Message: FeatureDisabled (Low 19)
 data class FeatureDisabledPacket(
     val messageName: String = "FeatureDisabled",
-    val messageNumber: Int = 19,
+    val messageNumber: Long = 19L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(19)
+        buffer.putInt((19L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -927,14 +927,14 @@ data class FeatureDisabledPacket(
 // Message: LogFailedMoneyTransaction (Low 20)
 data class LogFailedMoneyTransactionPacket(
     val messageName: String = "LogFailedMoneyTransaction",
-    val messageNumber: Int = 20,
+    val messageNumber: Long = 20L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(20)
+        buffer.putInt((20L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -943,14 +943,14 @@ data class LogFailedMoneyTransactionPacket(
 // Message: UserReportInternal (Low 21)
 data class UserReportInternalPacket(
     val messageName: String = "UserReportInternal",
-    val messageNumber: Int = 21,
+    val messageNumber: Long = 21L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(21)
+        buffer.putInt((21L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -959,14 +959,14 @@ data class UserReportInternalPacket(
 // Message: SetSimStatusInDatabase (Low 22)
 data class SetSimStatusInDatabasePacket(
     val messageName: String = "SetSimStatusInDatabase",
-    val messageNumber: Int = 22,
+    val messageNumber: Long = 22L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(22)
+        buffer.putInt((22L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -975,14 +975,14 @@ data class SetSimStatusInDatabasePacket(
 // Message: SetSimPresenceInDatabase (Low 23)
 data class SetSimPresenceInDatabasePacket(
     val messageName: String = "SetSimPresenceInDatabase",
-    val messageNumber: Int = 23,
+    val messageNumber: Long = 23L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(23)
+        buffer.putInt((23L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -991,14 +991,14 @@ data class SetSimPresenceInDatabasePacket(
 // Message: EconomyDataRequest (Low 24)
 data class EconomyDataRequestPacket(
     val messageName: String = "EconomyDataRequest",
-    val messageNumber: Int = 24,
+    val messageNumber: Long = 24L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(24)
+        buffer.putInt((24L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1007,14 +1007,14 @@ data class EconomyDataRequestPacket(
 // Message: EconomyData (Low 25)
 data class EconomyDataPacket(
     val messageName: String = "EconomyData",
-    val messageNumber: Int = 25,
+    val messageNumber: Long = 25L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(25)
+        buffer.putInt((25L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1023,14 +1023,14 @@ data class EconomyDataPacket(
 // Message: AvatarPickerRequest (Low 26)
 data class AvatarPickerRequestPacket(
     val messageName: String = "AvatarPickerRequest",
-    val messageNumber: Int = 26,
+    val messageNumber: Long = 26L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(26)
+        buffer.putInt((26L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1039,14 +1039,14 @@ data class AvatarPickerRequestPacket(
 // Message: AvatarPickerRequestBackend (Low 27)
 data class AvatarPickerRequestBackendPacket(
     val messageName: String = "AvatarPickerRequestBackend",
-    val messageNumber: Int = 27,
+    val messageNumber: Long = 27L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(27)
+        buffer.putInt((27L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1055,14 +1055,14 @@ data class AvatarPickerRequestBackendPacket(
 // Message: AvatarPickerReply (Low 28)
 data class AvatarPickerReplyPacket(
     val messageName: String = "AvatarPickerReply",
-    val messageNumber: Int = 28,
+    val messageNumber: Long = 28L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(28)
+        buffer.putInt((28L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1071,14 +1071,14 @@ data class AvatarPickerReplyPacket(
 // Message: PlacesQuery (Low 29)
 data class PlacesQueryPacket(
     val messageName: String = "PlacesQuery",
-    val messageNumber: Int = 29,
+    val messageNumber: Long = 29L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(29)
+        buffer.putInt((29L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1087,14 +1087,14 @@ data class PlacesQueryPacket(
 // Message: PlacesReply (Low 30)
 data class PlacesReplyPacket(
     val messageName: String = "PlacesReply",
-    val messageNumber: Int = 30,
+    val messageNumber: Long = 30L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(30)
+        buffer.putInt((30L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1103,14 +1103,14 @@ data class PlacesReplyPacket(
 // Message: DirFindQuery (Low 31)
 data class DirFindQueryPacket(
     val messageName: String = "DirFindQuery",
-    val messageNumber: Int = 31,
+    val messageNumber: Long = 31L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(31)
+        buffer.putInt((31L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1119,14 +1119,14 @@ data class DirFindQueryPacket(
 // Message: DirFindQueryBackend (Low 32)
 data class DirFindQueryBackendPacket(
     val messageName: String = "DirFindQueryBackend",
-    val messageNumber: Int = 32,
+    val messageNumber: Long = 32L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(32)
+        buffer.putInt((32L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1135,14 +1135,14 @@ data class DirFindQueryBackendPacket(
 // Message: DirPlacesQuery (Low 33)
 data class DirPlacesQueryPacket(
     val messageName: String = "DirPlacesQuery",
-    val messageNumber: Int = 33,
+    val messageNumber: Long = 33L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(33)
+        buffer.putInt((33L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1151,14 +1151,14 @@ data class DirPlacesQueryPacket(
 // Message: DirPlacesQueryBackend (Low 34)
 data class DirPlacesQueryBackendPacket(
     val messageName: String = "DirPlacesQueryBackend",
-    val messageNumber: Int = 34,
+    val messageNumber: Long = 34L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(34)
+        buffer.putInt((34L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1167,14 +1167,14 @@ data class DirPlacesQueryBackendPacket(
 // Message: DirPlacesReply (Low 35)
 data class DirPlacesReplyPacket(
     val messageName: String = "DirPlacesReply",
-    val messageNumber: Int = 35,
+    val messageNumber: Long = 35L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(35)
+        buffer.putInt((35L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1183,14 +1183,14 @@ data class DirPlacesReplyPacket(
 // Message: DirPeopleReply (Low 36)
 data class DirPeopleReplyPacket(
     val messageName: String = "DirPeopleReply",
-    val messageNumber: Int = 36,
+    val messageNumber: Long = 36L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(36)
+        buffer.putInt((36L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1199,14 +1199,14 @@ data class DirPeopleReplyPacket(
 // Message: DirEventsReply (Low 37)
 data class DirEventsReplyPacket(
     val messageName: String = "DirEventsReply",
-    val messageNumber: Int = 37,
+    val messageNumber: Long = 37L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(37)
+        buffer.putInt((37L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1215,14 +1215,14 @@ data class DirEventsReplyPacket(
 // Message: DirGroupsReply (Low 38)
 data class DirGroupsReplyPacket(
     val messageName: String = "DirGroupsReply",
-    val messageNumber: Int = 38,
+    val messageNumber: Long = 38L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(38)
+        buffer.putInt((38L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1231,14 +1231,14 @@ data class DirGroupsReplyPacket(
 // Message: DirClassifiedQuery (Low 39)
 data class DirClassifiedQueryPacket(
     val messageName: String = "DirClassifiedQuery",
-    val messageNumber: Int = 39,
+    val messageNumber: Long = 39L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(39)
+        buffer.putInt((39L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1247,14 +1247,14 @@ data class DirClassifiedQueryPacket(
 // Message: DirClassifiedQueryBackend (Low 40)
 data class DirClassifiedQueryBackendPacket(
     val messageName: String = "DirClassifiedQueryBackend",
-    val messageNumber: Int = 40,
+    val messageNumber: Long = 40L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(40)
+        buffer.putInt((40L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1263,14 +1263,14 @@ data class DirClassifiedQueryBackendPacket(
 // Message: DirClassifiedReply (Low 41)
 data class DirClassifiedReplyPacket(
     val messageName: String = "DirClassifiedReply",
-    val messageNumber: Int = 41,
+    val messageNumber: Long = 41L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(41)
+        buffer.putInt((41L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1279,14 +1279,14 @@ data class DirClassifiedReplyPacket(
 // Message: AvatarClassifiedReply (Low 42)
 data class AvatarClassifiedReplyPacket(
     val messageName: String = "AvatarClassifiedReply",
-    val messageNumber: Int = 42,
+    val messageNumber: Long = 42L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(42)
+        buffer.putInt((42L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1295,14 +1295,14 @@ data class AvatarClassifiedReplyPacket(
 // Message: ClassifiedInfoRequest (Low 43)
 data class ClassifiedInfoRequestPacket(
     val messageName: String = "ClassifiedInfoRequest",
-    val messageNumber: Int = 43,
+    val messageNumber: Long = 43L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(43)
+        buffer.putInt((43L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1311,14 +1311,14 @@ data class ClassifiedInfoRequestPacket(
 // Message: ClassifiedInfoReply (Low 44)
 data class ClassifiedInfoReplyPacket(
     val messageName: String = "ClassifiedInfoReply",
-    val messageNumber: Int = 44,
+    val messageNumber: Long = 44L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(44)
+        buffer.putInt((44L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1327,14 +1327,14 @@ data class ClassifiedInfoReplyPacket(
 // Message: ClassifiedInfoUpdate (Low 45)
 data class ClassifiedInfoUpdatePacket(
     val messageName: String = "ClassifiedInfoUpdate",
-    val messageNumber: Int = 45,
+    val messageNumber: Long = 45L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(45)
+        buffer.putInt((45L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1343,14 +1343,14 @@ data class ClassifiedInfoUpdatePacket(
 // Message: ClassifiedDelete (Low 46)
 data class ClassifiedDeletePacket(
     val messageName: String = "ClassifiedDelete",
-    val messageNumber: Int = 46,
+    val messageNumber: Long = 46L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(46)
+        buffer.putInt((46L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1359,14 +1359,14 @@ data class ClassifiedDeletePacket(
 // Message: ClassifiedGodDelete (Low 47)
 data class ClassifiedGodDeletePacket(
     val messageName: String = "ClassifiedGodDelete",
-    val messageNumber: Int = 47,
+    val messageNumber: Long = 47L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(47)
+        buffer.putInt((47L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1375,14 +1375,14 @@ data class ClassifiedGodDeletePacket(
 // Message: DirLandQuery (Low 48)
 data class DirLandQueryPacket(
     val messageName: String = "DirLandQuery",
-    val messageNumber: Int = 48,
+    val messageNumber: Long = 48L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(48)
+        buffer.putInt((48L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1391,14 +1391,14 @@ data class DirLandQueryPacket(
 // Message: DirLandQueryBackend (Low 49)
 data class DirLandQueryBackendPacket(
     val messageName: String = "DirLandQueryBackend",
-    val messageNumber: Int = 49,
+    val messageNumber: Long = 49L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(49)
+        buffer.putInt((49L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1407,14 +1407,14 @@ data class DirLandQueryBackendPacket(
 // Message: DirLandReply (Low 50)
 data class DirLandReplyPacket(
     val messageName: String = "DirLandReply",
-    val messageNumber: Int = 50,
+    val messageNumber: Long = 50L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(50)
+        buffer.putInt((50L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1423,14 +1423,14 @@ data class DirLandReplyPacket(
 // Message: DirPopularQuery (Low 51)
 data class DirPopularQueryPacket(
     val messageName: String = "DirPopularQuery",
-    val messageNumber: Int = 51,
+    val messageNumber: Long = 51L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(51)
+        buffer.putInt((51L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1439,14 +1439,14 @@ data class DirPopularQueryPacket(
 // Message: DirPopularQueryBackend (Low 52)
 data class DirPopularQueryBackendPacket(
     val messageName: String = "DirPopularQueryBackend",
-    val messageNumber: Int = 52,
+    val messageNumber: Long = 52L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(52)
+        buffer.putInt((52L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1455,14 +1455,14 @@ data class DirPopularQueryBackendPacket(
 // Message: DirPopularReply (Low 53)
 data class DirPopularReplyPacket(
     val messageName: String = "DirPopularReply",
-    val messageNumber: Int = 53,
+    val messageNumber: Long = 53L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(53)
+        buffer.putInt((53L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1471,14 +1471,14 @@ data class DirPopularReplyPacket(
 // Message: ParcelInfoRequest (Low 54)
 data class ParcelInfoRequestPacket(
     val messageName: String = "ParcelInfoRequest",
-    val messageNumber: Int = 54,
+    val messageNumber: Long = 54L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(54)
+        buffer.putInt((54L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1487,14 +1487,14 @@ data class ParcelInfoRequestPacket(
 // Message: ParcelInfoReply (Low 55)
 data class ParcelInfoReplyPacket(
     val messageName: String = "ParcelInfoReply",
-    val messageNumber: Int = 55,
+    val messageNumber: Long = 55L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(55)
+        buffer.putInt((55L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1503,14 +1503,14 @@ data class ParcelInfoReplyPacket(
 // Message: ParcelObjectOwnersRequest (Low 56)
 data class ParcelObjectOwnersRequestPacket(
     val messageName: String = "ParcelObjectOwnersRequest",
-    val messageNumber: Int = 56,
+    val messageNumber: Long = 56L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(56)
+        buffer.putInt((56L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1519,14 +1519,14 @@ data class ParcelObjectOwnersRequestPacket(
 // Message: ParcelObjectOwnersReply (Low 57)
 data class ParcelObjectOwnersReplyPacket(
     val messageName: String = "ParcelObjectOwnersReply",
-    val messageNumber: Int = 57,
+    val messageNumber: Long = 57L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(57)
+        buffer.putInt((57L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1535,14 +1535,14 @@ data class ParcelObjectOwnersReplyPacket(
 // Message: GroupNoticesListRequest (Low 58)
 data class GroupNoticesListRequestPacket(
     val messageName: String = "GroupNoticesListRequest",
-    val messageNumber: Int = 58,
+    val messageNumber: Long = 58L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(58)
+        buffer.putInt((58L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1551,14 +1551,14 @@ data class GroupNoticesListRequestPacket(
 // Message: GroupNoticesListReply (Low 59)
 data class GroupNoticesListReplyPacket(
     val messageName: String = "GroupNoticesListReply",
-    val messageNumber: Int = 59,
+    val messageNumber: Long = 59L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(59)
+        buffer.putInt((59L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1567,14 +1567,14 @@ data class GroupNoticesListReplyPacket(
 // Message: GroupNoticeRequest (Low 60)
 data class GroupNoticeRequestPacket(
     val messageName: String = "GroupNoticeRequest",
-    val messageNumber: Int = 60,
+    val messageNumber: Long = 60L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(60)
+        buffer.putInt((60L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1583,14 +1583,14 @@ data class GroupNoticeRequestPacket(
 // Message: GroupNoticeAdd (Low 61)
 data class GroupNoticeAddPacket(
     val messageName: String = "GroupNoticeAdd",
-    val messageNumber: Int = 61,
+    val messageNumber: Long = 61L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(61)
+        buffer.putInt((61L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1599,14 +1599,14 @@ data class GroupNoticeAddPacket(
 // Message: TeleportRequest (Low 62)
 data class TeleportRequestPacket(
     val messageName: String = "TeleportRequest",
-    val messageNumber: Int = 62,
+    val messageNumber: Long = 62L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(62)
+        buffer.putInt((62L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1615,14 +1615,14 @@ data class TeleportRequestPacket(
 // Message: TeleportLocationRequest (Low 63)
 data class TeleportLocationRequestPacket(
     val messageName: String = "TeleportLocationRequest",
-    val messageNumber: Int = 63,
+    val messageNumber: Long = 63L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(63)
+        buffer.putInt((63L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1631,14 +1631,14 @@ data class TeleportLocationRequestPacket(
 // Message: TeleportLocal (Low 64)
 data class TeleportLocalPacket(
     val messageName: String = "TeleportLocal",
-    val messageNumber: Int = 64,
+    val messageNumber: Long = 64L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(64)
+        buffer.putInt((64L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1647,14 +1647,14 @@ data class TeleportLocalPacket(
 // Message: TeleportLandmarkRequest (Low 65)
 data class TeleportLandmarkRequestPacket(
     val messageName: String = "TeleportLandmarkRequest",
-    val messageNumber: Int = 65,
+    val messageNumber: Long = 65L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(65)
+        buffer.putInt((65L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1663,14 +1663,14 @@ data class TeleportLandmarkRequestPacket(
 // Message: TeleportProgress (Low 66)
 data class TeleportProgressPacket(
     val messageName: String = "TeleportProgress",
-    val messageNumber: Int = 66,
+    val messageNumber: Long = 66L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(66)
+        buffer.putInt((66L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1679,14 +1679,14 @@ data class TeleportProgressPacket(
 // Message: DataHomeLocationRequest (Low 67)
 data class DataHomeLocationRequestPacket(
     val messageName: String = "DataHomeLocationRequest",
-    val messageNumber: Int = 67,
+    val messageNumber: Long = 67L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(67)
+        buffer.putInt((67L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1695,14 +1695,14 @@ data class DataHomeLocationRequestPacket(
 // Message: DataHomeLocationReply (Low 68)
 data class DataHomeLocationReplyPacket(
     val messageName: String = "DataHomeLocationReply",
-    val messageNumber: Int = 68,
+    val messageNumber: Long = 68L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(68)
+        buffer.putInt((68L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1711,14 +1711,14 @@ data class DataHomeLocationReplyPacket(
 // Message: TeleportFinish (Low 69)
 data class TeleportFinishPacket(
     val messageName: String = "TeleportFinish",
-    val messageNumber: Int = 69,
+    val messageNumber: Long = 69L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(69)
+        buffer.putInt((69L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1727,14 +1727,14 @@ data class TeleportFinishPacket(
 // Message: StartLure (Low 70)
 data class StartLurePacket(
     val messageName: String = "StartLure",
-    val messageNumber: Int = 70,
+    val messageNumber: Long = 70L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(70)
+        buffer.putInt((70L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1743,14 +1743,14 @@ data class StartLurePacket(
 // Message: TeleportLureRequest (Low 71)
 data class TeleportLureRequestPacket(
     val messageName: String = "TeleportLureRequest",
-    val messageNumber: Int = 71,
+    val messageNumber: Long = 71L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(71)
+        buffer.putInt((71L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1759,14 +1759,14 @@ data class TeleportLureRequestPacket(
 // Message: TeleportCancel (Low 72)
 data class TeleportCancelPacket(
     val messageName: String = "TeleportCancel",
-    val messageNumber: Int = 72,
+    val messageNumber: Long = 72L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(72)
+        buffer.putInt((72L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1775,14 +1775,14 @@ data class TeleportCancelPacket(
 // Message: TeleportStart (Low 73)
 data class TeleportStartPacket(
     val messageName: String = "TeleportStart",
-    val messageNumber: Int = 73,
+    val messageNumber: Long = 73L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(73)
+        buffer.putInt((73L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1791,14 +1791,14 @@ data class TeleportStartPacket(
 // Message: TeleportFailed (Low 74)
 data class TeleportFailedPacket(
     val messageName: String = "TeleportFailed",
-    val messageNumber: Int = 74,
+    val messageNumber: Long = 74L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(74)
+        buffer.putInt((74L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1807,14 +1807,14 @@ data class TeleportFailedPacket(
 // Message: Undo (Low 75)
 data class UndoPacket(
     val messageName: String = "Undo",
-    val messageNumber: Int = 75,
+    val messageNumber: Long = 75L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(75)
+        buffer.putInt((75L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1823,14 +1823,14 @@ data class UndoPacket(
 // Message: Redo (Low 76)
 data class RedoPacket(
     val messageName: String = "Redo",
-    val messageNumber: Int = 76,
+    val messageNumber: Long = 76L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(76)
+        buffer.putInt((76L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1839,14 +1839,14 @@ data class RedoPacket(
 // Message: UndoLand (Low 77)
 data class UndoLandPacket(
     val messageName: String = "UndoLand",
-    val messageNumber: Int = 77,
+    val messageNumber: Long = 77L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(77)
+        buffer.putInt((77L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1855,14 +1855,14 @@ data class UndoLandPacket(
 // Message: AgentPause (Low 78)
 data class AgentPausePacket(
     val messageName: String = "AgentPause",
-    val messageNumber: Int = 78,
+    val messageNumber: Long = 78L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(78)
+        buffer.putInt((78L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1871,14 +1871,14 @@ data class AgentPausePacket(
 // Message: AgentResume (Low 79)
 data class AgentResumePacket(
     val messageName: String = "AgentResume",
-    val messageNumber: Int = 79,
+    val messageNumber: Long = 79L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(79)
+        buffer.putInt((79L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1887,14 +1887,14 @@ data class AgentResumePacket(
 // Message: AgentUpdate (High 4)
 data class AgentUpdatePacket(
     val messageName: String = "AgentUpdate",
-    val messageNumber: Int = 4,
+    val messageNumber: Long = 4L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4)
+        buffer.putInt((4L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1903,14 +1903,14 @@ data class AgentUpdatePacket(
 // Message: ChatFromViewer (Low 80)
 data class ChatFromViewerPacket(
     val messageName: String = "ChatFromViewer",
-    val messageNumber: Int = 80,
+    val messageNumber: Long = 80L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(80)
+        buffer.putInt((80L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1919,14 +1919,14 @@ data class ChatFromViewerPacket(
 // Message: AgentThrottle (Low 81)
 data class AgentThrottlePacket(
     val messageName: String = "AgentThrottle",
-    val messageNumber: Int = 81,
+    val messageNumber: Long = 81L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(81)
+        buffer.putInt((81L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1935,14 +1935,14 @@ data class AgentThrottlePacket(
 // Message: AgentFOV (Low 82)
 data class AgentFOVPacket(
     val messageName: String = "AgentFOV",
-    val messageNumber: Int = 82,
+    val messageNumber: Long = 82L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(82)
+        buffer.putInt((82L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1951,14 +1951,14 @@ data class AgentFOVPacket(
 // Message: AgentHeightWidth (Low 83)
 data class AgentHeightWidthPacket(
     val messageName: String = "AgentHeightWidth",
-    val messageNumber: Int = 83,
+    val messageNumber: Long = 83L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(83)
+        buffer.putInt((83L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1967,14 +1967,14 @@ data class AgentHeightWidthPacket(
 // Message: AgentSetAppearance (Low 84)
 data class AgentSetAppearancePacket(
     val messageName: String = "AgentSetAppearance",
-    val messageNumber: Int = 84,
+    val messageNumber: Long = 84L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(84)
+        buffer.putInt((84L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1983,14 +1983,14 @@ data class AgentSetAppearancePacket(
 // Message: AgentAnimation (High 5)
 data class AgentAnimationPacket(
     val messageName: String = "AgentAnimation",
-    val messageNumber: Int = 5,
+    val messageNumber: Long = 5L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(5)
+        buffer.putInt((5L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -1999,14 +1999,14 @@ data class AgentAnimationPacket(
 // Message: AgentRequestSit (High 6)
 data class AgentRequestSitPacket(
     val messageName: String = "AgentRequestSit",
-    val messageNumber: Int = 6,
+    val messageNumber: Long = 6L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(6)
+        buffer.putInt((6L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2015,14 +2015,14 @@ data class AgentRequestSitPacket(
 // Message: AgentSit (High 7)
 data class AgentSitPacket(
     val messageName: String = "AgentSit",
-    val messageNumber: Int = 7,
+    val messageNumber: Long = 7L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(7)
+        buffer.putInt((7L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2031,14 +2031,14 @@ data class AgentSitPacket(
 // Message: AgentQuitCopy (Low 85)
 data class AgentQuitCopyPacket(
     val messageName: String = "AgentQuitCopy",
-    val messageNumber: Int = 85,
+    val messageNumber: Long = 85L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(85)
+        buffer.putInt((85L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2047,14 +2047,14 @@ data class AgentQuitCopyPacket(
 // Message: RequestImage (High 8)
 data class RequestImagePacket(
     val messageName: String = "RequestImage",
-    val messageNumber: Int = 8,
+    val messageNumber: Long = 8L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(8)
+        buffer.putInt((8L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2063,14 +2063,14 @@ data class RequestImagePacket(
 // Message: ImageNotInDatabase (Low 86)
 data class ImageNotInDatabasePacket(
     val messageName: String = "ImageNotInDatabase",
-    val messageNumber: Int = 86,
+    val messageNumber: Long = 86L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(86)
+        buffer.putInt((86L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2079,14 +2079,14 @@ data class ImageNotInDatabasePacket(
 // Message: RebakeAvatarTextures (Low 87)
 data class RebakeAvatarTexturesPacket(
     val messageName: String = "RebakeAvatarTextures",
-    val messageNumber: Int = 87,
+    val messageNumber: Long = 87L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(87)
+        buffer.putInt((87L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2095,14 +2095,14 @@ data class RebakeAvatarTexturesPacket(
 // Message: SetAlwaysRun (Low 88)
 data class SetAlwaysRunPacket(
     val messageName: String = "SetAlwaysRun",
-    val messageNumber: Int = 88,
+    val messageNumber: Long = 88L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(88)
+        buffer.putInt((88L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2111,14 +2111,14 @@ data class SetAlwaysRunPacket(
 // Message: ObjectAdd (Medium 1)
 data class ObjectAddPacket(
     val messageName: String = "ObjectAdd",
-    val messageNumber: Int = 1,
+    val messageNumber: Long = 1L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(1)
+        buffer.putInt((1L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2127,14 +2127,14 @@ data class ObjectAddPacket(
 // Message: ObjectDelete (Low 89)
 data class ObjectDeletePacket(
     val messageName: String = "ObjectDelete",
-    val messageNumber: Int = 89,
+    val messageNumber: Long = 89L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(89)
+        buffer.putInt((89L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2143,14 +2143,14 @@ data class ObjectDeletePacket(
 // Message: ObjectDuplicate (Low 90)
 data class ObjectDuplicatePacket(
     val messageName: String = "ObjectDuplicate",
-    val messageNumber: Int = 90,
+    val messageNumber: Long = 90L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(90)
+        buffer.putInt((90L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2159,14 +2159,14 @@ data class ObjectDuplicatePacket(
 // Message: ObjectDuplicateOnRay (Low 91)
 data class ObjectDuplicateOnRayPacket(
     val messageName: String = "ObjectDuplicateOnRay",
-    val messageNumber: Int = 91,
+    val messageNumber: Long = 91L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(91)
+        buffer.putInt((91L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2175,14 +2175,14 @@ data class ObjectDuplicateOnRayPacket(
 // Message: MultipleObjectUpdate (Medium 2)
 data class MultipleObjectUpdatePacket(
     val messageName: String = "MultipleObjectUpdate",
-    val messageNumber: Int = 2,
+    val messageNumber: Long = 2L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(2)
+        buffer.putInt((2L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2191,14 +2191,14 @@ data class MultipleObjectUpdatePacket(
 // Message: RequestMultipleObjects (Medium 3)
 data class RequestMultipleObjectsPacket(
     val messageName: String = "RequestMultipleObjects",
-    val messageNumber: Int = 3,
+    val messageNumber: Long = 3L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(3)
+        buffer.putInt((3L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2207,14 +2207,14 @@ data class RequestMultipleObjectsPacket(
 // Message: ObjectPosition (Medium 4)
 data class ObjectPositionPacket(
     val messageName: String = "ObjectPosition",
-    val messageNumber: Int = 4,
+    val messageNumber: Long = 4L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4)
+        buffer.putInt((4L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2223,14 +2223,14 @@ data class ObjectPositionPacket(
 // Message: ObjectScale (Low 92)
 data class ObjectScalePacket(
     val messageName: String = "ObjectScale",
-    val messageNumber: Int = 92,
+    val messageNumber: Long = 92L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(92)
+        buffer.putInt((92L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2239,14 +2239,14 @@ data class ObjectScalePacket(
 // Message: ObjectRotation (Low 93)
 data class ObjectRotationPacket(
     val messageName: String = "ObjectRotation",
-    val messageNumber: Int = 93,
+    val messageNumber: Long = 93L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(93)
+        buffer.putInt((93L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2255,14 +2255,14 @@ data class ObjectRotationPacket(
 // Message: ObjectFlagUpdate (Low 94)
 data class ObjectFlagUpdatePacket(
     val messageName: String = "ObjectFlagUpdate",
-    val messageNumber: Int = 94,
+    val messageNumber: Long = 94L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(94)
+        buffer.putInt((94L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2271,14 +2271,14 @@ data class ObjectFlagUpdatePacket(
 // Message: ObjectClickAction (Low 95)
 data class ObjectClickActionPacket(
     val messageName: String = "ObjectClickAction",
-    val messageNumber: Int = 95,
+    val messageNumber: Long = 95L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(95)
+        buffer.putInt((95L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2287,14 +2287,14 @@ data class ObjectClickActionPacket(
 // Message: ObjectImage (Low 96)
 data class ObjectImagePacket(
     val messageName: String = "ObjectImage",
-    val messageNumber: Int = 96,
+    val messageNumber: Long = 96L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(96)
+        buffer.putInt((96L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2303,14 +2303,14 @@ data class ObjectImagePacket(
 // Message: ObjectBypassModUpdate (Low 431)
 data class ObjectBypassModUpdatePacket(
     val messageName: String = "ObjectBypassModUpdate",
-    val messageNumber: Int = 431,
+    val messageNumber: Long = 431L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(431)
+        buffer.putInt((431L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2319,14 +2319,14 @@ data class ObjectBypassModUpdatePacket(
 // Message: ObjectMaterial (Low 97)
 data class ObjectMaterialPacket(
     val messageName: String = "ObjectMaterial",
-    val messageNumber: Int = 97,
+    val messageNumber: Long = 97L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(97)
+        buffer.putInt((97L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2335,14 +2335,14 @@ data class ObjectMaterialPacket(
 // Message: ObjectShape (Low 98)
 data class ObjectShapePacket(
     val messageName: String = "ObjectShape",
-    val messageNumber: Int = 98,
+    val messageNumber: Long = 98L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(98)
+        buffer.putInt((98L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2351,14 +2351,14 @@ data class ObjectShapePacket(
 // Message: ObjectExtraParams (Low 99)
 data class ObjectExtraParamsPacket(
     val messageName: String = "ObjectExtraParams",
-    val messageNumber: Int = 99,
+    val messageNumber: Long = 99L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(99)
+        buffer.putInt((99L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2367,14 +2367,14 @@ data class ObjectExtraParamsPacket(
 // Message: ObjectOwner (Low 100)
 data class ObjectOwnerPacket(
     val messageName: String = "ObjectOwner",
-    val messageNumber: Int = 100,
+    val messageNumber: Long = 100L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(100)
+        buffer.putInt((100L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2383,14 +2383,14 @@ data class ObjectOwnerPacket(
 // Message: ObjectGroup (Low 101)
 data class ObjectGroupPacket(
     val messageName: String = "ObjectGroup",
-    val messageNumber: Int = 101,
+    val messageNumber: Long = 101L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(101)
+        buffer.putInt((101L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2399,14 +2399,14 @@ data class ObjectGroupPacket(
 // Message: ObjectBuy (Low 102)
 data class ObjectBuyPacket(
     val messageName: String = "ObjectBuy",
-    val messageNumber: Int = 102,
+    val messageNumber: Long = 102L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(102)
+        buffer.putInt((102L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2415,14 +2415,14 @@ data class ObjectBuyPacket(
 // Message: BuyObjectInventory (Low 103)
 data class BuyObjectInventoryPacket(
     val messageName: String = "BuyObjectInventory",
-    val messageNumber: Int = 103,
+    val messageNumber: Long = 103L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(103)
+        buffer.putInt((103L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2431,14 +2431,14 @@ data class BuyObjectInventoryPacket(
 // Message: DerezContainer (Low 104)
 data class DerezContainerPacket(
     val messageName: String = "DerezContainer",
-    val messageNumber: Int = 104,
+    val messageNumber: Long = 104L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(104)
+        buffer.putInt((104L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2447,14 +2447,14 @@ data class DerezContainerPacket(
 // Message: ObjectPermissions (Low 105)
 data class ObjectPermissionsPacket(
     val messageName: String = "ObjectPermissions",
-    val messageNumber: Int = 105,
+    val messageNumber: Long = 105L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(105)
+        buffer.putInt((105L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2463,14 +2463,14 @@ data class ObjectPermissionsPacket(
 // Message: ObjectSaleInfo (Low 106)
 data class ObjectSaleInfoPacket(
     val messageName: String = "ObjectSaleInfo",
-    val messageNumber: Int = 106,
+    val messageNumber: Long = 106L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(106)
+        buffer.putInt((106L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2479,14 +2479,14 @@ data class ObjectSaleInfoPacket(
 // Message: ObjectName (Low 107)
 data class ObjectNamePacket(
     val messageName: String = "ObjectName",
-    val messageNumber: Int = 107,
+    val messageNumber: Long = 107L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(107)
+        buffer.putInt((107L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2495,14 +2495,14 @@ data class ObjectNamePacket(
 // Message: ObjectDescription (Low 108)
 data class ObjectDescriptionPacket(
     val messageName: String = "ObjectDescription",
-    val messageNumber: Int = 108,
+    val messageNumber: Long = 108L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(108)
+        buffer.putInt((108L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2511,14 +2511,14 @@ data class ObjectDescriptionPacket(
 // Message: ObjectCategory (Low 109)
 data class ObjectCategoryPacket(
     val messageName: String = "ObjectCategory",
-    val messageNumber: Int = 109,
+    val messageNumber: Long = 109L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(109)
+        buffer.putInt((109L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2527,14 +2527,14 @@ data class ObjectCategoryPacket(
 // Message: ObjectSelect (Low 110)
 data class ObjectSelectPacket(
     val messageName: String = "ObjectSelect",
-    val messageNumber: Int = 110,
+    val messageNumber: Long = 110L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(110)
+        buffer.putInt((110L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2543,14 +2543,14 @@ data class ObjectSelectPacket(
 // Message: ObjectDeselect (Low 111)
 data class ObjectDeselectPacket(
     val messageName: String = "ObjectDeselect",
-    val messageNumber: Int = 111,
+    val messageNumber: Long = 111L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(111)
+        buffer.putInt((111L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2559,14 +2559,14 @@ data class ObjectDeselectPacket(
 // Message: ObjectAttach (Low 112)
 data class ObjectAttachPacket(
     val messageName: String = "ObjectAttach",
-    val messageNumber: Int = 112,
+    val messageNumber: Long = 112L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(112)
+        buffer.putInt((112L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2575,14 +2575,14 @@ data class ObjectAttachPacket(
 // Message: ObjectDetach (Low 113)
 data class ObjectDetachPacket(
     val messageName: String = "ObjectDetach",
-    val messageNumber: Int = 113,
+    val messageNumber: Long = 113L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(113)
+        buffer.putInt((113L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2591,14 +2591,14 @@ data class ObjectDetachPacket(
 // Message: ObjectDrop (Low 114)
 data class ObjectDropPacket(
     val messageName: String = "ObjectDrop",
-    val messageNumber: Int = 114,
+    val messageNumber: Long = 114L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(114)
+        buffer.putInt((114L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2607,14 +2607,14 @@ data class ObjectDropPacket(
 // Message: ObjectLink (Low 115)
 data class ObjectLinkPacket(
     val messageName: String = "ObjectLink",
-    val messageNumber: Int = 115,
+    val messageNumber: Long = 115L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(115)
+        buffer.putInt((115L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2623,14 +2623,14 @@ data class ObjectLinkPacket(
 // Message: ObjectDelink (Low 116)
 data class ObjectDelinkPacket(
     val messageName: String = "ObjectDelink",
-    val messageNumber: Int = 116,
+    val messageNumber: Long = 116L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(116)
+        buffer.putInt((116L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2639,14 +2639,14 @@ data class ObjectDelinkPacket(
 // Message: ObjectGrab (Low 117)
 data class ObjectGrabPacket(
     val messageName: String = "ObjectGrab",
-    val messageNumber: Int = 117,
+    val messageNumber: Long = 117L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(117)
+        buffer.putInt((117L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2655,14 +2655,14 @@ data class ObjectGrabPacket(
 // Message: ObjectGrabUpdate (Low 118)
 data class ObjectGrabUpdatePacket(
     val messageName: String = "ObjectGrabUpdate",
-    val messageNumber: Int = 118,
+    val messageNumber: Long = 118L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(118)
+        buffer.putInt((118L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2671,14 +2671,14 @@ data class ObjectGrabUpdatePacket(
 // Message: ObjectDeGrab (Low 119)
 data class ObjectDeGrabPacket(
     val messageName: String = "ObjectDeGrab",
-    val messageNumber: Int = 119,
+    val messageNumber: Long = 119L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(119)
+        buffer.putInt((119L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2687,14 +2687,14 @@ data class ObjectDeGrabPacket(
 // Message: ObjectSpinStart (Low 120)
 data class ObjectSpinStartPacket(
     val messageName: String = "ObjectSpinStart",
-    val messageNumber: Int = 120,
+    val messageNumber: Long = 120L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(120)
+        buffer.putInt((120L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2703,14 +2703,14 @@ data class ObjectSpinStartPacket(
 // Message: ObjectSpinUpdate (Low 121)
 data class ObjectSpinUpdatePacket(
     val messageName: String = "ObjectSpinUpdate",
-    val messageNumber: Int = 121,
+    val messageNumber: Long = 121L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(121)
+        buffer.putInt((121L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2719,14 +2719,14 @@ data class ObjectSpinUpdatePacket(
 // Message: ObjectSpinStop (Low 122)
 data class ObjectSpinStopPacket(
     val messageName: String = "ObjectSpinStop",
-    val messageNumber: Int = 122,
+    val messageNumber: Long = 122L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(122)
+        buffer.putInt((122L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2735,14 +2735,14 @@ data class ObjectSpinStopPacket(
 // Message: ObjectExportSelected (Low 123)
 data class ObjectExportSelectedPacket(
     val messageName: String = "ObjectExportSelected",
-    val messageNumber: Int = 123,
+    val messageNumber: Long = 123L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(123)
+        buffer.putInt((123L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2751,14 +2751,14 @@ data class ObjectExportSelectedPacket(
 // Message: ModifyLand (Low 124)
 data class ModifyLandPacket(
     val messageName: String = "ModifyLand",
-    val messageNumber: Int = 124,
+    val messageNumber: Long = 124L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(124)
+        buffer.putInt((124L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2767,14 +2767,14 @@ data class ModifyLandPacket(
 // Message: VelocityInterpolateOn (Low 125)
 data class VelocityInterpolateOnPacket(
     val messageName: String = "VelocityInterpolateOn",
-    val messageNumber: Int = 125,
+    val messageNumber: Long = 125L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(125)
+        buffer.putInt((125L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2783,14 +2783,14 @@ data class VelocityInterpolateOnPacket(
 // Message: VelocityInterpolateOff (Low 126)
 data class VelocityInterpolateOffPacket(
     val messageName: String = "VelocityInterpolateOff",
-    val messageNumber: Int = 126,
+    val messageNumber: Long = 126L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(126)
+        buffer.putInt((126L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2799,14 +2799,14 @@ data class VelocityInterpolateOffPacket(
 // Message: StateSave (Low 127)
 data class StateSavePacket(
     val messageName: String = "StateSave",
-    val messageNumber: Int = 127,
+    val messageNumber: Long = 127L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(127)
+        buffer.putInt((127L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2815,14 +2815,14 @@ data class StateSavePacket(
 // Message: ReportAutosaveCrash (Low 128)
 data class ReportAutosaveCrashPacket(
     val messageName: String = "ReportAutosaveCrash",
-    val messageNumber: Int = 128,
+    val messageNumber: Long = 128L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(128)
+        buffer.putInt((128L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2831,14 +2831,14 @@ data class ReportAutosaveCrashPacket(
 // Message: SimWideDeletes (Low 129)
 data class SimWideDeletesPacket(
     val messageName: String = "SimWideDeletes",
-    val messageNumber: Int = 129,
+    val messageNumber: Long = 129L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(129)
+        buffer.putInt((129L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2847,14 +2847,14 @@ data class SimWideDeletesPacket(
 // Message: RequestObjectPropertiesFamily (Medium 5)
 data class RequestObjectPropertiesFamilyPacket(
     val messageName: String = "RequestObjectPropertiesFamily",
-    val messageNumber: Int = 5,
+    val messageNumber: Long = 5L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(5)
+        buffer.putInt((5L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2863,14 +2863,14 @@ data class RequestObjectPropertiesFamilyPacket(
 // Message: TrackAgent (Low 130)
 data class TrackAgentPacket(
     val messageName: String = "TrackAgent",
-    val messageNumber: Int = 130,
+    val messageNumber: Long = 130L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(130)
+        buffer.putInt((130L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2879,14 +2879,14 @@ data class TrackAgentPacket(
 // Message: ViewerStats (Low 131)
 data class ViewerStatsPacket(
     val messageName: String = "ViewerStats",
-    val messageNumber: Int = 131,
+    val messageNumber: Long = 131L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(131)
+        buffer.putInt((131L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2895,14 +2895,14 @@ data class ViewerStatsPacket(
 // Message: ScriptAnswerYes (Low 132)
 data class ScriptAnswerYesPacket(
     val messageName: String = "ScriptAnswerYes",
-    val messageNumber: Int = 132,
+    val messageNumber: Long = 132L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(132)
+        buffer.putInt((132L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2911,14 +2911,14 @@ data class ScriptAnswerYesPacket(
 // Message: UserReport (Low 133)
 data class UserReportPacket(
     val messageName: String = "UserReport",
-    val messageNumber: Int = 133,
+    val messageNumber: Long = 133L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(133)
+        buffer.putInt((133L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2927,14 +2927,14 @@ data class UserReportPacket(
 // Message: AlertMessage (Low 134)
 data class AlertMessagePacket(
     val messageName: String = "AlertMessage",
-    val messageNumber: Int = 134,
+    val messageNumber: Long = 134L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(134)
+        buffer.putInt((134L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2943,14 +2943,14 @@ data class AlertMessagePacket(
 // Message: AgentAlertMessage (Low 135)
 data class AgentAlertMessagePacket(
     val messageName: String = "AgentAlertMessage",
-    val messageNumber: Int = 135,
+    val messageNumber: Long = 135L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(135)
+        buffer.putInt((135L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2959,14 +2959,14 @@ data class AgentAlertMessagePacket(
 // Message: MeanCollisionAlert (Low 136)
 data class MeanCollisionAlertPacket(
     val messageName: String = "MeanCollisionAlert",
-    val messageNumber: Int = 136,
+    val messageNumber: Long = 136L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(136)
+        buffer.putInt((136L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2975,14 +2975,14 @@ data class MeanCollisionAlertPacket(
 // Message: ViewerFrozenMessage (Low 137)
 data class ViewerFrozenMessagePacket(
     val messageName: String = "ViewerFrozenMessage",
-    val messageNumber: Int = 137,
+    val messageNumber: Long = 137L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(137)
+        buffer.putInt((137L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -2991,14 +2991,14 @@ data class ViewerFrozenMessagePacket(
 // Message: HealthMessage (Low 138)
 data class HealthMessagePacket(
     val messageName: String = "HealthMessage",
-    val messageNumber: Int = 138,
+    val messageNumber: Long = 138L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(138)
+        buffer.putInt((138L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3007,14 +3007,14 @@ data class HealthMessagePacket(
 // Message: ChatFromSimulator (Low 139)
 data class ChatFromSimulatorPacket(
     val messageName: String = "ChatFromSimulator",
-    val messageNumber: Int = 139,
+    val messageNumber: Long = 139L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(139)
+        buffer.putInt((139L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3023,14 +3023,14 @@ data class ChatFromSimulatorPacket(
 // Message: SimStats (Low 140)
 data class SimStatsPacket(
     val messageName: String = "SimStats",
-    val messageNumber: Int = 140,
+    val messageNumber: Long = 140L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(140)
+        buffer.putInt((140L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3039,14 +3039,14 @@ data class SimStatsPacket(
 // Message: RequestRegionInfo (Low 141)
 data class RequestRegionInfoPacket(
     val messageName: String = "RequestRegionInfo",
-    val messageNumber: Int = 141,
+    val messageNumber: Long = 141L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(141)
+        buffer.putInt((141L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3055,14 +3055,14 @@ data class RequestRegionInfoPacket(
 // Message: RegionInfo (Low 142)
 data class RegionInfoPacket(
     val messageName: String = "RegionInfo",
-    val messageNumber: Int = 142,
+    val messageNumber: Long = 142L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(142)
+        buffer.putInt((142L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3071,14 +3071,14 @@ data class RegionInfoPacket(
 // Message: GodUpdateRegionInfo (Low 143)
 data class GodUpdateRegionInfoPacket(
     val messageName: String = "GodUpdateRegionInfo",
-    val messageNumber: Int = 143,
+    val messageNumber: Long = 143L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(143)
+        buffer.putInt((143L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3087,14 +3087,14 @@ data class GodUpdateRegionInfoPacket(
 // Message: NearestLandingRegionRequest (Low 144)
 data class NearestLandingRegionRequestPacket(
     val messageName: String = "NearestLandingRegionRequest",
-    val messageNumber: Int = 144,
+    val messageNumber: Long = 144L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(144)
+        buffer.putInt((144L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3103,14 +3103,14 @@ data class NearestLandingRegionRequestPacket(
 // Message: NearestLandingRegionReply (Low 145)
 data class NearestLandingRegionReplyPacket(
     val messageName: String = "NearestLandingRegionReply",
-    val messageNumber: Int = 145,
+    val messageNumber: Long = 145L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(145)
+        buffer.putInt((145L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3119,14 +3119,14 @@ data class NearestLandingRegionReplyPacket(
 // Message: NearestLandingRegionUpdated (Low 146)
 data class NearestLandingRegionUpdatedPacket(
     val messageName: String = "NearestLandingRegionUpdated",
-    val messageNumber: Int = 146,
+    val messageNumber: Long = 146L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(146)
+        buffer.putInt((146L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3135,14 +3135,14 @@ data class NearestLandingRegionUpdatedPacket(
 // Message: TeleportLandingStatusChanged (Low 147)
 data class TeleportLandingStatusChangedPacket(
     val messageName: String = "TeleportLandingStatusChanged",
-    val messageNumber: Int = 147,
+    val messageNumber: Long = 147L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(147)
+        buffer.putInt((147L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3151,14 +3151,14 @@ data class TeleportLandingStatusChangedPacket(
 // Message: RegionHandshake (Low 148)
 data class RegionHandshakePacket(
     val messageName: String = "RegionHandshake",
-    val messageNumber: Int = 148,
+    val messageNumber: Long = 148L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(148)
+        buffer.putInt((148L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3167,14 +3167,14 @@ data class RegionHandshakePacket(
 // Message: RegionHandshakeReply (Low 149)
 data class RegionHandshakeReplyPacket(
     val messageName: String = "RegionHandshakeReply",
-    val messageNumber: Int = 149,
+    val messageNumber: Long = 149L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(149)
+        buffer.putInt((149L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3183,14 +3183,14 @@ data class RegionHandshakeReplyPacket(
 // Message: CoarseLocationUpdate (Medium 6)
 data class CoarseLocationUpdatePacket(
     val messageName: String = "CoarseLocationUpdate",
-    val messageNumber: Int = 6,
+    val messageNumber: Long = 6L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(6)
+        buffer.putInt((6L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3199,14 +3199,14 @@ data class CoarseLocationUpdatePacket(
 // Message: ImageData (High 9)
 data class ImageDataPacket(
     val messageName: String = "ImageData",
-    val messageNumber: Int = 9,
+    val messageNumber: Long = 9L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(9)
+        buffer.putInt((9L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3215,14 +3215,14 @@ data class ImageDataPacket(
 // Message: ImagePacket (High 10)
 data class ImagePacketPacket(
     val messageName: String = "ImagePacket",
-    val messageNumber: Int = 10,
+    val messageNumber: Long = 10L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(10)
+        buffer.putInt((10L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3231,14 +3231,14 @@ data class ImagePacketPacket(
 // Message: LayerData (High 11)
 data class LayerDataPacket(
     val messageName: String = "LayerData",
-    val messageNumber: Int = 11,
+    val messageNumber: Long = 11L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(11)
+        buffer.putInt((11L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3247,14 +3247,14 @@ data class LayerDataPacket(
 // Message: ObjectUpdate (High 12)
 data class ObjectUpdatePacket(
     val messageName: String = "ObjectUpdate",
-    val messageNumber: Int = 12,
+    val messageNumber: Long = 12L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(12)
+        buffer.putInt((12L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3263,14 +3263,14 @@ data class ObjectUpdatePacket(
 // Message: ObjectUpdateCompressed (High 13)
 data class ObjectUpdateCompressedPacket(
     val messageName: String = "ObjectUpdateCompressed",
-    val messageNumber: Int = 13,
+    val messageNumber: Long = 13L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(13)
+        buffer.putInt((13L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3279,14 +3279,14 @@ data class ObjectUpdateCompressedPacket(
 // Message: ObjectUpdateCached (High 14)
 data class ObjectUpdateCachedPacket(
     val messageName: String = "ObjectUpdateCached",
-    val messageNumber: Int = 14,
+    val messageNumber: Long = 14L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(14)
+        buffer.putInt((14L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3295,14 +3295,14 @@ data class ObjectUpdateCachedPacket(
 // Message: ImprovedTerseObjectUpdate (High 15)
 data class ImprovedTerseObjectUpdatePacket(
     val messageName: String = "ImprovedTerseObjectUpdate",
-    val messageNumber: Int = 15,
+    val messageNumber: Long = 15L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(15)
+        buffer.putInt((15L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3311,14 +3311,14 @@ data class ImprovedTerseObjectUpdatePacket(
 // Message: KillObject (High 16)
 data class KillObjectPacket(
     val messageName: String = "KillObject",
-    val messageNumber: Int = 16,
+    val messageNumber: Long = 16L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(16)
+        buffer.putInt((16L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3327,14 +3327,14 @@ data class KillObjectPacket(
 // Message: CrossedRegion (Medium 7)
 data class CrossedRegionPacket(
     val messageName: String = "CrossedRegion",
-    val messageNumber: Int = 7,
+    val messageNumber: Long = 7L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(7)
+        buffer.putInt((7L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3343,14 +3343,14 @@ data class CrossedRegionPacket(
 // Message: SimulatorViewerTimeMessage (Low 150)
 data class SimulatorViewerTimeMessagePacket(
     val messageName: String = "SimulatorViewerTimeMessage",
-    val messageNumber: Int = 150,
+    val messageNumber: Long = 150L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(150)
+        buffer.putInt((150L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3359,14 +3359,14 @@ data class SimulatorViewerTimeMessagePacket(
 // Message: EnableSimulator (Low 151)
 data class EnableSimulatorPacket(
     val messageName: String = "EnableSimulator",
-    val messageNumber: Int = 151,
+    val messageNumber: Long = 151L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(151)
+        buffer.putInt((151L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3375,14 +3375,14 @@ data class EnableSimulatorPacket(
 // Message: DisableSimulator (Low 152)
 data class DisableSimulatorPacket(
     val messageName: String = "DisableSimulator",
-    val messageNumber: Int = 152,
+    val messageNumber: Long = 152L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(152)
+        buffer.putInt((152L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3391,14 +3391,14 @@ data class DisableSimulatorPacket(
 // Message: ConfirmEnableSimulator (Medium 8)
 data class ConfirmEnableSimulatorPacket(
     val messageName: String = "ConfirmEnableSimulator",
-    val messageNumber: Int = 8,
+    val messageNumber: Long = 8L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(8)
+        buffer.putInt((8L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3407,14 +3407,14 @@ data class ConfirmEnableSimulatorPacket(
 // Message: TransferRequest (Low 153)
 data class TransferRequestPacket(
     val messageName: String = "TransferRequest",
-    val messageNumber: Int = 153,
+    val messageNumber: Long = 153L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(153)
+        buffer.putInt((153L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3423,14 +3423,14 @@ data class TransferRequestPacket(
 // Message: TransferInfo (Low 154)
 data class TransferInfoPacket(
     val messageName: String = "TransferInfo",
-    val messageNumber: Int = 154,
+    val messageNumber: Long = 154L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(154)
+        buffer.putInt((154L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3439,14 +3439,14 @@ data class TransferInfoPacket(
 // Message: TransferPacket (High 17)
 data class TransferPacketPacket(
     val messageName: String = "TransferPacket",
-    val messageNumber: Int = 17,
+    val messageNumber: Long = 17L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(17)
+        buffer.putInt((17L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3455,14 +3455,14 @@ data class TransferPacketPacket(
 // Message: TransferAbort (Low 155)
 data class TransferAbortPacket(
     val messageName: String = "TransferAbort",
-    val messageNumber: Int = 155,
+    val messageNumber: Long = 155L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(155)
+        buffer.putInt((155L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3471,14 +3471,14 @@ data class TransferAbortPacket(
 // Message: RequestXfer (Low 156)
 data class RequestXferPacket(
     val messageName: String = "RequestXfer",
-    val messageNumber: Int = 156,
+    val messageNumber: Long = 156L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(156)
+        buffer.putInt((156L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3487,14 +3487,14 @@ data class RequestXferPacket(
 // Message: SendXferPacket (High 18)
 data class SendXferPacketPacket(
     val messageName: String = "SendXferPacket",
-    val messageNumber: Int = 18,
+    val messageNumber: Long = 18L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(18)
+        buffer.putInt((18L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3503,14 +3503,14 @@ data class SendXferPacketPacket(
 // Message: ConfirmXferPacket (High 19)
 data class ConfirmXferPacketPacket(
     val messageName: String = "ConfirmXferPacket",
-    val messageNumber: Int = 19,
+    val messageNumber: Long = 19L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(19)
+        buffer.putInt((19L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3519,14 +3519,14 @@ data class ConfirmXferPacketPacket(
 // Message: AbortXfer (Low 157)
 data class AbortXferPacket(
     val messageName: String = "AbortXfer",
-    val messageNumber: Int = 157,
+    val messageNumber: Long = 157L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(157)
+        buffer.putInt((157L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3535,14 +3535,14 @@ data class AbortXferPacket(
 // Message: AvatarAnimation (High 20)
 data class AvatarAnimationPacket(
     val messageName: String = "AvatarAnimation",
-    val messageNumber: Int = 20,
+    val messageNumber: Long = 20L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(20)
+        buffer.putInt((20L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3551,14 +3551,14 @@ data class AvatarAnimationPacket(
 // Message: AvatarAppearance (Low 158)
 data class AvatarAppearancePacket(
     val messageName: String = "AvatarAppearance",
-    val messageNumber: Int = 158,
+    val messageNumber: Long = 158L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(158)
+        buffer.putInt((158L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3567,14 +3567,14 @@ data class AvatarAppearancePacket(
 // Message: AvatarSitResponse (High 21)
 data class AvatarSitResponsePacket(
     val messageName: String = "AvatarSitResponse",
-    val messageNumber: Int = 21,
+    val messageNumber: Long = 21L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(21)
+        buffer.putInt((21L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3583,14 +3583,14 @@ data class AvatarSitResponsePacket(
 // Message: SetFollowCamProperties (Low 159)
 data class SetFollowCamPropertiesPacket(
     val messageName: String = "SetFollowCamProperties",
-    val messageNumber: Int = 159,
+    val messageNumber: Long = 159L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(159)
+        buffer.putInt((159L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3599,14 +3599,14 @@ data class SetFollowCamPropertiesPacket(
 // Message: ClearFollowCamProperties (Low 160)
 data class ClearFollowCamPropertiesPacket(
     val messageName: String = "ClearFollowCamProperties",
-    val messageNumber: Int = 160,
+    val messageNumber: Long = 160L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(160)
+        buffer.putInt((160L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3615,14 +3615,14 @@ data class ClearFollowCamPropertiesPacket(
 // Message: CameraConstraint (High 22)
 data class CameraConstraintPacket(
     val messageName: String = "CameraConstraint",
-    val messageNumber: Int = 22,
+    val messageNumber: Long = 22L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(22)
+        buffer.putInt((22L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3631,14 +3631,14 @@ data class CameraConstraintPacket(
 // Message: ObjectProperties (Medium 9)
 data class ObjectPropertiesPacket(
     val messageName: String = "ObjectProperties",
-    val messageNumber: Int = 9,
+    val messageNumber: Long = 9L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(9)
+        buffer.putInt((9L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3647,14 +3647,14 @@ data class ObjectPropertiesPacket(
 // Message: ObjectPropertiesFamily (Medium 10)
 data class ObjectPropertiesFamilyPacket(
     val messageName: String = "ObjectPropertiesFamily",
-    val messageNumber: Int = 10,
+    val messageNumber: Long = 10L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(10)
+        buffer.putInt((10L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3663,14 +3663,14 @@ data class ObjectPropertiesFamilyPacket(
 // Message: RequestPayPrice (Low 161)
 data class RequestPayPricePacket(
     val messageName: String = "RequestPayPrice",
-    val messageNumber: Int = 161,
+    val messageNumber: Long = 161L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(161)
+        buffer.putInt((161L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3679,14 +3679,14 @@ data class RequestPayPricePacket(
 // Message: PayPriceReply (Low 162)
 data class PayPriceReplyPacket(
     val messageName: String = "PayPriceReply",
-    val messageNumber: Int = 162,
+    val messageNumber: Long = 162L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(162)
+        buffer.putInt((162L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3695,14 +3695,14 @@ data class PayPriceReplyPacket(
 // Message: KickUser (Low 163)
 data class KickUserPacket(
     val messageName: String = "KickUser",
-    val messageNumber: Int = 163,
+    val messageNumber: Long = 163L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(163)
+        buffer.putInt((163L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3711,14 +3711,14 @@ data class KickUserPacket(
 // Message: KickUserAck (Low 164)
 data class KickUserAckPacket(
     val messageName: String = "KickUserAck",
-    val messageNumber: Int = 164,
+    val messageNumber: Long = 164L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(164)
+        buffer.putInt((164L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3727,14 +3727,14 @@ data class KickUserAckPacket(
 // Message: GodKickUser (Low 165)
 data class GodKickUserPacket(
     val messageName: String = "GodKickUser",
-    val messageNumber: Int = 165,
+    val messageNumber: Long = 165L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(165)
+        buffer.putInt((165L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3743,14 +3743,14 @@ data class GodKickUserPacket(
 // Message: SystemKickUser (Low 166)
 data class SystemKickUserPacket(
     val messageName: String = "SystemKickUser",
-    val messageNumber: Int = 166,
+    val messageNumber: Long = 166L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(166)
+        buffer.putInt((166L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3759,14 +3759,14 @@ data class SystemKickUserPacket(
 // Message: EjectUser (Low 167)
 data class EjectUserPacket(
     val messageName: String = "EjectUser",
-    val messageNumber: Int = 167,
+    val messageNumber: Long = 167L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(167)
+        buffer.putInt((167L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3775,14 +3775,14 @@ data class EjectUserPacket(
 // Message: FreezeUser (Low 168)
 data class FreezeUserPacket(
     val messageName: String = "FreezeUser",
-    val messageNumber: Int = 168,
+    val messageNumber: Long = 168L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(168)
+        buffer.putInt((168L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3791,14 +3791,14 @@ data class FreezeUserPacket(
 // Message: AvatarPropertiesRequest (Low 169)
 data class AvatarPropertiesRequestPacket(
     val messageName: String = "AvatarPropertiesRequest",
-    val messageNumber: Int = 169,
+    val messageNumber: Long = 169L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(169)
+        buffer.putInt((169L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3807,14 +3807,14 @@ data class AvatarPropertiesRequestPacket(
 // Message: AvatarPropertiesRequestBackend (Low 170)
 data class AvatarPropertiesRequestBackendPacket(
     val messageName: String = "AvatarPropertiesRequestBackend",
-    val messageNumber: Int = 170,
+    val messageNumber: Long = 170L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(170)
+        buffer.putInt((170L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3823,14 +3823,14 @@ data class AvatarPropertiesRequestBackendPacket(
 // Message: AvatarPropertiesReply (Low 171)
 data class AvatarPropertiesReplyPacket(
     val messageName: String = "AvatarPropertiesReply",
-    val messageNumber: Int = 171,
+    val messageNumber: Long = 171L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(171)
+        buffer.putInt((171L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3839,14 +3839,14 @@ data class AvatarPropertiesReplyPacket(
 // Message: AvatarInterestsReply (Low 172)
 data class AvatarInterestsReplyPacket(
     val messageName: String = "AvatarInterestsReply",
-    val messageNumber: Int = 172,
+    val messageNumber: Long = 172L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(172)
+        buffer.putInt((172L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3855,14 +3855,14 @@ data class AvatarInterestsReplyPacket(
 // Message: AvatarGroupsReply (Low 173)
 data class AvatarGroupsReplyPacket(
     val messageName: String = "AvatarGroupsReply",
-    val messageNumber: Int = 173,
+    val messageNumber: Long = 173L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(173)
+        buffer.putInt((173L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3871,14 +3871,14 @@ data class AvatarGroupsReplyPacket(
 // Message: AvatarPropertiesUpdate (Low 174)
 data class AvatarPropertiesUpdatePacket(
     val messageName: String = "AvatarPropertiesUpdate",
-    val messageNumber: Int = 174,
+    val messageNumber: Long = 174L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(174)
+        buffer.putInt((174L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3887,14 +3887,14 @@ data class AvatarPropertiesUpdatePacket(
 // Message: AvatarInterestsUpdate (Low 175)
 data class AvatarInterestsUpdatePacket(
     val messageName: String = "AvatarInterestsUpdate",
-    val messageNumber: Int = 175,
+    val messageNumber: Long = 175L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(175)
+        buffer.putInt((175L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3903,14 +3903,14 @@ data class AvatarInterestsUpdatePacket(
 // Message: AvatarNotesReply (Low 176)
 data class AvatarNotesReplyPacket(
     val messageName: String = "AvatarNotesReply",
-    val messageNumber: Int = 176,
+    val messageNumber: Long = 176L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(176)
+        buffer.putInt((176L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3919,14 +3919,14 @@ data class AvatarNotesReplyPacket(
 // Message: AvatarNotesUpdate (Low 177)
 data class AvatarNotesUpdatePacket(
     val messageName: String = "AvatarNotesUpdate",
-    val messageNumber: Int = 177,
+    val messageNumber: Long = 177L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(177)
+        buffer.putInt((177L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3935,14 +3935,14 @@ data class AvatarNotesUpdatePacket(
 // Message: AvatarPicksReply (Low 178)
 data class AvatarPicksReplyPacket(
     val messageName: String = "AvatarPicksReply",
-    val messageNumber: Int = 178,
+    val messageNumber: Long = 178L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(178)
+        buffer.putInt((178L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3951,14 +3951,14 @@ data class AvatarPicksReplyPacket(
 // Message: EventInfoRequest (Low 179)
 data class EventInfoRequestPacket(
     val messageName: String = "EventInfoRequest",
-    val messageNumber: Int = 179,
+    val messageNumber: Long = 179L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(179)
+        buffer.putInt((179L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3967,14 +3967,14 @@ data class EventInfoRequestPacket(
 // Message: EventInfoReply (Low 180)
 data class EventInfoReplyPacket(
     val messageName: String = "EventInfoReply",
-    val messageNumber: Int = 180,
+    val messageNumber: Long = 180L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(180)
+        buffer.putInt((180L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3983,14 +3983,14 @@ data class EventInfoReplyPacket(
 // Message: EventNotificationAddRequest (Low 181)
 data class EventNotificationAddRequestPacket(
     val messageName: String = "EventNotificationAddRequest",
-    val messageNumber: Int = 181,
+    val messageNumber: Long = 181L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(181)
+        buffer.putInt((181L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -3999,14 +3999,14 @@ data class EventNotificationAddRequestPacket(
 // Message: EventNotificationRemoveRequest (Low 182)
 data class EventNotificationRemoveRequestPacket(
     val messageName: String = "EventNotificationRemoveRequest",
-    val messageNumber: Int = 182,
+    val messageNumber: Long = 182L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(182)
+        buffer.putInt((182L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4015,14 +4015,14 @@ data class EventNotificationRemoveRequestPacket(
 // Message: EventGodDelete (Low 183)
 data class EventGodDeletePacket(
     val messageName: String = "EventGodDelete",
-    val messageNumber: Int = 183,
+    val messageNumber: Long = 183L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(183)
+        buffer.putInt((183L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4031,14 +4031,14 @@ data class EventGodDeletePacket(
 // Message: PickInfoReply (Low 184)
 data class PickInfoReplyPacket(
     val messageName: String = "PickInfoReply",
-    val messageNumber: Int = 184,
+    val messageNumber: Long = 184L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(184)
+        buffer.putInt((184L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4047,14 +4047,14 @@ data class PickInfoReplyPacket(
 // Message: PickInfoUpdate (Low 185)
 data class PickInfoUpdatePacket(
     val messageName: String = "PickInfoUpdate",
-    val messageNumber: Int = 185,
+    val messageNumber: Long = 185L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(185)
+        buffer.putInt((185L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4063,14 +4063,14 @@ data class PickInfoUpdatePacket(
 // Message: PickDelete (Low 186)
 data class PickDeletePacket(
     val messageName: String = "PickDelete",
-    val messageNumber: Int = 186,
+    val messageNumber: Long = 186L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(186)
+        buffer.putInt((186L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4079,14 +4079,14 @@ data class PickDeletePacket(
 // Message: PickGodDelete (Low 187)
 data class PickGodDeletePacket(
     val messageName: String = "PickGodDelete",
-    val messageNumber: Int = 187,
+    val messageNumber: Long = 187L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(187)
+        buffer.putInt((187L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4095,14 +4095,14 @@ data class PickGodDeletePacket(
 // Message: ScriptQuestion (Low 188)
 data class ScriptQuestionPacket(
     val messageName: String = "ScriptQuestion",
-    val messageNumber: Int = 188,
+    val messageNumber: Long = 188L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(188)
+        buffer.putInt((188L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4111,14 +4111,14 @@ data class ScriptQuestionPacket(
 // Message: ScriptControlChange (Low 189)
 data class ScriptControlChangePacket(
     val messageName: String = "ScriptControlChange",
-    val messageNumber: Int = 189,
+    val messageNumber: Long = 189L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(189)
+        buffer.putInt((189L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4127,14 +4127,14 @@ data class ScriptControlChangePacket(
 // Message: ScriptDialog (Low 190)
 data class ScriptDialogPacket(
     val messageName: String = "ScriptDialog",
-    val messageNumber: Int = 190,
+    val messageNumber: Long = 190L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(190)
+        buffer.putInt((190L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4143,14 +4143,14 @@ data class ScriptDialogPacket(
 // Message: ScriptDialogReply (Low 191)
 data class ScriptDialogReplyPacket(
     val messageName: String = "ScriptDialogReply",
-    val messageNumber: Int = 191,
+    val messageNumber: Long = 191L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(191)
+        buffer.putInt((191L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4159,14 +4159,14 @@ data class ScriptDialogReplyPacket(
 // Message: ForceScriptControlRelease (Low 192)
 data class ForceScriptControlReleasePacket(
     val messageName: String = "ForceScriptControlRelease",
-    val messageNumber: Int = 192,
+    val messageNumber: Long = 192L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(192)
+        buffer.putInt((192L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4175,14 +4175,14 @@ data class ForceScriptControlReleasePacket(
 // Message: RevokePermissions (Low 193)
 data class RevokePermissionsPacket(
     val messageName: String = "RevokePermissions",
-    val messageNumber: Int = 193,
+    val messageNumber: Long = 193L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(193)
+        buffer.putInt((193L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4191,14 +4191,14 @@ data class RevokePermissionsPacket(
 // Message: LoadURL (Low 194)
 data class LoadURLPacket(
     val messageName: String = "LoadURL",
-    val messageNumber: Int = 194,
+    val messageNumber: Long = 194L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(194)
+        buffer.putInt((194L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4207,14 +4207,14 @@ data class LoadURLPacket(
 // Message: ScriptTeleportRequest (Low 195)
 data class ScriptTeleportRequestPacket(
     val messageName: String = "ScriptTeleportRequest",
-    val messageNumber: Int = 195,
+    val messageNumber: Long = 195L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(195)
+        buffer.putInt((195L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4223,14 +4223,14 @@ data class ScriptTeleportRequestPacket(
 // Message: ParcelOverlay (Low 196)
 data class ParcelOverlayPacket(
     val messageName: String = "ParcelOverlay",
-    val messageNumber: Int = 196,
+    val messageNumber: Long = 196L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(196)
+        buffer.putInt((196L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4239,14 +4239,14 @@ data class ParcelOverlayPacket(
 // Message: ParcelPropertiesRequest (Medium 11)
 data class ParcelPropertiesRequestPacket(
     val messageName: String = "ParcelPropertiesRequest",
-    val messageNumber: Int = 11,
+    val messageNumber: Long = 11L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(11)
+        buffer.putInt((11L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4255,14 +4255,14 @@ data class ParcelPropertiesRequestPacket(
 // Message: ParcelPropertiesRequestByID (Low 197)
 data class ParcelPropertiesRequestByIDPacket(
     val messageName: String = "ParcelPropertiesRequestByID",
-    val messageNumber: Int = 197,
+    val messageNumber: Long = 197L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(197)
+        buffer.putInt((197L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4271,14 +4271,14 @@ data class ParcelPropertiesRequestByIDPacket(
 // Message: ParcelProperties (High 23)
 data class ParcelPropertiesPacket(
     val messageName: String = "ParcelProperties",
-    val messageNumber: Int = 23,
+    val messageNumber: Long = 23L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(23)
+        buffer.putInt((23L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4287,14 +4287,14 @@ data class ParcelPropertiesPacket(
 // Message: ParcelPropertiesUpdate (Low 198)
 data class ParcelPropertiesUpdatePacket(
     val messageName: String = "ParcelPropertiesUpdate",
-    val messageNumber: Int = 198,
+    val messageNumber: Long = 198L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(198)
+        buffer.putInt((198L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4303,14 +4303,14 @@ data class ParcelPropertiesUpdatePacket(
 // Message: ParcelReturnObjects (Low 199)
 data class ParcelReturnObjectsPacket(
     val messageName: String = "ParcelReturnObjects",
-    val messageNumber: Int = 199,
+    val messageNumber: Long = 199L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(199)
+        buffer.putInt((199L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4319,14 +4319,14 @@ data class ParcelReturnObjectsPacket(
 // Message: ParcelSetOtherCleanTime (Low 200)
 data class ParcelSetOtherCleanTimePacket(
     val messageName: String = "ParcelSetOtherCleanTime",
-    val messageNumber: Int = 200,
+    val messageNumber: Long = 200L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(200)
+        buffer.putInt((200L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4335,14 +4335,14 @@ data class ParcelSetOtherCleanTimePacket(
 // Message: ParcelDisableObjects (Low 201)
 data class ParcelDisableObjectsPacket(
     val messageName: String = "ParcelDisableObjects",
-    val messageNumber: Int = 201,
+    val messageNumber: Long = 201L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(201)
+        buffer.putInt((201L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4351,14 +4351,14 @@ data class ParcelDisableObjectsPacket(
 // Message: ParcelSelectObjects (Low 202)
 data class ParcelSelectObjectsPacket(
     val messageName: String = "ParcelSelectObjects",
-    val messageNumber: Int = 202,
+    val messageNumber: Long = 202L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(202)
+        buffer.putInt((202L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4367,14 +4367,14 @@ data class ParcelSelectObjectsPacket(
 // Message: EstateCovenantRequest (Low 203)
 data class EstateCovenantRequestPacket(
     val messageName: String = "EstateCovenantRequest",
-    val messageNumber: Int = 203,
+    val messageNumber: Long = 203L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(203)
+        buffer.putInt((203L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4383,14 +4383,14 @@ data class EstateCovenantRequestPacket(
 // Message: EstateCovenantReply (Low 204)
 data class EstateCovenantReplyPacket(
     val messageName: String = "EstateCovenantReply",
-    val messageNumber: Int = 204,
+    val messageNumber: Long = 204L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(204)
+        buffer.putInt((204L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4399,14 +4399,14 @@ data class EstateCovenantReplyPacket(
 // Message: ForceObjectSelect (Low 205)
 data class ForceObjectSelectPacket(
     val messageName: String = "ForceObjectSelect",
-    val messageNumber: Int = 205,
+    val messageNumber: Long = 205L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(205)
+        buffer.putInt((205L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4415,14 +4415,14 @@ data class ForceObjectSelectPacket(
 // Message: ParcelBuyPass (Low 206)
 data class ParcelBuyPassPacket(
     val messageName: String = "ParcelBuyPass",
-    val messageNumber: Int = 206,
+    val messageNumber: Long = 206L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(206)
+        buffer.putInt((206L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4431,14 +4431,14 @@ data class ParcelBuyPassPacket(
 // Message: ParcelDeedToGroup (Low 207)
 data class ParcelDeedToGroupPacket(
     val messageName: String = "ParcelDeedToGroup",
-    val messageNumber: Int = 207,
+    val messageNumber: Long = 207L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(207)
+        buffer.putInt((207L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4447,14 +4447,14 @@ data class ParcelDeedToGroupPacket(
 // Message: ParcelReclaim (Low 208)
 data class ParcelReclaimPacket(
     val messageName: String = "ParcelReclaim",
-    val messageNumber: Int = 208,
+    val messageNumber: Long = 208L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(208)
+        buffer.putInt((208L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4463,14 +4463,14 @@ data class ParcelReclaimPacket(
 // Message: ParcelClaim (Low 209)
 data class ParcelClaimPacket(
     val messageName: String = "ParcelClaim",
-    val messageNumber: Int = 209,
+    val messageNumber: Long = 209L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(209)
+        buffer.putInt((209L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4479,14 +4479,14 @@ data class ParcelClaimPacket(
 // Message: ParcelJoin (Low 210)
 data class ParcelJoinPacket(
     val messageName: String = "ParcelJoin",
-    val messageNumber: Int = 210,
+    val messageNumber: Long = 210L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(210)
+        buffer.putInt((210L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4495,14 +4495,14 @@ data class ParcelJoinPacket(
 // Message: ParcelDivide (Low 211)
 data class ParcelDividePacket(
     val messageName: String = "ParcelDivide",
-    val messageNumber: Int = 211,
+    val messageNumber: Long = 211L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(211)
+        buffer.putInt((211L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4511,14 +4511,14 @@ data class ParcelDividePacket(
 // Message: ParcelRelease (Low 212)
 data class ParcelReleasePacket(
     val messageName: String = "ParcelRelease",
-    val messageNumber: Int = 212,
+    val messageNumber: Long = 212L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(212)
+        buffer.putInt((212L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4527,14 +4527,14 @@ data class ParcelReleasePacket(
 // Message: ParcelBuy (Low 213)
 data class ParcelBuyPacket(
     val messageName: String = "ParcelBuy",
-    val messageNumber: Int = 213,
+    val messageNumber: Long = 213L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(213)
+        buffer.putInt((213L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4543,14 +4543,14 @@ data class ParcelBuyPacket(
 // Message: ParcelGodForceOwner (Low 214)
 data class ParcelGodForceOwnerPacket(
     val messageName: String = "ParcelGodForceOwner",
-    val messageNumber: Int = 214,
+    val messageNumber: Long = 214L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(214)
+        buffer.putInt((214L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4559,14 +4559,14 @@ data class ParcelGodForceOwnerPacket(
 // Message: ParcelAccessListRequest (Low 215)
 data class ParcelAccessListRequestPacket(
     val messageName: String = "ParcelAccessListRequest",
-    val messageNumber: Int = 215,
+    val messageNumber: Long = 215L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(215)
+        buffer.putInt((215L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4575,14 +4575,14 @@ data class ParcelAccessListRequestPacket(
 // Message: ParcelAccessListReply (Low 216)
 data class ParcelAccessListReplyPacket(
     val messageName: String = "ParcelAccessListReply",
-    val messageNumber: Int = 216,
+    val messageNumber: Long = 216L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(216)
+        buffer.putInt((216L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4591,14 +4591,14 @@ data class ParcelAccessListReplyPacket(
 // Message: ParcelAccessListUpdate (Low 217)
 data class ParcelAccessListUpdatePacket(
     val messageName: String = "ParcelAccessListUpdate",
-    val messageNumber: Int = 217,
+    val messageNumber: Long = 217L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(217)
+        buffer.putInt((217L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4607,14 +4607,14 @@ data class ParcelAccessListUpdatePacket(
 // Message: ParcelDwellRequest (Low 218)
 data class ParcelDwellRequestPacket(
     val messageName: String = "ParcelDwellRequest",
-    val messageNumber: Int = 218,
+    val messageNumber: Long = 218L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(218)
+        buffer.putInt((218L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4623,14 +4623,14 @@ data class ParcelDwellRequestPacket(
 // Message: ParcelDwellReply (Low 219)
 data class ParcelDwellReplyPacket(
     val messageName: String = "ParcelDwellReply",
-    val messageNumber: Int = 219,
+    val messageNumber: Long = 219L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(219)
+        buffer.putInt((219L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4639,14 +4639,14 @@ data class ParcelDwellReplyPacket(
 // Message: RequestParcelTransfer (Low 220)
 data class RequestParcelTransferPacket(
     val messageName: String = "RequestParcelTransfer",
-    val messageNumber: Int = 220,
+    val messageNumber: Long = 220L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(220)
+        buffer.putInt((220L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4655,14 +4655,14 @@ data class RequestParcelTransferPacket(
 // Message: UpdateParcel (Low 221)
 data class UpdateParcelPacket(
     val messageName: String = "UpdateParcel",
-    val messageNumber: Int = 221,
+    val messageNumber: Long = 221L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(221)
+        buffer.putInt((221L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4671,14 +4671,14 @@ data class UpdateParcelPacket(
 // Message: RemoveParcel (Low 222)
 data class RemoveParcelPacket(
     val messageName: String = "RemoveParcel",
-    val messageNumber: Int = 222,
+    val messageNumber: Long = 222L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(222)
+        buffer.putInt((222L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4687,14 +4687,14 @@ data class RemoveParcelPacket(
 // Message: MergeParcel (Low 223)
 data class MergeParcelPacket(
     val messageName: String = "MergeParcel",
-    val messageNumber: Int = 223,
+    val messageNumber: Long = 223L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(223)
+        buffer.putInt((223L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4703,14 +4703,14 @@ data class MergeParcelPacket(
 // Message: LogParcelChanges (Low 224)
 data class LogParcelChangesPacket(
     val messageName: String = "LogParcelChanges",
-    val messageNumber: Int = 224,
+    val messageNumber: Long = 224L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(224)
+        buffer.putInt((224L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4719,14 +4719,14 @@ data class LogParcelChangesPacket(
 // Message: CheckParcelSales (Low 225)
 data class CheckParcelSalesPacket(
     val messageName: String = "CheckParcelSales",
-    val messageNumber: Int = 225,
+    val messageNumber: Long = 225L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(225)
+        buffer.putInt((225L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4735,14 +4735,14 @@ data class CheckParcelSalesPacket(
 // Message: ParcelSales (Low 226)
 data class ParcelSalesPacket(
     val messageName: String = "ParcelSales",
-    val messageNumber: Int = 226,
+    val messageNumber: Long = 226L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(226)
+        buffer.putInt((226L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4751,14 +4751,14 @@ data class ParcelSalesPacket(
 // Message: ParcelGodMarkAsContent (Low 227)
 data class ParcelGodMarkAsContentPacket(
     val messageName: String = "ParcelGodMarkAsContent",
-    val messageNumber: Int = 227,
+    val messageNumber: Long = 227L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(227)
+        buffer.putInt((227L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4767,14 +4767,14 @@ data class ParcelGodMarkAsContentPacket(
 // Message: ViewerStartAuction (Low 228)
 data class ViewerStartAuctionPacket(
     val messageName: String = "ViewerStartAuction",
-    val messageNumber: Int = 228,
+    val messageNumber: Long = 228L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(228)
+        buffer.putInt((228L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4783,14 +4783,14 @@ data class ViewerStartAuctionPacket(
 // Message: StartAuction (Low 229)
 data class StartAuctionPacket(
     val messageName: String = "StartAuction",
-    val messageNumber: Int = 229,
+    val messageNumber: Long = 229L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(229)
+        buffer.putInt((229L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4799,14 +4799,14 @@ data class StartAuctionPacket(
 // Message: ConfirmAuctionStart (Low 230)
 data class ConfirmAuctionStartPacket(
     val messageName: String = "ConfirmAuctionStart",
-    val messageNumber: Int = 230,
+    val messageNumber: Long = 230L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(230)
+        buffer.putInt((230L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4815,14 +4815,14 @@ data class ConfirmAuctionStartPacket(
 // Message: CompleteAuction (Low 231)
 data class CompleteAuctionPacket(
     val messageName: String = "CompleteAuction",
-    val messageNumber: Int = 231,
+    val messageNumber: Long = 231L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(231)
+        buffer.putInt((231L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4831,14 +4831,14 @@ data class CompleteAuctionPacket(
 // Message: CancelAuction (Low 232)
 data class CancelAuctionPacket(
     val messageName: String = "CancelAuction",
-    val messageNumber: Int = 232,
+    val messageNumber: Long = 232L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(232)
+        buffer.putInt((232L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4847,14 +4847,14 @@ data class CancelAuctionPacket(
 // Message: CheckParcelAuctions (Low 233)
 data class CheckParcelAuctionsPacket(
     val messageName: String = "CheckParcelAuctions",
-    val messageNumber: Int = 233,
+    val messageNumber: Long = 233L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(233)
+        buffer.putInt((233L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4863,14 +4863,14 @@ data class CheckParcelAuctionsPacket(
 // Message: ParcelAuctions (Low 234)
 data class ParcelAuctionsPacket(
     val messageName: String = "ParcelAuctions",
-    val messageNumber: Int = 234,
+    val messageNumber: Long = 234L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(234)
+        buffer.putInt((234L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4879,14 +4879,14 @@ data class ParcelAuctionsPacket(
 // Message: UUIDNameRequest (Low 235)
 data class UUIDNameRequestPacket(
     val messageName: String = "UUIDNameRequest",
-    val messageNumber: Int = 235,
+    val messageNumber: Long = 235L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(235)
+        buffer.putInt((235L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4895,14 +4895,14 @@ data class UUIDNameRequestPacket(
 // Message: UUIDNameReply (Low 236)
 data class UUIDNameReplyPacket(
     val messageName: String = "UUIDNameReply",
-    val messageNumber: Int = 236,
+    val messageNumber: Long = 236L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(236)
+        buffer.putInt((236L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4911,14 +4911,14 @@ data class UUIDNameReplyPacket(
 // Message: UUIDGroupNameRequest (Low 237)
 data class UUIDGroupNameRequestPacket(
     val messageName: String = "UUIDGroupNameRequest",
-    val messageNumber: Int = 237,
+    val messageNumber: Long = 237L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(237)
+        buffer.putInt((237L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4927,14 +4927,14 @@ data class UUIDGroupNameRequestPacket(
 // Message: UUIDGroupNameReply (Low 238)
 data class UUIDGroupNameReplyPacket(
     val messageName: String = "UUIDGroupNameReply",
-    val messageNumber: Int = 238,
+    val messageNumber: Long = 238L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(238)
+        buffer.putInt((238L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4943,14 +4943,14 @@ data class UUIDGroupNameReplyPacket(
 // Message: ChatPass (Low 239)
 data class ChatPassPacket(
     val messageName: String = "ChatPass",
-    val messageNumber: Int = 239,
+    val messageNumber: Long = 239L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(239)
+        buffer.putInt((239L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4959,14 +4959,14 @@ data class ChatPassPacket(
 // Message: EdgeDataPacket (High 24)
 data class EdgeDataPacketPacket(
     val messageName: String = "EdgeDataPacket",
-    val messageNumber: Int = 24,
+    val messageNumber: Long = 24L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(24)
+        buffer.putInt((24L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4975,14 +4975,14 @@ data class EdgeDataPacketPacket(
 // Message: SimStatus (Medium 12)
 data class SimStatusPacket(
     val messageName: String = "SimStatus",
-    val messageNumber: Int = 12,
+    val messageNumber: Long = 12L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(12)
+        buffer.putInt((12L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -4991,14 +4991,14 @@ data class SimStatusPacket(
 // Message: ChildAgentUpdate (High 25)
 data class ChildAgentUpdatePacket(
     val messageName: String = "ChildAgentUpdate",
-    val messageNumber: Int = 25,
+    val messageNumber: Long = 25L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(25)
+        buffer.putInt((25L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5007,14 +5007,14 @@ data class ChildAgentUpdatePacket(
 // Message: ChildAgentAlive (High 26)
 data class ChildAgentAlivePacket(
     val messageName: String = "ChildAgentAlive",
-    val messageNumber: Int = 26,
+    val messageNumber: Long = 26L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(26)
+        buffer.putInt((26L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5023,14 +5023,14 @@ data class ChildAgentAlivePacket(
 // Message: ChildAgentPositionUpdate (High 27)
 data class ChildAgentPositionUpdatePacket(
     val messageName: String = "ChildAgentPositionUpdate",
-    val messageNumber: Int = 27,
+    val messageNumber: Long = 27L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(27)
+        buffer.putInt((27L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5039,14 +5039,14 @@ data class ChildAgentPositionUpdatePacket(
 // Message: ChildAgentDying (Low 240)
 data class ChildAgentDyingPacket(
     val messageName: String = "ChildAgentDying",
-    val messageNumber: Int = 240,
+    val messageNumber: Long = 240L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(240)
+        buffer.putInt((240L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5055,14 +5055,14 @@ data class ChildAgentDyingPacket(
 // Message: ChildAgentUnknown (Low 241)
 data class ChildAgentUnknownPacket(
     val messageName: String = "ChildAgentUnknown",
-    val messageNumber: Int = 241,
+    val messageNumber: Long = 241L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(241)
+        buffer.putInt((241L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5071,14 +5071,14 @@ data class ChildAgentUnknownPacket(
 // Message: AtomicPassObject (High 28)
 data class AtomicPassObjectPacket(
     val messageName: String = "AtomicPassObject",
-    val messageNumber: Int = 28,
+    val messageNumber: Long = 28L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(28)
+        buffer.putInt((28L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5087,14 +5087,14 @@ data class AtomicPassObjectPacket(
 // Message: KillChildAgents (Low 242)
 data class KillChildAgentsPacket(
     val messageName: String = "KillChildAgents",
-    val messageNumber: Int = 242,
+    val messageNumber: Long = 242L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(242)
+        buffer.putInt((242L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5103,14 +5103,14 @@ data class KillChildAgentsPacket(
 // Message: GetScriptRunning (Low 243)
 data class GetScriptRunningPacket(
     val messageName: String = "GetScriptRunning",
-    val messageNumber: Int = 243,
+    val messageNumber: Long = 243L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(243)
+        buffer.putInt((243L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5119,14 +5119,14 @@ data class GetScriptRunningPacket(
 // Message: ScriptRunningReply (Low 244)
 data class ScriptRunningReplyPacket(
     val messageName: String = "ScriptRunningReply",
-    val messageNumber: Int = 244,
+    val messageNumber: Long = 244L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(244)
+        buffer.putInt((244L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5135,14 +5135,14 @@ data class ScriptRunningReplyPacket(
 // Message: SetScriptRunning (Low 245)
 data class SetScriptRunningPacket(
     val messageName: String = "SetScriptRunning",
-    val messageNumber: Int = 245,
+    val messageNumber: Long = 245L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(245)
+        buffer.putInt((245L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5151,14 +5151,14 @@ data class SetScriptRunningPacket(
 // Message: ScriptReset (Low 246)
 data class ScriptResetPacket(
     val messageName: String = "ScriptReset",
-    val messageNumber: Int = 246,
+    val messageNumber: Long = 246L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(246)
+        buffer.putInt((246L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5167,14 +5167,14 @@ data class ScriptResetPacket(
 // Message: ScriptSensorRequest (Low 247)
 data class ScriptSensorRequestPacket(
     val messageName: String = "ScriptSensorRequest",
-    val messageNumber: Int = 247,
+    val messageNumber: Long = 247L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(247)
+        buffer.putInt((247L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5183,14 +5183,14 @@ data class ScriptSensorRequestPacket(
 // Message: ScriptSensorReply (Low 248)
 data class ScriptSensorReplyPacket(
     val messageName: String = "ScriptSensorReply",
-    val messageNumber: Int = 248,
+    val messageNumber: Long = 248L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(248)
+        buffer.putInt((248L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5199,14 +5199,14 @@ data class ScriptSensorReplyPacket(
 // Message: CompleteAgentMovement (Low 249)
 data class CompleteAgentMovementPacket(
     val messageName: String = "CompleteAgentMovement",
-    val messageNumber: Int = 249,
+    val messageNumber: Long = 249L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(249)
+        buffer.putInt((249L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5215,14 +5215,14 @@ data class CompleteAgentMovementPacket(
 // Message: AgentMovementComplete (Low 250)
 data class AgentMovementCompletePacket(
     val messageName: String = "AgentMovementComplete",
-    val messageNumber: Int = 250,
+    val messageNumber: Long = 250L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(250)
+        buffer.putInt((250L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5231,14 +5231,14 @@ data class AgentMovementCompletePacket(
 // Message: DataServerLogout (Low 251)
 data class DataServerLogoutPacket(
     val messageName: String = "DataServerLogout",
-    val messageNumber: Int = 251,
+    val messageNumber: Long = 251L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(251)
+        buffer.putInt((251L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5247,14 +5247,14 @@ data class DataServerLogoutPacket(
 // Message: LogoutRequest (Low 252)
 data class LogoutRequestPacket(
     val messageName: String = "LogoutRequest",
-    val messageNumber: Int = 252,
+    val messageNumber: Long = 252L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(252)
+        buffer.putInt((252L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5263,14 +5263,14 @@ data class LogoutRequestPacket(
 // Message: LogoutReply (Low 253)
 data class LogoutReplyPacket(
     val messageName: String = "LogoutReply",
-    val messageNumber: Int = 253,
+    val messageNumber: Long = 253L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(253)
+        buffer.putInt((253L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5279,14 +5279,14 @@ data class LogoutReplyPacket(
 // Message: ImprovedInstantMessage (Low 254)
 data class ImprovedInstantMessagePacket(
     val messageName: String = "ImprovedInstantMessage",
-    val messageNumber: Int = 254,
+    val messageNumber: Long = 254L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(254)
+        buffer.putInt((254L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5295,14 +5295,14 @@ data class ImprovedInstantMessagePacket(
 // Message: RetrieveInstantMessages (Low 255)
 data class RetrieveInstantMessagesPacket(
     val messageName: String = "RetrieveInstantMessages",
-    val messageNumber: Int = 255,
+    val messageNumber: Long = 255L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(255)
+        buffer.putInt((255L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5311,14 +5311,14 @@ data class RetrieveInstantMessagesPacket(
 // Message: FindAgent (Low 256)
 data class FindAgentPacket(
     val messageName: String = "FindAgent",
-    val messageNumber: Int = 256,
+    val messageNumber: Long = 256L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(256)
+        buffer.putInt((256L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5327,14 +5327,14 @@ data class FindAgentPacket(
 // Message: RequestGodlikePowers (Low 257)
 data class RequestGodlikePowersPacket(
     val messageName: String = "RequestGodlikePowers",
-    val messageNumber: Int = 257,
+    val messageNumber: Long = 257L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(257)
+        buffer.putInt((257L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5343,14 +5343,14 @@ data class RequestGodlikePowersPacket(
 // Message: GrantGodlikePowers (Low 258)
 data class GrantGodlikePowersPacket(
     val messageName: String = "GrantGodlikePowers",
-    val messageNumber: Int = 258,
+    val messageNumber: Long = 258L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(258)
+        buffer.putInt((258L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5359,14 +5359,14 @@ data class GrantGodlikePowersPacket(
 // Message: GodlikeMessage (Low 259)
 data class GodlikeMessagePacket(
     val messageName: String = "GodlikeMessage",
-    val messageNumber: Int = 259,
+    val messageNumber: Long = 259L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(259)
+        buffer.putInt((259L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5375,14 +5375,14 @@ data class GodlikeMessagePacket(
 // Message: EstateOwnerMessage (Low 260)
 data class EstateOwnerMessagePacket(
     val messageName: String = "EstateOwnerMessage",
-    val messageNumber: Int = 260,
+    val messageNumber: Long = 260L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(260)
+        buffer.putInt((260L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5391,14 +5391,14 @@ data class EstateOwnerMessagePacket(
 // Message: GenericMessage (Low 261)
 data class GenericMessagePacket(
     val messageName: String = "GenericMessage",
-    val messageNumber: Int = 261,
+    val messageNumber: Long = 261L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(261)
+        buffer.putInt((261L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5407,14 +5407,14 @@ data class GenericMessagePacket(
 // Message: GenericStreamingMessage (High 31)
 data class GenericStreamingMessagePacket(
     val messageName: String = "GenericStreamingMessage",
-    val messageNumber: Int = 31,
+    val messageNumber: Long = 31L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(31)
+        buffer.putInt((31L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5423,14 +5423,14 @@ data class GenericStreamingMessagePacket(
 // Message: LargeGenericMessage (Low 430)
 data class LargeGenericMessagePacket(
     val messageName: String = "LargeGenericMessage",
-    val messageNumber: Int = 430,
+    val messageNumber: Long = 430L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(430)
+        buffer.putInt((430L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5439,14 +5439,14 @@ data class LargeGenericMessagePacket(
 // Message: MuteListRequest (Low 262)
 data class MuteListRequestPacket(
     val messageName: String = "MuteListRequest",
-    val messageNumber: Int = 262,
+    val messageNumber: Long = 262L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(262)
+        buffer.putInt((262L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5455,14 +5455,14 @@ data class MuteListRequestPacket(
 // Message: UpdateMuteListEntry (Low 263)
 data class UpdateMuteListEntryPacket(
     val messageName: String = "UpdateMuteListEntry",
-    val messageNumber: Int = 263,
+    val messageNumber: Long = 263L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(263)
+        buffer.putInt((263L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5471,14 +5471,14 @@ data class UpdateMuteListEntryPacket(
 // Message: RemoveMuteListEntry (Low 264)
 data class RemoveMuteListEntryPacket(
     val messageName: String = "RemoveMuteListEntry",
-    val messageNumber: Int = 264,
+    val messageNumber: Long = 264L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(264)
+        buffer.putInt((264L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5487,14 +5487,14 @@ data class RemoveMuteListEntryPacket(
 // Message: CopyInventoryFromNotecard (Low 265)
 data class CopyInventoryFromNotecardPacket(
     val messageName: String = "CopyInventoryFromNotecard",
-    val messageNumber: Int = 265,
+    val messageNumber: Long = 265L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(265)
+        buffer.putInt((265L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5503,14 +5503,14 @@ data class CopyInventoryFromNotecardPacket(
 // Message: UpdateInventoryItem (Low 266)
 data class UpdateInventoryItemPacket(
     val messageName: String = "UpdateInventoryItem",
-    val messageNumber: Int = 266,
+    val messageNumber: Long = 266L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(266)
+        buffer.putInt((266L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5519,14 +5519,14 @@ data class UpdateInventoryItemPacket(
 // Message: UpdateCreateInventoryItem (Low 267)
 data class UpdateCreateInventoryItemPacket(
     val messageName: String = "UpdateCreateInventoryItem",
-    val messageNumber: Int = 267,
+    val messageNumber: Long = 267L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(267)
+        buffer.putInt((267L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5535,14 +5535,14 @@ data class UpdateCreateInventoryItemPacket(
 // Message: MoveInventoryItem (Low 268)
 data class MoveInventoryItemPacket(
     val messageName: String = "MoveInventoryItem",
-    val messageNumber: Int = 268,
+    val messageNumber: Long = 268L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(268)
+        buffer.putInt((268L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5551,14 +5551,14 @@ data class MoveInventoryItemPacket(
 // Message: CopyInventoryItem (Low 269)
 data class CopyInventoryItemPacket(
     val messageName: String = "CopyInventoryItem",
-    val messageNumber: Int = 269,
+    val messageNumber: Long = 269L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(269)
+        buffer.putInt((269L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5567,14 +5567,14 @@ data class CopyInventoryItemPacket(
 // Message: RemoveInventoryItem (Low 270)
 data class RemoveInventoryItemPacket(
     val messageName: String = "RemoveInventoryItem",
-    val messageNumber: Int = 270,
+    val messageNumber: Long = 270L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(270)
+        buffer.putInt((270L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5583,14 +5583,14 @@ data class RemoveInventoryItemPacket(
 // Message: ChangeInventoryItemFlags (Low 271)
 data class ChangeInventoryItemFlagsPacket(
     val messageName: String = "ChangeInventoryItemFlags",
-    val messageNumber: Int = 271,
+    val messageNumber: Long = 271L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(271)
+        buffer.putInt((271L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5599,14 +5599,14 @@ data class ChangeInventoryItemFlagsPacket(
 // Message: SaveAssetIntoInventory (Low 272)
 data class SaveAssetIntoInventoryPacket(
     val messageName: String = "SaveAssetIntoInventory",
-    val messageNumber: Int = 272,
+    val messageNumber: Long = 272L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(272)
+        buffer.putInt((272L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5615,14 +5615,14 @@ data class SaveAssetIntoInventoryPacket(
 // Message: CreateInventoryFolder (Low 273)
 data class CreateInventoryFolderPacket(
     val messageName: String = "CreateInventoryFolder",
-    val messageNumber: Int = 273,
+    val messageNumber: Long = 273L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(273)
+        buffer.putInt((273L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5631,14 +5631,14 @@ data class CreateInventoryFolderPacket(
 // Message: UpdateInventoryFolder (Low 274)
 data class UpdateInventoryFolderPacket(
     val messageName: String = "UpdateInventoryFolder",
-    val messageNumber: Int = 274,
+    val messageNumber: Long = 274L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(274)
+        buffer.putInt((274L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5647,14 +5647,14 @@ data class UpdateInventoryFolderPacket(
 // Message: MoveInventoryFolder (Low 275)
 data class MoveInventoryFolderPacket(
     val messageName: String = "MoveInventoryFolder",
-    val messageNumber: Int = 275,
+    val messageNumber: Long = 275L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(275)
+        buffer.putInt((275L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5663,14 +5663,14 @@ data class MoveInventoryFolderPacket(
 // Message: RemoveInventoryFolder (Low 276)
 data class RemoveInventoryFolderPacket(
     val messageName: String = "RemoveInventoryFolder",
-    val messageNumber: Int = 276,
+    val messageNumber: Long = 276L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(276)
+        buffer.putInt((276L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5679,14 +5679,14 @@ data class RemoveInventoryFolderPacket(
 // Message: FetchInventoryDescendents (Low 277)
 data class FetchInventoryDescendentsPacket(
     val messageName: String = "FetchInventoryDescendents",
-    val messageNumber: Int = 277,
+    val messageNumber: Long = 277L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(277)
+        buffer.putInt((277L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5695,14 +5695,14 @@ data class FetchInventoryDescendentsPacket(
 // Message: InventoryDescendents (Low 278)
 data class InventoryDescendentsPacket(
     val messageName: String = "InventoryDescendents",
-    val messageNumber: Int = 278,
+    val messageNumber: Long = 278L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(278)
+        buffer.putInt((278L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5711,14 +5711,14 @@ data class InventoryDescendentsPacket(
 // Message: FetchInventory (Low 279)
 data class FetchInventoryPacket(
     val messageName: String = "FetchInventory",
-    val messageNumber: Int = 279,
+    val messageNumber: Long = 279L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(279)
+        buffer.putInt((279L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5727,14 +5727,14 @@ data class FetchInventoryPacket(
 // Message: FetchInventoryReply (Low 280)
 data class FetchInventoryReplyPacket(
     val messageName: String = "FetchInventoryReply",
-    val messageNumber: Int = 280,
+    val messageNumber: Long = 280L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(280)
+        buffer.putInt((280L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5743,14 +5743,14 @@ data class FetchInventoryReplyPacket(
 // Message: BulkUpdateInventory (Low 281)
 data class BulkUpdateInventoryPacket(
     val messageName: String = "BulkUpdateInventory",
-    val messageNumber: Int = 281,
+    val messageNumber: Long = 281L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(281)
+        buffer.putInt((281L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5759,14 +5759,14 @@ data class BulkUpdateInventoryPacket(
 // Message: RequestInventoryAsset (Low 282)
 data class RequestInventoryAssetPacket(
     val messageName: String = "RequestInventoryAsset",
-    val messageNumber: Int = 282,
+    val messageNumber: Long = 282L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(282)
+        buffer.putInt((282L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5775,14 +5775,14 @@ data class RequestInventoryAssetPacket(
 // Message: InventoryAssetResponse (Low 283)
 data class InventoryAssetResponsePacket(
     val messageName: String = "InventoryAssetResponse",
-    val messageNumber: Int = 283,
+    val messageNumber: Long = 283L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(283)
+        buffer.putInt((283L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5791,14 +5791,14 @@ data class InventoryAssetResponsePacket(
 // Message: RemoveInventoryObjects (Low 284)
 data class RemoveInventoryObjectsPacket(
     val messageName: String = "RemoveInventoryObjects",
-    val messageNumber: Int = 284,
+    val messageNumber: Long = 284L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(284)
+        buffer.putInt((284L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5807,14 +5807,14 @@ data class RemoveInventoryObjectsPacket(
 // Message: PurgeInventoryDescendents (Low 285)
 data class PurgeInventoryDescendentsPacket(
     val messageName: String = "PurgeInventoryDescendents",
-    val messageNumber: Int = 285,
+    val messageNumber: Long = 285L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(285)
+        buffer.putInt((285L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5823,14 +5823,14 @@ data class PurgeInventoryDescendentsPacket(
 // Message: UpdateTaskInventory (Low 286)
 data class UpdateTaskInventoryPacket(
     val messageName: String = "UpdateTaskInventory",
-    val messageNumber: Int = 286,
+    val messageNumber: Long = 286L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(286)
+        buffer.putInt((286L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5839,14 +5839,14 @@ data class UpdateTaskInventoryPacket(
 // Message: RemoveTaskInventory (Low 287)
 data class RemoveTaskInventoryPacket(
     val messageName: String = "RemoveTaskInventory",
-    val messageNumber: Int = 287,
+    val messageNumber: Long = 287L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(287)
+        buffer.putInt((287L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5855,14 +5855,14 @@ data class RemoveTaskInventoryPacket(
 // Message: MoveTaskInventory (Low 288)
 data class MoveTaskInventoryPacket(
     val messageName: String = "MoveTaskInventory",
-    val messageNumber: Int = 288,
+    val messageNumber: Long = 288L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(288)
+        buffer.putInt((288L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5871,14 +5871,14 @@ data class MoveTaskInventoryPacket(
 // Message: RequestTaskInventory (Low 289)
 data class RequestTaskInventoryPacket(
     val messageName: String = "RequestTaskInventory",
-    val messageNumber: Int = 289,
+    val messageNumber: Long = 289L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(289)
+        buffer.putInt((289L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5887,14 +5887,14 @@ data class RequestTaskInventoryPacket(
 // Message: ReplyTaskInventory (Low 290)
 data class ReplyTaskInventoryPacket(
     val messageName: String = "ReplyTaskInventory",
-    val messageNumber: Int = 290,
+    val messageNumber: Long = 290L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(290)
+        buffer.putInt((290L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5903,14 +5903,14 @@ data class ReplyTaskInventoryPacket(
 // Message: DeRezObject (Low 291)
 data class DeRezObjectPacket(
     val messageName: String = "DeRezObject",
-    val messageNumber: Int = 291,
+    val messageNumber: Long = 291L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(291)
+        buffer.putInt((291L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5919,14 +5919,14 @@ data class DeRezObjectPacket(
 // Message: DeRezAck (Low 292)
 data class DeRezAckPacket(
     val messageName: String = "DeRezAck",
-    val messageNumber: Int = 292,
+    val messageNumber: Long = 292L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(292)
+        buffer.putInt((292L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5935,14 +5935,14 @@ data class DeRezAckPacket(
 // Message: RezObject (Low 293)
 data class RezObjectPacket(
     val messageName: String = "RezObject",
-    val messageNumber: Int = 293,
+    val messageNumber: Long = 293L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(293)
+        buffer.putInt((293L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5951,14 +5951,14 @@ data class RezObjectPacket(
 // Message: RezObjectFromNotecard (Low 294)
 data class RezObjectFromNotecardPacket(
     val messageName: String = "RezObjectFromNotecard",
-    val messageNumber: Int = 294,
+    val messageNumber: Long = 294L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(294)
+        buffer.putInt((294L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5967,14 +5967,14 @@ data class RezObjectFromNotecardPacket(
 // Message: TransferInventory (Low 295)
 data class TransferInventoryPacket(
     val messageName: String = "TransferInventory",
-    val messageNumber: Int = 295,
+    val messageNumber: Long = 295L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(295)
+        buffer.putInt((295L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5983,14 +5983,14 @@ data class TransferInventoryPacket(
 // Message: TransferInventoryAck (Low 296)
 data class TransferInventoryAckPacket(
     val messageName: String = "TransferInventoryAck",
-    val messageNumber: Int = 296,
+    val messageNumber: Long = 296L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(296)
+        buffer.putInt((296L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -5999,14 +5999,14 @@ data class TransferInventoryAckPacket(
 // Message: AcceptFriendship (Low 297)
 data class AcceptFriendshipPacket(
     val messageName: String = "AcceptFriendship",
-    val messageNumber: Int = 297,
+    val messageNumber: Long = 297L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(297)
+        buffer.putInt((297L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6015,14 +6015,14 @@ data class AcceptFriendshipPacket(
 // Message: DeclineFriendship (Low 298)
 data class DeclineFriendshipPacket(
     val messageName: String = "DeclineFriendship",
-    val messageNumber: Int = 298,
+    val messageNumber: Long = 298L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(298)
+        buffer.putInt((298L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6031,14 +6031,14 @@ data class DeclineFriendshipPacket(
 // Message: FormFriendship (Low 299)
 data class FormFriendshipPacket(
     val messageName: String = "FormFriendship",
-    val messageNumber: Int = 299,
+    val messageNumber: Long = 299L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(299)
+        buffer.putInt((299L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6047,14 +6047,14 @@ data class FormFriendshipPacket(
 // Message: TerminateFriendship (Low 300)
 data class TerminateFriendshipPacket(
     val messageName: String = "TerminateFriendship",
-    val messageNumber: Int = 300,
+    val messageNumber: Long = 300L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(300)
+        buffer.putInt((300L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6063,14 +6063,14 @@ data class TerminateFriendshipPacket(
 // Message: OfferCallingCard (Low 301)
 data class OfferCallingCardPacket(
     val messageName: String = "OfferCallingCard",
-    val messageNumber: Int = 301,
+    val messageNumber: Long = 301L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(301)
+        buffer.putInt((301L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6079,14 +6079,14 @@ data class OfferCallingCardPacket(
 // Message: AcceptCallingCard (Low 302)
 data class AcceptCallingCardPacket(
     val messageName: String = "AcceptCallingCard",
-    val messageNumber: Int = 302,
+    val messageNumber: Long = 302L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(302)
+        buffer.putInt((302L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6095,14 +6095,14 @@ data class AcceptCallingCardPacket(
 // Message: DeclineCallingCard (Low 303)
 data class DeclineCallingCardPacket(
     val messageName: String = "DeclineCallingCard",
-    val messageNumber: Int = 303,
+    val messageNumber: Long = 303L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(303)
+        buffer.putInt((303L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6111,14 +6111,14 @@ data class DeclineCallingCardPacket(
 // Message: RezScript (Low 304)
 data class RezScriptPacket(
     val messageName: String = "RezScript",
-    val messageNumber: Int = 304,
+    val messageNumber: Long = 304L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(304)
+        buffer.putInt((304L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6127,14 +6127,14 @@ data class RezScriptPacket(
 // Message: CreateInventoryItem (Low 305)
 data class CreateInventoryItemPacket(
     val messageName: String = "CreateInventoryItem",
-    val messageNumber: Int = 305,
+    val messageNumber: Long = 305L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(305)
+        buffer.putInt((305L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6143,14 +6143,14 @@ data class CreateInventoryItemPacket(
 // Message: CreateLandmarkForEvent (Low 306)
 data class CreateLandmarkForEventPacket(
     val messageName: String = "CreateLandmarkForEvent",
-    val messageNumber: Int = 306,
+    val messageNumber: Long = 306L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(306)
+        buffer.putInt((306L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6159,14 +6159,14 @@ data class CreateLandmarkForEventPacket(
 // Message: EventLocationRequest (Low 307)
 data class EventLocationRequestPacket(
     val messageName: String = "EventLocationRequest",
-    val messageNumber: Int = 307,
+    val messageNumber: Long = 307L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(307)
+        buffer.putInt((307L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6175,14 +6175,14 @@ data class EventLocationRequestPacket(
 // Message: EventLocationReply (Low 308)
 data class EventLocationReplyPacket(
     val messageName: String = "EventLocationReply",
-    val messageNumber: Int = 308,
+    val messageNumber: Long = 308L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(308)
+        buffer.putInt((308L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6191,14 +6191,14 @@ data class EventLocationReplyPacket(
 // Message: RegionHandleRequest (Low 309)
 data class RegionHandleRequestPacket(
     val messageName: String = "RegionHandleRequest",
-    val messageNumber: Int = 309,
+    val messageNumber: Long = 309L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(309)
+        buffer.putInt((309L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6207,14 +6207,14 @@ data class RegionHandleRequestPacket(
 // Message: RegionIDAndHandleReply (Low 310)
 data class RegionIDAndHandleReplyPacket(
     val messageName: String = "RegionIDAndHandleReply",
-    val messageNumber: Int = 310,
+    val messageNumber: Long = 310L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(310)
+        buffer.putInt((310L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6223,14 +6223,14 @@ data class RegionIDAndHandleReplyPacket(
 // Message: MoneyTransferRequest (Low 311)
 data class MoneyTransferRequestPacket(
     val messageName: String = "MoneyTransferRequest",
-    val messageNumber: Int = 311,
+    val messageNumber: Long = 311L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(311)
+        buffer.putInt((311L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6239,14 +6239,14 @@ data class MoneyTransferRequestPacket(
 // Message: MoneyTransferBackend (Low 312)
 data class MoneyTransferBackendPacket(
     val messageName: String = "MoneyTransferBackend",
-    val messageNumber: Int = 312,
+    val messageNumber: Long = 312L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(312)
+        buffer.putInt((312L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6255,14 +6255,14 @@ data class MoneyTransferBackendPacket(
 // Message: MoneyBalanceRequest (Low 313)
 data class MoneyBalanceRequestPacket(
     val messageName: String = "MoneyBalanceRequest",
-    val messageNumber: Int = 313,
+    val messageNumber: Long = 313L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(313)
+        buffer.putInt((313L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6271,14 +6271,14 @@ data class MoneyBalanceRequestPacket(
 // Message: MoneyBalanceReply (Low 314)
 data class MoneyBalanceReplyPacket(
     val messageName: String = "MoneyBalanceReply",
-    val messageNumber: Int = 314,
+    val messageNumber: Long = 314L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(314)
+        buffer.putInt((314L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6287,14 +6287,14 @@ data class MoneyBalanceReplyPacket(
 // Message: RoutedMoneyBalanceReply (Low 315)
 data class RoutedMoneyBalanceReplyPacket(
     val messageName: String = "RoutedMoneyBalanceReply",
-    val messageNumber: Int = 315,
+    val messageNumber: Long = 315L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(315)
+        buffer.putInt((315L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6303,14 +6303,14 @@ data class RoutedMoneyBalanceReplyPacket(
 // Message: ActivateGestures (Low 316)
 data class ActivateGesturesPacket(
     val messageName: String = "ActivateGestures",
-    val messageNumber: Int = 316,
+    val messageNumber: Long = 316L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(316)
+        buffer.putInt((316L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6319,14 +6319,14 @@ data class ActivateGesturesPacket(
 // Message: DeactivateGestures (Low 317)
 data class DeactivateGesturesPacket(
     val messageName: String = "DeactivateGestures",
-    val messageNumber: Int = 317,
+    val messageNumber: Long = 317L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(317)
+        buffer.putInt((317L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6335,14 +6335,14 @@ data class DeactivateGesturesPacket(
 // Message: MuteListUpdate (Low 318)
 data class MuteListUpdatePacket(
     val messageName: String = "MuteListUpdate",
-    val messageNumber: Int = 318,
+    val messageNumber: Long = 318L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(318)
+        buffer.putInt((318L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6351,14 +6351,14 @@ data class MuteListUpdatePacket(
 // Message: UseCachedMuteList (Low 319)
 data class UseCachedMuteListPacket(
     val messageName: String = "UseCachedMuteList",
-    val messageNumber: Int = 319,
+    val messageNumber: Long = 319L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(319)
+        buffer.putInt((319L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6367,14 +6367,14 @@ data class UseCachedMuteListPacket(
 // Message: GrantUserRights (Low 320)
 data class GrantUserRightsPacket(
     val messageName: String = "GrantUserRights",
-    val messageNumber: Int = 320,
+    val messageNumber: Long = 320L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(320)
+        buffer.putInt((320L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6383,14 +6383,14 @@ data class GrantUserRightsPacket(
 // Message: ChangeUserRights (Low 321)
 data class ChangeUserRightsPacket(
     val messageName: String = "ChangeUserRights",
-    val messageNumber: Int = 321,
+    val messageNumber: Long = 321L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(321)
+        buffer.putInt((321L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6399,14 +6399,14 @@ data class ChangeUserRightsPacket(
 // Message: OnlineNotification (Low 322)
 data class OnlineNotificationPacket(
     val messageName: String = "OnlineNotification",
-    val messageNumber: Int = 322,
+    val messageNumber: Long = 322L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(322)
+        buffer.putInt((322L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6415,14 +6415,14 @@ data class OnlineNotificationPacket(
 // Message: OfflineNotification (Low 323)
 data class OfflineNotificationPacket(
     val messageName: String = "OfflineNotification",
-    val messageNumber: Int = 323,
+    val messageNumber: Long = 323L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(323)
+        buffer.putInt((323L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6431,14 +6431,14 @@ data class OfflineNotificationPacket(
 // Message: SetStartLocationRequest (Low 324)
 data class SetStartLocationRequestPacket(
     val messageName: String = "SetStartLocationRequest",
-    val messageNumber: Int = 324,
+    val messageNumber: Long = 324L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(324)
+        buffer.putInt((324L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6447,14 +6447,14 @@ data class SetStartLocationRequestPacket(
 // Message: SetStartLocation (Low 325)
 data class SetStartLocationPacket(
     val messageName: String = "SetStartLocation",
-    val messageNumber: Int = 325,
+    val messageNumber: Long = 325L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(325)
+        buffer.putInt((325L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6463,14 +6463,14 @@ data class SetStartLocationPacket(
 // Message: NetTest (Low 326)
 data class NetTestPacket(
     val messageName: String = "NetTest",
-    val messageNumber: Int = 326,
+    val messageNumber: Long = 326L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(326)
+        buffer.putInt((326L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6479,14 +6479,14 @@ data class NetTestPacket(
 // Message: SetCPURatio (Low 327)
 data class SetCPURatioPacket(
     val messageName: String = "SetCPURatio",
-    val messageNumber: Int = 327,
+    val messageNumber: Long = 327L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(327)
+        buffer.putInt((327L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6495,14 +6495,14 @@ data class SetCPURatioPacket(
 // Message: SimCrashed (Low 328)
 data class SimCrashedPacket(
     val messageName: String = "SimCrashed",
-    val messageNumber: Int = 328,
+    val messageNumber: Long = 328L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(328)
+        buffer.putInt((328L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6511,14 +6511,14 @@ data class SimCrashedPacket(
 // Message: NameValuePair (Low 329)
 data class NameValuePairPacket(
     val messageName: String = "NameValuePair",
-    val messageNumber: Int = 329,
+    val messageNumber: Long = 329L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(329)
+        buffer.putInt((329L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6527,14 +6527,14 @@ data class NameValuePairPacket(
 // Message: RemoveNameValuePair (Low 330)
 data class RemoveNameValuePairPacket(
     val messageName: String = "RemoveNameValuePair",
-    val messageNumber: Int = 330,
+    val messageNumber: Long = 330L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(330)
+        buffer.putInt((330L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6543,14 +6543,14 @@ data class RemoveNameValuePairPacket(
 // Message: UpdateAttachment (Low 331)
 data class UpdateAttachmentPacket(
     val messageName: String = "UpdateAttachment",
-    val messageNumber: Int = 331,
+    val messageNumber: Long = 331L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(331)
+        buffer.putInt((331L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6559,14 +6559,14 @@ data class UpdateAttachmentPacket(
 // Message: RemoveAttachment (Low 332)
 data class RemoveAttachmentPacket(
     val messageName: String = "RemoveAttachment",
-    val messageNumber: Int = 332,
+    val messageNumber: Long = 332L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(332)
+        buffer.putInt((332L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6575,14 +6575,14 @@ data class RemoveAttachmentPacket(
 // Message: SoundTrigger (High 29)
 data class SoundTriggerPacket(
     val messageName: String = "SoundTrigger",
-    val messageNumber: Int = 29,
+    val messageNumber: Long = 29L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(29)
+        buffer.putInt((29L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6591,14 +6591,14 @@ data class SoundTriggerPacket(
 // Message: AttachedSound (Medium 13)
 data class AttachedSoundPacket(
     val messageName: String = "AttachedSound",
-    val messageNumber: Int = 13,
+    val messageNumber: Long = 13L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(13)
+        buffer.putInt((13L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6607,14 +6607,14 @@ data class AttachedSoundPacket(
 // Message: AttachedSoundGainChange (Medium 14)
 data class AttachedSoundGainChangePacket(
     val messageName: String = "AttachedSoundGainChange",
-    val messageNumber: Int = 14,
+    val messageNumber: Long = 14L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(14)
+        buffer.putInt((14L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6623,14 +6623,14 @@ data class AttachedSoundGainChangePacket(
 // Message: PreloadSound (Medium 15)
 data class PreloadSoundPacket(
     val messageName: String = "PreloadSound",
-    val messageNumber: Int = 15,
+    val messageNumber: Long = 15L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(15)
+        buffer.putInt((15L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6639,14 +6639,14 @@ data class PreloadSoundPacket(
 // Message: ObjectAnimation (High 30)
 data class ObjectAnimationPacket(
     val messageName: String = "ObjectAnimation",
-    val messageNumber: Int = 30,
+    val messageNumber: Long = 30L,
     val frequency: String = "High",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(30)
+        buffer.putInt((30L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6655,14 +6655,14 @@ data class ObjectAnimationPacket(
 // Message: AssetUploadRequest (Low 333)
 data class AssetUploadRequestPacket(
     val messageName: String = "AssetUploadRequest",
-    val messageNumber: Int = 333,
+    val messageNumber: Long = 333L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(333)
+        buffer.putInt((333L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6671,14 +6671,14 @@ data class AssetUploadRequestPacket(
 // Message: AssetUploadComplete (Low 334)
 data class AssetUploadCompletePacket(
     val messageName: String = "AssetUploadComplete",
-    val messageNumber: Int = 334,
+    val messageNumber: Long = 334L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(334)
+        buffer.putInt((334L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6687,14 +6687,14 @@ data class AssetUploadCompletePacket(
 // Message: EmailMessageRequest (Low 335)
 data class EmailMessageRequestPacket(
     val messageName: String = "EmailMessageRequest",
-    val messageNumber: Int = 335,
+    val messageNumber: Long = 335L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(335)
+        buffer.putInt((335L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6703,14 +6703,14 @@ data class EmailMessageRequestPacket(
 // Message: EmailMessageReply (Low 336)
 data class EmailMessageReplyPacket(
     val messageName: String = "EmailMessageReply",
-    val messageNumber: Int = 336,
+    val messageNumber: Long = 336L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(336)
+        buffer.putInt((336L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6719,14 +6719,14 @@ data class EmailMessageReplyPacket(
 // Message: InternalScriptMail (Medium 16)
 data class InternalScriptMailPacket(
     val messageName: String = "InternalScriptMail",
-    val messageNumber: Int = 16,
+    val messageNumber: Long = 16L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(16)
+        buffer.putInt((16L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6735,14 +6735,14 @@ data class InternalScriptMailPacket(
 // Message: ScriptDataRequest (Low 337)
 data class ScriptDataRequestPacket(
     val messageName: String = "ScriptDataRequest",
-    val messageNumber: Int = 337,
+    val messageNumber: Long = 337L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(337)
+        buffer.putInt((337L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6751,14 +6751,14 @@ data class ScriptDataRequestPacket(
 // Message: ScriptDataReply (Low 338)
 data class ScriptDataReplyPacket(
     val messageName: String = "ScriptDataReply",
-    val messageNumber: Int = 338,
+    val messageNumber: Long = 338L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(338)
+        buffer.putInt((338L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6767,14 +6767,14 @@ data class ScriptDataReplyPacket(
 // Message: CreateGroupRequest (Low 339)
 data class CreateGroupRequestPacket(
     val messageName: String = "CreateGroupRequest",
-    val messageNumber: Int = 339,
+    val messageNumber: Long = 339L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(339)
+        buffer.putInt((339L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6783,14 +6783,14 @@ data class CreateGroupRequestPacket(
 // Message: CreateGroupReply (Low 340)
 data class CreateGroupReplyPacket(
     val messageName: String = "CreateGroupReply",
-    val messageNumber: Int = 340,
+    val messageNumber: Long = 340L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(340)
+        buffer.putInt((340L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6799,14 +6799,14 @@ data class CreateGroupReplyPacket(
 // Message: UpdateGroupInfo (Low 341)
 data class UpdateGroupInfoPacket(
     val messageName: String = "UpdateGroupInfo",
-    val messageNumber: Int = 341,
+    val messageNumber: Long = 341L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(341)
+        buffer.putInt((341L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6815,14 +6815,14 @@ data class UpdateGroupInfoPacket(
 // Message: GroupRoleChanges (Low 342)
 data class GroupRoleChangesPacket(
     val messageName: String = "GroupRoleChanges",
-    val messageNumber: Int = 342,
+    val messageNumber: Long = 342L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(342)
+        buffer.putInt((342L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6831,14 +6831,14 @@ data class GroupRoleChangesPacket(
 // Message: JoinGroupRequest (Low 343)
 data class JoinGroupRequestPacket(
     val messageName: String = "JoinGroupRequest",
-    val messageNumber: Int = 343,
+    val messageNumber: Long = 343L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(343)
+        buffer.putInt((343L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6847,14 +6847,14 @@ data class JoinGroupRequestPacket(
 // Message: JoinGroupReply (Low 344)
 data class JoinGroupReplyPacket(
     val messageName: String = "JoinGroupReply",
-    val messageNumber: Int = 344,
+    val messageNumber: Long = 344L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(344)
+        buffer.putInt((344L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6863,14 +6863,14 @@ data class JoinGroupReplyPacket(
 // Message: EjectGroupMemberRequest (Low 345)
 data class EjectGroupMemberRequestPacket(
     val messageName: String = "EjectGroupMemberRequest",
-    val messageNumber: Int = 345,
+    val messageNumber: Long = 345L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(345)
+        buffer.putInt((345L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6879,14 +6879,14 @@ data class EjectGroupMemberRequestPacket(
 // Message: EjectGroupMemberReply (Low 346)
 data class EjectGroupMemberReplyPacket(
     val messageName: String = "EjectGroupMemberReply",
-    val messageNumber: Int = 346,
+    val messageNumber: Long = 346L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(346)
+        buffer.putInt((346L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6895,14 +6895,14 @@ data class EjectGroupMemberReplyPacket(
 // Message: LeaveGroupRequest (Low 347)
 data class LeaveGroupRequestPacket(
     val messageName: String = "LeaveGroupRequest",
-    val messageNumber: Int = 347,
+    val messageNumber: Long = 347L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(347)
+        buffer.putInt((347L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6911,14 +6911,14 @@ data class LeaveGroupRequestPacket(
 // Message: LeaveGroupReply (Low 348)
 data class LeaveGroupReplyPacket(
     val messageName: String = "LeaveGroupReply",
-    val messageNumber: Int = 348,
+    val messageNumber: Long = 348L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(348)
+        buffer.putInt((348L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6927,14 +6927,14 @@ data class LeaveGroupReplyPacket(
 // Message: InviteGroupRequest (Low 349)
 data class InviteGroupRequestPacket(
     val messageName: String = "InviteGroupRequest",
-    val messageNumber: Int = 349,
+    val messageNumber: Long = 349L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(349)
+        buffer.putInt((349L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6943,14 +6943,14 @@ data class InviteGroupRequestPacket(
 // Message: InviteGroupResponse (Low 350)
 data class InviteGroupResponsePacket(
     val messageName: String = "InviteGroupResponse",
-    val messageNumber: Int = 350,
+    val messageNumber: Long = 350L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(350)
+        buffer.putInt((350L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6959,14 +6959,14 @@ data class InviteGroupResponsePacket(
 // Message: GroupProfileRequest (Low 351)
 data class GroupProfileRequestPacket(
     val messageName: String = "GroupProfileRequest",
-    val messageNumber: Int = 351,
+    val messageNumber: Long = 351L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(351)
+        buffer.putInt((351L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6975,14 +6975,14 @@ data class GroupProfileRequestPacket(
 // Message: GroupProfileReply (Low 352)
 data class GroupProfileReplyPacket(
     val messageName: String = "GroupProfileReply",
-    val messageNumber: Int = 352,
+    val messageNumber: Long = 352L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(352)
+        buffer.putInt((352L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -6991,14 +6991,14 @@ data class GroupProfileReplyPacket(
 // Message: GroupAccountSummaryRequest (Low 353)
 data class GroupAccountSummaryRequestPacket(
     val messageName: String = "GroupAccountSummaryRequest",
-    val messageNumber: Int = 353,
+    val messageNumber: Long = 353L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(353)
+        buffer.putInt((353L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7007,14 +7007,14 @@ data class GroupAccountSummaryRequestPacket(
 // Message: GroupAccountSummaryReply (Low 354)
 data class GroupAccountSummaryReplyPacket(
     val messageName: String = "GroupAccountSummaryReply",
-    val messageNumber: Int = 354,
+    val messageNumber: Long = 354L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(354)
+        buffer.putInt((354L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7023,14 +7023,14 @@ data class GroupAccountSummaryReplyPacket(
 // Message: GroupAccountDetailsRequest (Low 355)
 data class GroupAccountDetailsRequestPacket(
     val messageName: String = "GroupAccountDetailsRequest",
-    val messageNumber: Int = 355,
+    val messageNumber: Long = 355L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(355)
+        buffer.putInt((355L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7039,14 +7039,14 @@ data class GroupAccountDetailsRequestPacket(
 // Message: GroupAccountDetailsReply (Low 356)
 data class GroupAccountDetailsReplyPacket(
     val messageName: String = "GroupAccountDetailsReply",
-    val messageNumber: Int = 356,
+    val messageNumber: Long = 356L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(356)
+        buffer.putInt((356L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7055,14 +7055,14 @@ data class GroupAccountDetailsReplyPacket(
 // Message: GroupAccountTransactionsRequest (Low 357)
 data class GroupAccountTransactionsRequestPacket(
     val messageName: String = "GroupAccountTransactionsRequest",
-    val messageNumber: Int = 357,
+    val messageNumber: Long = 357L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(357)
+        buffer.putInt((357L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7071,14 +7071,14 @@ data class GroupAccountTransactionsRequestPacket(
 // Message: GroupAccountTransactionsReply (Low 358)
 data class GroupAccountTransactionsReplyPacket(
     val messageName: String = "GroupAccountTransactionsReply",
-    val messageNumber: Int = 358,
+    val messageNumber: Long = 358L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(358)
+        buffer.putInt((358L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7087,14 +7087,14 @@ data class GroupAccountTransactionsReplyPacket(
 // Message: GroupActiveProposalsRequest (Low 359)
 data class GroupActiveProposalsRequestPacket(
     val messageName: String = "GroupActiveProposalsRequest",
-    val messageNumber: Int = 359,
+    val messageNumber: Long = 359L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(359)
+        buffer.putInt((359L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7103,14 +7103,14 @@ data class GroupActiveProposalsRequestPacket(
 // Message: GroupActiveProposalItemReply (Low 360)
 data class GroupActiveProposalItemReplyPacket(
     val messageName: String = "GroupActiveProposalItemReply",
-    val messageNumber: Int = 360,
+    val messageNumber: Long = 360L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(360)
+        buffer.putInt((360L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7119,14 +7119,14 @@ data class GroupActiveProposalItemReplyPacket(
 // Message: GroupVoteHistoryRequest (Low 361)
 data class GroupVoteHistoryRequestPacket(
     val messageName: String = "GroupVoteHistoryRequest",
-    val messageNumber: Int = 361,
+    val messageNumber: Long = 361L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(361)
+        buffer.putInt((361L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7135,14 +7135,14 @@ data class GroupVoteHistoryRequestPacket(
 // Message: GroupVoteHistoryItemReply (Low 362)
 data class GroupVoteHistoryItemReplyPacket(
     val messageName: String = "GroupVoteHistoryItemReply",
-    val messageNumber: Int = 362,
+    val messageNumber: Long = 362L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(362)
+        buffer.putInt((362L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7151,14 +7151,14 @@ data class GroupVoteHistoryItemReplyPacket(
 // Message: StartGroupProposal (Low 363)
 data class StartGroupProposalPacket(
     val messageName: String = "StartGroupProposal",
-    val messageNumber: Int = 363,
+    val messageNumber: Long = 363L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(363)
+        buffer.putInt((363L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7167,14 +7167,14 @@ data class StartGroupProposalPacket(
 // Message: GroupProposalBallot (Low 364)
 data class GroupProposalBallotPacket(
     val messageName: String = "GroupProposalBallot",
-    val messageNumber: Int = 364,
+    val messageNumber: Long = 364L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(364)
+        buffer.putInt((364L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7183,14 +7183,14 @@ data class GroupProposalBallotPacket(
 // Message: TallyVotes (Low 365)
 data class TallyVotesPacket(
     val messageName: String = "TallyVotes",
-    val messageNumber: Int = 365,
+    val messageNumber: Long = 365L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(365)
+        buffer.putInt((365L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7199,14 +7199,14 @@ data class TallyVotesPacket(
 // Message: GroupMembersRequest (Low 366)
 data class GroupMembersRequestPacket(
     val messageName: String = "GroupMembersRequest",
-    val messageNumber: Int = 366,
+    val messageNumber: Long = 366L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(366)
+        buffer.putInt((366L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7215,14 +7215,14 @@ data class GroupMembersRequestPacket(
 // Message: GroupMembersReply (Low 367)
 data class GroupMembersReplyPacket(
     val messageName: String = "GroupMembersReply",
-    val messageNumber: Int = 367,
+    val messageNumber: Long = 367L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(367)
+        buffer.putInt((367L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7231,14 +7231,14 @@ data class GroupMembersReplyPacket(
 // Message: ActivateGroup (Low 368)
 data class ActivateGroupPacket(
     val messageName: String = "ActivateGroup",
-    val messageNumber: Int = 368,
+    val messageNumber: Long = 368L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(368)
+        buffer.putInt((368L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7247,14 +7247,14 @@ data class ActivateGroupPacket(
 // Message: SetGroupContribution (Low 369)
 data class SetGroupContributionPacket(
     val messageName: String = "SetGroupContribution",
-    val messageNumber: Int = 369,
+    val messageNumber: Long = 369L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(369)
+        buffer.putInt((369L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7263,14 +7263,14 @@ data class SetGroupContributionPacket(
 // Message: SetGroupAcceptNotices (Low 370)
 data class SetGroupAcceptNoticesPacket(
     val messageName: String = "SetGroupAcceptNotices",
-    val messageNumber: Int = 370,
+    val messageNumber: Long = 370L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(370)
+        buffer.putInt((370L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7279,14 +7279,14 @@ data class SetGroupAcceptNoticesPacket(
 // Message: GroupRoleDataRequest (Low 371)
 data class GroupRoleDataRequestPacket(
     val messageName: String = "GroupRoleDataRequest",
-    val messageNumber: Int = 371,
+    val messageNumber: Long = 371L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(371)
+        buffer.putInt((371L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7295,14 +7295,14 @@ data class GroupRoleDataRequestPacket(
 // Message: GroupRoleDataReply (Low 372)
 data class GroupRoleDataReplyPacket(
     val messageName: String = "GroupRoleDataReply",
-    val messageNumber: Int = 372,
+    val messageNumber: Long = 372L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(372)
+        buffer.putInt((372L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7311,14 +7311,14 @@ data class GroupRoleDataReplyPacket(
 // Message: GroupRoleMembersRequest (Low 373)
 data class GroupRoleMembersRequestPacket(
     val messageName: String = "GroupRoleMembersRequest",
-    val messageNumber: Int = 373,
+    val messageNumber: Long = 373L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(373)
+        buffer.putInt((373L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7327,14 +7327,14 @@ data class GroupRoleMembersRequestPacket(
 // Message: GroupRoleMembersReply (Low 374)
 data class GroupRoleMembersReplyPacket(
     val messageName: String = "GroupRoleMembersReply",
-    val messageNumber: Int = 374,
+    val messageNumber: Long = 374L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(374)
+        buffer.putInt((374L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7343,14 +7343,14 @@ data class GroupRoleMembersReplyPacket(
 // Message: GroupTitlesRequest (Low 375)
 data class GroupTitlesRequestPacket(
     val messageName: String = "GroupTitlesRequest",
-    val messageNumber: Int = 375,
+    val messageNumber: Long = 375L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(375)
+        buffer.putInt((375L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7359,14 +7359,14 @@ data class GroupTitlesRequestPacket(
 // Message: GroupTitlesReply (Low 376)
 data class GroupTitlesReplyPacket(
     val messageName: String = "GroupTitlesReply",
-    val messageNumber: Int = 376,
+    val messageNumber: Long = 376L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(376)
+        buffer.putInt((376L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7375,14 +7375,14 @@ data class GroupTitlesReplyPacket(
 // Message: GroupTitleUpdate (Low 377)
 data class GroupTitleUpdatePacket(
     val messageName: String = "GroupTitleUpdate",
-    val messageNumber: Int = 377,
+    val messageNumber: Long = 377L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(377)
+        buffer.putInt((377L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7391,14 +7391,14 @@ data class GroupTitleUpdatePacket(
 // Message: GroupRoleUpdate (Low 378)
 data class GroupRoleUpdatePacket(
     val messageName: String = "GroupRoleUpdate",
-    val messageNumber: Int = 378,
+    val messageNumber: Long = 378L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(378)
+        buffer.putInt((378L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7407,14 +7407,14 @@ data class GroupRoleUpdatePacket(
 // Message: LiveHelpGroupRequest (Low 379)
 data class LiveHelpGroupRequestPacket(
     val messageName: String = "LiveHelpGroupRequest",
-    val messageNumber: Int = 379,
+    val messageNumber: Long = 379L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(379)
+        buffer.putInt((379L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7423,14 +7423,14 @@ data class LiveHelpGroupRequestPacket(
 // Message: LiveHelpGroupReply (Low 380)
 data class LiveHelpGroupReplyPacket(
     val messageName: String = "LiveHelpGroupReply",
-    val messageNumber: Int = 380,
+    val messageNumber: Long = 380L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(380)
+        buffer.putInt((380L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7439,14 +7439,14 @@ data class LiveHelpGroupReplyPacket(
 // Message: AgentWearablesRequest (Low 381)
 data class AgentWearablesRequestPacket(
     val messageName: String = "AgentWearablesRequest",
-    val messageNumber: Int = 381,
+    val messageNumber: Long = 381L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(381)
+        buffer.putInt((381L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7455,14 +7455,14 @@ data class AgentWearablesRequestPacket(
 // Message: AgentWearablesUpdate (Low 382)
 data class AgentWearablesUpdatePacket(
     val messageName: String = "AgentWearablesUpdate",
-    val messageNumber: Int = 382,
+    val messageNumber: Long = 382L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(382)
+        buffer.putInt((382L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7471,14 +7471,14 @@ data class AgentWearablesUpdatePacket(
 // Message: AgentIsNowWearing (Low 383)
 data class AgentIsNowWearingPacket(
     val messageName: String = "AgentIsNowWearing",
-    val messageNumber: Int = 383,
+    val messageNumber: Long = 383L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(383)
+        buffer.putInt((383L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7487,14 +7487,14 @@ data class AgentIsNowWearingPacket(
 // Message: AgentCachedTexture (Low 384)
 data class AgentCachedTexturePacket(
     val messageName: String = "AgentCachedTexture",
-    val messageNumber: Int = 384,
+    val messageNumber: Long = 384L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(384)
+        buffer.putInt((384L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7503,14 +7503,14 @@ data class AgentCachedTexturePacket(
 // Message: AgentCachedTextureResponse (Low 385)
 data class AgentCachedTextureResponsePacket(
     val messageName: String = "AgentCachedTextureResponse",
-    val messageNumber: Int = 385,
+    val messageNumber: Long = 385L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(385)
+        buffer.putInt((385L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7519,14 +7519,14 @@ data class AgentCachedTextureResponsePacket(
 // Message: AgentDataUpdateRequest (Low 386)
 data class AgentDataUpdateRequestPacket(
     val messageName: String = "AgentDataUpdateRequest",
-    val messageNumber: Int = 386,
+    val messageNumber: Long = 386L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(386)
+        buffer.putInt((386L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7535,14 +7535,14 @@ data class AgentDataUpdateRequestPacket(
 // Message: AgentDataUpdate (Low 387)
 data class AgentDataUpdatePacket(
     val messageName: String = "AgentDataUpdate",
-    val messageNumber: Int = 387,
+    val messageNumber: Long = 387L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(387)
+        buffer.putInt((387L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7551,14 +7551,14 @@ data class AgentDataUpdatePacket(
 // Message: GroupDataUpdate (Low 388)
 data class GroupDataUpdatePacket(
     val messageName: String = "GroupDataUpdate",
-    val messageNumber: Int = 388,
+    val messageNumber: Long = 388L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(388)
+        buffer.putInt((388L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7567,14 +7567,14 @@ data class GroupDataUpdatePacket(
 // Message: AgentGroupDataUpdate (Low 389)
 data class AgentGroupDataUpdatePacket(
     val messageName: String = "AgentGroupDataUpdate",
-    val messageNumber: Int = 389,
+    val messageNumber: Long = 389L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(389)
+        buffer.putInt((389L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7583,14 +7583,14 @@ data class AgentGroupDataUpdatePacket(
 // Message: AgentDropGroup (Low 390)
 data class AgentDropGroupPacket(
     val messageName: String = "AgentDropGroup",
-    val messageNumber: Int = 390,
+    val messageNumber: Long = 390L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(390)
+        buffer.putInt((390L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7599,14 +7599,14 @@ data class AgentDropGroupPacket(
 // Message: LogTextMessage (Low 391)
 data class LogTextMessagePacket(
     val messageName: String = "LogTextMessage",
-    val messageNumber: Int = 391,
+    val messageNumber: Long = 391L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(391)
+        buffer.putInt((391L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7615,14 +7615,14 @@ data class LogTextMessagePacket(
 // Message: ViewerEffect (Medium 17)
 data class ViewerEffectPacket(
     val messageName: String = "ViewerEffect",
-    val messageNumber: Int = 17,
+    val messageNumber: Long = 17L,
     val frequency: String = "Medium",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(17)
+        buffer.putInt((17L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7631,14 +7631,14 @@ data class ViewerEffectPacket(
 // Message: CreateTrustedCircuit (Low 392)
 data class CreateTrustedCircuitPacket(
     val messageName: String = "CreateTrustedCircuit",
-    val messageNumber: Int = 392,
+    val messageNumber: Long = 392L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(392)
+        buffer.putInt((392L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7647,14 +7647,14 @@ data class CreateTrustedCircuitPacket(
 // Message: DenyTrustedCircuit (Low 393)
 data class DenyTrustedCircuitPacket(
     val messageName: String = "DenyTrustedCircuit",
-    val messageNumber: Int = 393,
+    val messageNumber: Long = 393L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(393)
+        buffer.putInt((393L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7663,14 +7663,14 @@ data class DenyTrustedCircuitPacket(
 // Message: RequestTrustedCircuit (Low 394)
 data class RequestTrustedCircuitPacket(
     val messageName: String = "RequestTrustedCircuit",
-    val messageNumber: Int = 394,
+    val messageNumber: Long = 394L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(394)
+        buffer.putInt((394L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7679,14 +7679,14 @@ data class RequestTrustedCircuitPacket(
 // Message: RezSingleAttachmentFromInv (Low 395)
 data class RezSingleAttachmentFromInvPacket(
     val messageName: String = "RezSingleAttachmentFromInv",
-    val messageNumber: Int = 395,
+    val messageNumber: Long = 395L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(395)
+        buffer.putInt((395L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7695,14 +7695,14 @@ data class RezSingleAttachmentFromInvPacket(
 // Message: RezMultipleAttachmentsFromInv (Low 396)
 data class RezMultipleAttachmentsFromInvPacket(
     val messageName: String = "RezMultipleAttachmentsFromInv",
-    val messageNumber: Int = 396,
+    val messageNumber: Long = 396L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(396)
+        buffer.putInt((396L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7711,14 +7711,14 @@ data class RezMultipleAttachmentsFromInvPacket(
 // Message: DetachAttachmentIntoInv (Low 397)
 data class DetachAttachmentIntoInvPacket(
     val messageName: String = "DetachAttachmentIntoInv",
-    val messageNumber: Int = 397,
+    val messageNumber: Long = 397L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(397)
+        buffer.putInt((397L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7727,14 +7727,14 @@ data class DetachAttachmentIntoInvPacket(
 // Message: CreateNewOutfitAttachments (Low 398)
 data class CreateNewOutfitAttachmentsPacket(
     val messageName: String = "CreateNewOutfitAttachments",
-    val messageNumber: Int = 398,
+    val messageNumber: Long = 398L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(398)
+        buffer.putInt((398L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7743,14 +7743,14 @@ data class CreateNewOutfitAttachmentsPacket(
 // Message: UserInfoRequest (Low 399)
 data class UserInfoRequestPacket(
     val messageName: String = "UserInfoRequest",
-    val messageNumber: Int = 399,
+    val messageNumber: Long = 399L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(399)
+        buffer.putInt((399L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7759,14 +7759,14 @@ data class UserInfoRequestPacket(
 // Message: UserInfoReply (Low 400)
 data class UserInfoReplyPacket(
     val messageName: String = "UserInfoReply",
-    val messageNumber: Int = 400,
+    val messageNumber: Long = 400L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(400)
+        buffer.putInt((400L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7775,14 +7775,14 @@ data class UserInfoReplyPacket(
 // Message: UpdateUserInfo (Low 401)
 data class UpdateUserInfoPacket(
     val messageName: String = "UpdateUserInfo",
-    val messageNumber: Int = 401,
+    val messageNumber: Long = 401L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(401)
+        buffer.putInt((401L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7791,14 +7791,14 @@ data class UpdateUserInfoPacket(
 // Message: ParcelRename (Low 402)
 data class ParcelRenamePacket(
     val messageName: String = "ParcelRename",
-    val messageNumber: Int = 402,
+    val messageNumber: Long = 402L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(402)
+        buffer.putInt((402L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7807,14 +7807,14 @@ data class ParcelRenamePacket(
 // Message: InitiateDownload (Low 403)
 data class InitiateDownloadPacket(
     val messageName: String = "InitiateDownload",
-    val messageNumber: Int = 403,
+    val messageNumber: Long = 403L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(403)
+        buffer.putInt((403L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7823,14 +7823,14 @@ data class InitiateDownloadPacket(
 // Message: SystemMessage (Low 404)
 data class SystemMessagePacket(
     val messageName: String = "SystemMessage",
-    val messageNumber: Int = 404,
+    val messageNumber: Long = 404L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(404)
+        buffer.putInt((404L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7839,14 +7839,14 @@ data class SystemMessagePacket(
 // Message: MapLayerRequest (Low 405)
 data class MapLayerRequestPacket(
     val messageName: String = "MapLayerRequest",
-    val messageNumber: Int = 405,
+    val messageNumber: Long = 405L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(405)
+        buffer.putInt((405L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7855,14 +7855,14 @@ data class MapLayerRequestPacket(
 // Message: MapLayerReply (Low 406)
 data class MapLayerReplyPacket(
     val messageName: String = "MapLayerReply",
-    val messageNumber: Int = 406,
+    val messageNumber: Long = 406L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(406)
+        buffer.putInt((406L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7871,14 +7871,14 @@ data class MapLayerReplyPacket(
 // Message: MapBlockRequest (Low 407)
 data class MapBlockRequestPacket(
     val messageName: String = "MapBlockRequest",
-    val messageNumber: Int = 407,
+    val messageNumber: Long = 407L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(407)
+        buffer.putInt((407L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7887,14 +7887,14 @@ data class MapBlockRequestPacket(
 // Message: MapNameRequest (Low 408)
 data class MapNameRequestPacket(
     val messageName: String = "MapNameRequest",
-    val messageNumber: Int = 408,
+    val messageNumber: Long = 408L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(408)
+        buffer.putInt((408L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7903,14 +7903,14 @@ data class MapNameRequestPacket(
 // Message: MapBlockReply (Low 409)
 data class MapBlockReplyPacket(
     val messageName: String = "MapBlockReply",
-    val messageNumber: Int = 409,
+    val messageNumber: Long = 409L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(409)
+        buffer.putInt((409L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7919,14 +7919,14 @@ data class MapBlockReplyPacket(
 // Message: MapItemRequest (Low 410)
 data class MapItemRequestPacket(
     val messageName: String = "MapItemRequest",
-    val messageNumber: Int = 410,
+    val messageNumber: Long = 410L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(410)
+        buffer.putInt((410L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7935,14 +7935,14 @@ data class MapItemRequestPacket(
 // Message: MapItemReply (Low 411)
 data class MapItemReplyPacket(
     val messageName: String = "MapItemReply",
-    val messageNumber: Int = 411,
+    val messageNumber: Long = 411L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(411)
+        buffer.putInt((411L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7951,14 +7951,14 @@ data class MapItemReplyPacket(
 // Message: SendPostcard (Low 412)
 data class SendPostcardPacket(
     val messageName: String = "SendPostcard",
-    val messageNumber: Int = 412,
+    val messageNumber: Long = 412L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(412)
+        buffer.putInt((412L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7967,14 +7967,14 @@ data class SendPostcardPacket(
 // Message: RpcChannelRequest (Low 413)
 data class RpcChannelRequestPacket(
     val messageName: String = "RpcChannelRequest",
-    val messageNumber: Int = 413,
+    val messageNumber: Long = 413L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(413)
+        buffer.putInt((413L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7983,14 +7983,14 @@ data class RpcChannelRequestPacket(
 // Message: RpcChannelReply (Low 414)
 data class RpcChannelReplyPacket(
     val messageName: String = "RpcChannelReply",
-    val messageNumber: Int = 414,
+    val messageNumber: Long = 414L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(414)
+        buffer.putInt((414L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -7999,14 +7999,14 @@ data class RpcChannelReplyPacket(
 // Message: RpcScriptRequestInbound (Low 415)
 data class RpcScriptRequestInboundPacket(
     val messageName: String = "RpcScriptRequestInbound",
-    val messageNumber: Int = 415,
+    val messageNumber: Long = 415L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(415)
+        buffer.putInt((415L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8015,14 +8015,14 @@ data class RpcScriptRequestInboundPacket(
 // Message: RpcScriptRequestInboundForward (Low 416)
 data class RpcScriptRequestInboundForwardPacket(
     val messageName: String = "RpcScriptRequestInboundForward",
-    val messageNumber: Int = 416,
+    val messageNumber: Long = 416L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(416)
+        buffer.putInt((416L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8031,14 +8031,14 @@ data class RpcScriptRequestInboundForwardPacket(
 // Message: RpcScriptReplyInbound (Low 417)
 data class RpcScriptReplyInboundPacket(
     val messageName: String = "RpcScriptReplyInbound",
-    val messageNumber: Int = 417,
+    val messageNumber: Long = 417L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(417)
+        buffer.putInt((417L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8047,14 +8047,14 @@ data class RpcScriptReplyInboundPacket(
 // Message: ScriptMailRegistration (Low 418)
 data class ScriptMailRegistrationPacket(
     val messageName: String = "ScriptMailRegistration",
-    val messageNumber: Int = 418,
+    val messageNumber: Long = 418L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(418)
+        buffer.putInt((418L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8063,14 +8063,14 @@ data class ScriptMailRegistrationPacket(
 // Message: ParcelMediaCommandMessage (Low 419)
 data class ParcelMediaCommandMessagePacket(
     val messageName: String = "ParcelMediaCommandMessage",
-    val messageNumber: Int = 419,
+    val messageNumber: Long = 419L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(419)
+        buffer.putInt((419L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8079,14 +8079,14 @@ data class ParcelMediaCommandMessagePacket(
 // Message: ParcelMediaUpdate (Low 420)
 data class ParcelMediaUpdatePacket(
     val messageName: String = "ParcelMediaUpdate",
-    val messageNumber: Int = 420,
+    val messageNumber: Long = 420L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(420)
+        buffer.putInt((420L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8095,14 +8095,14 @@ data class ParcelMediaUpdatePacket(
 // Message: LandStatRequest (Low 421)
 data class LandStatRequestPacket(
     val messageName: String = "LandStatRequest",
-    val messageNumber: Int = 421,
+    val messageNumber: Long = 421L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(421)
+        buffer.putInt((421L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8111,14 +8111,14 @@ data class LandStatRequestPacket(
 // Message: LandStatReply (Low 422)
 data class LandStatReplyPacket(
     val messageName: String = "LandStatReply",
-    val messageNumber: Int = 422,
+    val messageNumber: Long = 422L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(422)
+        buffer.putInt((422L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8127,14 +8127,14 @@ data class LandStatReplyPacket(
 // Message: Error (Low 423)
 data class ErrorPacket(
     val messageName: String = "Error",
-    val messageNumber: Int = 423,
+    val messageNumber: Long = 423L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(423)
+        buffer.putInt((423L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8143,14 +8143,14 @@ data class ErrorPacket(
 // Message: ObjectIncludeInSearch (Low 424)
 data class ObjectIncludeInSearchPacket(
     val messageName: String = "ObjectIncludeInSearch",
-    val messageNumber: Int = 424,
+    val messageNumber: Long = 424L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(424)
+        buffer.putInt((424L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8159,14 +8159,14 @@ data class ObjectIncludeInSearchPacket(
 // Message: RezRestoreToWorld (Low 425)
 data class RezRestoreToWorldPacket(
     val messageName: String = "RezRestoreToWorld",
-    val messageNumber: Int = 425,
+    val messageNumber: Long = 425L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(425)
+        buffer.putInt((425L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8175,14 +8175,14 @@ data class RezRestoreToWorldPacket(
 // Message: LinkInventoryItem (Low 426)
 data class LinkInventoryItemPacket(
     val messageName: String = "LinkInventoryItem",
-    val messageNumber: Int = 426,
+    val messageNumber: Long = 426L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(426)
+        buffer.putInt((426L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8191,14 +8191,14 @@ data class LinkInventoryItemPacket(
 // Message: RetrieveIMsExtended (Low 427)
 data class RetrieveIMsExtendedPacket(
     val messageName: String = "RetrieveIMsExtended",
-    val messageNumber: Int = 427,
+    val messageNumber: Long = 427L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(427)
+        buffer.putInt((427L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8207,14 +8207,14 @@ data class RetrieveIMsExtendedPacket(
 // Message: JoinGroupRequestExtended (Low 428)
 data class JoinGroupRequestExtendedPacket(
     val messageName: String = "JoinGroupRequestExtended",
-    val messageNumber: Int = 428,
+    val messageNumber: Long = 428L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(428)
+        buffer.putInt((428L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8223,14 +8223,14 @@ data class JoinGroupRequestExtendedPacket(
 // Message: CreateGroupRequestExtended (Low 429)
 data class CreateGroupRequestExtendedPacket(
     val messageName: String = "CreateGroupRequestExtended",
-    val messageNumber: Int = 429,
+    val messageNumber: Long = 429L,
     val frequency: String = "Low",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(429)
+        buffer.putInt((429L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -8239,14 +8239,14 @@ data class CreateGroupRequestExtendedPacket(
 // Message: GameControlInput (High 32)
 data class GameControlInputPacket(
     val messageName: String = "GameControlInput",
-    val messageNumber: Int = 32,
+    val messageNumber: Long = 32L,
     val frequency: String = "High",
     val isZerocoded: Boolean = true
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(32)
+        buffer.putInt((32L).toInt())
         return buffer.array().copyOf(buffer.position())
     }
 

@@ -38,10 +38,10 @@ class JavaEmitter(BaseEmitter):
 
         out.append("public class GeneratedProtocol {")
         out.append(f'    public static final String TEMPLATE_VERSION = "{ast.version}";')
-        out.append("    public static final Map<String, Integer> REGISTERED_MESSAGES = new HashMap<>();\n")
+        out.append("    public static final Map<String, Long> REGISTERED_MESSAGES = new HashMap<>();\n")
         out.append("    static {")
         for msg in ast.messages:
-            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {msg.message_number});')
+            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {msg.message_number}L);')
         out.append("    }\n")
 
         out.append("""    public static byte[] decompressZerocoded(byte[] src) {
@@ -83,6 +83,7 @@ class JavaEmitter(BaseEmitter):
         out = []
         out.append(self.get_header_warning("//"))
         out.append("package com.linkpoint.protocol.java.generated;\n")
+        out.append("import java.util.List;\n")
 
         out.append("public class GeneratedLLSDCapabilities {")
         for schema in ast.llsd_schemas:
@@ -95,6 +96,8 @@ class JavaEmitter(BaseEmitter):
                     j_type = "Double"
                 elif prop.data_type == "boolean":
                     j_type = "Boolean"
+                elif prop.data_type == "array":
+                    j_type = "List<String>"
                 out.append(f"        public {j_type} {p_name};")
             out.append("    }\n")
         out.append("}")

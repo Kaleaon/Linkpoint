@@ -5,10 +5,12 @@
 
 package com.linkpoint.protocol.java.generated;
 
+import java.util.List;
+
 public class GeneratedLLSDCapabilities {
     public static class EventQueueGetCapabilities {
         public Integer ack;
-        public String events;
+        public List<String> events;
     }
 
     public static class AgentDomainCapabilitiesCapabilities {
@@ -23,7 +25,7 @@ public class GeneratedLLSDCapabilities {
     }
 
     public static class CapabilitiesRequestResponseCapabilities {
-        public String capabilities;
+        public List<String> capabilities;
         public String seed_response;
         public String fetch_inventory;
     }
