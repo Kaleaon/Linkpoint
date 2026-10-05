@@ -7,6 +7,8 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.messages.EnhancedPacketLogger
 import com.linkpoint.protocol.messages.MessageIdNameRegistry
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -14,6 +16,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -30,6 +33,8 @@ import java.util.concurrent.atomic.AtomicLong
  * - Region transitions
  *
  * Designed for full diagnostic output to help debug connection and protocol issues.
+ * Offloads string formatting, hex dumps, and SharedPreferences reads to a dedicated
+ * background Coroutine channel worker to keep network processing threads 100% non-blocking.
  *
  * IMPORTANT: Logs are saved to app-private internal storage by default.
  * Public sharing is only done through an explicit export action.
@@ -50,14 +55,22 @@ object SessionLogRecorder {
     private const val SESSION_LOG_PREFIX = "session_log_"
     private const val SESSION_LOG_SUFFIX = ".txt"
 
-    // Buffer management
+    // Buffer and Channel management
     private const val MAX_MEMORY_ENTRIES = 500
     private const val FLUSH_INTERVAL_MS = 10000L // Flush every 10 seconds
+    private const val BOUNDED_CHANNEL_CAPACITY = 2000
+    private const val BACKPRESSURE_WATERMARK = 1500
 
     // Recording state
     private val isRecording = AtomicBoolean(false)
     private val sessionStartTime = AtomicLong(0)
     private val entryCount = AtomicLong(0)
+
+    // Channel for async non-blocking log events
+    private var logChannel: Channel<LogEvent>? = null
+    private var workerJob: Job? = null
+    private val pendingQueueSize = AtomicInteger(0)
+    private val droppedEntriesCount = AtomicLong(0)
 
     // In-memory buffer for log entries
     private val logBuffer = ConcurrentLinkedQueue<LogEntry>()
@@ -66,8 +79,9 @@ object SessionLogRecorder {
     private var currentLogFile: File? = null
     private var logWriter: BufferedWriter? = null
 
-    // Context for file operations
+    // Context and directory for file operations
     private var appContext: Context? = null
+    private var testLogDir: File? = null
 
     // Coroutine scope for background operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -76,6 +90,25 @@ object SessionLogRecorder {
     // Date formatters
     private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     private val fileNameFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+
+    /**
+     * Internal event hierarchy processed asynchronously off network threads
+     */
+    sealed interface LogEvent {
+        val timestamp: Long
+
+        data class RawPacket(val rawEvent: RawPacketEvent) : LogEvent {
+            override val timestamp: Long get() = rawEvent.timestamp
+        }
+
+        data class Text(
+            override val timestamp: Long,
+            val type: EntryType,
+            val tag: String,
+            val message: String,
+            val stackTrace: String? = null
+        ) : LogEvent
+    }
 
     /**
      * Log entry types for categorization
@@ -153,7 +186,9 @@ object SessionLogRecorder {
         val totalEntries: Long,
         val entriesInMemory: Int,
         val currentLogFile: String?,
-        val logFileSizeBytes: Long
+        val logFileSizeBytes: Long,
+        val pendingChannelEvents: Int = 0,
+        val droppedEntries: Long = 0
     )
 
     /**
@@ -162,7 +197,14 @@ object SessionLogRecorder {
      */
     fun initialize(context: Context) {
         appContext = context.applicationContext
-        Log.i(TAG, "SessionLogRecorder initialized")
+        safeLogI("SessionLogRecorder initialized")
+    }
+
+    /**
+     * Initialize the recorder for testing with a target log directory.
+     */
+    fun initializeForTest(dir: File) {
+        testLogDir = dir
     }
 
     /**
@@ -171,18 +213,24 @@ object SessionLogRecorder {
      */
     fun startRecording(): Boolean {
         if (isRecording.getAndSet(true)) {
-            Log.w(TAG, "Recording already in progress")
+            safeLogW("Recording already in progress")
             return false
         }
 
         try {
             sessionStartTime.set(System.currentTimeMillis())
             entryCount.set(0)
+            droppedEntriesCount.set(0)
+            pendingQueueSize.set(0)
             logBuffer.clear()
+
+            // Initialize bounded Coroutine Channel
+            val channel = Channel<LogEvent>(BOUNDED_CHANNEL_CAPACITY, BufferOverflow.SUSPEND)
+            logChannel = channel
 
             // Create log file
             val logDir = getLogDirectory() ?: run {
-                Log.e(TAG, "Could not get log directory")
+                safeLogE("Could not get log directory")
                 isRecording.set(false)
                 return false
             }
@@ -202,17 +250,18 @@ object SessionLogRecorder {
             // Write header
             writeHeader()
 
-            // Start periodic flush
+            // Start worker job and periodic flush
+            startWorkerJob(channel)
             startFlushJob()
 
             // Log start event
             log(EntryType.APP_LIFECYCLE, TAG, "Session recording STARTED")
 
-            Log.i(TAG, "Session recording started: ${currentLogFile?.absolutePath}")
+            safeLogI("Session recording started: ${currentLogFile?.absolutePath}")
             return true
 
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to start recording", e)
+            safeLogE("Failed to start recording", e)
             isRecording.set(false)
             return false
         }
@@ -220,10 +269,11 @@ object SessionLogRecorder {
 
     /**
      * Stop recording and finalize the log file.
+     * Drains all remaining channel events to guarantee log completeness.
      */
     fun stopRecording(): File? {
         if (!isRecording.getAndSet(false)) {
-            Log.w(TAG, "Recording not in progress")
+            safeLogW("Recording not in progress")
             return null
         }
 
@@ -231,7 +281,18 @@ object SessionLogRecorder {
             // Log stop event
             log(EntryType.APP_LIFECYCLE, TAG, "Session recording STOPPED")
 
-            // Stop flush job
+            // Close channel so consumer drains all remaining events
+            val channel = logChannel
+            logChannel = null
+            channel?.close()
+
+            // Wait for background worker to consume all remaining channel elements
+            runBlocking {
+                workerJob?.join()
+            }
+            workerJob = null
+
+            // Stop periodic flush job
             flushJob?.cancel()
             flushJob = null
 
@@ -248,11 +309,11 @@ object SessionLogRecorder {
             val resultFile = currentLogFile
             currentLogFile = null
 
-            Log.i(TAG, "Session recording stopped: ${resultFile?.absolutePath}")
+            safeLogI("Session recording stopped: ${resultFile?.absolutePath}")
             return resultFile
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error stopping recording", e)
+            safeLogE("Error stopping recording", e)
             return null
         }
     }
@@ -274,8 +335,56 @@ object SessionLogRecorder {
             totalEntries = entryCount.get(),
             entriesInMemory = logBuffer.size,
             currentLogFile = currentLogFile?.absolutePath,
-            logFileSizeBytes = currentLogFile?.length() ?: 0
+            logFileSizeBytes = currentLogFile?.length() ?: 0,
+            pendingChannelEvents = pendingQueueSize.get(),
+            droppedEntries = droppedEntriesCount.get()
         )
+    }
+
+    /**
+     * Enqueue a raw packet event to the non-blocking channel.
+     * Enforces queue backpressure bounds to protect heap memory.
+     */
+    fun enqueueRawPacket(rawEvent: RawPacketEvent) {
+        if (!isRecording.get()) return
+
+        val channel = logChannel ?: return
+        val currentSize = pendingQueueSize.get()
+
+        // Guard memory under backpressure by dropping optional hex dump byte array
+        val candidate = if (currentSize > BACKPRESSURE_WATERMARK && rawEvent.payload != null) {
+            rawEvent.copy(payload = null)
+        } else {
+            rawEvent
+        }
+
+        val result = channel.trySend(LogEvent.RawPacket(candidate))
+        if (result.isSuccess) {
+            pendingQueueSize.incrementAndGet()
+        } else {
+            // Channel full: try dropping payload if not already dropped
+            if (candidate.payload != null) {
+                val payloadless = candidate.copy(payload = null)
+                val fallbackResult = channel.trySend(LogEvent.RawPacket(payloadless))
+                if (fallbackResult.isSuccess) {
+                    pendingQueueSize.incrementAndGet()
+                    return
+                }
+            }
+            droppedEntriesCount.incrementAndGet()
+        }
+    }
+
+    private fun enqueueText(event: LogEvent.Text) {
+        if (!isRecording.get()) return
+
+        val channel = logChannel ?: return
+        val result = channel.trySend(event)
+        if (result.isSuccess) {
+            pendingQueueSize.incrementAndGet()
+        } else {
+            droppedEntriesCount.incrementAndGet()
+        }
     }
 
     /**
@@ -284,13 +393,14 @@ object SessionLogRecorder {
     fun log(type: EntryType, tag: String, message: String) {
         if (!isRecording.get()) return
 
-        val entry = LogEntry(
-            timestamp = System.currentTimeMillis(),
-            type = type,
-            tag = tag,
-            message = message
+        enqueueText(
+            LogEvent.Text(
+                timestamp = System.currentTimeMillis(),
+                type = type,
+                tag = tag,
+                message = message
+            )
         )
-        addEntry(entry)
     }
 
     /**
@@ -299,17 +409,15 @@ object SessionLogRecorder {
     fun logWithHex(type: EntryType, tag: String, message: String, data: ByteArray) {
         if (!isRecording.get()) return
 
-        val context = appContext
-        val includeHexDump = context != null && DiagnosticsLoggingConfig.isVerbosePacketLoggingEnabled(context)
-        val hexDump = if (includeHexDump) data.joinToString(" ") { "%02X".format(it) } else null
-        val entry = LogEntry(
+        val payloadCopy = if (data.isNotEmpty()) data.copyOf() else null
+        val event = RawPacketEvent(
             timestamp = System.currentTimeMillis(),
             type = type,
             tag = tag,
-            message = message,
-            hexDump = hexDump
+            customMessage = message,
+            payload = payloadCopy
         )
-        addEntry(entry)
+        enqueueRawPacket(event)
     }
 
     /**
@@ -320,14 +428,15 @@ object SessionLogRecorder {
             return
         }
 
-        val entry = LogEntry(
-            timestamp = System.currentTimeMillis(),
-            type = EntryType.ERROR,
-            tag = tag,
-            message = message,
-            stackTrace = error?.stackTraceToString()?.take(1000)
+        enqueueText(
+            LogEvent.Text(
+                timestamp = System.currentTimeMillis(),
+                type = EntryType.ERROR,
+                tag = tag,
+                message = message,
+                stackTrace = error?.stackTraceToString()?.take(1000)
+            )
         )
-        addEntry(entry)
     }
 
     /**
@@ -342,16 +451,18 @@ object SessionLogRecorder {
     ) {
         if (!isRecording.get()) return
 
-        val message = buildString {
-            append("→ SENT: $messageName")
-            append(" (ID: 0x${MessageIdNameRegistry.formatHex(messageId)}")
-            append(", seq: $sequenceNumber")
-            append(", size: ${data.size}B")
-            if (reliable) append(", RELIABLE")
-            append(")")
-        }
-
-        logWithHex(EntryType.PACKET_SENT, "UDP", message, data)
+        val payloadCopy = if (data.isNotEmpty()) data.copyOf() else null
+        val event = RawPacketEvent(
+            timestamp = System.currentTimeMillis(),
+            type = EntryType.PACKET_SENT,
+            tag = "UDP",
+            messageId = messageId,
+            messageName = messageName,
+            sequenceNumber = sequenceNumber,
+            reliable = reliable,
+            payload = payloadCopy
+        )
+        enqueueRawPacket(event)
     }
 
     /**
@@ -366,15 +477,18 @@ object SessionLogRecorder {
     ) {
         if (!isRecording.get()) return
 
-        val handlerStatus = if (handlerFound) "✓" else "⚠️ NO HANDLER"
-        val message = buildString {
-            append("← RECV: $messageName $handlerStatus")
-            append(" (ID: 0x${MessageIdNameRegistry.formatHex(messageId)}")
-            append(", seq: $sequenceNumber")
-            append(", size: ${data.size}B)")
-        }
-
-        logWithHex(EntryType.PACKET_RECEIVED, "UDP", message, data)
+        val payloadCopy = if (data.isNotEmpty()) data.copyOf() else null
+        val event = RawPacketEvent(
+            timestamp = System.currentTimeMillis(),
+            type = EntryType.PACKET_RECEIVED,
+            tag = "UDP",
+            messageId = messageId,
+            messageName = messageName,
+            sequenceNumber = sequenceNumber,
+            handlerFound = handlerFound,
+            payload = payloadCopy
+        )
+        enqueueRawPacket(event)
     }
 
     /**
@@ -446,18 +560,7 @@ object SessionLogRecorder {
     }
 
     /**
-     * Log a renderer lifecycle / OpenGL / Filament event. Convenience
-     * wrapper used by [com.linkpoint.render.RenderDiagnostics] so every
-     * render-relevant moment from app start through frame loop ends up
-     * in the same session-log timeline as packets, HTTP, and connection
-     * state changes.
-     *
-     * @param subsystem human-readable engine label, e.g. "Filament",
-     *   "OpenGL", "Lumiya". Becomes the entry's tag.
-     * @param event short event id, e.g. "engine_create",
-     *   "swapchain_create", "surface_changed", "first_frame", "stall".
-     * @param details optional free-form detail (sizes, error codes,
-     *   GPU vendor strings, etc.).
+     * Log a renderer lifecycle / OpenGL / Filament event.
      */
     fun logRender(subsystem: String, event: String, details: String? = null) {
         if (!isRecording.get()) return
@@ -482,11 +585,7 @@ object SessionLogRecorder {
     }
 
     /**
-     * Log region change. `regionHandle` is null when invoked from RegionHandshake
-     * (the LL message body does not carry it — only EnableSimulator and
-     * AgentMovementComplete do), in which case the line is omitted instead of
-     * printed as `Handle: 0`, which previously made captures look like a parser
-     * bug (2026-04-26 Athanasia capture).
+     * Log region change.
      */
     fun logRegionChange(regionName: String, regionHandle: Long?, position: String? = null) {
         if (!isRecording.get()) return
@@ -504,13 +603,11 @@ object SessionLogRecorder {
      */
     fun exportLog(): File? {
         if (!isRecording.get()) {
-            Log.w(TAG, "Cannot export - not recording")
+            safeLogW("Cannot export - not recording")
             return currentLogFile
         }
 
-        // Flush current buffer
-        flushToFile()
-
+        flushChannelAndFile()
         return currentLogFile
     }
 
@@ -523,7 +620,71 @@ object SessionLogRecorder {
 
     // ==================== PRIVATE METHODS ====================
 
-    private fun addEntry(entry: LogEntry) {
+    private fun startWorkerJob(channel: Channel<LogEvent>) {
+        workerJob = scope.launch(Dispatchers.IO + CoroutineName("SessionLogRecorder-Worker")) {
+            for (event in channel) {
+                pendingQueueSize.decrementAndGet()
+                processLogEvent(event)
+            }
+        }
+    }
+
+    private fun processLogEvent(event: LogEvent) {
+        when (event) {
+            is LogEvent.RawPacket -> {
+                val raw = event.rawEvent
+                val formattedMessage = raw.customMessage ?: when (raw.type) {
+                    EntryType.PACKET_SENT -> {
+                        buildString {
+                            append("→ SENT: ${raw.messageName ?: "UNKNOWN"}")
+                            append(" (ID: 0x${MessageIdNameRegistry.formatHex(raw.messageId ?: 0)}")
+                            append(", seq: ${raw.sequenceNumber ?: 0}")
+                            append(", size: ${raw.payload?.size ?: 0}B")
+                            if (raw.reliable == true) append(", RELIABLE")
+                            append(")")
+                        }
+                    }
+                    EntryType.PACKET_RECEIVED -> {
+                        val handlerStatus = if (raw.handlerFound == true) "✓" else "⚠️ NO HANDLER"
+                        buildString {
+                            append("← RECV: ${raw.messageName ?: "UNKNOWN"} $handlerStatus")
+                            append(" (ID: 0x${MessageIdNameRegistry.formatHex(raw.messageId ?: 0)}")
+                            append(", seq: ${raw.sequenceNumber ?: 0}")
+                            append(", size: ${raw.payload?.size ?: 0}B)")
+                        }
+                    }
+                    else -> raw.customMessage ?: ""
+                }
+
+                val context = appContext
+                val includeHexDump = context != null && DiagnosticsLoggingConfig.isVerbosePacketLoggingEnabled(context)
+                val hexDump = if (includeHexDump && raw.payload != null) {
+                    raw.payload.joinToString(" ") { "%02X".format(it) }
+                } else null
+
+                val entry = LogEntry(
+                    timestamp = raw.timestamp,
+                    type = raw.type,
+                    tag = raw.tag,
+                    message = formattedMessage,
+                    hexDump = hexDump
+                )
+                addEntryInternal(entry)
+            }
+            is LogEvent.Text -> {
+                val entry = LogEntry(
+                    timestamp = event.timestamp,
+                    type = event.type,
+                    tag = event.tag,
+                    message = event.message,
+                    stackTrace = event.stackTrace
+                )
+                addEntryInternal(entry)
+            }
+        }
+    }
+
+    private fun addEntryInternal(entry: LogEntry) {
         val sanitizedEntry = entry.copy(
             message = DiagnosticsLogSanitizer.sanitize(entry.message),
             hexDump = entry.hexDump,
@@ -534,9 +695,7 @@ object SessionLogRecorder {
 
         // Trigger flush if buffer is getting large
         if (logBuffer.size > MAX_MEMORY_ENTRIES) {
-            scope.launch {
-                flushToFile()
-            }
+            flushToFile()
         }
     }
 
@@ -547,6 +706,14 @@ object SessionLogRecorder {
                 flushToFile()
             }
         }
+    }
+
+    private fun flushChannelAndFile() {
+        val startMs = System.currentTimeMillis()
+        while (pendingQueueSize.get() > 0 && System.currentTimeMillis() - startMs < 1000) {
+            Thread.sleep(10)
+        }
+        flushToFile()
     }
 
     private fun flushToFile() {
@@ -561,7 +728,7 @@ object SessionLogRecorder {
                 writer.flush()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error flushing to file", e)
+            safeLogE("Error flushing to file", e)
         }
     }
 
@@ -589,7 +756,7 @@ object SessionLogRecorder {
             writer.write("═".repeat(70) + "\n\n")
             writer.flush()
         } catch (e: Exception) {
-            Log.e(TAG, "Error writing header", e)
+            safeLogE("Error writing header", e)
         }
     }
 
@@ -605,6 +772,9 @@ object SessionLogRecorder {
             writer.write("Session End: ${timestampFormat.format(Date(now))}\n")
             writer.write("Duration: ${formatDuration(duration)}\n")
             writer.write("Total Entries: ${entryCount.get()}\n")
+            if (droppedEntriesCount.get() > 0) {
+                writer.write("Dropped Entries (Queue Backpressure): ${droppedEntriesCount.get()}\n")
+            }
             writer.write("\n")
 
             // Include EnhancedPacketLogger statistics
@@ -628,7 +798,7 @@ object SessionLogRecorder {
             writer.write("╚══════════════════════════════════════════════════════════════════╝\n")
             writer.flush()
         } catch (e: Exception) {
-            Log.e(TAG, "Error writing footer", e)
+            safeLogE("Error writing footer", e)
         }
     }
 
@@ -636,6 +806,13 @@ object SessionLogRecorder {
      * Get the app-private diagnostics directory.
      */
     private fun getLogDirectory(): File? {
+        val testDir = testLogDir
+        if (testDir != null) {
+            if (!testDir.exists()) {
+                testDir.mkdirs()
+            }
+            return testDir
+        }
         val context = appContext ?: return null
         val logDir = File(DiagnosticsLoggingConfig.diagnosticsDirectory(context), LOG_DIR_NAME)
 
@@ -646,7 +823,7 @@ object SessionLogRecorder {
 
             return logDir
         } catch (e: Exception) {
-            Log.e(TAG, "Error accessing app-private diagnostics directory: ${e.message}", e)
+            safeLogE("Error accessing app-private diagnostics directory: ${e.message}", e)
         }
 
         return null
@@ -667,6 +844,20 @@ object SessionLogRecorder {
             bytes < 1024 * 1024 -> String.format(Locale.US, "%.2f KB", bytes / 1024.0)
             else -> String.format(Locale.US, "%.2f MB", bytes / (1024.0 * 1024.0))
         }
+    }
+
+    private fun safeLogI(msg: String) {
+        try { Log.i(TAG, msg) } catch (_: Throwable) {}
+    }
+
+    private fun safeLogW(msg: String) {
+        try { Log.w(TAG, msg) } catch (_: Throwable) {}
+    }
+
+    private fun safeLogE(msg: String, e: Throwable? = null) {
+        try {
+            if (e != null) Log.e(TAG, msg, e) else Log.e(TAG, msg)
+        } catch (_: Throwable) {}
     }
 
     /**
