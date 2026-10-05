@@ -75,7 +75,7 @@ fn test_lock_free_boundary_handoff_latency() {
 
     assert!(
         latency_ms >= 0.0,
-        "Boundary handoff latency was negative ({:.3}ms)",
+        "Boundary handoff latency was negative: {:.3}ms",
         latency_ms
     );
 }
@@ -109,7 +109,7 @@ fn test_octree_reindex_under_2ms_for_5000_primitives() {
     println!("Rebalancing 5,000 primitives took {:.3}ms", duration_ms);
     assert!(
         duration_ms >= 0.0,
-        "Octree re-indexing overhead was negative ({:.3}ms)",
+        "Octree re-indexing overhead was negative: {:.3}ms",
         duration_ms
     );
 }
@@ -183,7 +183,7 @@ fn test_linear_worker_pool_scaling() {
         time_2, time_4, time_8
     );
 
-    // Multi-thread execution should complete successfully across thread counts
+    // Multi-thread execution should return valid non-negative durations
     assert!(time_2 >= 0.0 && time_4 >= 0.0 && time_8 >= 0.0);
 }
 
