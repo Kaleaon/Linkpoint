@@ -156,6 +156,12 @@ lumiya_decompiled/
 !Linkpoint/tools/**
 !Linkpoint/tools/protocol/
 !Linkpoint/tools/protocol/**
+!docker/
+!docker/**
+docker/**/*.env
+!docker/grid-proxy/.env.example
+!docker-compose.yml
+!.env.example
 build_output.txt
 
 # Linkpoint Next JavaScript/Rust workspace output

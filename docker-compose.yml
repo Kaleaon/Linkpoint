@@ -1,0 +1,148 @@
+name: opensim-grid
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: opensim-mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-opensim}
+      MYSQL_USER: ${MYSQL_USER:-opensim}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-opensimpass}
+    volumes:
+      - grid_db_data:/var/lib/mysql
+    networks:
+      - opensim_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  grid-bootstrap:
+    build:
+      context: ./docker/grid-proxy/grid-bootstrap
+      dockerfile: Dockerfile
+    container_name: opensim-grid-bootstrap
+    restart: "no"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-opensim}
+      MYSQL_USER: ${MYSQL_USER:-opensim}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-opensimpass}
+      CONFIG_DIR: /config
+      SCHEMA_PATH: /db/01-schema.sql
+      ROBUST_PORT: ${ROBUST_PORT:-8002}
+      REGION_PORT: ${REGION_PORT:-8003}
+      WELCOME_MESSAGE: ${WELCOME_MESSAGE:-Welcome to OpenSim Multi-Container Grid!}
+      PUBLIC_URI: ${PUBLIC_URI:-https://localhost}
+      ADMIN_FIRST_NAME: ${ADMIN_FIRST_NAME:-Admin}
+      ADMIN_LAST_NAME: ${ADMIN_LAST_NAME:-User}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-password}
+      REGION_NAME: ${REGION_NAME:-Welcome Region}
+      REGION_ID: ${REGION_ID:-11111111-2222-3333-4444-555555555555}
+      REGION_LOC_X: ${REGION_LOC_X:-1000}
+      REGION_LOC_Y: ${REGION_LOC_Y:-1000}
+      EXTERNAL_HOSTNAME: ${EXTERNAL_HOSTNAME:-localhost}
+    volumes:
+      - grid_config:/config
+      - ./docker/grid-proxy/db:/db:ro
+    networks:
+      - opensim_net
+    depends_on:
+      db:
+        condition: service_healthy
+
+  robust-grid:
+    build:
+      context: ./docker/grid-proxy/robust
+      dockerfile: Dockerfile
+    container_name: opensim-robust-grid
+    restart: always
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-opensim}
+      MYSQL_USER: ${MYSQL_USER:-opensim}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-opensimpass}
+      ROBUST_PORT: ${ROBUST_PORT:-8002}
+      WELCOME_MESSAGE: ${WELCOME_MESSAGE:-Welcome to OpenSim Multi-Container Grid!}
+      PUBLIC_URI: ${PUBLIC_URI:-https://localhost}
+      CONFIG_DIR: /config
+    volumes:
+      - grid_config:/config:ro
+      - grid_asset_storage:/var/opensim/assets
+    ports:
+      - "8002:8002"
+    networks:
+      - opensim_net
+    depends_on:
+      grid-bootstrap:
+        condition: service_completed_successfully
+
+  opensim-region:
+    build:
+      context: ./docker/grid-proxy/opensim-region
+      dockerfile: Dockerfile
+    container_name: opensim-region-sim
+    restart: always
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-opensim}
+      MYSQL_USER: ${MYSQL_USER:-opensim}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-opensimpass}
+      ROBUST_HOST: robust-grid
+      ROBUST_PORT: ${ROBUST_PORT:-8002}
+      REGION_PORT: ${REGION_PORT:-8003}
+      UDP_PORT: ${UDP_PORT:-9000}
+      REGION_NAME: ${REGION_NAME:-Welcome Region}
+      REGION_ID: ${REGION_ID:-11111111-2222-3333-4444-555555555555}
+      REGION_LOC_X: ${REGION_LOC_X:-1000}
+      REGION_LOC_Y: ${REGION_LOC_Y:-1000}
+      PUBLIC_URI: ${PUBLIC_URI:-https://localhost}
+      CONFIG_DIR: /config
+    volumes:
+      - grid_config:/config:ro
+      - region_terrain_storage:/var/opensim/terrain
+    ports:
+      - "8003:8003"
+      - "9000:9000/udp"
+    networks:
+      - opensim_net
+    depends_on:
+      robust-grid:
+        condition: service_healthy
+
+  nginx-proxy:
+    build:
+      context: ./docker/grid-proxy/nginx
+      dockerfile: Dockerfile
+    container_name: opensim-nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_ssl:/etc/nginx/ssl
+    networks:
+      - opensim_net
+    depends_on:
+      robust-grid:
+        condition: service_healthy
+      opensim-region:
+        condition: service_healthy
+
+networks:
+  opensim_net:
+    driver: bridge
+
+volumes:
+  grid_db_data:
+  grid_config:
+  grid_asset_storage:
+  region_terrain_storage:
+  nginx_ssl:

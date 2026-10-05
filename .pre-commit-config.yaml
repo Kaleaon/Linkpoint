@@ -10,11 +10,10 @@ repos:
       - id: end-of-file-fixer
         files: '^(apps/linkpoint/src/)'
         exclude: '.*message_template\.msg$'
-      - id: end-of-file-fixer
-        files: '^(apps/linkpoint/src/)'
-        exclude: '.*message_template\.msg$'
       - id: check-yaml
+        exclude: '^(android-sdk/|lumiya_extracted/|lumiya_decompiled_source/|secondlife_decompiled/|disassembled-apps/|Gauss/|LLSD-KOTLIN/|Linkpoint/src/test/resources/|crates/quick-xml/|vendor/|file_bundle/|apk_analysis/|kotlin-translations/|cmdline-temp/|platforms/|tools/|packages/|apps/|design/|gradle/|app/|src/)'
       - id: check-json
+        exclude: '^(android-sdk/|lumiya_extracted/|lumiya_decompiled_source/|secondlife_decompiled/|disassembled-apps/|Gauss/|LLSD-KOTLIN/|Linkpoint/src/test/resources/|crates/quick-xml/|vendor/|file_bundle/|apk_analysis/|kotlin-translations/|cmdline-temp/|platforms/|tools/|packages/|apps/|design/|gradle/|app/|src/)'
       - id: check-added-large-files
       - id: check-merge-conflict
 
