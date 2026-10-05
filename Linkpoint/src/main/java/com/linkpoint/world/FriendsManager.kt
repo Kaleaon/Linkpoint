@@ -523,14 +523,16 @@ class FriendsManager(
      * Update rights given to friend
      */
     suspend fun updateRightsGiven(friendAgentId: UUID, rights: Int): Boolean {
-        val friend = friends[friendAgentId] ?: return false
+        if (!friends.containsKey(friendAgentId)) {
+            return false
+        }
+        val friend = friends[friendAgentId]!!
 
         return withContext(Dispatchers.IO) {
             try {
                 // GrantUserRights message
-                val payload = ByteBuffer.allocate(56).order(ByteOrder.LITTLE_ENDIAN)
-
                 // AgentData - UUIDs use big-endian per SL protocol
+                val payload = ByteBuffer.allocate(56).order(ByteOrder.LITTLE_ENDIAN)
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
 

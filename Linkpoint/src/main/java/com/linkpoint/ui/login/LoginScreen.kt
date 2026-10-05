@@ -1,5 +1,6 @@
 package com.linkpoint.ui.login
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Settings
@@ -31,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +55,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.linkpoint.R
+import com.linkpoint.auth.SavedAccount
 import com.linkpoint.ui.components.linkpoint2.fx.AuroraBackdrop
 import com.linkpoint.ui.components.linkpoint2.primitives.L2Chip
 import com.linkpoint.ui.components.linkpoint2.primitives.L2ChipVariant
@@ -93,6 +99,10 @@ fun LoginScreen(
     statusMessage: String = "",
     isLoading: Boolean = false,
     isError: Boolean = false,
+    savedAccounts: List<SavedAccount> = emptyList(),
+    onSelectSavedAccount: ((SavedAccount) -> Unit)? = null,
+    onDeleteSavedAccount: ((SavedAccount) -> Unit)? = null,
+    onAddAccount: (() -> Unit)? = null,
     onWebAuthRequested: (() -> Unit)? = null,
     onLogin: (LoginCredentials) -> Unit,
     onOpenSettings: () -> Unit,
@@ -102,6 +112,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var gridExpanded by remember { mutableStateOf(false) }
     var locationExpanded by remember { mutableStateOf(false) }
+    var showSavedSheet by remember { mutableStateOf(false) }
     val scroll = rememberScrollState()
     val tokens = Linkpoint2.tokens
 
@@ -332,22 +343,24 @@ fun LoginScreen(
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         L2GhostButton(
-                            onClick = { /* saved accounts */ },
+                            onClick = { showSavedSheet = true },
                             modifier = Modifier.weight(1f),
                             height = 40.dp,
                         ) { Text(stringResource(R.string.login_saved)) }
+                        L2GhostButton(
+                            onClick = {
+                                credentials = LoginCredentials(selectedGridIndex = credentials.selectedGridIndex)
+                                onAddAccount?.invoke()
+                            },
+                            modifier = Modifier.weight(1f),
+                            height = 40.dp,
+                        ) { Text(stringResource(R.string.login_add_account)) }
                         if (onWebAuthRequested != null) {
                             L2GhostButton(
                                 onClick = onWebAuthRequested,
                                 modifier = Modifier.weight(1f),
                                 height = 40.dp,
                             ) { Text(stringResource(R.string.login_web_2fa)) }
-                        } else {
-                            L2GhostButton(
-                                onClick = { /* add account */ },
-                                modifier = Modifier.weight(1f),
-                                height = 40.dp,
-                            ) { Text(stringResource(R.string.login_add_account)) }
                         }
                     }
 
@@ -381,6 +394,29 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
+        }
+
+        if (showSavedSheet) {
+            SavedAccountsBottomSheet(
+                accounts = savedAccounts,
+                grids = grids,
+                onSelectAccount = { account ->
+                    val matchedIndex = grids.indexOfFirst { it.id.equals(account.gridId, ignoreCase = true) }
+                    credentials = credentials.copy(
+                        firstName = account.firstName,
+                        lastName = account.lastName,
+                        password = account.encryptedPassword,
+                        selectedGridIndex = if (matchedIndex >= 0) matchedIndex else credentials.selectedGridIndex,
+                        savePassword = true,
+                    )
+                    onSelectSavedAccount?.invoke(account)
+                    showSavedSheet = false
+                },
+                onDeleteAccount = { account ->
+                    onDeleteSavedAccount?.invoke(account)
+                },
+                onDismissRequest = { showSavedSheet = false }
+            )
         }
     }
 }
@@ -423,3 +459,117 @@ private fun GridStatusDot(status: String, modifier: Modifier = Modifier) {
         drawCircle(color = color)
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SavedAccountsBottomSheet(
+    accounts: List<SavedAccount>,
+    grids: List<GridDisplayInfo>,
+    onSelectAccount: (SavedAccount) -> Unit,
+    onDeleteAccount: (SavedAccount) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    val tokens = Linkpoint2.tokens
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RoundedCornerShape(topStart = tokens.radii.lg, topEnd = tokens.radii.lg),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "SAVED ACCOUNTS",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.sp,
+                    ),
+                    color = tokens.onSurfaceDim,
+                )
+                L2GhostButton(
+                    onClick = onDismissRequest,
+                    height = 32.dp,
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                ) {
+                    Text("Close", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            if (accounts.isEmpty()) {
+                L2GlassSurface(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(20.dp),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "No saved accounts found",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = tokens.onSurfaceDim,
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    items(accounts) { account ->
+                        val gridName = grids.find { it.id.equals(account.gridId, ignoreCase = true) }?.name ?: account.gridId
+                        L2GlassSurface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSelectAccount(account)
+                                },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = account.displayName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        L2Chip(
+                                            label = gridName,
+                                            variant = L2ChipVariant.Primary,
+                                        )
+                                    }
+                                }
+                                IconButton(
+                                    onClick = { onDeleteAccount(account) },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete account",
+                                        tint = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+

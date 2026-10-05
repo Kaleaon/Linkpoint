@@ -428,7 +428,9 @@ class CrashReporter private constructor(private val context: Context) {
         primaryStoragePath?.let { path ->
             try {
                 val crashDir = File(path)
-                if (!crashDir.exists()) crashDir.mkdirs()
+                if (!crashDir.exists()) {
+                    crashDir.mkdirs()
+                }
 
                 val crashFile = File(crashDir, filename)
                 crashFile.writeText(content)
@@ -626,9 +628,9 @@ class CrashReporter private constructor(private val context: Context) {
      */
     fun generateCrashSummary(): String {
         val crashes = getCrashLogs()
-        val recentCount = crashes.size
 
         return buildString {
+            val recentCount = crashes.size
             appendLine("=== Linkpoint Crash Report Summary ===")
             appendLine()
             appendLine("Total crash logs: $recentCount")
