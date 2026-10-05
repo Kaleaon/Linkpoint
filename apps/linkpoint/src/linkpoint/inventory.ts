@@ -931,4 +931,67 @@ export class InventoryManager extends Utils.EventEmitter {
 
     return result;
   }
+
+  public moveItemUp(id: string): boolean {
+    const entry = this.items.get(id) || this.folders.get(id);
+    if (!entry || !entry.parent) return false;
+    const parentFolder = this.folders.get(entry.parent);
+    if (!parentFolder || !Array.isArray(parentFolder.children)) return false;
+    const idx = parentFolder.children.indexOf(id);
+    if (idx <= 0) return false;
+    const temp = parentFolder.children[idx];
+    parentFolder.children[idx] = parentFolder.children[idx - 1];
+    parentFolder.children[idx - 1] = temp;
+    this.emit('inventory_updated');
+    return true;
+  }
+
+  public moveItemDown(id: string): boolean {
+    const entry = this.items.get(id) || this.folders.get(id);
+    if (!entry || !entry.parent) return false;
+    const parentFolder = this.folders.get(entry.parent);
+    if (!parentFolder || !Array.isArray(parentFolder.children)) return false;
+    const idx = parentFolder.children.indexOf(id);
+    if (idx < 0 || idx >= parentFolder.children.length - 1) return false;
+    const temp = parentFolder.children[idx];
+    parentFolder.children[idx] = parentFolder.children[idx + 1];
+    parentFolder.children[idx + 1] = temp;
+    this.emit('inventory_updated');
+    return true;
+  }
+
+  public moveItemToFolder(id: string, targetFolderId: string): boolean {
+    const entry = this.items.get(id) || this.folders.get(id);
+    if (!entry) return false;
+    if (entry.id === targetFolderId) return false;
+
+    if (entry.type === 'folder') {
+      let curr: any = this.folders.get(targetFolderId);
+      while (curr) {
+        if (curr.id === id) return false;
+        curr = curr.parent ? this.folders.get(curr.parent) : null;
+      }
+    }
+
+    const targetFolder = this.folders.get(targetFolderId);
+    if (!targetFolder) return false;
+
+    if (entry.parent) {
+      const oldParent = this.folders.get(entry.parent);
+      if (oldParent && Array.isArray(oldParent.children)) {
+        oldParent.children = oldParent.children.filter((childId: string) => childId !== id);
+      }
+    }
+
+    entry.parent = targetFolderId;
+    if (!Array.isArray(targetFolder.children)) {
+      targetFolder.children = [];
+    }
+    if (!targetFolder.children.includes(id)) {
+      targetFolder.children.push(id);
+    }
+
+    this.emit('inventory_updated');
+    return true;
+  }
 }
