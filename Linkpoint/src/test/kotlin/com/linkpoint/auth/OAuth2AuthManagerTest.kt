@@ -198,7 +198,7 @@ class OAuth2AuthManagerTest {
     fun testLaunchAuthPortalFallback() {
         val context = org.robolectric.RuntimeEnvironment.getApplication()
         val (authUrl, _) = authManager.startAuthSession()
-        
+
         val launched = authManager.launchAuthPortal(context, authUrl)
         // In Robolectric test environment without registered browser activity, launch returns true (intent created) or false safely without crashing
         assertNotNull(launched)
