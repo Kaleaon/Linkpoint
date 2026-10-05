@@ -198,3 +198,83 @@ fn test_linear_worker_pool_scaling() {
         time_2
     );
 }
+
+#[test]
+fn test_spatial_worker_pool_additional_coverage() {
+    let region_min = [0.0, 0.0, 0.0];
+    let region_max = [256.0, 256.0, 256.0];
+    let chunk_size = [32.0, 32.0, 32.0];
+
+    let manager = SpatialManager::new(region_min, region_max, chunk_size, 4);
+    assert_eq!(manager.pool.worker_count(), 4);
+
+    let entity = SpatialEntity::new(
+        "avatar_test",
+        AABB::new([1.0, 1.0, 1.0], [5.0, 5.0, 5.0]),
+        [3.0, 3.0, 3.0],
+    )
+    .with_type("avatar");
+    assert_eq!(entity.entity_type, "avatar");
+
+    manager.insert(entity);
+
+    // Test parallel_rebalance
+    let rebalance_ms = manager
+        .pool
+        .parallel_rebalance(&manager.grid.lock().unwrap());
+    assert!(rebalance_ms >= 0.0);
+
+    // Test empty parallel_batch_collisions
+    let empty_res = manager.pool.parallel_batch_collisions(&[]);
+    assert!(empty_res.is_empty());
+
+    // Test total_memory_usage_bytes and handoff early return
+    let grid = manager.grid.lock().unwrap();
+    let mem_bytes = grid.total_memory_usage_bytes();
+    assert!(mem_bytes > 0);
+
+    let same_chunk_entity = SpatialEntity::new(
+        "same_chunk",
+        AABB::new([2.0, 2.0, 2.0], [4.0, 4.0, 4.0]),
+        [3.0, 3.0, 3.0],
+    );
+    let same_chunk_id = grid.get_chunk_id([3.0, 3.0, 3.0]);
+    let handoff_same = grid.handoff_boundary_entities(same_chunk_entity, same_chunk_id);
+    assert_eq!(handoff_same.unwrap(), 0.0);
+}
+
+#[test]
+fn test_octree_query_ray_and_remove() {
+    let region_bounds = AABB::new([0.0, 0.0, 0.0], [100.0, 100.0, 100.0]);
+    let mut octree = Octree::new(region_bounds, 4, 2);
+
+    let e1 = SpatialEntity::new(
+        "obj_1",
+        AABB::new([10.0, 10.0, 10.0], [20.0, 20.0, 20.0]),
+        [15.0, 15.0, 15.0],
+    );
+    let e2 = SpatialEntity::new(
+        "obj_2",
+        AABB::new([30.0, 30.0, 30.0], [40.0, 40.0, 40.0]),
+        [35.0, 35.0, 35.0],
+    );
+
+    assert!(octree.insert(e1.clone()));
+    assert!(octree.insert(e2.clone()));
+    assert_eq!(octree.count, 2);
+
+    // Query ray through obj_1
+    let ray_hits = octree.query_ray([0.0, 0.0, 0.0], [1.0, 1.0, 1.0]);
+    assert!(!ray_hits.is_empty());
+
+    // Remove obj_1
+    let removed = octree.remove("obj_1");
+    assert!(removed.is_some());
+    assert_eq!(removed.unwrap().id, "obj_1");
+    assert_eq!(octree.count, 1);
+
+    // Remove non-existent object
+    assert!(octree.remove("non_existent").is_none());
+
+    octree.rebalance();
+}
