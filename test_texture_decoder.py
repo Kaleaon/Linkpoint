@@ -19,6 +19,8 @@ from texture_decoder import (
     decode_jpeg2000_buffer,
     populate_rgba_buffer_python,
     populate_rgba_buffer_native,
+    populate_rgba_buffer_wasm,
+    _get_wasm_decoder,
     _get_native_lib
 )
 from inventory_cache import InventoryCache
@@ -209,6 +211,18 @@ class TestTextureDecoder(unittest.TestCase):
             self.assertEqual(decoded.width, 32)
             self.assertEqual(decoded.height, 32)
             self.assertEqual(len(decoded.buffer), 32 * 32 * 4)
+
+    def test_wasm_environment_fallback(self):
+        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        raw_bytes = jp2_header + b"\x00" * 32
+
+        with patch("texture_decoder.populate_rgba_buffer_native", return_value=None):
+            with patch("texture_decoder._get_wasm_decoder", return_value=None):
+                decoded = decode_jpeg2000_buffer("tex_wasm_fallback", raw_bytes)
+                self.assertEqual(decoded.status, "success")
+                self.assertEqual(decoded.width, 32)
+                self.assertEqual(decoded.height, 32)
+                self.assertEqual(len(decoded.buffer), 32 * 32 * 4)
 
     def test_performance_sub_quarter_second(self):
         # Header specifying 8192x8192 resolution
