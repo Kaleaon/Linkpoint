@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { useRlvSafe, RLV_REDACTED } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
 import { slBridge } from "../linkpoint/sl-bridge.ts";
 import { MAP_WATER_COLOR, indexBlocks, mapRange, mapTileUrl, mapTiles, ratingName, teleportTarget } from "../linkpoint/map-tiles.ts";
@@ -56,12 +57,31 @@ export default function Map() {
   const block = (tile) => blocks?.get(`${tile.x},${tile.y}`) || null;
   const chosen = selected ? { tile: selected, block: block(selected) } : null;
 
+  const rlv = useRlvSafe();
+  const mapRestricted = rlv.restricted("showworldmap");
+  const mapReason = rlv.reasonFor("showworldmap");
+  const tpRestricted = rlv.restricted("tploc") || rlv.restricted("tplm") || rlv.restricted("tpto");
+  const tpReason = rlv.reasonFor("tploc") || rlv.reasonFor("tplm") || rlv.reasonFor("tpto");
+  const locRestricted = rlv.restricted("showloc");
+
   const teleport = async () => {
-    if (!chosen?.block) return;
+    if (!chosen?.block || tpRestricted) return;
     setMessage("");
     try { await app.protocol.teleportTo(teleportTarget(chosen.block)); setMessage(`Teleport to ${chosen.block.name} requested`); }
     catch (error) { setMessage(error?.message || "Teleport failed"); }
   };
+
+  if (mapRestricted) {
+    return (
+      <section className="live-screen" style={{ padding: 24, textAlign: "center" }}>
+        <div style={{ padding: 24, border: `1px solid ${V.outv}`, borderRadius: V.rp, background: V.surf, maxWidth: 480, margin: "40px auto" }}>
+          <Icon name="lock" size={32} style={{ marginBottom: 12, color: V.pri }} />
+          <h2 style={{ fontSize: 18, color: V.ink, marginBottom: 8 }}>World Map Restricted</h2>
+          <p style={{ color: V.ink2, fontSize: 14 }}>{mapReason}</p>
+        </div>
+      </section>
+    );
+  }
 
   const button = { border: `1px solid ${V.outv}`, background: V.surf, color: V.on, borderRadius: 6, padding: "4px 10px", cursor: "pointer" };
 
@@ -90,10 +110,20 @@ export default function Map() {
             <dt>Grid coordinates</dt><dd>{chosen.tile.x}, {chosen.tile.y}</dd>
             {chosen.block ? <><dt>Maturity</dt><dd>{ratingName(chosen.block.access)}</dd></> : <><dt>Region</dt><dd>No region here</dd></>}
           </dl>
-          {chosen.block ? <button type="button" style={button} onClick={teleport}>Teleport</button> : null}
+          {chosen.block ? (
+            <button
+              type="button"
+              style={{ ...button, opacity: tpRestricted ? 0.6 : 1, cursor: tpRestricted ? "not-allowed" : "pointer" }}
+              disabled={tpRestricted}
+              title={tpRestricted ? (tpReason || "Teleport restricted by RLV") : ""}
+              onClick={teleport}
+            >
+              Teleport
+            </button>
+          ) : null}
           {message ? <small role="status">{message}</small> : null}
         </> : <>
-          <h2 style={{ font: `600 18px/1.3 ${t.dfont}` }}>{region.name || "Current region"}</h2>
+          <h2 style={{ font: `600 18px/1.3 ${t.dfont}` }}>{locRestricted ? RLV_REDACTED : (region.name || "Current region")}</h2>
           <dl><dt>Region ID</dt><dd>{region.id || "Not supplied by grid"}</dd><dt>Grid coordinates</dt><dd>{hasCoordinates ? `${region.x}, ${region.y}` : "Not supplied by grid"}</dd>{region.parcel ? <><dt>Parcel</dt><dd>{region.parcel.Name || region.parcel.name || "Unnamed parcel"}</dd></> : null}</dl>
           <small>Select a square to see its region.</small>
         </>}

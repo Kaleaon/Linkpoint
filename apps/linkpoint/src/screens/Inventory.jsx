@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { useRlvSafe } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
 import { macroTaskQueue } from "../linkpoint/macro-task-queue.ts";
 import Icon from "../components/Icon.jsx";
@@ -77,6 +78,22 @@ export default function Inventory() {
       app.inventory.updateViewportFolders(visibleFolderIds);
     }
   }, [rows]);
+
+  const rlv = useRlvSafe();
+  const invRestricted = rlv.restricted("showinv");
+  const invReason = rlv.reasonFor("showinv");
+
+  if (invRestricted) {
+    return (
+      <section className="live-screen" style={{ padding: 24, textAlign: "center" }}>
+        <div style={{ padding: 24, border: `1px solid ${V.outv}`, borderRadius: V.rp, background: V.surf, maxWidth: 480, margin: "40px auto" }}>
+          <Icon name="lock" size={32} style={{ marginBottom: 12, color: V.pri }} />
+          <h2 style={{ fontSize: 18, color: V.ink, marginBottom: 8 }}>Inventory Restricted</h2>
+          <p style={{ color: V.ink2, fontSize: 14 }}>{invReason}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="live-screen" onClick={() => contextMenu && setContextMenu(null)}>

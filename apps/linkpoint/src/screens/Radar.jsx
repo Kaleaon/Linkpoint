@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useApp } from "../context/AppContext.jsx";
 import { useAnnouncer } from "../context/AnnouncerContext.jsx";
+import { useRlvSafe, RLV_REDACTED } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
 import Icon from "../components/Icon.jsx";
 import { COMPASS } from "../data/content.js";
@@ -318,6 +319,23 @@ export default function Radar() {
       };
     });
   }, [activeEntries, selectedId]);
+
+  const rlv = useRlvSafe();
+  const minimapRestricted = rlv.restricted("showminimap");
+  const minimapReason = rlv.reasonFor("showminimap");
+  const namesRestricted = rlv.restricted("shownames");
+
+  if (minimapRestricted) {
+    return (
+      <section className="live-screen" style={{ padding: 24, textAlign: "center" }}>
+        <div style={{ padding: 24, border: `1px solid ${V.outv}`, borderRadius: V.rp, background: V.surf, maxWidth: 480, margin: "40px auto" }}>
+          <Icon name="lock" size={32} style={{ marginBottom: 12, color: V.pri }} />
+          <h2 style={{ fontSize: 18, color: V.ink, marginBottom: 8 }}>Radar / Minimap Restricted</h2>
+          <p style={{ color: V.ink2, fontSize: 14 }}>{minimapReason}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", background: V.bg, color: V.ink, overflow: "hidden" }}>

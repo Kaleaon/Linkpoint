@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { useRlvSafe } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
 import Icon from "../components/Icon.jsx";
 
@@ -138,6 +139,7 @@ const DEMO_OUTFIT_ITEMS = [
  */
 export default function OutfitViewer() {
   const { V, t } = useTheme();
+  const rlv = useRlvSafe();
   const [activePanel, setActivePanel] = useState("viewport"); // "viewport" | "outfit" | "shape" | "mesh"
   const [shapeValues, setShapeValues] = useState(DEFAULT_SHAPE_VALUES);
   const [activeShapeCategory, setActiveShapeCategory] = useState("general");
@@ -494,9 +496,31 @@ export default function OutfitViewer() {
   }, [wornItems, searchQuery, categoryFilter]);
 
   const toggleItemWorn = (itemId) => {
-    setWornItems((prev) =>
-      prev.map((it) => (it.id === itemId ? { ...it, worn: !it.worn } : it))
-    );
+    const item = wornItems.find((it) => it.id === itemId);
+    if (!item) return;
+
+    if (item.worn) {
+      if (rlv.restricted("detach") || rlv.restricted("remoutfit")) {
+        const reason = rlv.reasonFor("detach") || rlv.reasonFor("remoutfit") || "Restricted by RLV.";
+        setStatusMessage(reason);
+        setTimeout(() => setStatusMessage(""), 4000);
+        return;
+      }
+      setWornItems((prev) =>
+        prev.map((it) => (it.id === itemId ? { ...it, worn: false } : it))
+      );
+      rlv.clearObjectRestrictions(itemId);
+    } else {
+      if (rlv.restricted("addoutfit")) {
+        const reason = rlv.reasonFor("addoutfit") || "Restricted by RLV.";
+        setStatusMessage(reason);
+        setTimeout(() => setStatusMessage(""), 4000);
+        return;
+      }
+      setWornItems((prev) =>
+        prev.map((it) => (it.id === itemId ? { ...it, worn: true } : it))
+      );
+    }
   };
 
   return (
@@ -666,11 +690,13 @@ export default function OutfitViewer() {
                 <div style={{ display: "flex", gap: 4 }}>
                   <button
                     type="button"
+                    disabled={rlv.restricted("addoutfit") || rlv.restricted("remoutfit")}
+                    title={rlv.reasonFor("addoutfit") || rlv.reasonFor("remoutfit") || undefined}
                     onClick={async () => {
                       const res = await app.inventory.replaceOutfit("current_outfit_folder");
                       setStatusMessage("Replaced outfit in current outfit folder.");
                     }}
-                    style={{ padding: "4px 8px", fontSize: 10, fontWeight: 700, background: V.pri, color: V.onpri || "#fff", border: "none", borderRadius: V.rs, cursor: "pointer" }}
+                    style={{ padding: "4px 8px", fontSize: 10, fontWeight: 700, background: V.pri, color: V.onpri || "#fff", border: "none", borderRadius: V.rs, cursor: "pointer", opacity: rlv.restricted("addoutfit") || rlv.restricted("remoutfit") ? 0.5 : 1 }}
                   >
                     REPLACE OUTFIT
                   </button>
@@ -702,45 +728,59 @@ export default function OutfitViewer() {
               {/* Items List */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 280, overflowY: "auto" }}>
                 {filteredItems.length ? (
-                  filteredItems.map((item) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "6px 10px",
-                        background: item.worn ? "rgba(56, 189, 248, 0.08)" : V.bg,
-                        border: `1px solid ${item.worn ? V.pri : V.outv}`,
-                        borderRadius: V.rs,
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <Icon name={item.category === "attachment" ? "paperclip" : item.category === "body" ? "user" : "shirt"} size={15} style={{ color: item.worn ? V.pri : V.ink2 }} />
-                        <div>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: V.ink }}>{item.name}</div>
-                          <div style={{ fontSize: 10, color: V.ink2 }}>{item.typeName} · {item.category}</div>
-                        </div>
-                      </div>
+                  filteredItems.map((item) => {
+                    const isDetachRestricted = item.worn && (rlv.restricted("detach") || rlv.restricted("remoutfit"));
+                    const isAddRestricted = !item.worn && rlv.restricted("addoutfit");
+                    const isDisabled = isDetachRestricted || isAddRestricted;
+                    const reason = isDetachRestricted
+                      ? (rlv.reasonFor("detach") || rlv.reasonFor("remoutfit"))
+                      : isAddRestricted
+                      ? rlv.reasonFor("addoutfit")
+                      : undefined;
 
-                      <button
-                        type="button"
-                        onClick={() => toggleItemWorn(item.id)}
+                    return (
+                      <div
+                        key={item.id}
                         style={{
-                          padding: "3px 8px",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          borderRadius: V.rs,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "6px 10px",
+                          background: item.worn ? "rgba(56, 189, 248, 0.08)" : V.bg,
                           border: `1px solid ${item.worn ? V.pri : V.outv}`,
-                          background: item.worn ? V.pri : "transparent",
-                          color: item.worn ? (V.onpri || "#fff") : V.ink,
-                          cursor: "pointer",
+                          borderRadius: V.rs,
                         }}
                       >
-                        {item.worn ? "WORN" : "WEAR"}
-                      </button>
-                    </div>
-                  ))
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <Icon name={item.category === "attachment" ? "paperclip" : item.category === "body" ? "user" : "shirt"} size={15} style={{ color: item.worn ? V.pri : V.ink2 }} />
+                          <div>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: V.ink }}>{item.name}</div>
+                            <div style={{ fontSize: 10, color: V.ink2 }}>{item.typeName} · {item.category}</div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={isDisabled}
+                          title={reason || undefined}
+                          onClick={() => toggleItemWorn(item.id)}
+                          style={{
+                            padding: "3px 8px",
+                            fontSize: 10,
+                            fontWeight: 700,
+                            borderRadius: V.rs,
+                            border: `1px solid ${item.worn ? V.pri : V.outv}`,
+                            background: item.worn ? V.pri : "transparent",
+                            color: item.worn ? (V.onpri || "#fff") : V.ink,
+                            cursor: isDisabled ? "not-allowed" : "pointer",
+                            opacity: isDisabled ? 0.5 : 1,
+                          }}
+                        >
+                          {item.worn ? "WORN" : "WEAR"}
+                        </button>
+                      </div>
+                    );
+                  })
                 ) : (
                   <div style={{ padding: 16, textAlign: "center", color: V.ink2, fontSize: 11 }}>
                     No outfit items matching current filter.
