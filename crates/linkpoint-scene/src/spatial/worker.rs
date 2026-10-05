@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn test_worker_pool_parallel_collisions_and_count() {
-        let grid = Arc::new(Mutex::new(ChunkGrid::new(
+        let grid = Arc::new(RwLock::new(ChunkGrid::new(
             [0.0, 0.0, 0.0],
             [128.0, 128.0, 128.0],
             [64.0, 64.0, 64.0],
