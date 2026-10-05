@@ -5,6 +5,7 @@ Verifies SQLite persistent inventory cache, immediate launch loading,
 HTTP delta updates, schema corruption recovery, query speeds, and thread safety.
 """
 
+import gc
 import os
 import tempfile
 import threading
@@ -102,6 +103,112 @@ class TestInventoryCache(unittest.TestCase):
         corrupt_cache = InventoryCache(self.db_path)
         loaded = corrupt_cache.load_cached_inventory()
         self.assertEqual(loaded["folder_count"], 0)
+
+    def test_wal_mode_initialization(self):
+        conn = self.cache._get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA journal_mode;")
+            journal_mode = cursor.fetchone()[0]
+            cursor.execute("PRAGMA synchronous;")
+            sync_mode = cursor.fetchone()[0]
+            self.assertEqual(str(journal_mode).lower(), "wal")
+            self.assertIn(sync_mode, (1, "1", "NORMAL", "normal"))
+        finally:
+            self.cache._close_connection(conn)
+
+    def test_bulk_synchronization_speed_10k_items(self):
+        folders = [{"folder_id": f"f_{i}", "parent_id": None, "name": f"Folder {i}"} for i in range(100)]
+        items = [
+            {
+                "item_id": f"item_{i}",
+                "folder_id": f"f_{i % 100}",
+                "name": f"Inventory Item {i}",
+                "asset_id": f"asset_{i}",
+                "type": 5,
+                "inv_type": 5,
+                "flags": 0,
+                "creation_date": 1600000000,
+            }
+            for i in range(10000)
+        ]
+        full_data = {"folders": folders, "items": items}
+
+        gc.collect()
+        start = time.time()
+        success = self.cache.reload_full_inventory(full_data, new_token="token_10k")
+        elapsed = time.time() - start
+
+        self.assertTrue(success)
+        self.assertLess(elapsed, 0.100, f"10k item sync took {elapsed * 1000:.2f}ms, expected under 100ms")
+
+        loaded = self.cache.load_cached_inventory()
+        self.assertEqual(loaded["folder_count"], 100)
+        self.assertEqual(loaded["item_count"], 10000)
+        self.assertEqual(loaded["update_token"], "token_10k")
+
+    def test_non_blocking_concurrent_readers_during_background_writes(self):
+        folders = [{"folder_id": f"f_{i}", "parent_id": None, "name": f"Folder {i}"} for i in range(100)]
+        items = [
+            {
+                "item_id": f"item_bg_{i}",
+                "folder_id": f"f_{i % 100}",
+                "name": f"Background Item {i}",
+                "asset_id": f"asset_bg_{i}",
+            }
+            for i in range(10000)
+        ]
+        full_data = {"folders": folders, "items": items}
+
+        write_done = threading.Event()
+        reader_durations = []
+        errors = []
+
+        def background_writer():
+            try:
+                self.cache.reload_full_inventory(full_data, new_token="bg_token")
+            except Exception as e:
+                errors.append(e)
+            finally:
+                write_done.set()
+
+        writer_thread = threading.Thread(target=background_writer)
+        writer_thread.start()
+
+        time.sleep(0.002)  # Give writer a moment to start
+        while not write_done.is_set():
+            t0 = time.time()
+            try:
+                self.cache.get_item("item_bg_1")
+                self.cache.get_folder_items("f_0")
+                self.cache.get_update_token()
+            except Exception as e:
+                errors.append(e)
+            dur = time.time() - t0
+            reader_durations.append(dur)
+            time.sleep(0.001)
+
+        writer_thread.join()
+
+        self.assertEqual(len(errors), 0, f"Errors during concurrent read/write: {errors}")
+        self.assertGreater(len(reader_durations), 0, "Expected readers to execute during background write")
+        for dur in reader_durations:
+            self.assertLess(dur, 0.050, f"Reader query took {dur * 1000:.2f}ms, expected under 50ms without write locks")
+
+    def test_wal_sidecar_file_cleanup(self):
+        full_data = {
+            "folders": [{"folder_id": "f1", "parent_id": None, "name": "Folder 1"}],
+            "items": [{"item_id": "i1", "folder_id": "f1", "name": "Item 1", "asset_id": "a1"}],
+        }
+        self.cache.reload_full_inventory(full_data, new_token="tok1")
+
+        wal_path = f"{self.db_path}-wal"
+        shm_path = f"{self.db_path}-shm"
+
+        self.cache.close()
+
+        self.assertFalse(os.path.exists(wal_path), "WAL file was not cleaned up after close()")
+        self.assertFalse(os.path.exists(shm_path), "SHM file was not cleaned up after close()")
 
     def test_thread_safety(self):
         errors = []
