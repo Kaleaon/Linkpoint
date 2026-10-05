@@ -11,12 +11,16 @@ import java.io.File
 class SharedTestVectorSuiteTest {
 
     private fun findTestVectorsDir(): File {
+        val userDir = File(System.getProperty("user.dir", "."))
         val candidates = listOf(
+            userDir.parentFile?.parentFile?.let { File(it, "test-vectors") },
+            userDir.parentFile?.let { File(it, "test-vectors") },
+            File(userDir, "test-vectors"),
             File("../../test-vectors"),
             File("../test-vectors"),
             File("test-vectors"),
             File("/app/Linkpoint/test-vectors")
-        )
+        ).filterNotNull()
         return candidates.firstOrNull { it.exists() && it.isDirectory }
             ?: error("test-vectors directory not found in candidates: $candidates")
     }
