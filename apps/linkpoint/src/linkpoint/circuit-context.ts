@@ -1,6 +1,6 @@
 /**
  * Linkpoint - Circuit Context Manager
- * 
+ *
  * Circuit identity tracking and AgentData parameter management for SL/OpenSim grid protocol compliance.
  */
 
