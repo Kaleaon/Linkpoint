@@ -87,3 +87,47 @@ impl SpatialManager {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_spatial_manager_operations() {
+        let mgr = SpatialManager::new(
+            [0.0, 0.0, 0.0],
+            [256.0, 256.0, 256.0],
+            [64.0, 64.0, 64.0],
+            2,
+        );
+
+        let entity = SpatialEntity::new(
+            "1",
+            AABB::new([8.0, 8.0, 8.0], [12.0, 12.0, 12.0]),
+            [10.0, 10.0, 10.0],
+        );
+
+        assert!(mgr.insert(entity.clone()));
+
+        let search = AABB::new([0.0, 0.0, 0.0], [20.0, 20.0, 20.0]);
+        let results = mgr.query_aabb_simd(&search);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, "1");
+
+        let from_chunk = ChunkId { x: 0, y: 0, z: 0 };
+        let update_res = mgr.update_entity_position(
+            entity,
+            [15.0, 15.0, 15.0],
+            AABB::new([13.0, 13.0, 13.0], [17.0, 17.0, 17.0]),
+            from_chunk,
+        );
+        assert!(update_res.is_ok());
+
+        let _elapsed = mgr.rebalance_async();
+        let overhead = mgr.memory_overhead_ratio(1024 * 1024);
+        assert!(overhead >= 0.0);
+
+        let zero_overhead = mgr.memory_overhead_ratio(0);
+        assert_eq!(zero_overhead, 0.0);
+    }
+}

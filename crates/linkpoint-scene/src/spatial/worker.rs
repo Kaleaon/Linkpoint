@@ -147,3 +147,30 @@ impl Drop for SpatialWorkerPool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_worker_pool_parallel_collisions_and_count() {
+        let grid = Arc::new(Mutex::new(ChunkGrid::new(
+            [0.0, 0.0, 0.0],
+            [128.0, 128.0, 128.0],
+            [64.0, 64.0, 64.0],
+        )));
+        let pool = SpatialWorkerPool::new(2, grid);
+
+        assert_eq!(pool.worker_count(), 2);
+
+        let empty_collisions = pool.parallel_batch_collisions(&[]);
+        assert!(empty_collisions.is_empty());
+
+        let queries = vec![
+            AABB::new([0.0, 0.0, 0.0], [10.0, 10.0, 10.0]),
+            AABB::new([20.0, 20.0, 20.0], [30.0, 30.0, 30.0]),
+        ];
+        let collisions = pool.parallel_batch_collisions(&queries);
+        assert_eq!(collisions.len(), 2);
+    }
+}

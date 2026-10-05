@@ -318,4 +318,69 @@ mod tests {
         let ray_miss = box1.ray_intersects([0.0, 0.0, 0.0], [0.0, -1.0, 0.0]);
         assert!(ray_miss.is_none());
     }
+
+    #[test]
+    fn test_aabb_default_and_constructors() {
+        let def = AABB::default();
+        assert_eq!(def.min, [0.0; 4]);
+        assert_eq!(def.max, [0.0; 4]);
+
+        let aabb = AABB::from_center_extents([10.0, 20.0, 30.0], [4.0, 6.0, 8.0]);
+        assert_eq!(aabb.min, [8.0, 17.0, 26.0, 0.0]);
+        assert_eq!(aabb.max, [12.0, 23.0, 34.0, 0.0]);
+        assert_eq!(aabb.center(), [10.0, 20.0, 30.0]);
+        assert_eq!(aabb.extents(), [4.0, 6.0, 8.0]);
+    }
+
+    #[test]
+    fn test_aabb_contains_and_union() {
+        let aabb1 = AABB::new([0.0, 0.0, 0.0], [10.0, 10.0, 10.0]);
+        assert!(aabb1.contains_point([5.0, 5.0, 5.0]));
+        assert!(!aabb1.contains_point([15.0, 5.0, 5.0]));
+
+        let aabb2 = AABB::new([5.0, 5.0, 5.0], [15.0, 15.0, 15.0]);
+        let u = aabb1.union(&aabb2);
+        assert_eq!(u.min, [0.0, 0.0, 0.0, 0.0]);
+        assert_eq!(u.max, [15.0, 15.0, 15.0, 0.0]);
+    }
+
+    #[test]
+    fn test_aabb_intersects_batch_and_scalar() {
+        let box1 = AABB::new([0.0, 0.0, 0.0], [10.0, 10.0, 10.0]);
+        let candidates = vec![
+            AABB::new([5.0, 5.0, 5.0], [12.0, 12.0, 12.0]),
+            AABB::new([20.0, 20.0, 20.0], [25.0, 25.0, 25.0]),
+        ];
+        let scalar_res = box1.intersects_batch_scalar(&candidates);
+        assert_eq!(scalar_res, vec![true, false]);
+
+        let batch_res = box1.intersects_batch(&candidates);
+        assert_eq!(batch_res, vec![true, false]);
+    }
+
+    #[test]
+    fn test_aabb_ray_intersects() {
+        let box1 = AABB::new([0.0, 0.0, 0.0], [10.0, 10.0, 10.0]);
+
+        // Hit ray from outside
+        let hit = box1.ray_intersects([-5.0, 5.0, 5.0], [1.0, 0.0, 0.0]);
+        assert!(hit.is_some());
+        assert!((hit.unwrap() - 5.0).abs() < 1e-4);
+
+        // Hit ray starting inside
+        let hit_inside = box1.ray_intersects([5.0, 5.0, 5.0], [1.0, 0.0, 0.0]);
+        assert!(hit_inside.is_some());
+
+        // Miss ray
+        let miss = box1.ray_intersects([-5.0, 20.0, 5.0], [1.0, 0.0, 0.0]);
+        assert!(miss.is_none());
+
+        // Parallel ray outside
+        let parallel_outside = box1.ray_intersects([-5.0, 20.0, 5.0], [0.0, 1.0, 0.0]);
+        assert!(parallel_outside.is_none());
+
+        // Ray pointing away
+        let away = box1.ray_intersects([-5.0, 5.0, 5.0], [-1.0, 0.0, 0.0]);
+        assert!(away.is_none());
+    }
 }

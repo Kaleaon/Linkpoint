@@ -120,6 +120,13 @@ mod tests {
     use super::*;
     #[test]
     fn normalizes_missing_simulator_transform_fields() {
+        let default_tf = Transform::default();
+        assert_eq!(default_tf.position, [0.0; 3]);
+        assert_eq!(default_tf.rotation, [0.0, 0.0, 0.0, 1.0]);
+        assert_eq!(default_tf.scale, [1.0; 3]);
+
+        assert_eq!(AlphaMode::default(), AlphaMode::Opaque);
+
         let scene = SceneEntity::from(SimulatorObject {
             id: "1".into(),
             parent_id: None,
@@ -130,5 +137,16 @@ mod tests {
         });
         assert_eq!(scene.transform.rotation, [0.0, 0.0, 0.0, 1.0]);
         assert_eq!(scene.transform.scale, [1.0; 3]);
+        assert_eq!(scene.kind, EntityKind::Primitive);
+
+        let mesh_scene = SceneEntity::from(SimulatorObject {
+            id: "2".into(),
+            parent_id: Some("1".into()),
+            position: [1.0, 2.0, 3.0],
+            rotation: Some([0.0, 0.0, 0.0, 1.0]),
+            scale: Some([2.0, 2.0, 2.0]),
+            mesh_asset: Some("asset_uuid".into()),
+        });
+        assert_eq!(mesh_scene.kind, EntityKind::Mesh);
     }
 }

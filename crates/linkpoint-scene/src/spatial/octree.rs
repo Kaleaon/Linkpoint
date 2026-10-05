@@ -278,3 +278,39 @@ impl Octree {
         self.root.memory_usage_bytes()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_octree_query_ray_remove_and_memory() {
+        let bounds = AABB::new([0.0, 0.0, 0.0], [100.0, 100.0, 100.0]);
+        let mut octree = Octree::new(bounds, 4, 8);
+
+        let e1 = SpatialEntity::new(
+            "item1",
+            AABB::new([10.0, 10.0, 10.0], [20.0, 20.0, 20.0]),
+            [15.0, 15.0, 15.0],
+        )
+        .with_type("avatar");
+        assert_eq!(e1.entity_type, "avatar");
+
+        octree.insert(e1.clone());
+        assert_eq!(octree.count, 1);
+
+        let ray_hits = octree.query_ray([0.0, 15.0, 15.0], [1.0, 0.0, 0.0]);
+        assert_eq!(ray_hits.len(), 1);
+        assert_eq!(ray_hits[0].0.id, "item1");
+
+        octree.rebalance();
+        assert!(octree.memory_usage_bytes() > 0);
+
+        let removed = octree.remove("item1");
+        assert!(removed.is_some());
+        assert_eq!(octree.count, 0);
+
+        let non_existent = octree.remove("item1");
+        assert!(non_existent.is_none());
+    }
+}
