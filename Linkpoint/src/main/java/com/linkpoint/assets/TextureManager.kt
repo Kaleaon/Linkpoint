@@ -9,6 +9,7 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.types.getUUID
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlin.coroutines.resume
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -99,7 +100,13 @@ class TextureManager(
 
     // Download queue with priority
     private val downloadQueue = PriorityBlockingQueue<TextureRequest>(100)
+    private val workSignal = Channel<Unit>(Channel.UNLIMITED)
     private val activeDownloads = AtomicInteger(0)
+
+    private fun enqueueDownloadRequest(request: TextureRequest) {
+        downloadQueue.offer(request)
+        workSignal.trySend(Unit)
+    }
     private val pendingTextures = ConcurrentHashMap<UUID, Deferred<Bitmap?>>()
 
     // Off-thread asset decoding worker pool & frustum priority queue
@@ -184,7 +191,7 @@ class TextureManager(
         val discard = computeDiscardLevel(priority, distanceMeters = 256f)
         textureIds.forEach { id ->
             if (!textureCache.containsKey(id)) {
-                downloadQueue.offer(TextureRequest(id, priority, discard))
+                enqueueDownloadRequest(TextureRequest(id, priority, discard))
             }
         }
     }
@@ -708,7 +715,15 @@ class TextureManager(
         while (currentCoroutineContext().isActive) {
             val request = downloadQueue.poll()
             if (request == null) {
-                delay(50L)
+                try {
+                    withTimeoutOrNull(500L) {
+                        workSignal.receive()
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Throwable) {
+                    // Ignore closed/cancelled signal
+                }
                 continue
             }
             if (activeDownloads.get() < MAX_CONCURRENT_DOWNLOADS) {
@@ -733,6 +748,7 @@ class TextureManager(
     }
 
     fun shutdown() {
+        workSignal.close()
         scope.cancel()
         clearDecodedCache()
     }
@@ -769,7 +785,7 @@ class TextureManager(
 
         retryList.forEach { req ->
             if (!textureCache.containsKey(req.textureId)) {
-                downloadQueue.offer(req)
+                enqueueDownloadRequest(req)
             }
         }
     }
