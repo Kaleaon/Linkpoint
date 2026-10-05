@@ -225,6 +225,43 @@ object AdditionalMessageParsers {
         }
     }
 
+    // ==================== AVATAR PROPERTIES UPDATE ====================
+
+    data class AvatarPropertiesUpdateData(
+        val agentID: UUID,
+        val sessionID: UUID,
+        val imageID: UUID,
+        val flImageID: UUID,
+        val aboutText: String,
+        val flAboutText: String,
+        val allowPublish: Boolean,
+        val maturePublish: Boolean,
+        val profileURL: String
+    )
+
+    fun parseAvatarPropertiesUpdate(data: ByteArray): AvatarPropertiesUpdateData? {
+        return try {
+            val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
+            val agentID = buffer.getUUID()
+            val sessionID = buffer.getUUID()
+            val imageID = buffer.getUUID()
+            val flImageID = buffer.getUUID()
+            val aboutText = buffer.readString2()
+            val flAboutText = buffer.readString1()
+            val allowPublish = buffer.get() != 0.toByte()
+            val maturePublish = buffer.get() != 0.toByte()
+            val profileURL = buffer.readString1()
+
+            AvatarPropertiesUpdateData(
+                agentID, sessionID, imageID, flImageID,
+                aboutText, flAboutText, allowPublish, maturePublish, profileURL
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse AvatarPropertiesUpdate", e)
+            null
+        }
+    }
+
     // ==================== GROUP PROFILE REPLY ====================
 
     data class GroupProfileReplyData(

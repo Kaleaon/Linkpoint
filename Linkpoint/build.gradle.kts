@@ -248,7 +248,7 @@ android {
     testOptions {
         unitTests {
             isReturnDefaultValues = true  // Return default values for unmocked Android methods like Log
-            isIncludeAndroidResources = true
+            isIncludeAndroidResources = false
         }
     }
 
