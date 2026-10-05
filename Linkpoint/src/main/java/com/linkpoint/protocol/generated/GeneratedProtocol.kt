@@ -12,9 +12,9 @@ object GeneratedProtocolCatalog {
     const val TEMPLATE_VERSION = "2.0"
     val REGISTERED_MESSAGES = mapOf(
         "TestMessage" to 1,
-        "PacketAck" to 4294967291,
-        "OpenCircuit" to 4294967292,
-        "CloseCircuit" to 4294967293,
+        "PacketAck" to 4294967291.toInt(),
+        "OpenCircuit" to 4294967292.toInt(),
+        "CloseCircuit" to 4294967293.toInt(),
         "StartPingCheck" to 1,
         "CompletePingCheck" to 2,
         "AddCircuitCode" to 2,
