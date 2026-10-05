@@ -40,8 +40,8 @@ class TextureManager(
     private val cache: AssetCache,
     private val capabilityManager: com.linkpoint.protocol.capabilities.CapabilityManager? = null
 ) {
-    private val capabilityUrl: String? get() =
-        capabilityManager?.getCapability(com.linkpoint.protocol.capabilities.CapabilityManager.CAP_GET_TEXTURE)
+    private val capabilityUrl: String? get() = 
+        capabilityManager?.getTextureFetchURL() ?: capabilityManager?.getCapability(com.linkpoint.protocol.capabilities.CapabilityManager.CAP_GET_TEXTURE)
     companion object {
         private const val TAG = "TextureManager"
         private const val MAX_CONCURRENT_DOWNLOADS = 4

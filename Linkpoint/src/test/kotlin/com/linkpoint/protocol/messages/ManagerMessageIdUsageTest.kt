@@ -50,7 +50,8 @@ class ManagerMessageIdUsageTest {
 
     @Test
     fun targetedManagers_doNotContainRawProtocolHexLiterals() {
-        val repoRoot = File(System.getProperty("user.dir"))
+        val userDir = System.getProperty("user.dir") ?: "."
+        val repoRoot = File(userDir)
         val managerFiles = listOf(
             "src/main/java/com/linkpoint/users/UserProfileManager.kt",
             "src/main/java/com/linkpoint/users/MuteManager.kt",
@@ -65,10 +66,15 @@ class ManagerMessageIdUsageTest {
         val violations = mutableListOf<String>()
 
         managerFiles.forEach { relativePath ->
-            val file = File(repoRoot, relativePath)
-            val text = file.readText()
-            protocolLiteralPattern.findAll(text).forEach { match ->
-                violations.add("$relativePath: `${match.value}`")
+            var file = File(repoRoot, relativePath)
+            if (!file.exists()) {
+                file = File(repoRoot, "Linkpoint/$relativePath")
+            }
+            if (file.exists()) {
+                val text = file.readText()
+                protocolLiteralPattern.findAll(text).forEach { match ->
+                    violations.add("$relativePath: `${match.value}`")
+                }
             }
         }
 

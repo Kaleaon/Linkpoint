@@ -279,6 +279,7 @@ class LinkpointProtocolBridge(
             CapabilityManager.CAP_FETCH_INVENTORY,
             CapabilityManager.CAP_FETCH_LIB_INVENTORY,
             CapabilityManager.CAP_FETCH_INVENTORY_DESCENDENTS,
+            CapabilityManager.CAP_VIEWER_ASSET,
             CapabilityManager.CAP_GET_TEXTURE,
             CapabilityManager.CAP_GET_MESH,
             CapabilityManager.CAP_GET_MESH2,
@@ -400,9 +401,9 @@ class LinkpointProtocolBridge(
      * @return The raw texture data (JPEG2000 format) or null on failure
      */
     suspend fun fetchTexture(textureId: String): ByteArray? = withContext(Dispatchers.IO) {
-        val textureCapUrl = getCapability("GetTexture")
+        val textureCapUrl = getCapability("ViewerAsset") ?: getCapability("GetTexture")
         if (textureCapUrl == null) {
-            Log.w(TAG, "GetTexture capability not available")
+            Log.w(TAG, "Texture capability not available")
             return@withContext null
         }
 
@@ -416,7 +417,7 @@ class LinkpointProtocolBridge(
      * Fetch a mesh using Linkpoint-compatible URL handling.
      *
      * This method:
-     * 1. Repairs the GetMesh/GetMesh2 capability URL if needed
+     * 1. Repairs the GetMesh/GetMesh2/ViewerAsset capability URL if needed
      * 2. Builds the proper mesh request URL
      * 3. Fetches the mesh with appropriate headers
      * 4. Validates the returned data
@@ -425,10 +426,10 @@ class LinkpointProtocolBridge(
      * @return The raw mesh data (LLSD format) or null on failure
      */
     suspend fun fetchMesh(meshId: String): ByteArray? = withContext(Dispatchers.IO) {
-        // Prefer GetMesh2 over GetMesh
-        val meshCapUrl = getCapability("GetMesh2") ?: getCapability("GetMesh")
+        // Prefer ViewerAsset over GetMesh2 / GetMesh
+        val meshCapUrl = getCapability("ViewerAsset") ?: getCapability("GetMesh2") ?: getCapability("GetMesh")
         if (meshCapUrl == null) {
-            Log.w(TAG, "GetMesh/GetMesh2 capability not available")
+            Log.w(TAG, "Mesh capability not available")
             return@withContext null
         }
 

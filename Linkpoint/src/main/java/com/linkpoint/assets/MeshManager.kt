@@ -144,7 +144,8 @@ class MeshManager(
     }
 
     private suspend fun downloadAndParseMesh(meshId: UUID, lod: MeshLOD): MeshData? {
-        val meshUrl = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+        val meshUrl = capabilityManager.getMeshFetchURL()
+            ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
 
         if (meshUrl == null) {
@@ -833,7 +834,8 @@ class MeshManager(
      * Retries any mesh downloads that were queued due to missing GetMesh capability.
      */
     fun onCapabilitiesReady() {
-        val meshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+        val meshCap = capabilityManager.getMeshFetchURL()
+            ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
         if (meshCap != null) {
             retryCapabilityPendingMeshes()
@@ -865,7 +867,8 @@ class MeshManager(
             while (isActive && capabilityPendingMeshes.isNotEmpty() && attempts < 30) {
                 attempts++
                 delay(5_000L)
-                val meshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+                val meshCap = capabilityManager.getMeshFetchURL()
+                    ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
                     ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
                 if (meshCap != null) {
                     Log.i(TAG, "GetMesh capability now available, retrying queued meshes")
@@ -897,7 +900,8 @@ class MeshManager(
      * Get comprehensive diagnostic data for debug reports
      */
     fun getDiagnostics(): MeshManagerDiagnostics {
-        val getMeshCap = capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
+        val getMeshCap = capabilityManager.getMeshFetchURL()
+            ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH2)
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
 
         return MeshManagerDiagnostics(

@@ -37,7 +37,7 @@ class MessageTemplateProtocolConformanceTest {
             .sorted()
 
         val reportFile = File(
-            System.getProperty("user.dir"),
+            System.getProperty("user.dir") ?: ".",
             "build/reports/protocol/message-template-classification-report.txt",
         )
         reportFile.parentFile?.mkdirs()
