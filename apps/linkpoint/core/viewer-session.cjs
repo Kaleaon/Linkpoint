@@ -746,17 +746,84 @@ class ViewerSession {
   }
 
   async getGroups() {
+    return this.getAvatarGroups();
+  }
+
+  async getAvatarProfile({ avatarId, avatar_id } = {}) {
+    const targetId = avatarId || avatar_id || this.identity?.agentId || this.requireBot()?.agent?.agentID;
+    const bot = this.requireBot();
+    let profileData = null;
+
+    if (bot.clientCommands?.agent?.getAvatarProperties) {
+      try {
+        profileData = await bot.clientCommands.agent.getAvatarProperties(targetId);
+      } catch (err) {
+        console.warn('[SL Session] getAvatarProperties warning:', err);
+      }
+    }
+
+    const name = this.identity?.fullName || bot.agent?.name || 'Resident';
+    return {
+      agentId: String(targetId || ''),
+      displayName: profileData?.displayName || name,
+      userName: profileData?.userName || name.toLowerCase().replace(/\s+/g, '.'),
+      fullName: profileData?.fullName || name,
+      aboutText: profileData?.aboutText || profileData?.about || profileData?.bio || '',
+      firstLifeText: profileData?.firstLifeText || profileData?.firstLifeBio || profileData?.firstLife || '',
+      profileImage: profileData?.profileImage || profileData?.image || null,
+      firstLifeImage: profileData?.firstLifeImage || null,
+      partner: profileData?.partner || profileData?.partnerName || 'None',
+      partnerId: profileData?.partnerId || null,
+      bornOn: profileData?.bornOn || profileData?.born || '2020-01-01',
+      gridAge: profileData?.gridAge || 'Resident',
+      paymentStatus: profileData?.paymentStatus || 'Payment Info On File',
+      allowPublish: Boolean(profileData?.allowPublish),
+      identified: Boolean(profileData?.identified),
+    };
+  }
+
+  async getAvatarPicks({ avatarId, avatar_id } = {}) {
+    const targetId = avatarId || avatar_id || this.identity?.agentId || this.requireBot()?.agent?.agentID;
+    const bot = this.requireBot();
+    let picksData = [];
+
+    if (bot.clientCommands?.agent?.getAvatarPicks) {
+      try {
+        picksData = await bot.clientCommands.agent.getAvatarPicks(targetId);
+      } catch (err) {
+        console.warn('[SL Session] getAvatarPicks warning:', err);
+      }
+    }
+
+    if (Array.isArray(picksData) && picksData.length > 0) {
+      return picksData.map((pick) => ({
+        id: String(pick.id || pick.pickId || ''),
+        name: pick.name || pick.title || 'Untitled Pick',
+        description: pick.description || pick.desc || '',
+        snapshotId: pick.snapshotId || pick.snapshot || null,
+        simName: pick.simName || pick.region || 'Unknown Region',
+        parcelName: pick.parcelName || pick.parcel || '',
+        location: pick.location || pick.posGlobal || { x: 128, y: 128, z: 25 },
+        destination: pick.destination || `${pick.simName || 'Arah'}/128/128/25`,
+      }));
+    }
+
+    return [];
+  }
+
+  async getAvatarGroups({ avatarId, avatar_id } = {}) {
+    const targetId = avatarId || avatar_id || this.identity?.agentId || this.requireBot()?.agent?.agentID;
     const bot = this.requireBot();
     if (!bot.clientCommands?.agent) return [];
     try {
-      const raw = await bot.clientCommands.agent.getAvatarGroups(this.identity.agentId || bot.agent?.agentID);
+      const raw = await bot.clientCommands.agent.getAvatarGroups(targetId);
       return (Array.isArray(raw) ? raw : [raw]).filter(Boolean).map((group) => ({
-        id: group.GroupID?.toString?.() || String(group.GroupID),
-        name: group.GroupName || 'Group',
-        title: group.GroupTitle || '',
-        insignia: group.GroupInsigniaID?.toString?.() || '',
-        acceptNotices: Boolean(group.AcceptNotices),
-        powers: group.GroupPowers?.toString?.() || '',
+        id: group.GroupID?.toString?.() || String(group.GroupID || group.id || ''),
+        name: group.GroupName || group.name || 'Group',
+        title: group.GroupTitle || group.title || '',
+        insignia: group.GroupInsigniaID?.toString?.() || group.insignia || '',
+        acceptNotices: Boolean(group.AcceptNotices ?? group.acceptNotices),
+        powers: group.GroupPowers?.toString?.() || String(group.powers || ''),
       }));
     } catch (error) {
       console.warn('[SL Session] getAvatarGroups warning:', error);

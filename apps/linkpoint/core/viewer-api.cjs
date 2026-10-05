@@ -11,6 +11,7 @@ const METHODS = new Set([
   'fetchAnimation', 'getMapBlocks', 'getFriends', 'getGroups', 'getInventory', 'getDiagnostics',
   'getSceneObjects', 'getSceneSnapshot',
   'wearItem', 'wearOutfit', 'requestMuteList', 'updateMuteListEntry', 'removeMuteListEntry',
+  'getAvatarProfile', 'getAvatarPicks', 'getAvatarGroups',
 ]);
 
 async function callViewer(session, method, params) {

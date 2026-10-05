@@ -84,7 +84,7 @@ export const CSUB = {
   Radar:         [["AVATAR", "· 01"], ["OBJECT", "· 02"]],
   Map:           [["WORLD", "· 01"], ["MINI", "· 02"]],
   Inventory:     [["ALL", "· 01"], ["RECENT", "· 02"], ["WORN", "· 03"]],
-  Profile:       [["2ND LIFE", "· 01"], ["PICKS", "· 02"]],
+  Profile:       [["ABOUT", "· 01"], ["FIRST LIFE", "· 02"], ["PICKS", "· 03"], ["GROUPS", "· 04"]],
   Groups:        [["GROUPS", "· 01"], ["ROLES", "· 02"]],
   Notices:       [["NOTICES", "· 01"], ["CALENDAR", "· 02"]],
   Teleport:      [["LANDMARK", "· 01"], ["HISTORY", "· 02"]],
