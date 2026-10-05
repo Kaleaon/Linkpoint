@@ -248,6 +248,7 @@ class MapActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private fun loadVisibleTiles() {
         val width = surfaceView.width
         val height = surfaceView.height
+        if (width <= 0 || height <= 0) return
         val tileSize = getTileSize()
 
         val tilesX = (width / tileSize).toInt() + 2
@@ -256,6 +257,18 @@ class MapActivity : AppCompatActivity(), SurfaceHolder.Callback {
         val startX = centerX - tilesX / 2
         val startY = centerY - tilesY / 2
 
+        val visibleKeys = HashSet<String>()
+        for (y in 0 until tilesY) {
+            for (x in 0 until tilesX) {
+                val gridX = startX + x
+                val gridY = startY + y
+                visibleKeys.add("$zoomLevel-$gridX-$gridY")
+            }
+        }
+
+        // Active viewport tile gating: purge local bitmap references outside visible grid bounds
+        mapTiles.keys.retainAll(visibleKeys)
+
         lifecycleScope.launch {
             for (y in 0 until tilesY) {
                 for (x in 0 until tilesX) {
@@ -263,9 +276,9 @@ class MapActivity : AppCompatActivity(), SurfaceHolder.Callback {
                     val gridY = startY + y
                     val key = "$zoomLevel-$gridX-$gridY"
 
-                    if (!mapTiles.containsKey(key)) {
+                    if (!mapTiles.containsKey(key) && visibleKeys.contains(key)) {
                         val tile = worldMap.getMapTile(gridX, gridY, zoomLevel)
-                        if (tile != null) {
+                        if (tile != null && visibleKeys.contains(key)) {
                             mapTiles[key] = tile
                             withContext(Dispatchers.Main) {
                                 renderMap()

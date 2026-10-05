@@ -48,7 +48,7 @@ class VoiceManager(
     private val simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager? = null,
     initialGridKind: GridKind = GridKind.SECOND_LIFE,
     initialVoiceConfig: VoiceConfig? = null,
-    adapterFactory: VoiceTransportAdapterFactory? = null
+    adapterFactory: VoiceTransportAdapterFactory? = null,
     private val parcelManager: com.linkpoint.world.ParcelManager? = null,
 ) {
     companion object {
@@ -297,7 +297,6 @@ class VoiceManager(
             }
         }
 
-        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
             Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
@@ -368,6 +367,7 @@ class VoiceManager(
                 _isConnected.value = true
                 return@withContext true
             }
+        }
         val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
         if (isWebRtcVoiceRegion()) {
             joinSpatialVoiceWebRtc(targetParcel)
@@ -432,61 +432,6 @@ class VoiceManager(
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
         return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
-        if (!capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) &&
-            !capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC)) {
-            Log.w(TAG, "WebRTC voice unavailable: ProvisionVoiceAccountRequest capability missing on this region")
-            _lastError.value = "Voice capability is not available in this region"
-            return false
-        }
-
-        val factory = peerConnectionFactory
-        if (factory == null) {
-            Log.w(TAG, "WebRTC voice requested but PeerConnectionFactory failed to initialise")
-            _lastError.value = "PeerConnectionFactory initialization failed"
-            return false
-        }
-
-        // Fetch provisioning account info to check for sim-advertised ICE servers
-        val accountInfo = provisionVoiceAccount()
-        val simIceServers = accountInfo?.iceServers?.map { spec ->
-            PeerConnection.IceServer.builder(spec.urls).apply {
-                spec.username?.let { setUsername(it) }
-                spec.credential?.let { setPassword(it) }
-            }.createIceServer()
-        } ?: emptyList()
-
-        val resolvedIce = if (simIceServers.isNotEmpty()) {
-            simIceServers
-        } else {
-            resolveDefaultIceServers()
-        }
-
-        currentWebRtcSession?.close()
-
-        val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
-
-        val session = WebRtcVoiceSession(
-            capabilityManager = capabilityManager,
-            factory = factory,
-            channelType = WebRtcVoiceSession.ChannelType.SPATIAL,
-            parcelLocalId = targetParcel,
-        )
-        currentWebRtcSession = session
-
-        return try {
-            session.connect(resolvedIce)
-            session.sendJoin(primary = true)
-            _isConnected.value = true
-            _lastError.value = null
-            Log.i(TAG, "WebRTC spatial voice connected (parcel=$targetParcel, iceServers=${resolvedIce.size})")
-            true
-        } catch (e: Exception) {
-            Log.w(TAG, "WebRTC spatial voice connect failed: ${e.message}", e)
-            _lastError.value = "WebRTC connection failed: ${e.message}"
-            session.close()
-            currentWebRtcSession = null
-            false
-        }
     }
 
     /**

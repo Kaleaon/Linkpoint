@@ -1,9 +1,14 @@
 package com.linkpoint.world
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.UUID
 import kotlin.math.sqrt
 import kotlin.random.Random
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class WorldMapBenchmark {
     // Stubs
     private data class StubVector3(val x: Float, val y: Float, val z: Float) {
@@ -180,6 +185,132 @@ class WorldMapBenchmark {
         val oldRes = runOld(allAvatars, myPos, 100f, 50)
         val newRes = runNew(allAvatars, myPos, 100f, 50)
         org.junit.Assert.assertEquals(oldRes.size, newRes.size)
+    }
+
+    @org.junit.Test
+    fun testWorldMapMemoryLruEviction() {
+        val capManager = com.linkpoint.protocol.capabilities.CapabilityManager()
+        val worldMap = WorldMap(capManager)
+
+        // Verify configuration
+        org.junit.Assert.assertEquals(WorldMap.TILE_MEMORY_CACHE_MAX_BYTES, worldMap.getMemoryTileCacheMaxSize())
+        org.junit.Assert.assertEquals(0, worldMap.getMemoryTileCacheSize())
+
+        // Insert 120 tile bitmaps into memory LRU cache
+        // Each 256x256 ARGB_8888 bitmap = 256 * 256 * 4 = 262,144 bytes (256 KB)
+        // 120 * 256 KB = 31,457,280 bytes (> 24 MB max capacity of 25,165,824 bytes)
+        val bitmapCount = 120
+        for (i in 0 until bitmapCount) {
+            val bmp = android.graphics.Bitmap.createBitmap(256, 256, android.graphics.Bitmap.Config.ARGB_8888)
+            worldMap.putMemoryCachedTile(1000 + i, 1000, bmp)
+        }
+
+        // The first inserted tile (1000, 1000) should have been evicted when limit was reached
+        org.junit.Assert.assertNull(
+            "Oldest tile (1000, 1000) should be evicted from LRU memory cache",
+            worldMap.getMemoryCachedTile(1000, 1000)
+        )
+
+        // The latest inserted tile (1000 + bitmapCount - 1, 1000) should still be in cache
+        org.junit.Assert.assertNotNull(
+            "Newest tile should remain in memory cache",
+            worldMap.getMemoryCachedTile(1000 + bitmapCount - 1, 1000)
+        )
+
+        // Verify size limit is respected
+        org.junit.Assert.assertTrue(
+            "Memory LRU size (${worldMap.getMemoryTileCacheSize()}) must not exceed max size (${worldMap.getMemoryTileCacheMaxSize()})",
+            worldMap.getMemoryTileCacheSize() <= worldMap.getMemoryTileCacheMaxSize()
+        )
+    }
+
+    @org.junit.Test
+    fun testWorldMapDiskCacheHits() = kotlinx.coroutines.runBlocking {
+        val tempDir = java.nio.file.Files.createTempDirectory("tile_cache_test").toFile()
+        try {
+            val capManager = com.linkpoint.protocol.capabilities.CapabilityManager()
+            val worldMap = WorldMap(capManager, tileCacheDir = tempDir)
+
+            // Create a valid JPEG byte array and save it to the disk cache directory
+            val bitmap = android.graphics.Bitmap.createBitmap(256, 256, android.graphics.Bitmap.Config.ARGB_8888)
+            val bos = java.io.ByteArrayOutputStream()
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, bos)
+            val jpegBytes = bos.toByteArray()
+
+            val key = "3-1000-1000"
+            val diskFile = java.io.File(tempDir, "tile_$key.jpg")
+            diskFile.writeBytes(jpegBytes)
+
+            // Request tile - should hit disk cache without network requests
+            val loadedTile = worldMap.getMapTile(1000, 1000, WorldMap.ZOOM_REGION)
+
+            org.junit.Assert.assertNotNull("Tile should be loaded from disk cache", loadedTile)
+            org.junit.Assert.assertNotNull(
+                "Tile should be promoted to memory LRU cache",
+                worldMap.getMemoryCachedTile(1000, 1000, WorldMap.ZOOM_REGION)
+            )
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
+    @org.junit.Test
+    fun testViewportGridTileFilteringAndEviction() {
+        // Simulate local tile map in MapActivity
+        val zoomLevel = 3
+        val tileSize = 128f
+        val width = 512
+        val height = 512
+
+        // Tiles per viewport: (512/128)+2 = 6 in X, 6 in Y => 36 tiles
+        var centerX = 1000
+        var centerY = 1000
+
+        fun calculateVisibleKeys(cx: Int, cy: Int): Set<String> {
+            val tilesX = (width / tileSize).toInt() + 2
+            val tilesY = (height / tileSize).toInt() + 2
+            val startX = cx - tilesX / 2
+            val startY = cy - tilesY / 2
+            val keys = HashSet<String>()
+            for (y in 0 until tilesY) {
+                for (x in 0 until tilesX) {
+                    keys.add("$zoomLevel-${startX + x}-${startY + y}")
+                }
+            }
+            return keys
+        }
+
+        val localMap = mutableMapOf<String, android.graphics.Bitmap>()
+        val dummyBitmap = android.graphics.Bitmap.createBitmap(16, 16, android.graphics.Bitmap.Config.ARGB_8888)
+
+        // Initial viewport load
+        val initialKeys = calculateVisibleKeys(centerX, centerY)
+        for (k in initialKeys) {
+            localMap[k] = dummyBitmap
+        }
+
+        org.junit.Assert.assertEquals(36, localMap.size)
+
+        // Simulate panning far away
+        centerX = 2000
+        centerY = 2000
+        val pannedKeys = calculateVisibleKeys(centerX, centerY)
+
+        // Purge out of bounds keys
+        localMap.keys.retainAll(pannedKeys)
+
+        // Verify that initial keys were evicted
+        for (k in initialKeys) {
+            org.junit.Assert.assertFalse("Initial key $k should be evicted after panning far away", localMap.containsKey(k))
+        }
+
+        // Populate new panned viewport tiles
+        for (k in pannedKeys) {
+            localMap[k] = dummyBitmap
+        }
+
+        org.junit.Assert.assertEquals(36, localMap.size)
+        org.junit.Assert.assertTrue(localMap.keys.containsAll(pannedKeys))
     }
 
 }
