@@ -46,7 +46,8 @@ sealed class PreparedRenderCommand {
         val localId: Int,
         val meshData: com.linkpoint.assets.MeshData,
         val textureEntry: ByteArray,
-        val descriptorKey: Long
+        val descriptorKey: Long,
+        val hostAvatarId: java.util.UUID? = null
     ) : PreparedRenderCommand() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -183,7 +184,8 @@ class ParallelCommandBufferRecorder {
                     localId = command.localId,
                     meshData = command.meshData,
                     textureEntry = command.textureEntry,
-                    descriptorKey = descriptorKey
+                    descriptorKey = descriptorKey,
+                    hostAvatarId = command.hostAvatarId
                 )
             }
             is SceneRenderCommand.UpdateMaterial -> {

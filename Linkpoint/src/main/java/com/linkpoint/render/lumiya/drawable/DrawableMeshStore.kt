@@ -5,11 +5,16 @@ import android.opengl.Matrix
 import android.util.Log
 import com.linkpoint.assets.MeshData
 import com.linkpoint.assets.MeshFace
+import com.linkpoint.assets.SkinData
+import com.linkpoint.avatar.AvatarSkeleton
 import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
+import com.linkpoint.render.lumiya.shaders.RiggedMeshShaderProgram
 import com.linkpoint.render.materials.GlesMaterialTranslator
 import com.linkpoint.render.materials.MaterialDescriptor
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,14 +26,18 @@ import java.util.concurrent.ConcurrentHashMap
  * face; per-prim instances reference the shared VAOs and carry their own
  * model matrix + per-face material array.
  *
- * Rigged-mesh skinning is captured but currently rendered in bind pose,
- * matching the Filament path. GPU skinning lands when `RiggedMeshShaderProgram`
- * is wired through here.
+ * Rigged mesh attachments pre-align vertex joint indices to standard avatar
+ * skeleton bone indices during compilation and bind host avatar joint UBOs
+ * directly to UBO binding point 1 without extra per-attachment UBO allocations.
  */
 class DrawableMeshStore {
 
     companion object {
         private const val TAG = "DrawableMeshStore"
+        private val IDENTITY_MATRIX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+        private val BONE_NAME_TO_INDEX_MAP: Map<String, Int> by lazy {
+            AvatarSkeleton.BONE_NAMES.withIndex().associate { it.value to it.index }
+        }
     }
 
     /** Per-mesh-asset GPU buffers, one VAO per face. */
@@ -68,12 +77,15 @@ class DrawableMeshStore {
         var aabbHalfX: Float = 0.5f,
         var aabbHalfY: Float = 0.5f,
         var aabbHalfZ: Float = 0.5f,
-        var isTransparent: Boolean = false
+        var isTransparent: Boolean = false,
+        var hostAvatarId: UUID? = null
     )
 
     private val compiled = ConcurrentHashMap<UUID, CompiledMesh>()
     private val instances = ConcurrentHashMap<Long, MeshInstance>()
     private var bufferManager: GLBufferManager? = null
+
+    var avatarStore: DrawableAvatarStore? = null
 
     // ── Compilation ──────────────────────────────────────────────────────
 
@@ -84,11 +96,13 @@ class DrawableMeshStore {
         scaleX: Float, scaleY: Float, scaleZ: Float,
         rotation: FloatArray? = null,
         meshData: MeshData,
-        textureEntry: ByteArray? = null
+        textureEntry: ByteArray? = null,
+        hostAvatarId: UUID? = null
     ): Boolean {
         val mesh = getOrCompile(ctx, meshData) ?: return false
 
         val instance = instances.getOrPut(id) { MeshInstance(id, meshData.meshId) }
+        instance.hostAvatarId = hostAvatarId
         Matrix.setIdentityM(instance.modelMatrix, 0)
         Matrix.translateM(instance.modelMatrix, 0, posX, posY, posZ)
         if (rotation != null && rotation.size >= 16) {
@@ -105,6 +119,10 @@ class DrawableMeshStore {
         return true
     }
 
+    fun setHostAvatarId(id: Long, hostAvatarId: UUID?) {
+        instances[id]?.hostAvatarId = hostAvatarId
+    }
+
     private fun getOrCompile(ctx: LumiyaRenderContext, data: MeshData): CompiledMesh? {
         compiled[data.meshId]?.let { return it }
         if (data.faces.isEmpty()) return null
@@ -114,7 +132,7 @@ class DrawableMeshStore {
         try {
             for (face in data.faces) {
                 if (face.vertexCount == 0 || face.indexCount == 0) continue
-                val vao = uploadFace(bm, face) ?: continue
+                val vao = uploadFace(bm, face, data.skinData) ?: continue
                 vaos.add(vao)
                 bounds.add(faceMaxExtent(face))
             }
@@ -128,25 +146,90 @@ class DrawableMeshStore {
         return cm
     }
 
-    private fun uploadFace(bm: GLBufferManager, face: MeshFace): GLBufferManager.MeshVAO? {
+    private fun uploadFace(bm: GLBufferManager, face: MeshFace, skinData: SkinData? = null): GLBufferManager.MeshVAO? {
         if (face.positions.size != face.vertexCount * 3) return null
         if (face.normals.size != face.vertexCount * 3) return null
         if (face.uvs.size != face.vertexCount * 2) return null
 
-        // Interleave POS(3) + NORMAL(3) + UV(2) — matches the existing
-        // PrimShaderProgram input layout (locations 0/1/2).
-        val data = FloatArray(face.vertexCount * 8)
-        for (i in 0 until face.vertexCount) {
-            data[i * 8 + 0] = face.positions[i * 3 + 0]
-            data[i * 8 + 1] = face.positions[i * 3 + 1]
-            data[i * 8 + 2] = face.positions[i * 3 + 2]
-            data[i * 8 + 3] = face.normals[i * 3 + 0]
-            data[i * 8 + 4] = face.normals[i * 3 + 1]
-            data[i * 8 + 5] = face.normals[i * 3 + 2]
-            data[i * 8 + 6] = face.uvs[i * 2 + 0]
-            data[i * 8 + 7] = face.uvs[i * 2 + 1]
+        val vertexCount = face.vertexCount
+        val bindShape = skinData?.bindShapeMatrix
+        val hasValidBindShape = bindShape != null && bindShape.size == 16
+        val jointNames = skinData?.jointNames ?: emptyList()
+
+        val rawJoints = face.jointIndices
+        val rawWeights = face.weights
+        val isRiggedFace = face.isRigged || skinData != null
+
+        val bb = ByteBuffer.allocateDirect(vertexCount * 16 * 4).order(ByteOrder.nativeOrder())
+
+        for (i in 0 until vertexCount) {
+            var px = face.positions[i * 3 + 0]
+            var py = face.positions[i * 3 + 1]
+            var pz = face.positions[i * 3 + 2]
+            if (hasValidBindShape) {
+                val rx = bindShape!![0] * px + bindShape[4] * py + bindShape[8] * pz + bindShape[12]
+                val ry = bindShape[1] * px + bindShape[5] * py + bindShape[9] * pz + bindShape[13]
+                val rz = bindShape[2] * px + bindShape[6] * py + bindShape[10] * pz + bindShape[14]
+                px = rx; py = ry; pz = rz
+            }
+            bb.putFloat(px)
+            bb.putFloat(py)
+            bb.putFloat(pz)
+
+            var nx = face.normals[i * 3 + 0]
+            var ny = face.normals[i * 3 + 1]
+            var nz = face.normals[i * 3 + 2]
+            if (hasValidBindShape) {
+                val rnx = bindShape!![0] * nx + bindShape[4] * ny + bindShape[8] * nz
+                val rny = bindShape[1] * nx + bindShape[5] * ny + bindShape[9] * nz
+                val rnz = bindShape[2] * nx + bindShape[6] * ny + bindShape[10] * nz
+                val len = kotlin.math.sqrt(rnx * rnx + rny * rny + rnz * rnz)
+                if (len > 1e-6f) {
+                    nx = rnx / len; ny = rny / len; nz = rnz / len
+                } else {
+                    nx = rnx; ny = rny; nz = rnz
+                }
+            }
+            bb.putFloat(nx)
+            bb.putFloat(ny)
+            bb.putFloat(nz)
+
+            bb.putFloat(face.uvs[i * 2 + 0])
+            bb.putFloat(face.uvs[i * 2 + 1])
+
+            var w0 = 0f; var w1 = 0f; var w2 = 0f; var w3 = 0f
+            var j0 = 0; var j1 = 0; var j2 = 0; var j3 = 0
+
+            if (isRiggedFace && rawJoints != null && rawWeights != null &&
+                rawJoints.size >= (i + 1) * 4 && rawWeights.size >= (i + 1) * 4) {
+
+                val mapJoint = { ji: Int, w: Float ->
+                    if (ji >= 0 && ji < jointNames.size && w > 0f) {
+                        val name = jointNames[ji]
+                        val globalIdx = BONE_NAME_TO_INDEX_MAP[name]
+                        if (globalIdx != null) globalIdx to w else 0 to 0f
+                    } else 0 to 0f
+                }
+
+                val (mappedJ0, mappedW0) = mapJoint(rawJoints[i * 4 + 0], rawWeights[i * 4 + 0])
+                val (mappedJ1, mappedW1) = mapJoint(rawJoints[i * 4 + 1], rawWeights[i * 4 + 1])
+                val (mappedJ2, mappedW2) = mapJoint(rawJoints[i * 4 + 2], rawWeights[i * 4 + 2])
+                val (mappedJ3, mappedW3) = mapJoint(rawJoints[i * 4 + 3], rawWeights[i * 4 + 3])
+
+                val wSum = mappedW0 + mappedW1 + mappedW2 + mappedW3
+                if (wSum > 1e-6f) {
+                    w0 = mappedW0 / wSum; w1 = mappedW1 / wSum
+                    w2 = mappedW2 / wSum; w3 = mappedW3 / wSum
+                    j0 = mappedJ0; j1 = mappedJ1; j2 = mappedJ2; j3 = mappedJ3
+                }
+            }
+
+            bb.putFloat(w0); bb.putFloat(w1); bb.putFloat(w2); bb.putFloat(w3)
+            bb.putInt(j0); bb.putInt(j1); bb.putInt(j2); bb.putInt(j3)
         }
-        return bm.buildVAO(data, face.indices, listOf(0 to 3, 1 to 3, 2 to 2))
+
+        bb.flip()
+        return bm.buildSkinnedVAO(bb, face.indices)
     }
 
     private fun faceMaxExtent(face: MeshFace): Float {
@@ -187,32 +270,60 @@ class DrawableMeshStore {
 
     // ── Draw ─────────────────────────────────────────────────────────────
 
-    fun drawOpaque(ctx: LumiyaRenderContext) {
+    fun drawOpaque(ctx: LumiyaRenderContext, avatarStore: DrawableAvatarStore? = this.avatarStore) {
         if (instances.isEmpty()) return
-        val program = ctx.primProgram ?: return
-        program.use()
-        program.setLighting(
+        val primProgram = ctx.primProgram
+        val riggedProgram = ctx.riggedMeshProgram
+
+        primProgram?.use()
+        primProgram?.setLighting(
             ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
             ctx.sunColorR, ctx.sunColorG, ctx.sunColorB,
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
+
+        riggedProgram?.use()
+        riggedProgram?.setLighting(
+            ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
+            ctx.sunColorR, ctx.sunColorG, ctx.sunColorB,
+            ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
+        )
+
         for (instance in instances.values) {
             if (instance.isTransparent) continue
             if (!instanceInFrustum(ctx, instance)) continue
-            drawInstance(program, instance)
+
+            val hostAvatar = instance.hostAvatarId?.let { avatarStore?.getAvatar(it) }
+            if (hostAvatar != null && hostAvatar.jointUBO != 0 && riggedProgram != null) {
+                riggedProgram.use()
+                drawRiggedInstance(riggedProgram, instance, hostAvatar)
+            } else if (primProgram != null) {
+                primProgram.use()
+                drawInstance(primProgram, instance)
+            }
         }
         GLES32.glBindVertexArray(0)
     }
 
-    fun drawTransparent(ctx: LumiyaRenderContext) {
+    fun drawTransparent(ctx: LumiyaRenderContext, avatarStore: DrawableAvatarStore? = this.avatarStore) {
         if (instances.isEmpty()) return
-        val program = ctx.primProgram ?: return
-        program.use()
-        program.setLighting(
+        val primProgram = ctx.primProgram
+        val riggedProgram = ctx.riggedMeshProgram
+
+        primProgram?.use()
+        primProgram?.setLighting(
             ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
             ctx.sunColorR, ctx.sunColorG, ctx.sunColorB,
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
+
+        riggedProgram?.use()
+        riggedProgram?.setLighting(
+            ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
+            ctx.sunColorR, ctx.sunColorG, ctx.sunColorB,
+            ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
+        )
+
         val sorted = instances.values
             .filter { it.isTransparent && instanceInFrustum(ctx, it) }
             .sortedByDescending {
@@ -221,7 +332,17 @@ class DrawableMeshStore {
                 val dz = it.modelMatrix[14] - ctx.cameraPositionZ
                 dx * dx + dy * dy + dz * dz
             }
-        for (instance in sorted) drawInstance(program, instance)
+
+        for (instance in sorted) {
+            val hostAvatar = instance.hostAvatarId?.let { avatarStore?.getAvatar(it) }
+            if (hostAvatar != null && hostAvatar.jointUBO != 0 && riggedProgram != null) {
+                riggedProgram.use()
+                drawRiggedInstance(riggedProgram, instance, hostAvatar)
+            } else if (primProgram != null) {
+                primProgram.use()
+                drawInstance(primProgram, instance)
+            }
+        }
         GLES32.glBindVertexArray(0)
     }
 
@@ -248,6 +369,35 @@ class DrawableMeshStore {
                 occlusionHandle = face.occlusionHandle
             )
             GlesMaterialTranslator.apply(program, matDescriptor, bindings)
+            GLES32.glBindVertexArray(vao.vao)
+            val type = if (vao.useIntIndices) GLES32.GL_UNSIGNED_INT else GLES32.GL_UNSIGNED_SHORT
+            GLES32.glDrawElements(GLES32.GL_TRIANGLES, vao.indexCount, type, 0)
+        }
+    }
+
+    private fun drawRiggedInstance(
+        program: RiggedMeshShaderProgram,
+        instance: MeshInstance,
+        hostAvatar: DrawableAvatarStore.AvatarInstance
+    ) {
+        val mesh = compiled[instance.meshId] ?: return
+        program.setModelMatrix(instance.modelMatrix)
+        program.setBindShapeMatrix(IDENTITY_MATRIX)
+        program.setJointCount(hostAvatar.jointCount)
+        GLES32.glBindBufferBase(GLES32.GL_UNIFORM_BUFFER, 1, hostAvatar.jointUBO)
+
+        for ((faceIdx, vao) in mesh.faces.withIndex()) {
+            val face = instance.faces.getOrNull(faceIdx) ?: continue
+            program.setColor(face.colorR, face.colorG, face.colorB, face.colorA)
+            program.setUseTexture(face.textureHandle != 0)
+            program.setTextureSampler(0)
+            program.setTexMatrix(buildTexMatrix(face))
+
+            if (face.textureHandle != 0) {
+                GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
+                GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, face.textureHandle)
+            }
+
             GLES32.glBindVertexArray(vao.vao)
             val type = if (vao.useIntIndices) GLES32.GL_UNSIGNED_INT else GLES32.GL_UNSIGNED_SHORT
             GLES32.glDrawElements(GLES32.GL_TRIANGLES, vao.indexCount, type, 0)

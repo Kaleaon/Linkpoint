@@ -38,6 +38,8 @@ class DrawableAvatarStore internal constructor(
     private var avatarMesh: GLBufferManager.MeshVAO? = null
     private var bufferManager: GLBufferManager? = null
 
+    fun getAvatar(id: UUID): AvatarInstance? = avatars[id]
+
     fun addAvatar(id: UUID, posX: Float, posY: Float, posZ: Float) {
         val instance = AvatarInstance(id = id)
         Matrix.setIdentityM(instance.modelMatrix, 0)

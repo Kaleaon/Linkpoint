@@ -62,7 +62,8 @@ class RiggedMeshShaderProgram : BaseShaderProgram() {
             vec4 bindPos = uBindShapeMatrix * vec4(aPosition, 1.0);
 
             mat4 skin = mat4(0.0);
-            if (uJointCount > 0) {
+            float totalWeight = aWeights.x + aWeights.y + aWeights.z + aWeights.w;
+            if (uJointCount > 0 && totalWeight > 0.0001) {
                 skin += aWeights.x * uJointMatrices[aJoints.x];
                 skin += aWeights.y * uJointMatrices[aJoints.y];
                 skin += aWeights.z * uJointMatrices[aJoints.z];
