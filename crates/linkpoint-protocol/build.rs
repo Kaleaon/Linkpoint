@@ -5,7 +5,12 @@ fn main() {
     println!("cargo:rerun-if-changed=../../schemas/protocol/llsd");
 
     let status = Command::new("python3")
-        .args(&["tools/protocol_gen/cli.py", "generate", "--target", "rust,c"])
+        .args([
+            "tools/protocol_gen/cli.py",
+            "generate",
+            "--target",
+            "rust,c",
+        ])
         .current_dir("../../")
         .status();
 

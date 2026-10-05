@@ -1,4 +1,5 @@
 import os
+import subprocess
 from typing import Dict
 from tools.protocol_gen.proto_ast.models import ProtocolAST
 from tools.protocol_gen.emitters.base import BaseEmitter
@@ -16,15 +17,26 @@ class RustEmitter(BaseEmitter):
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(code)
 
+        try:
+            subprocess.run(["rustfmt", out_file], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            with open(out_file, "r", encoding="utf-8") as f:
+                code = f.read()
+        except Exception:
+            pass
+
         return {out_file: code}
 
     def _generate_rust_code(self, ast: ProtocolAST) -> str:
         out = []
-        out.append(self.get_header_warning("//"))
+        out.append(self.get_header_warning("//").rstrip())
+        out.append("")
         out.append("#![allow(dead_code)]")
-        out.append("#![allow(non_camel_case_types)]\n")
+        out.append("#![allow(non_camel_case_types)]")
+        out.append("#![allow(clippy::all)]")
+        out.append("")
 
-        out.append(f'pub const TEMPLATE_VERSION: &str = "{ast.version}";\n')
+        out.append(f'pub const TEMPLATE_VERSION: &str = "{ast.version}";')
+        out.append("")
 
         # Zerocoded decompression
         out.append("""/// Decompresses zero-coded byte sequence into unencoded payload
@@ -58,7 +70,13 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
 
         # Enums for Message ID
         out.append("#[derive(Debug, Clone, Copy, PartialEq, Eq)]")
-        out.append("pub enum MessageFrequency { High, Medium, Low, Fixed }\n")
+        out.append("pub enum MessageFrequency {")
+        out.append("    High,")
+        out.append("    Medium,")
+        out.append("    Low,")
+        out.append("    Fixed,")
+        out.append("}")
+        out.append("")
 
         # Message Structs
         out.append("// Generated UDP Messages")
@@ -80,7 +98,8 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
             out.append(f'            zerocoded: {"true" if msg.encoding == "Zerocoded" else "false"},')
             out.append("        }")
             out.append("    }")
-            out.append("}\n")
+            out.append("}")
+            out.append("")
 
         # LLSD capability structs
         out.append("// Generated LLSD Capability Schemas")
@@ -99,6 +118,7 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
                 elif prop.data_type == "array":
                     rs_type = "Vec<String>"
                 out.append(f"    pub {p_name}: {rs_type},")
-            out.append("}\n")
+            out.append("}")
+            out.append("")
 
         return "\n".join(out)
