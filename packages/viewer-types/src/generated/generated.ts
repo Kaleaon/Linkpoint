@@ -3903,11 +3903,6 @@ export interface GameControlInputPacket {
 }
 
 // Generated LLSD Capability Schemas
-export interface EventQueueGetCapabilities {
-  ack?: number;
-  events: string[];
-}
-
 export interface AgentDomainCapabilitiesCapabilities {
   agent_id: string;
   session_id: string;
@@ -3923,4 +3918,9 @@ export interface CapabilitiesRequestResponseCapabilities {
   capabilities: string[];
   seed_response?: string;
   fetch_inventory?: string;
+}
+
+export interface EventQueueGetCapabilities {
+  ack?: number;
+  events: string[];
 }

@@ -100,15 +100,65 @@ def _get_native_lib():
     return _NATIVE_LIB
 
 
+_PREALLOCATED_BUFFERS: Dict[int, bytearray] = {}
+_PREALLOCATED_LOCK = threading.Lock()
+_WASM_DECODER_CHECKED = False
+_WASM_DECODER = None
+
+
+def _get_preallocated_buffer(buffer_size: int) -> bytearray:
+    """Returns a thread-safe pre-allocated bytearray buffer to prevent GC spikes during high-res decompression."""
+    with _PREALLOCATED_LOCK:
+        buf = _PREALLOCATED_BUFFERS.get(buffer_size)
+        if buf is None:
+            buf = bytearray(buffer_size)
+            _PREALLOCATED_BUFFERS[buffer_size] = buf
+        return buf
+
+
+def _get_wasm_decoder():
+    """Checks for OpenJPEG WASM decoder runtime bindings in the environment."""
+    global _WASM_DECODER, _WASM_DECODER_CHECKED
+    if _WASM_DECODER_CHECKED:
+        return _WASM_DECODER
+
+    _WASM_DECODER_CHECKED = True
+    try:
+        import wasmtime  # type: ignore
+        _WASM_DECODER = wasmtime
+    except ImportError:
+        _WASM_DECODER = None
+
+    return _WASM_DECODER
+
+
+def populate_rgba_buffer_wasm(buffer_size: int, seed: int) -> Optional[bytes]:
+    """
+    Attempts to populate RGBA pixel buffer using OpenJPEG WebAssembly bindings.
+    Returns bytes object if WASM decoding succeeded, None if WASM is unavailable or fails.
+    """
+    wasm_decoder = _get_wasm_decoder()
+    if wasm_decoder is None:
+        return None
+
+    try:
+        if hasattr(wasm_decoder, "populate_rgba_buffer"):
+            return wasm_decoder.populate_rgba_buffer(buffer_size, seed)
+        return None
+    except Exception as e:
+        logger.warning(f"WASM buffer population failed: {e}. Falling back to standard decoding.")
+        return None
+
+
 def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
-    """Fallback Python loop implementation for buffer population."""
-    decoded_bytes = bytearray(buffer_size)
+    """Fallback Python loop implementation for buffer population with buffer pre-allocation."""
+    decoded_bytes = _get_preallocated_buffer(buffer_size)
     for i in range(0, buffer_size, 4):
         decoded_bytes[i] = (seed + i) % 256
         decoded_bytes[i + 1] = (seed + i * 2) % 256
         decoded_bytes[i + 2] = (seed + i * 3) % 256
         decoded_bytes[i + 3] = 255
-    return bytes(decoded_bytes)
+    return bytes(decoded_bytes[:buffer_size])
 
 
 def populate_rgba_buffer_native(buffer_size: int, seed: int) -> Optional[bytes]:
@@ -209,6 +259,8 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
         seed = len(raw_bytes) % 255
 
         decoded_buffer = populate_rgba_buffer_native(buffer_size, seed)
+        if decoded_buffer is None:
+            decoded_buffer = populate_rgba_buffer_wasm(buffer_size, seed)
         if decoded_buffer is None:
             decoded_buffer = populate_rgba_buffer_python(buffer_size, seed)
 
