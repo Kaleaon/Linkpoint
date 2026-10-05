@@ -112,6 +112,9 @@ class VoiceManager(
     private val _allMuted = MutableStateFlow(false)
     val allMuted: StateFlow<Boolean> = _allMuted
 
+    private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> = _lastError
+
     // Audio settings
     private var inputGain = 1.0f
     private var outputGain = 1.0f
@@ -1015,6 +1018,19 @@ internal class VoiceSession(
     }
 
     fun isConnected(): Boolean = isConnected
+
+    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+        val pc = peerConnection ?: return false
+        return try {
+            val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
+                sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+            }
+            pc.setConfiguration(rtcConfig)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 data class VoiceInfo(
