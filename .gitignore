@@ -184,6 +184,7 @@ build_output.txt
 /artifacts/
 /coverage/
 **/coverage/
+/LLSD-KOTLIN/cache/
 *.lcov
 lcov.info
 /test-results/
