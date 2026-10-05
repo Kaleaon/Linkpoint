@@ -38,9 +38,20 @@ export function ratingName(access: number | undefined): string {
   return 'Unknown';
 }
 
-/** The tile server's image for a region of Second Life; other grids advertise no tiles. */
-export function mapTileUrl(x: number, y: number) {
-  return `https://map.secondlife.com/map-1-${x}-${y}-objects.jpg`;
+/** The tile server's image for a region, using dynamic template or default Second Life tile URL. */
+export function mapTileUrl(x: number, y: number, mapUrlTemplate?: string, zoom: number = 1): string {
+  if (mapUrlTemplate) {
+    let url = mapUrlTemplate.trim();
+    if (url.includes('{x}') && url.includes('{y}')) {
+      return url
+        .replace('{zoom}', String(zoom))
+        .replace('{x}', String(x))
+        .replace('{y}', String(y));
+    }
+    const base = url.endsWith('/') ? url.slice(0, -1) : url;
+    return `${base}/map-${zoom}-${x}-${y}-objects.jpg`;
+  }
+  return `https://map.secondlife.com/map-${zoom}-${x}-${y}-objects.jpg`;
 }
 
 /** The colour the official map shows where there is no region: open water. */

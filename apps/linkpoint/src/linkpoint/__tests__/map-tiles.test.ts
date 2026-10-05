@@ -18,6 +18,8 @@ describe('map layout', () => {
   it('names ratings, tile urls and teleport targets', () => {
     expect([13, 21, 42, 0].map(ratingName)).toEqual(['General', 'Moderate', 'Adult', 'Unknown']);
     expect(mapTileUrl(1000, 1001)).toBe('https://map.secondlife.com/map-1-1000-1001-objects.jpg');
+    expect(mapTileUrl(1000, 1001, 'https://grid.example.com/tiles/{zoom}/{x}/{y}.png', 2)).toBe('https://grid.example.com/tiles/2/1000/1001.png');
+    expect(mapTileUrl(1000, 1001, 'https://grid.example.com/maptiles')).toBe('https://grid.example.com/maptiles/map-1-1000-1001-objects.jpg');
     expect(teleportTarget({ name: 'Ahern' })).toBe('Ahern/128/128/30');
   });
 

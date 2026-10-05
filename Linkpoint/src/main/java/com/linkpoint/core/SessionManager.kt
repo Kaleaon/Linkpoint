@@ -77,6 +77,7 @@ class SessionManager(private val context: Context) {
     fun getHelperUri(): String? = _activeGrid.value?.helperUri
     fun getEconomyUri(): String? = _activeGrid.value?.economyUri
     fun getMapUri(): String? = _activeGrid.value?.mapUri
+    fun getSearchUri(): String? = _activeGrid.value?.searchUri
     fun getWelcomeUri(): String? = _activeGrid.value?.welcomeUri ?: _activeGrid.value?.website
 
     /**
