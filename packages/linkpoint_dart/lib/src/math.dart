@@ -11,9 +11,12 @@ class Vector3 {
   static const Vector3 zero = Vector3(0.0, 0.0, 0.0);
   static const Vector3 one = Vector3(1.0, 1.0, 1.0);
 
-  Vector3 operator +(Vector3 other) => Vector3(x + other.x, y + other.y, z + other.z);
-  Vector3 operator -(Vector3 other) => Vector3(x - other.x, y - other.y, z - other.z);
-  Vector3 operator *(double scalar) => Vector3(x * scalar, y * scalar, z * scalar);
+  Vector3 operator +(Vector3 other) =>
+      Vector3(x + other.x, y + other.y, z + other.z);
+  Vector3 operator -(Vector3 other) =>
+      Vector3(x - other.x, y - other.y, z - other.z);
+  Vector3 operator *(double scalar) =>
+      Vector3(x * scalar, y * scalar, z * scalar);
 
   double get length => math.sqrt(x * x + y * y + z * z);
 

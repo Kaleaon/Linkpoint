@@ -1,13 +1,14 @@
 import os
-from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 class KotlinEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("Kotlin", ".kt")
 
-    def emit(self, ast: ProtocolAST, out_dir: str) -> Dict[str, str]:
+    def emit(self, ast: ProtocolAST, out_dir: str) -> dict[str, str]:
         os.makedirs(out_dir, exist_ok=True)
 
         proto_code = self._generate_protocol_code(ast)
@@ -16,10 +17,7 @@ class KotlinEmitter(BaseEmitter):
         proto_file = os.path.join(out_dir, "GeneratedProtocol.kt")
         llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.kt")
 
-        results = {
-            proto_file: proto_code,
-            llsd_file: llsd_code
-        }
+        results = {proto_file: proto_code, llsd_file: llsd_code}
 
         for path, content in results.items():
             with open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -73,16 +71,24 @@ class KotlinEmitter(BaseEmitter):
 
         # Message data classes
         for msg in ast.messages:
-            num_val = f"{msg.message_number}.toInt()" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
+            num_val = (
+                f"{msg.message_number}.toInt()"
+                if msg.message_number > 2147483647 or msg.message_number < -2147483648
+                else str(msg.message_number)
+            )
             out.append(f"// Message: {msg.name} ({msg.frequency} {msg.message_number})")
             out.append(f"data class {msg.name}Packet(")
             out.append(f'    val messageName: String = "{msg.name}",')
             out.append(f"    val messageNumber: Int = {num_val},")
             out.append(f'    val frequency: String = "{msg.frequency}",')
-            out.append(f'    val isZerocoded: Boolean = {"true" if msg.encoding == "Zerocoded" else "false"}')
+            out.append(
+                f"    val isZerocoded: Boolean = {'true' if msg.encoding == 'Zerocoded' else 'false'}"
+            )
             out.append(") {\n")
             out.append("    fun serialize(): ByteArray {")
-            out.append("        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)")
+            out.append(
+                "        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)"
+            )
             out.append(f"        buffer.putInt({num_val})")
             out.append("        return buffer.array().copyOf(buffer.position())")
             out.append("    }\n")

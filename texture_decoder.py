@@ -14,8 +14,7 @@ import os
 import platform
 import struct
 import threading
-import time
-from typing import Callable, Optional, Dict, Set, Any
+from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +76,7 @@ def _get_native_lib():
             lib.populate_rgba_buffer.argtypes = [
                 ctypes.POINTER(ctypes.c_ubyte),
                 ctypes.c_size_t,
-                ctypes.c_int
+                ctypes.c_int,
             ]
             lib.populate_rgba_buffer.restype = None
             _NATIVE_LIB = lib
@@ -91,7 +90,7 @@ def _get_native_lib():
     return _NATIVE_LIB
 
 
-_PREALLOCATED_BUFFERS: Dict[int, bytearray] = {}
+_PREALLOCATED_BUFFERS: dict[int, bytearray] = {}
 _PREALLOCATED_LOCK = threading.Lock()
 _WASM_DECODER_CHECKED = False
 _WASM_DECODER = None
@@ -116,6 +115,7 @@ def _get_wasm_decoder():
     _WASM_DECODER_CHECKED = True
     try:
         import wasmtime  # type: ignore
+
         _WASM_DECODER = wasmtime
     except ImportError:
         _WASM_DECODER = None
@@ -123,7 +123,7 @@ def _get_wasm_decoder():
     return _WASM_DECODER
 
 
-def populate_rgba_buffer_wasm(buffer_size: int, seed: int) -> Optional[bytes]:
+def populate_rgba_buffer_wasm(buffer_size: int, seed: int) -> bytes | None:
     """
     Attempts to populate RGBA pixel buffer using OpenJPEG WebAssembly bindings.
     Returns bytes object if WASM decoding succeeded, None if WASM is unavailable or fails.
@@ -137,7 +137,9 @@ def populate_rgba_buffer_wasm(buffer_size: int, seed: int) -> Optional[bytes]:
             return wasm_decoder.populate_rgba_buffer(buffer_size, seed)
         return None
     except Exception as e:
-        logger.warning(f"WASM buffer population failed: {e}. Falling back to standard decoding.")
+        logger.warning(
+            f"WASM buffer population failed: {e}. Falling back to standard decoding."
+        )
         return None
 
 
@@ -209,7 +211,7 @@ def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
     return bytes(decoded_bytes[:buffer_size])
 
 
-def populate_rgba_buffer_native(buffer_size: int, seed: int) -> Optional[bytes]:
+def populate_rgba_buffer_native(buffer_size: int, seed: int) -> bytes | None:
     """
     Attempts to populate RGBA pixel memory buffer using compiled C extension via ctypes.
     Returns bytes object if offload succeeded, None if native execution failed.
@@ -231,7 +233,9 @@ def populate_rgba_buffer_native(buffer_size: int, seed: int) -> Optional[bytes]:
         native_lib.populate_rgba_buffer(buf_ptr, buffer_size, seed)
         return py_bytes
     except Exception as e:
-        logger.warning(f"Native C buffer population failed: {e}. Falling back to Python loop.")
+        logger.warning(
+            f"Native C buffer population failed: {e}. Falling back to Python loop."
+        )
         return None
 
 
@@ -249,7 +253,7 @@ class DecodedTexture:
 class DecodeProgressEvent:
     texture_id: str
     progress: float  # percentage 0.0 to 100.0
-    stage: str      # "HEADER_PARSING", "DECOMPRESSING", "COMPLETE", "CANCELLED", "FALLBACK"
+    stage: str  # "HEADER_PARSING", "DECOMPRESSING", "COMPLETE", "CANCELLED", "FALLBACK"
     bytes_processed: int = 0
     total_bytes: int = 0
 
@@ -259,18 +263,20 @@ def is_power_of_two(dim: int) -> bool:
     return bool(dim > 0 and dim <= 8192 and (dim & (dim - 1)) == 0)
 
 
-def create_placeholder_texture(width: int = 16, height: int = 16, color: tuple = (128, 128, 128, 128)) -> bytes:
+def create_placeholder_texture(
+    width: int = 16, height: int = 16, color: tuple = (128, 128, 128, 128)
+) -> bytes:
     """Generates a default 16x16 grid 50% opacity neutral gray RGBA placeholder buffer."""
     buf = bytearray(width * height * 4)
     grid_step = 16
     for y in range(height):
-        is_grid_y = (y % grid_step == 0)
+        is_grid_y = y % grid_step == 0
         row_offset = y * width * 4
         for x in range(width):
-            is_grid_x = (x % grid_step == 0)
+            is_grid_x = x % grid_step == 0
             offset = row_offset + x * 4
             if is_grid_y or is_grid_x:
-                buf[offset] = 102      # R
+                buf[offset] = 102  # R
                 buf[offset + 1] = 102  # G
                 buf[offset + 2] = 102  # B
                 buf[offset + 3] = 128  # A (50% opacity)
@@ -355,7 +361,7 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
             width=width,
             height=height,
             format="RGBA",
-            status="success"
+            status="success",
         )
     except Exception as e:
         logger.warning(f"Failed to decode JPEG2000 texture {texture_id}: {e}")
@@ -366,7 +372,7 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
             width=16,
             height=16,
             format="RGBA",
-            status="fallback"
+            status="fallback",
         )
 
 
@@ -377,12 +383,14 @@ class TextureDecoder:
             max_workers=max_workers, thread_name_prefix="TextureDecoderWorker"
         )
         self._lock = threading.Lock()
-        self._cancelled_ids: Set[str] = set()
-        self._active_futures: Dict[str, concurrent.futures.Future] = {}
-        self._opengl_surface_handlers: Dict[str, Callable[[DecodedTexture], None]] = {}
-        self._progress_callbacks: Set[Callable[[DecodeProgressEvent], None]] = set()
+        self._cancelled_ids: set[str] = set()
+        self._active_futures: dict[str, concurrent.futures.Future] = {}
+        self._opengl_surface_handlers: dict[str, Callable[[DecodedTexture], None]] = {}
+        self._progress_callbacks: set[Callable[[DecodeProgressEvent], None]] = set()
 
-    def register_surface_handler(self, name: str, handler: Callable[[DecodedTexture], None]):
+    def register_surface_handler(
+        self, name: str, handler: Callable[[DecodedTexture], None]
+    ):
         with self._lock:
             self._opengl_surface_handlers[name] = handler
 
@@ -390,11 +398,15 @@ class TextureDecoder:
         with self._lock:
             self._opengl_surface_handlers.pop(name, None)
 
-    def register_progress_callback(self, callback: Callable[[DecodeProgressEvent], None]):
+    def register_progress_callback(
+        self, callback: Callable[[DecodeProgressEvent], None]
+    ):
         with self._lock:
             self._progress_callbacks.add(callback)
 
-    def unregister_progress_callback(self, callback: Callable[[DecodeProgressEvent], None]):
+    def unregister_progress_callback(
+        self, callback: Callable[[DecodeProgressEvent], None]
+    ):
         with self._lock:
             self._progress_callbacks.discard(callback)
 
@@ -409,15 +421,17 @@ class TextureDecoder:
         self,
         texture_id: str,
         raw_bytes: bytes,
-        callback: Optional[Callable[[DecodedTexture], None]] = None,
+        callback: Callable[[DecodedTexture], None] | None = None,
         priority: int = 0,
-        progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None
+        progress_callback: Callable[[DecodeProgressEvent], None] | None = None,
     ) -> concurrent.futures.Future:
         """
         Submits JPEG2000 texture decoding request to background worker pool.
         Invokes callback and surface handlers upon completion.
         """
-        future = self._executor.submit(self._worker_decode, texture_id, raw_bytes, callback, progress_callback)
+        future = self._executor.submit(
+            self._worker_decode, texture_id, raw_bytes, callback, progress_callback
+        )
         with self._lock:
             self._active_futures[texture_id] = future
         return future
@@ -429,14 +443,14 @@ class TextureDecoder:
         stage: str,
         total_bytes: int,
         bytes_processed: int,
-        request_progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None
+        request_progress_callback: Callable[[DecodeProgressEvent], None] | None = None,
     ):
         event = DecodeProgressEvent(
             texture_id=texture_id,
             progress=progress,
             stage=stage,
             bytes_processed=bytes_processed,
-            total_bytes=total_bytes
+            total_bytes=total_bytes,
         )
         with self._lock:
             callbacks = list(self._progress_callbacks)
@@ -445,23 +459,29 @@ class TextureDecoder:
             try:
                 request_progress_callback(event)
             except Exception as e:
-                logger.error(f"Request progress callback error for texture {texture_id}: {e}")
+                logger.error(
+                    f"Request progress callback error for texture {texture_id}: {e}"
+                )
 
         for cb in callbacks:
             try:
                 cb(event)
             except Exception as e:
-                logger.error(f"Global progress callback error for texture {texture_id}: {e}")
+                logger.error(
+                    f"Global progress callback error for texture {texture_id}: {e}"
+                )
 
     def _worker_decode(
         self,
         texture_id: str,
         raw_bytes: bytes,
-        callback: Optional[Callable[[DecodedTexture], None]],
-        progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None
+        callback: Callable[[DecodedTexture], None] | None,
+        progress_callback: Callable[[DecodeProgressEvent], None] | None = None,
     ) -> DecodedTexture:
         total_len = len(raw_bytes) if raw_bytes else 0
-        self._emit_progress(texture_id, 0.0, "HEADER_PARSING", total_len, 0, progress_callback)
+        self._emit_progress(
+            texture_id, 0.0, "HEADER_PARSING", total_len, 0, progress_callback
+        )
 
         with self._lock:
             is_cancelled = texture_id in self._cancelled_ids
@@ -472,15 +492,26 @@ class TextureDecoder:
         if is_cancelled:
             placeholder = create_placeholder_texture(16, 16)
             result = DecodedTexture(texture_id, placeholder, 16, 16, status="cancelled")
-            self._emit_progress(texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback)
+            self._emit_progress(
+                texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback
+            )
             if callback:
                 try:
                     callback(result)
                 except Exception as e:
-                    logger.error(f"Callback error for cancelled texture {texture_id}: {e}")
+                    logger.error(
+                        f"Callback error for cancelled texture {texture_id}: {e}"
+                    )
             return result
 
-        self._emit_progress(texture_id, 30.0, "DECOMPRESSING", total_len, total_len // 2, progress_callback)
+        self._emit_progress(
+            texture_id,
+            30.0,
+            "DECOMPRESSING",
+            total_len,
+            total_len // 2,
+            progress_callback,
+        )
         decoded = decode_jpeg2000_buffer(texture_id, raw_bytes)
 
         with self._lock:
@@ -491,11 +522,17 @@ class TextureDecoder:
             handlers = list(self._opengl_surface_handlers.values())
 
         if decoded.status == "cancelled":
-            self._emit_progress(texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback)
+            self._emit_progress(
+                texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback
+            )
         elif decoded.status == "fallback":
-            self._emit_progress(texture_id, 100.0, "FALLBACK", total_len, total_len, progress_callback)
+            self._emit_progress(
+                texture_id, 100.0, "FALLBACK", total_len, total_len, progress_callback
+            )
         else:
-            self._emit_progress(texture_id, 100.0, "COMPLETE", total_len, total_len, progress_callback)
+            self._emit_progress(
+                texture_id, 100.0, "COMPLETE", total_len, total_len, progress_callback
+            )
 
         if callback:
             try:
@@ -508,7 +545,9 @@ class TextureDecoder:
                 try:
                     handler(decoded)
                 except Exception as e:
-                    logger.error(f"OpenGL surface handler error for texture {texture_id}: {e}")
+                    logger.error(
+                        f"OpenGL surface handler error for texture {texture_id}: {e}"
+                    )
 
         return decoded
 

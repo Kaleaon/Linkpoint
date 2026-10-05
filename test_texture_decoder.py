@@ -10,21 +10,17 @@ import threading
 import time
 import unittest
 from unittest.mock import patch
+
+from avatar_renderer import AvatarRenderer
+from inventory_cache import InventoryCache
 from texture_decoder import (
-    TextureDecoder,
     DecodedTexture,
     DecodeProgressEvent,
-    create_placeholder_texture,
-    parse_jp2_dimensions,
+    TextureDecoder,
     decode_jpeg2000_buffer,
-    populate_rgba_buffer_python,
     populate_rgba_buffer_native,
-    populate_rgba_buffer_wasm,
-    _get_wasm_decoder,
-    _get_native_lib
+    populate_rgba_buffer_python,
 )
-from inventory_cache import InventoryCache
-from avatar_renderer import AvatarRenderer
 
 
 class TestTextureDecoder(unittest.TestCase):
@@ -36,7 +32,10 @@ class TestTextureDecoder(unittest.TestCase):
 
     def test_async_jpeg2000_decoding(self):
         # Simulated valid JP2 payload
-        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        jp2_header = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        )
         raw_bytes = jp2_header + b"\x00" * 128
 
         received = []
@@ -46,7 +45,7 @@ class TestTextureDecoder(unittest.TestCase):
             received.append(decoded)
             event.set()
 
-        future = self.decoder.request_decode("tex_1", raw_bytes, callback=on_decoded)
+        self.decoder.request_decode("tex_1", raw_bytes, callback=on_decoded)
         completed = event.wait(timeout=2.0)
 
         self.assertTrue(completed)
@@ -68,7 +67,10 @@ class TestTextureDecoder(unittest.TestCase):
 
         self.decoder.register_surface_handler("main_surface", opengl_handler)
 
-        jp2_data = b"\x00\x00\x00\x0c\x6a\x50\x20\x20" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        jp2_data = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20"
+            + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        )
         self.decoder.request_decode("tex_gl", jp2_data)
 
         completed = event.wait(timeout=2.0)
@@ -95,7 +97,10 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertGreater(len(decoded.buffer), 0)  # Contains placeholder texture
 
     def test_cancellation(self):
-        jp2_data = b"\x00\x00\x00\x0c\x6a\x50\x20\x20" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        jp2_data = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20"
+            + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        )
         self.decoder.cancel_decode("tex_cancel")
 
         event = threading.Event()
@@ -117,9 +122,16 @@ class TestTextureDecoder(unittest.TestCase):
         cache.reload_full_inventory(
             {
                 "folders": [{"folder_id": "f_outfit", "name": "Outfit"}],
-                "items": [{"item_id": "item_hair", "folder_id": "f_outfit", "name": "Long Hair", "asset_id": "asset_hair_123"}]
+                "items": [
+                    {
+                        "item_id": "item_hair",
+                        "folder_id": "f_outfit",
+                        "name": "Long Hair",
+                        "asset_id": "asset_hair_123",
+                    }
+                ],
             },
-            new_token="v1"
+            new_token="v1",
         )
 
         renderer = AvatarRenderer(cache, self.decoder)
@@ -133,14 +145,17 @@ class TestTextureDecoder(unittest.TestCase):
 
         renderer.register_opengl_surface("surface_1", surface_gl)
 
-        jp2_data = b"\x00\x00\x00\x0c\x6a\x50\x20\x20" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        jp2_data = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20"
+            + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        )
 
         # Update attachment - immediately loads cached metadata
         attachment = renderer.update_avatar_attachment(
             avatar_id="avatar_1",
             attachment_point=1,
             item_id="item_hair",
-            raw_texture_bytes=None
+            raw_texture_bytes=None,
         )
 
         # Avatar rendered immediately using cached metadata
@@ -154,7 +169,7 @@ class TestTextureDecoder(unittest.TestCase):
             avatar_id="avatar_1",
             attachment_point=1,
             item_id="item_hair",
-            raw_texture_bytes=jp2_data
+            raw_texture_bytes=jp2_data,
         )
 
         # Wait for async decode to finish and update OpenGL surface
@@ -170,7 +185,10 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertFalse(updated_attachment.is_placeholder)
 
     def test_progress_callback_events(self):
-        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        jp2_header = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        )
         raw_bytes = jp2_header + b"\x00" * 128
 
         progress_events = []
@@ -181,7 +199,9 @@ class TestTextureDecoder(unittest.TestCase):
             if p_event.stage == "COMPLETE":
                 event.set()
 
-        self.decoder.request_decode("tex_prog", raw_bytes, progress_callback=on_progress)
+        self.decoder.request_decode(
+            "tex_prog", raw_bytes, progress_callback=on_progress
+        )
         completed = event.wait(timeout=2.0)
 
         self.assertTrue(completed)
@@ -201,10 +221,15 @@ class TestTextureDecoder(unittest.TestCase):
                 c_buf = populate_rgba_buffer_native(buf_size, seed)
 
                 self.assertIsNotNone(c_buf, "Native C buffer population should succeed")
-                self.assertEqual(py_buf, c_buf, f"Mismatch for buffer size {buf_size} seed {seed}")
+                self.assertEqual(
+                    py_buf, c_buf, f"Mismatch for buffer size {buf_size} seed {seed}"
+                )
 
     def test_fallback_when_native_fails(self):
-        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        jp2_header = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        )
         raw_bytes = jp2_header + b"\x00" * 32
 
         with patch("texture_decoder._get_native_lib", return_value=None):
@@ -215,7 +240,10 @@ class TestTextureDecoder(unittest.TestCase):
             self.assertEqual(len(decoded.buffer), 32 * 32 * 4)
 
     def test_wasm_environment_fallback(self):
-        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        jp2_header = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        )
         raw_bytes = jp2_header + b"\x00" * 32
 
         with patch("texture_decoder.populate_rgba_buffer_native", return_value=None):
@@ -228,7 +256,10 @@ class TestTextureDecoder(unittest.TestCase):
 
     def test_performance_sub_quarter_second(self):
         # Header specifying 8192x8192 resolution
-        jp2_header = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x20\x00\x00\x00\x20\x00"
+        jp2_header = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x20\x00\x00\x00\x20\x00"
+        )
         raw_bytes = jp2_header + b"\x00" * 256
 
         t0 = time.time()
@@ -239,10 +270,17 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertEqual(decoded.width, 8192)
         self.assertEqual(decoded.height, 8192)
         self.assertEqual(len(decoded.buffer), 8192 * 8192 * 4)
-        self.assertLess(elapsed, 0.25, f"Decoding 8192x8192 texture took {elapsed:.4f}s, expected < 0.25s")
+        self.assertLess(
+            elapsed,
+            0.25,
+            f"Decoding 8192x8192 texture took {elapsed:.4f}s, expected < 0.25s",
+        )
 
     def test_concurrent_multithreaded_safety(self):
-        jp2_data = b"\x00\x00\x00\x0c\x6a\x50\x20\x20" + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        jp2_data = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20"
+            + b"ihdr\x00\x00\x00\x20\x00\x00\x00\x20"
+        )
         num_requests = 20
         received_count = 0
         lock = threading.Lock()
@@ -257,11 +295,16 @@ class TestTextureDecoder(unittest.TestCase):
 
         futures = []
         for i in range(num_requests):
-            f = self.decoder.request_decode(f"tex_concurrent_{i}", jp2_data, callback=callback)
+            f = self.decoder.request_decode(
+                f"tex_concurrent_{i}", jp2_data, callback=callback
+            )
             futures.append(f)
 
         completed = done_event.wait(timeout=5.0)
-        self.assertTrue(completed, f"Only {received_count}/{num_requests} concurrent requests completed")
+        self.assertTrue(
+            completed,
+            f"Only {received_count}/{num_requests} concurrent requests completed",
+        )
         self.assertEqual(received_count, num_requests)
 
     def test_stream_truncation_fixtures(self):
@@ -324,7 +367,6 @@ class TestTextureDecoder(unittest.TestCase):
 
         self.assertEqual(dec.status, "fallback")
         self.assertLess(elapsed_ms, 5.0, f"Fallback processing took {elapsed_ms:.3f}ms, expected < 5.0ms")
-
 
 
 if __name__ == "__main__":

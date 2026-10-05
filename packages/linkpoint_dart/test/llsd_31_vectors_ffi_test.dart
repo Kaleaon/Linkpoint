@@ -59,12 +59,15 @@ void main() {
         expect(xmlDec, isNotNull, reason: 'Vector #$id ($name) parseXml');
 
         final notationEnc = LinkpointProtocolFFI.serializeNotation(jsonStr);
-        expect(notationEnc, isNotEmpty, reason: 'Vector #$id ($name) serializeNotation');
+        expect(notationEnc, isNotEmpty,
+            reason: 'Vector #$id ($name) serializeNotation');
         final notationDec = LinkpointProtocolFFI.parseNotation(notationEnc);
-        expect(notationDec, isNotNull, reason: 'Vector #$id ($name) parseNotation');
+        expect(notationDec, isNotNull,
+            reason: 'Vector #$id ($name) parseNotation');
 
         final binaryEnc = LinkpointProtocolFFI.serializeBinary(jsonStr);
-        expect(binaryEnc, isNotEmpty, reason: 'Vector #$id ($name) serializeBinary');
+        expect(binaryEnc, isNotEmpty,
+            reason: 'Vector #$id ($name) serializeBinary');
         final binaryDec = LinkpointProtocolFFI.parseBinary(binaryEnc);
         expect(binaryDec, isNotNull, reason: 'Vector #$id ($name) parseBinary');
       }

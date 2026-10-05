@@ -1,13 +1,14 @@
 import os
-from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 class CEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("C", ".h")
 
-    def emit(self, ast: ProtocolAST, out_dir: str) -> Dict[str, str]:
+    def emit(self, ast: ProtocolAST, out_dir: str) -> dict[str, str]:
         os.makedirs(out_dir, exist_ok=True)
 
         header_code = self._generate_c_header(ast)
@@ -16,10 +17,7 @@ class CEmitter(BaseEmitter):
         header_file = os.path.join(out_dir, "generated_protocol.h")
         source_file = os.path.join(out_dir, "generated_protocol.c")
 
-        results = {
-            header_file: header_code,
-            source_file: source_code
-        }
+        results = {header_file: header_code, source_file: source_code}
 
         for path, content in results.items():
             with open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -39,7 +37,9 @@ class CEmitter(BaseEmitter):
         out.append(f'#define PROTOCOL_TEMPLATE_VERSION "{ast.version}"\n')
 
         # Functions
-        out.append("size_t decompress_zerocoded(const uint8_t* src, size_t src_len, uint8_t* dest, size_t dest_capacity);\n")
+        out.append(
+            "size_t decompress_zerocoded(const uint8_t* src, size_t src_len, uint8_t* dest, size_t dest_capacity);\n"
+        )
 
         # Message Structs
         for msg in ast.messages:

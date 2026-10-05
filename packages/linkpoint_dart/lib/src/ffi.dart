@@ -18,11 +18,15 @@ final class LlsdResultBufferStruct extends Struct {
   external Pointer<Utf8> errorPtr;
 }
 
-typedef NativeLinkpointFreeBuffer = Void Function(Pointer<LlsdResultBufferStruct>);
-typedef DartLinkpointFreeBuffer = void Function(Pointer<LlsdResultBufferStruct>);
+typedef NativeLinkpointFreeBuffer = Void Function(
+    Pointer<LlsdResultBufferStruct>);
+typedef DartLinkpointFreeBuffer = void Function(
+    Pointer<LlsdResultBufferStruct>);
 
-typedef NativeLinkpointParse = Pointer<LlsdResultBufferStruct> Function(Pointer<Uint8>, IntPtr);
-typedef DartLinkpointParse = Pointer<LlsdResultBufferStruct> Function(Pointer<Uint8>, int);
+typedef NativeLinkpointParse = Pointer<LlsdResultBufferStruct> Function(
+    Pointer<Uint8>, IntPtr);
+typedef DartLinkpointParse = Pointer<LlsdResultBufferStruct> Function(
+    Pointer<Uint8>, int);
 
 class LinkpointProtocolFFI {
   static DynamicLibrary? _lib;
@@ -100,7 +104,8 @@ class LinkpointProtocolFFI {
     List<int> inputBytes,
   ) {
     final lib = _loadLibrary();
-    final nativeFn = lib.lookupFunction<NativeLinkpointParse, DartLinkpointParse>(functionName);
+    final nativeFn = lib
+        .lookupFunction<NativeLinkpointParse, DartLinkpointParse>(functionName);
 
     final inputPtr = calloc<Uint8>(inputBytes.length);
     final nativeList = inputPtr.asTypedList(inputBytes.length);
@@ -116,7 +121,9 @@ class LinkpointProtocolFFI {
   static void freeBuffer(Pointer<LlsdResultBufferStruct> buf) {
     if (buf == nullptr) return;
     final lib = _loadLibrary();
-    final freeFn = lib.lookupFunction<NativeLinkpointFreeBuffer, DartLinkpointFreeBuffer>('linkpoint_free_buffer');
+    final freeFn =
+        lib.lookupFunction<NativeLinkpointFreeBuffer, DartLinkpointFreeBuffer>(
+            'linkpoint_free_buffer');
     freeFn(buf);
   }
 
@@ -127,7 +134,9 @@ class LinkpointProtocolFFI {
     try {
       final ref = resBuf.ref;
       if (ref.status != 0) {
-        final errMsg = ref.errorPtr != nullptr ? ref.errorPtr.toDartString() : 'Unknown FFI error';
+        final errMsg = ref.errorPtr != nullptr
+            ? ref.errorPtr.toDartString()
+            : 'Unknown FFI error';
         throw Exception(errMsg);
       }
       if (ref.ptr == nullptr || ref.len == 0) {
@@ -140,14 +149,17 @@ class LinkpointProtocolFFI {
     }
   }
 
-  static List<int> _extractAndFreeBinaryResult(Pointer<LlsdResultBufferStruct> resBuf) {
+  static List<int> _extractAndFreeBinaryResult(
+      Pointer<LlsdResultBufferStruct> resBuf) {
     if (resBuf == nullptr) {
       throw Exception('FFI returned null buffer');
     }
     try {
       final ref = resBuf.ref;
       if (ref.status != 0) {
-        final errMsg = ref.errorPtr != nullptr ? ref.errorPtr.toDartString() : 'Unknown FFI error';
+        final errMsg = ref.errorPtr != nullptr
+            ? ref.errorPtr.toDartString()
+            : 'Unknown FFI error';
         throw Exception(errMsg);
       }
       if (ref.ptr == nullptr || ref.len == 0) {

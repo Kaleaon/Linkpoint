@@ -19,7 +19,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_TEMPLATE = ROOT / "tools/parser-templates/message-parser-templates.json"
-DEFAULT_OUTPUT = ROOT / "src/main/java/com/linkpoint/protocol/messages/generated/GeneratedParserScaffolding.kt"
+DEFAULT_OUTPUT = (
+    ROOT
+    / "src/main/java/com/linkpoint/protocol/messages/generated/GeneratedParserScaffolding.kt"
+)
 
 # Domain-to-parser mapping follows conventions in src/main/java/com/linkpoint/protocol/messages/*Parsers.kt
 PARSER_OBJECT_BY_DOMAIN: dict[str, str] = {
@@ -107,7 +110,9 @@ def generate(messages: list[dict[str, Any]]) -> str:
 
 def main() -> None:
     args = parse_args()
-    template_path = args.template if args.template.is_absolute() else ROOT / args.template
+    template_path = (
+        args.template if args.template.is_absolute() else ROOT / args.template
+    )
     output_path = args.output if args.output.is_absolute() else ROOT / args.output
 
     messages = load_template(template_path)

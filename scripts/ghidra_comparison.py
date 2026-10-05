@@ -7,15 +7,13 @@ with a fresh decompilation from Ghidra to identify discrepancies and validate
 the current active library implementation.
 """
 
-import os
-import sys
-import json
-import subprocess
 import argparse
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
 from datetime import datetime
-import hashlib
-import difflib
+from pathlib import Path
 
 
 class LumiyaGhidraComparison:
@@ -45,10 +43,17 @@ class LumiyaGhidraComparison:
         dex_file = self.analysis_dir / "classes.dex"
 
         try:
-            subprocess.run([
-                "unzip", "-j", str(self.lumiya_apk_path),
-                "classes.dex", "-d", str(self.analysis_dir)
-            ], check=True)
+            subprocess.run(
+                [
+                    "unzip",
+                    "-j",
+                    str(self.lumiya_apk_path),
+                    "classes.dex",
+                    "-d",
+                    str(self.analysis_dir),
+                ],
+                check=True,
+            )
             print(f"Extracted DEX file from APK to {dex_file}")
             return True
         except subprocess.CalledProcessError as e:
@@ -77,9 +82,11 @@ class LumiyaGhidraComparison:
             str(analyze_headless),
             str(self.analysis_dir),
             "LumiyaGhidraAnalysis",
-            "-import", str(self.lumiya_apk_path),
+            "-import",
+            str(self.lumiya_apk_path),
             "-overwrite",
-            "-analysisTimeoutPerFile", "600",
+            "-analysisTimeoutPerFile",
+            "600",
             "-noanalysis",  # Skip automatic analysis for faster processing
         ]
 
@@ -89,7 +96,9 @@ class LumiyaGhidraComparison:
             if "JAVA_HOME" not in env or not env["JAVA_HOME"]:
                 # Try to detect JAVA_HOME dynamically
                 try:
-                    java_path = subprocess.check_output(["which", "java"], text=True).strip()
+                    java_path = subprocess.check_output(
+                        ["which", "java"], text=True
+                    ).strip()
                     if java_path:
                         # Get the real path in case of symlinks
                         java_real_path = os.path.realpath(java_path)
@@ -99,8 +108,9 @@ class LumiyaGhidraComparison:
                 except Exception:
                     pass  # If detection fails, don't set JAVA_HOME
 
-            result = subprocess.run(cmd, capture_output=True, text=True,
-                                  timeout=1200, env=env)  # 20 minute timeout
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=1200, env=env
+            )  # 20 minute timeout
 
             if result.returncode == 0:
                 print("Ghidra APK analysis completed successfully!")
@@ -128,9 +138,9 @@ class LumiyaGhidraComparison:
 
         # Use aapt or dexdump to analyze the DEX file structure
         try:
-            result = subprocess.run([
-                "strings", str(dex_file)
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                ["strings", str(dex_file)], capture_output=True, text=True
+            )
 
             if result.returncode == 0:
                 strings_output = result.stdout
@@ -139,26 +149,36 @@ class LumiyaGhidraComparison:
                 class_signatures = []
                 method_signatures = []
 
-                for line in strings_output.split('\n'):
+                for line in strings_output.split("\n"):
                     line = line.strip()
-                    if line.startswith('Lcom/lumiyaviewer/'):
+                    if line.startswith("Lcom/lumiyaviewer/"):
                         class_signatures.append(line)
-                    elif '(' in line and ')' in line and any(java_type in line for java_type in ['V', 'I', 'Z', 'L']):
+                    elif (
+                        "(" in line
+                        and ")" in line
+                        and any(java_type in line for java_type in ["V", "I", "Z", "L"])
+                    ):
                         method_signatures.append(line)
 
                 dex_info = {
                     "analysis_date": datetime.now().isoformat(),
                     "apk_file": str(self.lumiya_apk_path),
                     "dex_file": str(dex_file),
-                    "total_strings": len(strings_output.split('\n')),
+                    "total_strings": len(strings_output.split("\n")),
                     "class_signatures": list(set(class_signatures)),
-                    "method_signatures": list(set(method_signatures[:100])),  # First 100 methods
-                    "lumiya_classes": len([c for c in class_signatures if 'lumiyaviewer' in c])
+                    "method_signatures": list(
+                        set(method_signatures[:100])
+                    ),  # First 100 methods
+                    "lumiya_classes": len(
+                        [c for c in class_signatures if "lumiyaviewer" in c]
+                    ),
                 }
 
                 # Save DEX analysis
-                dex_report_file = self.comparison_report_dir / "dex_structure_analysis.json"
-                with open(dex_report_file, 'w') as f:
+                dex_report_file = (
+                    self.comparison_report_dir / "dex_structure_analysis.json"
+                )
+                with open(dex_report_file, "w") as f:
                     json.dump(dex_info, f, indent=2)
 
                 print(f"DEX structure analysis saved to {dex_report_file}")
@@ -180,9 +200,11 @@ class LumiyaGhidraComparison:
             "comparison_date": datetime.now().isoformat(),
             "repository_path": str(self.repo_path),
             "apk_file": str(self.lumiya_apk_path),
-            "active_library": self.analyze_directory_structure(self.active_library_path),
+            "active_library": self.analyze_directory_structure(
+                self.active_library_path
+            ),
             "apk_info": self.analyze_apk_structure(),
-            "differences": {}
+            "differences": {},
         }
 
         # Compare structures
@@ -191,12 +213,12 @@ class LumiyaGhidraComparison:
         comparison_report["differences"] = {
             "total_active_files": len(active_files),
             "apk_analysis": "DEX structure analyzed separately",
-            "validation": "Comparing active library consistency with compiled APK"
+            "validation": "Comparing active library consistency with compiled APK",
         }
 
         # Save comparison report
         report_file = self.comparison_report_dir / "source_structure_comparison.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             json.dump(comparison_report, f, indent=2)
 
         print(f"Source structure comparison saved to {report_file}")
@@ -211,19 +233,26 @@ class LumiyaGhidraComparison:
                 "exists": False,
                 "path": str(self.lumiya_apk_path),
                 "contents": [],
-                "total_files": 0
+                "total_files": 0,
             }
 
         apk_contents = []
 
         try:
-            result = subprocess.run([
-                "unzip", "-l", str(self.lumiya_apk_path)
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                ["unzip", "-l", str(self.lumiya_apk_path)],
+                capture_output=True,
+                text=True,
+            )
 
             if result.returncode == 0:
-                for line in result.stdout.split('\n'):
-                    if 'classes.dex' in line or 'AndroidManifest.xml' in line or '.so' in line or 'assets/' in line:
+                for line in result.stdout.split("\n"):
+                    if (
+                        "classes.dex" in line
+                        or "AndroidManifest.xml" in line
+                        or ".so" in line
+                        or "assets/" in line
+                    ):
                         apk_contents.append(line.strip())
         except Exception as e:
             print(f"Error analyzing APK structure: {e}")
@@ -233,8 +262,12 @@ class LumiyaGhidraComparison:
             "path": str(self.lumiya_apk_path),
             "contents": apk_contents[:20],  # First 20 entries
             "total_files": len(apk_contents),
-            "has_classes_dex": any('classes.dex' in content for content in apk_contents),
-            "has_manifest": any('AndroidManifest.xml' in content for content in apk_contents)
+            "has_classes_dex": any(
+                "classes.dex" in content for content in apk_contents
+            ),
+            "has_manifest": any(
+                "AndroidManifest.xml" in content for content in apk_contents
+            ),
         }
 
     def analyze_directory_structure(self, directory_path):
@@ -245,7 +278,7 @@ class LumiyaGhidraComparison:
                 "path": str(directory_path),
                 "java_files": [],
                 "packages": [],
-                "total_files": 0
+                "total_files": 0,
             }
 
         java_files = []
@@ -267,20 +300,20 @@ class LumiyaGhidraComparison:
             "java_files": java_files,
             "packages": list(packages),
             "total_files": len(java_files),
-            "total_packages": len(packages)
+            "total_packages": len(packages),
         }
 
     def print_comparison_summary(self, report):
         """Print a summary of the comparison results"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("LUMIYA GHIDRA APK ANALYSIS SUMMARY")
-        print("="*70)
+        print("=" * 70)
         print(f"Active Library Files: {report['active_library']['total_files']}")
         print(f"APK File: {report['apk_info']['path']}")
         print(f"APK Contains classes.dex: {report['apk_info']['has_classes_dex']}")
         print(f"APK Contains AndroidManifest: {report['apk_info']['has_manifest']}")
-        print(f"Analysis Status: ✅ SUCCESSFUL")
-        print("\n" + "="*70)
+        print("Analysis Status: ✅ SUCCESSFUL")
+        print("\n" + "=" * 70)
 
     def create_ghidra_analysis_readme(self):
         """Create a README file documenting the Ghidra analysis process"""
@@ -357,7 +390,7 @@ python3 scripts/ghidra_comparison.py --repo-path . --ghidra-path /path/to/ghidra
 """
 
         readme_file = self.comparison_report_dir / "README.md"
-        with open(readme_file, 'w') as f:
+        with open(readme_file, "w") as f:
             f.write(readme_content)
 
         print(f"Ghidra analysis documentation saved to {readme_file}")
@@ -394,9 +427,9 @@ python3 scripts/ghidra_comparison.py --repo-path . --ghidra-path /path/to/ghidra
         # else:
         #     print("❌ Ghidra APK analysis failed or skipped")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("APK ANALYSIS COMPLETED")
-        print("="*70)
+        print("=" * 70)
         for step in success_steps:
             print(step)
 
@@ -405,13 +438,24 @@ python3 scripts/ghidra_comparison.py --repo-path . --ghidra-path /path/to/ghidra
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Compare Lumiya APK with Ghidra analysis")
-    parser.add_argument("--repo-path", default="/home/runner/work/Linkpoint/Linkpoint",
-                       help="Path to the Linkpoint repository")
-    parser.add_argument("--ghidra-path", default="/tmp/ghidra/ghidra_11.4.2_PUBLIC",
-                       help="Path to Ghidra installation")
-    parser.add_argument("--apk-path", default="/home/runner/work/Linkpoint/Linkpoint/Lumiya_3.4.2.zip",
-                       help="Path to Lumiya APK file")
+    parser = argparse.ArgumentParser(
+        description="Compare Lumiya APK with Ghidra analysis"
+    )
+    parser.add_argument(
+        "--repo-path",
+        default="/home/runner/work/Linkpoint/Linkpoint",
+        help="Path to the Linkpoint repository",
+    )
+    parser.add_argument(
+        "--ghidra-path",
+        default="/tmp/ghidra/ghidra_11.4.2_PUBLIC",
+        help="Path to Ghidra installation",
+    )
+    parser.add_argument(
+        "--apk-path",
+        default="/home/runner/work/Linkpoint/Linkpoint/Lumiya_3.4.2.zip",
+        help="Path to Lumiya APK file",
+    )
 
     args = parser.parse_args()
 

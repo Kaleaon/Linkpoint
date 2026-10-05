@@ -1,13 +1,19 @@
 import re
-from typing import List, Optional
-from tools.protocol_gen.proto_ast.models import MessageSpec, BlockSpec, FieldSpec, ProtocolAST
+
+from tools.protocol_gen.proto_ast.models import (
+    BlockSpec,
+    FieldSpec,
+    MessageSpec,
+    ProtocolAST,
+)
+
 
 class TemplateParser:
     """
     Parser for Linden Lab message_template.msg grammar into ProtocolAST MessageSpecs.
     """
 
-    def parse(self, content: str, ast: Optional[ProtocolAST] = None) -> ProtocolAST:
+    def parse(self, content: str, ast: ProtocolAST | None = None) -> ProtocolAST:
         if ast is None:
             ast = ProtocolAST()
 
@@ -34,25 +40,25 @@ class TemplateParser:
 
         return ast
 
-    def _extract_braced_blocks(self, text: str) -> List[str]:
+    def _extract_braced_blocks(self, text: str) -> list[str]:
         blocks = []
         stack = 0
         start = -1
         for i, char in enumerate(text):
-            if char == '{':
+            if char == "{":
                 if stack == 0:
                     start = i + 1
                 stack += 1
-            elif char == '}':
+            elif char == "}":
                 stack -= 1
                 if stack == 0 and start != -1:
                     blocks.append(text[start:i].strip())
                     start = -1
         return blocks
 
-    def _parse_message(self, text: str) -> Optional[MessageSpec]:
+    def _parse_message(self, text: str) -> MessageSpec | None:
         # Split message header from inner blocks
-        first_brace = text.find('{')
+        first_brace = text.find("{")
         if first_brace == -1:
             header_text = text
             inner_text = ""
@@ -67,7 +73,7 @@ class TemplateParser:
         msg_name = tokens[0]
         frequency = tokens[1]
         msg_num_str = tokens[2]
-        
+
         # Parse message number (decimal or hex)
         if msg_num_str.lower().startswith("0x"):
             msg_num = int(msg_num_str, 16)
@@ -85,7 +91,7 @@ class TemplateParser:
             trust_level=trust,
             encoding=encoding,
             flags=flags,
-            blocks=[]
+            blocks=[],
         )
 
         if inner_text:
@@ -97,8 +103,8 @@ class TemplateParser:
 
         return message_spec
 
-    def _parse_block(self, text: str) -> Optional[BlockSpec]:
-        first_brace = text.find('{')
+    def _parse_block(self, text: str) -> BlockSpec | None:
+        first_brace = text.find("{")
         if first_brace == -1:
             header_text = text
             inner_text = ""
@@ -115,10 +121,7 @@ class TemplateParser:
         count = int(tokens[2]) if len(tokens) > 2 and tokens[2].isdigit() else 1
 
         block_spec = BlockSpec(
-            name=block_name,
-            block_type=block_type,
-            count=count,
-            fields=[]
+            name=block_name, block_type=block_type, count=count, fields=[]
         )
 
         if inner_text:
@@ -130,7 +133,7 @@ class TemplateParser:
 
         return block_spec
 
-    def _parse_field(self, text: str) -> Optional[FieldSpec]:
+    def _parse_field(self, text: str) -> FieldSpec | None:
         tokens = text.split()
         if not tokens or len(tokens) < 2:
             return None
@@ -139,8 +142,4 @@ class TemplateParser:
         field_type = tokens[1]
         count = int(tokens[2]) if len(tokens) > 2 and tokens[2].isdigit() else 1
 
-        return FieldSpec(
-            name=field_name,
-            type_name=field_type,
-            count=count
-        )
+        return FieldSpec(name=field_name, type_name=field_type, count=count)
