@@ -219,6 +219,25 @@ class WebRtcVoiceSession(
         }
     }
 
+    /** Update ICE server configuration on active PeerConnection. */
+    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+        val pc = peerConnection ?: return false
+        return try {
+            val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
+                sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+                bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
+                rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
+                continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
+            }
+            pc.setConfiguration(rtcConfig)
+            Log.i(TAG, "Updated ICE server configuration on active PeerConnection (${iceServers.size} servers)")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update ICE server configuration on active PeerConnection", e)
+            false
+        }
+    }
+
     // ─────────────────────────────── SLData send API ──────────────────────────────
 
     /**
