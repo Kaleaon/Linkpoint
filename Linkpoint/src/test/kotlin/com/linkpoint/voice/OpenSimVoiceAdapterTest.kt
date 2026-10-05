@@ -2,12 +2,9 @@ package com.linkpoint.voice
 
 import androidx.test.core.app.ApplicationProvider
 import com.linkpoint.protocol.capabilities.CapabilityManager
-import com.linkpoint.protocol.llsd.LLSDMap
-import com.linkpoint.protocol.llsd.LLSDString
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith

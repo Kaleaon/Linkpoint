@@ -1,6 +1,5 @@
 package com.linkpoint.voice
 
-import org.json.JSONObject
 import org.webrtc.PeerConnection
 
 /**
