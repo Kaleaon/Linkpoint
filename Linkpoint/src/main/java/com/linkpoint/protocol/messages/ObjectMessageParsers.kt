@@ -74,7 +74,11 @@ internal object ObjectMessageParsers {
         return results
     }
 
-    fun parseTerseObjectUpdate(data: ByteArray): List<TerseUpdateData> {
+    fun parseTerseObjectUpdate(
+        data: ByteArray,
+        regionSizeX: Float = 256f,
+        regionSizeY: Float = regionSizeX
+    ): List<TerseUpdateData> {
         val results = mutableListOf<TerseUpdateData>()
         packetsReceived++
         val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
@@ -87,7 +91,7 @@ internal object ObjectMessageParsers {
                 if (dataLen > 0) {
                     val blockData = ByteArray(dataLen)
                     buffer.get(blockData)
-                    parseTerseBlock(blockData)?.let(results::add)
+                    parseTerseBlock(blockData, regionSizeX, regionSizeY)?.let(results::add)
                 }
             }
             packetsParsed++
@@ -230,7 +234,11 @@ internal object ObjectMessageParsers {
         }
     }
 
-    private fun parseTerseBlock(data: ByteArray): TerseUpdateData? {
+    private fun parseTerseBlock(
+        data: ByteArray,
+        regionSizeX: Float = 256f,
+        regionSizeY: Float = regionSizeX
+    ): TerseUpdateData? {
         if (data.size < 30) {
             markRejected(RejectReason.INVALID_BLOCK_LENGTH)
             return null
@@ -240,15 +248,15 @@ internal object ObjectMessageParsers {
         val state = bb.get().toInt() and 0xFF
         val isAvatar = (state and 0x01) != 0
         if (isAvatar && data.size >= 46) repeat(4) { bb.float }
-        val position = LLVector3.fromTerse(data, bb.position(), 256f)
+        val position = LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         bb.position(bb.position() + 6)
-        val velocity = LLVector3.fromTerse(data, bb.position(), 256f)
+        val velocity = LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         bb.position(bb.position() + 6)
-        val acceleration = LLVector3.fromTerse(data, bb.position(), 256f)
+        val acceleration = LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         bb.position(bb.position() + 6)
         val rotation = LLQuaternion.fromTerse(data, bb.position())
         bb.position(bb.position() + 8)
-        val angularVelocity = if (bb.remaining() >= 6) LLVector3.fromTerse(data, bb.position(), 256f) else LLVector3.zero()
+        val angularVelocity = if (bb.remaining() >= 6) LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY) else LLVector3.zero()
 
         if (localId == 0) {
             markRejected(RejectReason.ZERO_LOCAL_ID)
