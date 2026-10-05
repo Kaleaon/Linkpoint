@@ -161,6 +161,8 @@ impl Quaternion {
             false
         };
 
+        cos_theta = cos_theta.clamp(-1.0, 1.0);
+
         let (alpha, beta) = if 1.0 - cos_theta < 0.00001 {
             (t, 1.0 - t)
         } else {
@@ -172,12 +174,12 @@ impl Quaternion {
             )
         };
 
-        let b_factor = if b_flip { -beta } else { beta };
+        let b_factor = if b_flip { -alpha } else { alpha };
         let mut r = Self::new(
-            b_factor * a.x + alpha * b.x,
-            b_factor * a.y + alpha * b.y,
-            b_factor * a.z + alpha * b.z,
-            b_factor * a.w + alpha * b.w,
+            beta * a.x + b_factor * b.x,
+            beta * a.y + b_factor * b.y,
+            beta * a.z + b_factor * b.z,
+            beta * a.w + b_factor * b.w,
         );
         r.normalize();
         r
