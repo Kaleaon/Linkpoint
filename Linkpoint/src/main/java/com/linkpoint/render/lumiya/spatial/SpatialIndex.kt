@@ -12,9 +12,15 @@ import java.util.concurrent.ConcurrentHashMap
  * node memory pooling, incremental node updates, depth capping at 8 levels,
  * and a diagnostic safety mechanism toggle.
  */
-class SpatialIndex(
+class SpatialIndex @JvmOverloads constructor(
     private val nodePool: OctreeNodePool = OctreeNodePool(),
-    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection(),
+    val rootMinX: Float = 0f,
+    val rootMinY: Float = 0f,
+    val rootMinZ: Float = 0f,
+    val rootSizeX: Float = REGION_XY,
+    val rootSizeY: Float = REGION_XY,
+    val rootSizeZ: Float = REGION_Z
 ) {
 
     companion object {
@@ -51,8 +57,8 @@ class SpatialIndex(
 
     // Root octree node
     private val root = nodePool.acquire(
-        minX = 0f, minY = 0f, minZ = 0f,
-        sizeX = REGION_XY, sizeY = REGION_XY, sizeZ = REGION_Z,
+        minX = rootMinX, minY = rootMinY, minZ = rootMinZ,
+        sizeX = rootSizeX, sizeY = rootSizeY, sizeZ = rootSizeZ,
         depth = 1
     )
 
