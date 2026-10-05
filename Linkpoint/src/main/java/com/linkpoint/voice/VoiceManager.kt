@@ -49,6 +49,7 @@ class VoiceManager(
     initialGridKind: GridKind = GridKind.SECOND_LIFE,
     initialVoiceConfig: VoiceConfig? = null,
     adapterFactory: VoiceTransportAdapterFactory? = null
+    private val parcelManager: com.linkpoint.world.ParcelManager? = null,
 ) {
     companion object {
         private const val TAG = "VoiceManager"
@@ -110,6 +111,9 @@ class VoiceManager(
 
     private val _allMuted = MutableStateFlow(false)
     val allMuted: StateFlow<Boolean> = _allMuted
+
+    private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> = _lastError
 
     // Audio settings
     private var inputGain = 1.0f
@@ -235,13 +239,27 @@ class VoiceManager(
     }
 
     /**
-     * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
-     * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
-     * servers, then builds a [VoiceSession] configured with the
-     * sim-provided ICE servers (instead of the previous hardcoded
-     * Google STUN). The signaling layer that POSTs SDP to the channel
-     * URI is still pending — see the [VoiceSession] class doc.
+     * Primary entry point for voice connection.
+     *
+     * Queries region capability status and parcel local ID prior to initiating
+     * WebRTC peer connections. Fails gracefully if voice capability is missing
+     * on the current region.
      */
+    suspend fun connect(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
+        val hasVoiceCap = capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) ||
+                          capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC) ||
+                          capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE)
+        if (!hasVoiceCap) {
+            Log.w(TAG, "Cannot connect voice: Region lacks voice capabilities (ProvisionVoiceAccountRequest missing)")
+            _lastError.value = "Voice capability is not available in this region"
+            return@withContext false
+        }
+        _lastError.value = null
+
+        val targetParcelId = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
+        joinSpatialVoice(targetParcelId)
+    }
+
     /**
      * Join parcel voice for OpenSim regions or legacy non-SL WebRTC channels.
      * Delegates directly to [joinOpenSimVoice] to bypass legacy native Vivox JNI stubs.
@@ -280,18 +298,29 @@ class VoiceManager(
         }
 
         val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
+        if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
+            !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
+            Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
+            _lastError.value = "Voice capability is not available in this region"
+            return@withContext false
+        }
+        val voiceInfo = requestParcelVoiceInfo() ?: run {
+            _lastError.value = "Failed to retrieve parcel voice info"
+            return@withContext false
+        }
         val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
 
         Log.i(TAG, "Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
 
         val creds = openSimVoiceSignalingAdapter.parseCredentials(voiceInfo, account)
-        val iceServers = if (creds.iceServers.isNotEmpty()) creds.iceServers else defaultWebRtcIceServers()
+        val iceServers = if (creds.iceServers.isNotEmpty()) creds.iceServers else resolveDefaultIceServers()
 
         currentWebRtcSession?.close()
 
         val factory = peerConnectionFactory
         if (factory == null) {
             Log.w(TAG, "WebRTC PeerConnectionFactory not initialized for OpenSim voice session")
+            _lastError.value = "WebRTC PeerConnectionFactory not initialized"
             return@withContext false
         }
 
@@ -307,10 +336,12 @@ class VoiceManager(
             session.connect(iceServers)
             session.sendJoin(primary = true)
             _isConnected.value = true
+            _lastError.value = null
             Log.i(TAG, "OpenSim WebRTC spatial voice connected successfully (parcel=$parcelLocalId)")
             true
         } catch (e: Exception) {
             Log.w(TAG, "OpenSim WebRTC spatial voice connect failed: ${e.message}", e)
+            _lastError.value = "WebRTC connection failed: ${e.message}"
             session.close()
             currentWebRtcSession = null
             _isConnected.value = false
@@ -337,6 +368,11 @@ class VoiceManager(
                 _isConnected.value = true
                 return@withContext true
             }
+        val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
+        if (isWebRtcVoiceRegion()) {
+            joinSpatialVoiceWebRtc(targetParcel)
+        } else {
+            joinOpenSimVoice(parcelLocalId)
         }
 
         joinParcelVoice()
@@ -353,25 +389,123 @@ class VoiceManager(
     }
 
     /**
-     * Default STUN list for WebRTC voice. Direct port of the list in
-     * `cinderblocks/libremetaverse`'s `LibreMetaverse.Voice.WebRTC.
-     * VoiceSession` (LL's own STUN endpoints + a few well-known public
-     * servers as resilience fallbacks). Used when the sim doesn't
-     * advertise its own `ice_servers`.
+     * Extract active grid/region host domain from capabilities or login URL.
      */
     private fun defaultWebRtcIceServers(): List<PeerConnection.IceServer> =
         activeAdapter.resolveIceServers(emptyList(), currentVoiceConfig)
+    fun getGridHost(): String? {
+        val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_PROVISION_VOICE)
+            ?: capabilityManager.getCapability("SeedCapability")
+            ?: capabilityManager.getCapability(CapabilityManager.CAP_PARCEL_VOICE)
+            ?: capabilityManager.loginUrl
+        if (capUrl.isNullOrBlank()) return null
+        return try {
+            java.net.URI(capUrl).host
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Dynamic STUN list for WebRTC voice. Resolves ICE server endpoints from
+     * the active grid domain host instead of using hardcoded Agni STUN URLs,
+     * supplemented with resilient public STUN fallbacks.
+     */
+    fun resolveDefaultIceServers(capHost: String? = getGridHost()): List<PeerConnection.IceServer> {
+        val servers = mutableListOf<PeerConnection.IceServer>()
+        if (!capHost.isNullOrBlank()) {
+            servers.add(PeerConnection.IceServer.builder("stun:$capHost:3478").createIceServer())
+            servers.add(PeerConnection.IceServer.builder("stun:stun.$capHost:3478").createIceServer())
+        }
+        servers.add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer())
+        servers.add(PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer())
+        servers.add(PeerConnection.IceServer.builder("stun:stun.nextcloud.com:443").createIceServer())
+        servers.add(PeerConnection.IceServer.builder("stun:stun.twilio.com:3478").createIceServer())
+        return servers
+    }
 
     /**
      * Track for the active WebRTC voice session — at most one for
-     * spatial voice plus N for cross-region (handled by VoiceManager
-     * one level up; this single-session tracker mirrors the existing
-     * `currentParcelSession` field for symmetry with [leaveVoice]).
+     * spatial voice plus N for cross-region.
      */
     @Volatile private var currentWebRtcSession: WebRtcVoiceSession? = null
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
         return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
+        if (!capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) &&
+            !capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC)) {
+            Log.w(TAG, "WebRTC voice unavailable: ProvisionVoiceAccountRequest capability missing on this region")
+            _lastError.value = "Voice capability is not available in this region"
+            return false
+        }
+
+        val factory = peerConnectionFactory
+        if (factory == null) {
+            Log.w(TAG, "WebRTC voice requested but PeerConnectionFactory failed to initialise")
+            _lastError.value = "PeerConnectionFactory initialization failed"
+            return false
+        }
+
+        // Fetch provisioning account info to check for sim-advertised ICE servers
+        val accountInfo = provisionVoiceAccount()
+        val simIceServers = accountInfo?.iceServers?.map { spec ->
+            PeerConnection.IceServer.builder(spec.urls).apply {
+                spec.username?.let { setUsername(it) }
+                spec.credential?.let { setPassword(it) }
+            }.createIceServer()
+        } ?: emptyList()
+
+        val resolvedIce = if (simIceServers.isNotEmpty()) {
+            simIceServers
+        } else {
+            resolveDefaultIceServers()
+        }
+
+        currentWebRtcSession?.close()
+
+        val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
+
+        val session = WebRtcVoiceSession(
+            capabilityManager = capabilityManager,
+            factory = factory,
+            channelType = WebRtcVoiceSession.ChannelType.SPATIAL,
+            parcelLocalId = targetParcel,
+        )
+        currentWebRtcSession = session
+
+        return try {
+            session.connect(resolvedIce)
+            session.sendJoin(primary = true)
+            _isConnected.value = true
+            _lastError.value = null
+            Log.i(TAG, "WebRTC spatial voice connected (parcel=$targetParcel, iceServers=${resolvedIce.size})")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "WebRTC spatial voice connect failed: ${e.message}", e)
+            _lastError.value = "WebRTC connection failed: ${e.message}"
+            session.close()
+            currentWebRtcSession = null
+            false
+        }
+    }
+
+    /**
+     * Support updating ICE server configuration on active peer connections
+     * when provided in voice provisioning responses.
+     */
+    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+        var updated = false
+        currentWebRtcSession?.let { session ->
+            if (session.updateIceServers(iceServers)) {
+                updated = true
+            }
+        }
+        for (session in activeSessions.values) {
+            if (session.updateIceServers(iceServers)) {
+                updated = true
+            }
+        }
+        return updated
     }
 
     /**
@@ -981,6 +1115,19 @@ internal class VoiceSession(
     }
 
     fun isConnected(): Boolean = isConnected
+
+    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+        val pc = peerConnection ?: return false
+        return try {
+            val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
+                sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+            }
+            pc.setConfiguration(rtcConfig)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 data class VoiceInfo(

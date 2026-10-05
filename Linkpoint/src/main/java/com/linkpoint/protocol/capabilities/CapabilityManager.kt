@@ -286,7 +286,8 @@ open class CapabilityManager : CapabilityRequester {
     @Volatile private var lastSeedCapabilityUsed: String? = null
 
     // Linkpoint translation layer support
-    @Volatile private var loginUrl: String? = null
+    @Volatile var loginUrl: String? = null
+        private set
 
     // Grid-aware capability strategy dispatcher
     @Volatile var activeStrategy: CapabilityParserStrategy = CapabilityStrategyDispatcher.selectStrategy()
