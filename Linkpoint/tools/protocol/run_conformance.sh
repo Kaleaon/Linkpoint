@@ -136,6 +136,7 @@ if [[ ${skip_gradle} -eq 0 ]]; then
       --tests 'com.linkpoint.protocol.messages.ManagerMessageIdUsageTest' \
       --tests 'com.linkpoint.protocol.capabilities.CapabilityDeclarationAuditTest' \
       --tests 'com.linkpoint.protocol.llsd.LLSDParserFuzzTargetTest' \
+      --tests 'com.linkpoint.protocol.llsd.LLSDConformanceTest' \
   ) 2>&1 | tee "${REPORTS_DIR}/gradle-conformance.log"
   rc=${PIPESTATUS[0]}
   set -e

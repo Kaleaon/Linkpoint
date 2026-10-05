@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { toJSON, fromJSON, parseXML, detectFormat, LLSDFormat, serializeXML } from './llsd.js';
+import { toJSON, fromJSON, parseXML, parseBinary, serializeBinary, parse, detectFormat, LLSDFormat, serializeXML } from './llsd.js';
 import { parseISO } from 'date-fns';
+import fs from 'fs';
+import path from 'path';
 
 
 
@@ -350,5 +352,65 @@ describe('serializeXML', () => {
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
     expect(xml).toContain('<llsd>');
     expect(xml).toMatch(/<\/llsd>$/);
+  });
+});
+
+describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
+  function normalise(val: any): any {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'string') return val.replace(/\r\n/g, '\n');
+    if (val instanceof Date) return val.getTime();
+    if (val instanceof Uint8Array) return Array.from(val);
+    if (Array.isArray(val)) return val.map(normalise);
+    if (typeof val === 'object') {
+      const res: any = {};
+      for (const k of Object.keys(val)) {
+        res[k] = normalise(val[k]);
+      }
+      return res;
+    }
+    return val;
+  }
+
+  it('passes all 31 canonical test vectors in XML and Binary formats', () => {
+    let vectorsDir = path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors');
+    if (!fs.existsSync(vectorsDir)) {
+      vectorsDir = path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors');
+    }
+    expect(fs.existsSync(vectorsDir)).toBe(true);
+
+    const subdirs = fs.readdirSync(vectorsDir)
+      .map(name => path.join(vectorsDir, name))
+      .filter(p => fs.statSync(p).isDirectory())
+      .sort();
+
+    expect(subdirs.length).toBe(31);
+
+    for (const dir of subdirs) {
+      const fixtureName = path.basename(dir);
+      const xmlPath = path.join(dir, 'value.xml');
+      const binPath = path.join(dir, 'value.bin');
+
+      expect(fs.existsSync(xmlPath)).toBe(true);
+      expect(fs.existsSync(binPath)).toBe(true);
+
+      const xmlString = fs.readFileSync(xmlPath, 'utf-8');
+      const binBytes = new Uint8Array(fs.readFileSync(binPath));
+
+      const fromXml = parseXML(xmlString);
+      const fromBin = parseBinary(binBytes);
+
+      expect(normalise(fromXml)).toEqual(normalise(fromBin));
+
+      // Round-trip check
+      const reXml = serializeXML(fromXml);
+      const reBin = serializeBinary(fromXml);
+
+      const reFromXml = parseXML(reXml);
+      const reFromBin = parseBinary(reBin);
+
+      expect(normalise(reFromXml)).toEqual(normalise(fromXml));
+      expect(normalise(reFromBin)).toEqual(normalise(fromXml));
+    }
   });
 });
