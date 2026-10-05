@@ -331,6 +331,54 @@ object AdditionalMessageParsers {
         }
     }
 
+    // ==================== MAP ITEM REPLY ====================
+
+    data class MapItemReplyData(
+        val agentID: UUID,
+        val flags: Int,
+        val itemType: Int,
+        val items: List<MapItemData>
+    )
+
+    data class MapItemData(
+        val globalX: Int,
+        val globalY: Int,
+        val id: UUID,
+        val extra: Int,
+        val extra2: Int,
+        val name: String
+    )
+
+    fun parseMapItemReply(data: ByteArray): MapItemReplyData? {
+        return try {
+            val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
+
+            val agentID = buffer.getUUID()
+            val flags = buffer.int
+            val itemType = buffer.int
+
+            val itemCount = buffer.get().toInt() and 0xFF
+            val items = mutableListOf<MapItemData>()
+
+            for (i in 0 until itemCount) {
+                if (buffer.remaining() < 32) break
+                val globalX = buffer.int
+                val globalY = buffer.int
+                val id = buffer.getUUID()
+                val extra = buffer.int
+                val extra2 = buffer.int
+                val name = buffer.readString1()
+
+                items.add(MapItemData(globalX, globalY, id, extra, extra2, name))
+            }
+
+            MapItemReplyData(agentID, flags, itemType, items)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse MapItemReply", e)
+            null
+        }
+    }
+
     // ==================== DIR PLACES REPLY ====================
 
     data class DirPlacesReplyData(

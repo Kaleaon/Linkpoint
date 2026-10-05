@@ -108,6 +108,7 @@ open class CapabilityManager : CapabilityRequester {
         const val CAP_SIMULATE_LURE = "SimulatorLure"
         const val CAP_AVATAR_PICKER = "AvatarPickerSearch"
         const val CAP_SEARCH_STATIC = "SearchStatRequest"
+        const val CAP_SEARCH_DIRECTORY = "search_directory"
 
         // Voice moderation capability (Project Voice Moderation)
         const val CAP_VOICE_MODERATION = "VoiceModeration"

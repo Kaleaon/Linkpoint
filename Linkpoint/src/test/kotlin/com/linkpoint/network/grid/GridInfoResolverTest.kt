@@ -5,11 +5,9 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import org.junit.runners.JUnit4
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@RunWith(JUnit4::class)
 class GridInfoResolverTest {
 
     @Test
@@ -48,6 +46,7 @@ class GridInfoResolverTest {
                 <economy>http://economy.osgrid.org/</economy>
                 <helperuri>http://helper.osgrid.org/</helperuri>
                 <map>http://map.osgrid.org/</map>
+                <search>http://search.osgrid.org/</search>
             </gridinfo>
         """.trimIndent()
 
@@ -60,6 +59,7 @@ class GridInfoResolverTest {
         assertEquals("http://economy.osgrid.org/", parsed["economy"])
         assertEquals("http://helper.osgrid.org/", parsed["helperuri"])
         assertEquals("http://map.osgrid.org/", parsed["map"])
+        assertEquals("http://search.osgrid.org/", parsed["search"])
     }
 
     @Test
@@ -73,6 +73,7 @@ class GridInfoResolverTest {
                 <key>economy</key><string>https://economy.kitely.com/</string>
                 <key>helperuri</key><string>https://helper.kitely.com/</string>
                 <key>map</key><string>https://map.kitely.com/</string>
+                <key>search_uri</key><string>https://search.kitely.com/</string>
             </map>
         """.trimIndent()
 
@@ -85,6 +86,7 @@ class GridInfoResolverTest {
         assertEquals("https://economy.kitely.com/", parsed["economy"])
         assertEquals("https://helper.kitely.com/", parsed["helperuri"])
         assertEquals("https://map.kitely.com/", parsed["map"])
+        assertEquals("https://search.kitely.com/", parsed["search_uri"])
     }
 
     @Test
@@ -97,7 +99,8 @@ class GridInfoResolverTest {
                 "welcome": "http://inworldz.com/welcome",
                 "economy": "http://economy.inworldz.com/",
                 "helperuri": "http://helper.inworldz.com/",
-                "map": "http://map.inworldz.com/"
+                "map": "http://map.inworldz.com/",
+                "directory": "http://search.inworldz.com/"
             }
         """.trimIndent()
 
@@ -110,6 +113,7 @@ class GridInfoResolverTest {
         assertEquals("http://economy.inworldz.com/", parsed["economy"])
         assertEquals("http://helper.inworldz.com/", parsed["helperuri"])
         assertEquals("http://map.inworldz.com/", parsed["map"])
+        assertEquals("http://search.inworldz.com/", parsed["directory"])
     }
 
     @Test
