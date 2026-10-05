@@ -335,7 +335,7 @@ class SecondLifeProtocol(private val context: Context) {
                 Log.i(TAG, "Cache configured for grid: ${grid.id} (${grid.name}), user: ${result.agentId}")
 
                 // Initialize agent-specific managers (sets app.agentId)
-                app.initializeAgentManagers(agentId)
+                app.initializeAgentManagers(agentId, result.groupServerUri)
 
                 com.linkpoint.utils.InitializationTracker.completePhase(
                     com.linkpoint.utils.InitializationTracker.Phase.SESSION_SETUP,
