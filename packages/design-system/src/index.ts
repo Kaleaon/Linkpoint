@@ -6,56 +6,70 @@ export * from "./tokens/index.js";
 export * from "./css/index.js";
 export * from "./react/index.js";
 
-const THEME_IMPORTS: Record<string, () => Promise<any>> = {
-  "art-deco": () => import("../themes/art-deco.json"),
-  "art-nouveau": () => import("../themes/art-nouveau.json"),
-  "aurora-glass-night": () => import("../themes/aurora-glass-night.json"),
-  "burgundy-rose-gold": () => import("../themes/burgundy-rose-gold.json"),
-  "calm-clinical": () => import("../themes/calm-clinical.json"),
-  "charcoal-champagne": () => import("../themes/charcoal-champagne.json"),
-  "cleverferret-gold": () => import("../themes/cleverferret-gold.json"),
-  "deep-purple-platinum": () => import("../themes/deep-purple-platinum.json"),
-  "emerald-silver": () => import("../themes/emerald-silver.json"),
-  "firestorm": () => import("../themes/firestorm.json"),
-  "forest-copper": () => import("../themes/forest-copper.json"),
-  "frutiger-aero": () => import("../themes/frutiger-aero.json"),
-  "ink-terminal-modern": () => import("../themes/ink-terminal-modern.json"),
-  "lcars": () => import("../themes/lcars.json"),
-  "linkpoint-default": () => import("../themes/linkpoint-default.json"),
-  "midnight-amber": () => import("../themes/midnight-amber.json"),
-  "navy-gold": () => import("../themes/navy-gold.json"),
-  "neo-noir-neon": () => import("../themes/neo-noir-neon.json"),
-  "obsidian-crimson": () => import("../themes/obsidian-crimson.json"),
-  "paper-ink": () => import("../themes/paper-ink.json"),
-  "rose-gold": () => import("../themes/rose-gold.json"),
-  "royal-bronze": () => import("../themes/royal-bronze.json"),
-  "royal-silver": () => import("../themes/royal-silver.json"),
-  "sl-classic": () => import("../themes/sl-classic.json"),
-  "slate-cyan": () => import("../themes/slate-cyan.json"),
-  "slate-gunmetal": () => import("../themes/slate-gunmetal.json"),
-  "solarpunk-civic": () => import("../themes/solarpunk-civic.json"),
-  "windows-phone-metro": () => import("../themes/windows-phone-metro.json")
+import artDeco from "../themes/art-deco.json";
+import artNouveau from "../themes/art-nouveau.json";
+import auroraGlassNight from "../themes/aurora-glass-night.json";
+import burgundyRoseGold from "../themes/burgundy-rose-gold.json";
+import calmClinical from "../themes/calm-clinical.json";
+import charcoalChampagne from "../themes/charcoal-champagne.json";
+import cleverferretGold from "../themes/cleverferret-gold.json";
+import deepPurplePlatinum from "../themes/deep-purple-platinum.json";
+import emeraldSilver from "../themes/emerald-silver.json";
+import firestorm from "../themes/firestorm.json";
+import forestCopper from "../themes/forest-copper.json";
+import frutigerAero from "../themes/frutiger-aero.json";
+import inkTerminalModern from "../themes/ink-terminal-modern.json";
+import lcars from "../themes/lcars.json";
+import linkpointDefault from "../themes/linkpoint-default.json";
+import midnightAmber from "../themes/midnight-amber.json";
+import navyGold from "../themes/navy-gold.json";
+import neoNoirNeon from "../themes/neo-noir-neon.json";
+import obsidianCrimson from "../themes/obsidian-crimson.json";
+import paperInk from "../themes/paper-ink.json";
+import roseGold from "../themes/rose-gold.json";
+import royalBronze from "../themes/royal-bronze.json";
+import royalSilver from "../themes/royal-silver.json";
+import slClassic from "../themes/sl-classic.json";
+import slateCyan from "../themes/slate-cyan.json";
+import slateGunmetal from "../themes/slate-gunmetal.json";
+import solarpunkCivic from "../themes/solarpunk-civic.json";
+import windowsPhoneMetro from "../themes/windows-phone-metro.json";
+
+const THEME_MAP: Record<string, unknown> = {
+  "art-deco": artDeco,
+  "art-nouveau": artNouveau,
+  "aurora-glass-night": auroraGlassNight,
+  "burgundy-rose-gold": burgundyRoseGold,
+  "calm-clinical": calmClinical,
+  "charcoal-champagne": charcoalChampagne,
+  "cleverferret-gold": cleverferretGold,
+  "deep-purple-platinum": deepPurplePlatinum,
+  "emerald-silver": emeraldSilver,
+  "firestorm": firestorm,
+  "forest-copper": forestCopper,
+  "frutiger-aero": frutigerAero,
+  "ink-terminal-modern": inkTerminalModern,
+  "lcars": lcars,
+  "linkpoint-default": linkpointDefault,
+  "midnight-amber": midnightAmber,
+  "navy-gold": navyGold,
+  "neo-noir-neon": neoNoirNeon,
+  "obsidian-crimson": obsidianCrimson,
+  "paper-ink": paperInk,
+  "rose-gold": roseGold,
+  "royal-bronze": royalBronze,
+  "royal-silver": royalSilver,
+  "sl-classic": slClassic,
+  "slate-cyan": slateCyan,
+  "slate-gunmetal": slateGunmetal,
+  "solarpunk-civic": solarpunkCivic,
+  "windows-phone-metro": windowsPhoneMetro
 };
 
 export async function loadTheme(name: import("./tokens/index.js").ThemeName): Promise<unknown> {
-  const globModules: Record<string, () => Promise<any>> =
-    typeof import.meta !== "undefined" && typeof (import.meta as any).glob === "function"
-      ? (import.meta as any).glob("../themes/*.json")
-      : {};
-
-  const matchedKey = Object.keys(globModules).find(
-    (k) => k.replace(/\\/g, "/").endsWith(`/${name}.json`) || k === `../themes/${name}.json`
-  );
-
-  if (matchedKey && globModules[matchedKey]) {
-    const mod = await globModules[matchedKey]();
-    return mod.default || mod;
+  const theme = THEME_MAP[name];
+  if (theme) {
+    return theme;
   }
-
-  if (THEME_IMPORTS[name]) {
-    const mod = await THEME_IMPORTS[name]();
-    return mod.default || mod;
-  }
-
   throw new Error(`Unknown theme: ${name}`);
 }
