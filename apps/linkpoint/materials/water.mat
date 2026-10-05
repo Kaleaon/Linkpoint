@@ -12,9 +12,12 @@ material {
     culling : none,
     depthWrite : false,
     variables : [
-        world
+        world,
+        bumpUV0,
+        bumpUV1
     ],
     parameters : [
+        { type : sampler2D, name : uNormalMap },
         { type : float3, name : uBlueHorizon },
         { type : float3, name : uBlueDensity },
         { type : float3, name : uAmbient },
@@ -52,6 +55,9 @@ vertex {
     void materialVertex(inout MaterialVertexInputs material) {
         material.worldPosition = vec4(getPosition().xy, materialParams.uWaterHeight, 1.0);
         material.world = vec4(material.worldPosition.xyz, 0.0);
+        vec2 uv = getPosition().xy * 0.05;
+        material.bumpUV0 = uv + vec2(materialParams.uTime * 0.02, materialParams.uTime * 0.01);
+        material.bumpUV1 = uv * 1.5 - vec2(materialParams.uTime * 0.01, materialParams.uTime * 0.03);
     }
 }
 
@@ -61,29 +67,16 @@ fragment {
     void material(inout MaterialInputs material) {
         prepareMaterial(material);
         vec3 vWorld = variable_world.xyz;
-        vec4 frequency = materialParams.uFrequency;
-        vec4 phase = materialParams.uPhase;
-        vec4 amplitude = materialParams.uAmplitude;
-        vec2 direction[4];
-        direction[0] = materialParams.uDirection01.xy;
-        direction[1] = materialParams.uDirection01.zw;
-        direction[2] = materialParams.uDirection23.xy;
-        direction[3] = materialParams.uDirection23.zw;
 
         vec3 toCamera = materialParams.uCameraPos - vWorld;
         float distanceToCamera = length(toCamera);
         vec3 viewDir = toCamera / max(distanceToCamera, 0.0001);
-        // Ground footprint of one pixel, stretched at grazing angles. A wave whose
-        // wavelength is shorter than two footprints would alias into speckle, so
-        // each wave fades out once it drops below that limit.
-        float footprint = distanceToCamera * materialParams.uPixelAngle / max(viewDir.z, 0.1);
-        vec2 slope = vec2(0.0);
-        for (int i = 0; i < 4; i++) {
-            float weight = clamp(1.0 - footprint * frequency[i] / 3.14159, 0.0, 1.0);
-            float arg = dot(direction[i], vWorld.xy) * frequency[i] + materialParams.uTime * phase[i];
-            slope += direction[i] * amplitude[i] * frequency[i] * cos(arg) * weight;
-        }
-        vec3 normal = normalize(vec3(-slope * materialParams.uNormalScale, 1.0));
+
+        vec3 normal1 = texture(materialParams_uNormalMap, variable_bumpUV0).rgb * 2.0 - 1.0;
+        vec3 normal2 = texture(materialParams_uNormalMap, variable_bumpUV1).rgb * 2.0 - 1.0;
+        vec2 slope = (normal1.xy + normal2.xy) * materialParams.uNormalScale;
+        vec3 normal = normalize(vec3(-slope, 1.0));
+
         // Fresnel from the water settings: more reflective at grazing angles.
         float cosV = max(dot(normal, viewDir), 0.0);
         float f1 = clamp(materialParams.uFresnelOffset - materialParams.uFresnelScale * cosV, 0.0, 1.0);
