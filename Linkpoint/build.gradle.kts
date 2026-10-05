@@ -253,6 +253,15 @@ android {
     }
 
     packaging {
+        jniLibs {
+            useLegacyPackaging = false
+            pickFirsts += listOf(
+                "**/libjnidispatch.so",
+                "**/libopenjpeg.so",
+                "**/libopenjp2.so",
+                "**/liblumiya-native.so"
+            )
+        }
         resources {
             excludes += listOf(
                 "META-INF/DEPENDENCIES",
