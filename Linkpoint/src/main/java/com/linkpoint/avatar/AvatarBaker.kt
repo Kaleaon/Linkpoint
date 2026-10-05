@@ -380,20 +380,14 @@ class AvatarBaker(
 
         return withContext(Dispatchers.IO) {
             try {
-                // Compress to JPEG2000 (or use PNG fallback)
-                val outputStream = ByteArrayOutputStream()
+                // Enforce native JPEG2000 encoding for bake uploads; PNG fallback uploads are blocked
                 val j2kBytes = com.linkpoint.assets.JPEG2000Encoder.encode(bitmap, lossless = false)
-                val data: ByteArray
-                val mimeType: String
-                if (j2kBytes != null) {
-                    data = j2kBytes
-                    mimeType = "image/x-j2c"
-                } else {
-                    Log.w(TAG, "J2K encoder unavailable; uploading PNG (sim may reject)")
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 90, outputStream)
-                    data = outputStream.toByteArray()
-                    mimeType = "image/png"
+                if (j2kBytes == null || j2kBytes.isEmpty()) {
+                    Log.e(TAG, "Native JPEG2000 encoding failed for channel $channel; blocking PNG fallback upload")
+                    return@withContext null
                 }
+                val data = j2kBytes
+                val mimeType = "image/x-j2c"
 
                 // Retry handling with backoff timers for high-latency mobile LTE/5G connections
                 val maxAttempts = 3

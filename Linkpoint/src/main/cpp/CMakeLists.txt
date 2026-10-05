@@ -35,7 +35,16 @@ add_library(
     jni/spatial_audio_jni.cpp
     jni/math_jni.cpp
     audio/voice/VivoxVoiceEngine.cpp
+    basis_universal/basisu_transcoder.cpp
+    jni/basis_transcoder_jni.cpp
     ${LINKPOINT_ETCPAK_SOURCES}
+)
+
+# Set compile definitions and include directories for basis_universal
+target_compile_definitions(linkpoint-j2k PRIVATE BASISD_SUPPORT_KTX2=1 BASISD_SUPPORT_KTX2_ZSTD=0)
+target_include_directories(linkpoint-j2k PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/basis_universal
 )
 
 # Enable ARM NEON SIMD build flags and vectorization optimizations
