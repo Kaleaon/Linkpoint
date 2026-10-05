@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { getRecentLocations, saveRecentLocation, clearRecentLocations } from '../../components/StartLocationCombobox.jsx';
 const require = createRequire(import.meta.url);
 const actions = require('../../../core/sl-actions.cjs');
 const patcher = require('../../../scripts/patch-metaverse.cjs');
@@ -28,19 +29,49 @@ describe('parseLoginName (Lumiya SLAuth.SendLoginRequest, from the original smal
 });
 
 describe('normalizeStart', () => {
-  it('maps first/home to home, passes a valid uri, and falls back to last', () => {
+  it('maps standard keywords (last, home) and parses raw region names or SLurls into uri format', () => {
     expect(actions.normalizeStart(undefined)).toBe('last');
     expect(actions.normalizeStart('last')).toBe('last');
+    expect(actions.normalizeStart('last location')).toBe('last');
+    expect(actions.normalizeStart('LAST LOCATION')).toBe('last');
     expect(actions.normalizeStart('first')).toBe('home');
     expect(actions.normalizeStart('home')).toBe('home');
-    expect(actions.normalizeStart('whatever')).toBe('last');
+    expect(actions.normalizeStart('whatever')).toBe('uri:whatever&128&128&30');
+    expect(actions.normalizeStart('Ahern')).toBe('uri:Ahern&128&128&30');
+    expect(actions.normalizeStart('Ahern/10/20/30')).toBe('uri:Ahern&10&20&30');
+    expect(actions.normalizeStart('secondlife://Ahern/10/20/30')).toBe('uri:Ahern&10&20&30');
+    expect(actions.normalizeStart('http://maps.secondlife.com/secondlife/Ahern/10/20/30')).toBe('uri:Ahern&10&20&30');
     expect(actions.normalizeStart('uri:Ahern&10&20&30')).toBe('uri:Ahern&10&20&30');
     expect(actions.normalizeStart('uri:Da Boom')).toBe('uri:Da Boom&128&128&30');
   });
-  it('refuses a uri that is malformed or tries to carry extra fields', () => {
-    for (const bad of ['uri:Ahern&1&2', 'uri:Ahern&1&2&3&4', 'uri:../x&1&2&3', 'uri:Ahern&a&b&c', 'uri:&1&2&3', 'uri:Ahern<script>&1&2&3', `uri:${'A'.repeat(80)}&1&2&3`]) {
+  it('refuses a uri or region string that is malformed or carries invalid characters', () => {
+    for (const bad of ['uri:Ahern&1&2', 'uri:Ahern&1&2&3&4', 'uri:../x&1&2&3', 'uri:Ahern&a&b&c', 'uri:&1&2&3', 'uri:Ahern<script>&1&2&3', `uri:${'A'.repeat(80)}&1&2&3`, 'Ahern<script>']) {
       expect(() => actions.normalizeStart(bad), bad).toThrow(/start location/);
     }
+  });
+});
+
+describe('StartLocationCombobox recent locations storage', () => {
+  const TEST_KEY = 'test_recent_start_locations';
+
+  beforeEach(() => {
+    clearRecentLocations(TEST_KEY);
+  });
+
+  it('saves custom locations, deduplicates entries case-insensitively, and ignores standard choices', () => {
+    saveRecentLocation('last', TEST_KEY);
+    saveRecentLocation('home', TEST_KEY);
+    expect(getRecentLocations(TEST_KEY)).toEqual([]);
+
+    saveRecentLocation('Ahern', TEST_KEY);
+    expect(getRecentLocations(TEST_KEY)).toEqual(['Ahern']);
+
+    saveRecentLocation('Da Boom', TEST_KEY);
+    expect(getRecentLocations(TEST_KEY)).toEqual(['Da Boom', 'Ahern']);
+
+    // Duplicate addition moves to front and deduplicates
+    saveRecentLocation('ahern', TEST_KEY);
+    expect(getRecentLocations(TEST_KEY)).toEqual(['ahern', 'Da Boom']);
   });
 });
 
