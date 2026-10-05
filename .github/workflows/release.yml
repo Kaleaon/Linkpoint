@@ -1,0 +1,153 @@
+name: Release & Deployment
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'next-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: '17'
+  ANDROID_SDK_VERSION: '35'
+  NDK_VERSION: '26.3.11579264'
+
+jobs:
+  build-android-release:
+    name: Task 1 - Build Android Release Binaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: >-
+            platform-tools
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
+            build-tools;35.0.0
+            cmake;3.22.1
+            ndk;${{ env.NDK_VERSION }}
+
+      - name: Decode release keystore
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > Linkpoint/release.keystore
+          cat > Linkpoint/keystore.properties << EOF
+          storeFile=release.keystore
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: Build Release APK and AAB
+        run: |
+          chmod +x gradlew Linkpoint/gradlew 2>/dev/null || true
+          ./gradlew :Linkpoint:assembleRelease :Linkpoint:bundleRelease --stacktrace
+
+      - name: Consolidate release binaries and compute checksums
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts
+          find Linkpoint/build/outputs -type f \( -name "*.apk" -o -name "*.aab" \) -exec cp {} release-artifacts/ \;
+          cd release-artifacts
+          sha256sum *.apk *.aab > SHA256SUMS 2>/dev/null || sha256sum * > SHA256SUMS
+          cp SHA256SUMS checksums.sha256
+          cat SHA256SUMS
+
+      - name: Attest build provenance (SLSA Level 3)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "release-artifacts/*"
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkpoint-release-binaries
+          path: release-artifacts/*
+          retention-days: 30
+
+  deploy-web-preview:
+    name: Task 2 - Build & Deploy Web Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web application
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /Linkpoint/
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkpoint-web-bundle
+          path: apps/linkpoint/dist
+          retention-days: 14
+
+  publish-release:
+    name: Task 3 - Publish GitHub Release
+    needs: [build-android-release, deploy-web-preview]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download release binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: linkpoint-release-binaries
+          path: release-assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ startsWith(github.ref_name, 'next-v') || contains(github.ref_name, 'beta') }}

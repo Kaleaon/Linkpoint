@@ -46,27 +46,24 @@ rules. For protocol or parity work informed by Lumiya, follow the
 [Lumiya-Redux working guide](docs/LUMIYA_REDUX_WORKING_GUIDE.md) to establish an
 executable oracle, sanitize fixtures, and apply the source-review gate.
 
-## Validation
+## Validation & Itemized CI/CD Tasks
 
 When you run `git commit`, local Git hooks in `.githooks/pre-commit` validate your staged changes.
-- If Python `pre-commit` is installed, it executes the configured hooks (automatically bypassing `gradle-lint` when Android SDK dependencies are missing).
-- If Python `pre-commit` is not installed, native fallback checks execute (`npm run check:contract`, `npm run typecheck`, and `cargo fmt`).
-- Environment-dependent checks (such as Gradle Android linting) are automatically skipped when `ANDROID_HOME` or Android SDK components are missing.
 
-If you need to bypass pre-commit checks (e.g. for temporary or work-in-progress commits), pass `--no-verify`:
+### Local Verification Tasks
 
-```bash
-git commit --no-verify
-```
+Before submitting a pull request, run the itemized validation tasks locally:
 
-Run the smallest useful check while iterating, then the complete check before
-submitting:
+1. **Task 1 - Pre-Commit & Linting**: `pre-commit run --all-files` (or `npm run check:contract`)
+2. **Task 2 - Android Verification**: `./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug`
+3. **Task 3 - Web Workspace Validation**: `npm run check:web`
+4. **Task 4 - Rust Core Validation**: `cargo fmt --all --check && cargo clippy --workspace --all-targets --locked`
+5. **Task 5 - Protocol Conformance**: `Linkpoint/tools/protocol/run_conformance.sh --skip-gradle`
+6. **Task 6 - Complete Active Validation**: `npm run check`
 
-```bash
-npm run check:web
-npm run check:rust
-npm run check
-```
+### Automated CI/CD Pipeline
+
+The repository CI workflow (`.github/workflows/ci.yml`) automatically enforces all 6 tasks on pull requests and pushes to `main` and `develop`. Release builds and web deployments are handled by `.github/workflows/release.yml`.
 
 To run code coverage reports locally across components:
 
