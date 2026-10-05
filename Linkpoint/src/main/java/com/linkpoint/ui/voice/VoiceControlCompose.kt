@@ -137,7 +137,7 @@ fun VoiceControl(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
         if (results.values.all { it }) {
-            scope.launch { voiceManager.joinParcelVoice() }
+            scope.launch { voiceManager.connect() }
         }
     }
 
@@ -154,7 +154,7 @@ fun VoiceControl(
                     if (missing.isNotEmpty()) {
                         permissionLauncher.launch(missing.toTypedArray())
                     } else {
-                        voiceManager.joinParcelVoice()
+                        voiceManager.connect()
                     }
                 } else {
                     voiceManager.leaveVoice()
