@@ -151,4 +151,98 @@ public class SpatialChatViewTest {
         assertTrue(footprintRatio <= SpatialChatView.MAX_OVERLAY_HEIGHT_RATIO);
         assertEquals(SpatialChatView.MAX_OVERLAY_HEIGHT_RATIO, footprintRatio, 0.001f);
     }
+
+    @Test
+    public void testChatHistoryBoundedFifoEviction() {
+        assertEquals(SpatialChatView.DEFAULT_CHAT_HISTORY_CAPACITY, spatialChatView.getChatHistoryCapacity());
+
+        // Process 250 messages into chat history (limit 200)
+        for (int i = 1; i <= 250; i++) {
+            spatialChatView.processChatPacket(new SpatialChatView.ChatMessage(
+                    "msg" + i, 0, SpatialChatView.ChatSourceType.AGENT, "Avatar" + i,
+                    "Continuous msg " + i, 1.0f, 0.0f, 0.0f, System.currentTimeMillis()
+            ));
+        }
+
+        List<SpatialChatView.ChatMessage> history = spatialChatView.getChatHistory();
+        assertEquals(200, history.size());
+        // Verify FIFO eviction: oldest 50 messages dropped, history starts at msg51 and ends at msg250
+        assertEquals("msg51", history.get(0).getId());
+        assertEquals("msg250", history.get(199).getId());
+    }
+
+    @Test
+    public void testScriptDrawerBoundedFifoEviction() {
+        assertEquals(SpatialChatView.DEFAULT_SCRIPT_DRAWER_CAPACITY, spatialChatView.getScriptDrawerCapacity());
+
+        // Process 150 script messages into script drawer (limit 100)
+        for (int i = 1; i <= 150; i++) {
+            spatialChatView.processChatPacket(new SpatialChatView.ChatMessage(
+                    "s" + i, 0, SpatialChatView.ChatSourceType.OBJECT, "Script" + i,
+                    "Script message " + i, 0.0f, 0.0f, 0.0f, System.currentTimeMillis()
+            ));
+        }
+
+        List<SpatialChatView.ChatMessage> drawer = spatialChatView.getScriptDrawerMessages();
+        assertEquals(100, drawer.size());
+        // Verify FIFO eviction: oldest 50 messages dropped, drawer starts at s51 and ends at s150
+        assertEquals("s51", drawer.get(0).getId());
+        assertEquals("s150", drawer.get(99).getId());
+    }
+
+    @Test
+    public void testUnreadScriptCounterDoesNotCountPurgedItems() {
+        assertFalse(spatialChatView.isScriptDrawerExpanded());
+
+        // Receive 150 script messages while collapsed
+        for (int i = 1; i <= 150; i++) {
+            spatialChatView.processChatPacket(new SpatialChatView.ChatMessage(
+                    "s" + i, 0, SpatialChatView.ChatSourceType.OBJECT, "Script" + i,
+                    "Script chatter " + i, 0.0f, 0.0f, 0.0f, System.currentTimeMillis()
+            ));
+        }
+
+        // Unread counter should be capped to current drawer message count (100) and not 150
+        assertEquals(100, spatialChatView.getUnreadScriptCount());
+
+        spatialChatView.setScriptDrawerExpanded(true);
+        assertEquals(0, spatialChatView.getUnreadScriptCount());
+    }
+
+    @Test
+    public void testCustomAndDynamicRetentionCapacities() {
+        SpatialChatView customView = new SpatialChatView(RuntimeEnvironment.getApplication(), 50, 25);
+        assertEquals(50, customView.getChatHistoryCapacity());
+        assertEquals(25, customView.getScriptDrawerCapacity());
+
+        for (int i = 1; i <= 60; i++) {
+            customView.processChatPacket(new SpatialChatView.ChatMessage(
+                    "msg" + i, 0, SpatialChatView.ChatSourceType.AGENT, "User" + i,
+                    "Text " + i, 0.0f, 0.0f, 0.0f, System.currentTimeMillis()
+            ));
+        }
+
+        assertEquals(50, customView.getChatHistory().size());
+        assertEquals("msg11", customView.getChatHistory().get(0).getId());
+
+        for (int i = 1; i <= 30; i++) {
+            customView.processChatPacket(new SpatialChatView.ChatMessage(
+                    "s" + i, 0, SpatialChatView.ChatSourceType.OBJECT, "Object" + i,
+                    "Object text " + i, 0.0f, 0.0f, 0.0f, System.currentTimeMillis()
+            ));
+        }
+
+        // Script drawer capacity is 25 (s6 to s30 retained)
+        assertEquals(25, customView.getScriptDrawerMessages().size());
+        assertEquals("s6", customView.getScriptDrawerMessages().get(0).getId());
+
+        // Full chat history capacity is 50 (msg41..msg60 and s1..s30 retained)
+        assertEquals(50, customView.getChatHistory().size());
+        assertEquals("msg41", customView.getChatHistory().get(0).getId());
+
+        // Test dynamic capacity reduction
+        customView.setChatHistoryCapacity(30);
+        assertEquals(30, customView.getChatHistory().size());
+        assertEquals("s1", customView.getChatHistory().get(0).getId());
+    }
 }

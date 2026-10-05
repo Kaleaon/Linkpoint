@@ -194,8 +194,10 @@ class DrawableTerrain(private val ctx: LumiyaRenderContext) {
     }
 
     private fun sampleHeight(hm: FloatArray, w: Int, d: Int, worldX: Float, worldZ: Float): Float {
-        val fx = (worldX / 256f * (w - 1)).coerceIn(0f, (w - 1).toFloat())
-        val fz = (worldZ / 256f * (d - 1)).coerceIn(0f, (d - 1).toFloat())
+        val maxW = (w - 1).coerceAtLeast(1).toFloat()
+        val maxD = (d - 1).coerceAtLeast(1).toFloat()
+        val fx = worldX.coerceIn(0f, maxW)
+        val fz = worldZ.coerceIn(0f, maxD)
         val ix = fx.toInt().coerceIn(0, w - 2)
         val iz = fz.toInt().coerceIn(0, d - 2)
         val fracX = fx - ix

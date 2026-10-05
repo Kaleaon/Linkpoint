@@ -43,11 +43,17 @@ data class LLVector3(
         /**
          * Decode from terse update format (used in UDP messages)
          */
-        fun fromTerse(bytes: ByteArray, offset: Int = 0, range: Float = 256f): LLVector3 {
+        fun fromTerse(
+            bytes: ByteArray,
+            offset: Int = 0,
+            rangeX: Float = 256f,
+            rangeY: Float = rangeX,
+            rangeZ: Float = 256f
+        ): LLVector3 {
             val buffer = ByteBuffer.wrap(bytes, offset, 6).order(ByteOrder.LITTLE_ENDIAN)
-            val x = (buffer.short.toInt() and 0xFFFF) / 65535f * range
-            val y = (buffer.short.toInt() and 0xFFFF) / 65535f * range
-            val z = (buffer.short.toInt() and 0xFFFF) / 65535f * range
+            val x = (buffer.short.toInt() and 0xFFFF) / 65535f * rangeX
+            val y = (buffer.short.toInt() and 0xFFFF) / 65535f * rangeY
+            val z = (buffer.short.toInt() and 0xFFFF) / 65535f * rangeZ
             return LLVector3(x, y, z)
         }
     }
