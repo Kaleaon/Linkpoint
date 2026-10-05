@@ -5,6 +5,11 @@ import java.io.InputStream
 import java.io.PushbackInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.*
 
 /**
@@ -13,6 +18,25 @@ import java.util.*
  */
 object LLSDParser {
     private const val TAG = "LLSDParser"
+
+    private val TZ_PATTERN = Regex("""[+-]\d{2}:?\d{2}""")
+
+    private val DATE_FORMATTERS: List<DateTimeFormatter> = listOf(
+        DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+            .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
+            .appendLiteral('Z')
+            .toFormatter()
+            .withZone(ZoneOffset.UTC),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC),
+        DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+            .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
+            .appendOffset("+HH:MM", "Z")
+            .toFormatter()
+            .withZone(ZoneOffset.UTC),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX").withZone(ZoneOffset.UTC)
+    )
 
     private fun logWarning(tag: String, message: String, throwable: Throwable? = null) {
         SafeLog.w(tag, message, throwable)
@@ -391,22 +415,13 @@ object LLSDParser {
 
     fun parseLlsdDate(value: String): Date? {
         val normalised = value.trim().let { v ->
-            val tzPattern = Regex("""[+-]\d{2}:?\d{2}""")
-            if (v.endsWith("Z") && tzPattern.containsMatchIn(v.dropLast(1))) v.dropLast(1) else v
+            if (v.endsWith("Z") && TZ_PATTERN.containsMatchIn(v.dropLast(1))) v.dropLast(1) else v
         }
-        val patterns = listOf(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-            "yyyy-MM-dd'T'HH:mm:ssXXX"
-        )
-        for (pattern in patterns) {
-            val formatter = java.text.SimpleDateFormat(pattern, Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
+        for (formatter in DATE_FORMATTERS) {
             try {
-                return formatter.parse(normalised)
-            } catch (e: Exception) {
+                val instant = formatter.parse(normalised, Instant::from)
+                return Date.from(instant)
+            } catch (_: Exception) {
                 // Try next
             }
         }
