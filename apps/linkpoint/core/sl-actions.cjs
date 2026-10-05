@@ -292,6 +292,16 @@ function normalizeStart(start) {
   return `uri:${region}&${x}&${y}&${z}`;
 }
 
+const { readViewerIdentity } = require('../scripts/patch-metaverse.cjs');
+
+function getViewerIdentity() {
+  try {
+    return readViewerIdentity();
+  } catch (_e) {
+    return { channel: 'Linkpoint Viewer', version: '2.0.0' };
+  }
+}
+
 /** node-metaverse LoginParameters for a request from the browser or renderer. */
 function buildLoginParams(request, lib) {
   const { LoginParameters } = loadLibrary(lib);
@@ -311,6 +321,9 @@ function buildLoginParams(request, lib) {
   // and the hash a previous successful MFA login returned for this device.
   if (request.mfaToken) params.token = String(request.mfaToken).replace(/\s+/g, '').slice(0, 32);
   if (request.mfaHash) params.mfa_hash = String(request.mfaHash).slice(0, 256);
+  const identity = getViewerIdentity();
+  params.channel = identity.channel;
+  params.version = identity.version;
   return params;
 }
 
