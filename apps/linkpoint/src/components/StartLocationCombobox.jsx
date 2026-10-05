@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "./Icon.jsx";
@@ -70,16 +70,28 @@ export default function StartLocationCombobox({
   const { V, t: typography } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [recents, setRecents] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef(null);
+
+  const baseId = useId();
+  const listboxId = `start-location-listbox-${baseId}`;
+  const optionIdPrefix = `start-location-option-${baseId}`;
 
   useEffect(() => {
     setRecents(getRecentLocations(storageKey));
   }, [isOpen, storageKey]);
 
   useEffect(() => {
+    if (!isOpen) {
+      setActiveIndex(-1);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
+        setActiveIndex(-1);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -91,9 +103,64 @@ export default function StartLocationCombobox({
     { value: "home", label: t("login_option_home") || "Home" },
   ];
 
+  const allOptions = [
+    ...standardOptions.map((opt) => ({ type: "standard", value: opt.value, label: opt.label })),
+    ...recents.map((loc) => ({ type: "recent", value: loc, label: loc })),
+  ];
+  const totalOptions = allOptions.length;
+
+  useEffect(() => {
+    if (isOpen && activeIndex >= 0) {
+      const activeEl = document.getElementById(`${optionIdPrefix}-${activeIndex}`);
+      if (activeEl && typeof activeEl.scrollIntoView === "function") {
+        activeEl.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [activeIndex, isOpen, optionIdPrefix]);
+
   const handleSelectOption = (optValue) => {
     onChange?.(optValue);
     setIsOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!isOpen) {
+        setIsOpen(true);
+        setActiveIndex(0);
+      } else if (totalOptions > 0) {
+        setActiveIndex((prev) => (prev < 0 ? 0 : (prev + 1) % totalOptions));
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (isOpen && totalOptions > 0) {
+        setActiveIndex((prev) => (prev <= 0 ? totalOptions - 1 : prev - 1));
+      }
+    } else if (e.key === "Enter") {
+      if (isOpen && activeIndex >= 0 && activeIndex < totalOptions) {
+        e.preventDefault();
+        const selectedOption = allOptions[activeIndex];
+        handleSelectOption(selectedOption.value);
+      }
+    } else if (e.key === "Escape") {
+      if (isOpen) {
+        e.preventDefault();
+        setIsOpen(false);
+        setActiveIndex(-1);
+      }
+    } else if (e.key === "Home") {
+      if (isOpen && totalOptions > 0) {
+        e.preventDefault();
+        setActiveIndex(0);
+      }
+    } else if (e.key === "End") {
+      if (isOpen && totalOptions > 0) {
+        e.preventDefault();
+        setActiveIndex(totalOptions - 1);
+      }
+    }
   };
 
   const getDisplayValue = () => {
@@ -124,8 +191,16 @@ export default function StartLocationCombobox({
       <div style={controlStyle}>
         <input
           type="text"
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          aria-activedescendant={activeIndex >= 0 ? `${optionIdPrefix}-${activeIndex}` : undefined}
           value={getDisplayValue()}
           onChange={(e) => {
+            setActiveIndex(-1);
+            if (!isOpen) setIsOpen(true);
             const val = e.target.value;
             const lower = val.trim().toLowerCase();
             const lastLabel = (t("login_option_last_location") || "last location").toLowerCase();
@@ -140,6 +215,7 @@ export default function StartLocationCombobox({
             }
           }}
           onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder || t("login_option_last_location") || "Start location or SLurl"}
           style={{
             flex: 1,
@@ -154,6 +230,7 @@ export default function StartLocationCombobox({
         />
         <button
           type="button"
+          tabIndex={-1}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle start location options"
           style={{
@@ -172,6 +249,7 @@ export default function StartLocationCombobox({
 
       {isOpen && (
         <ul
+          id={listboxId}
           role="listbox"
           style={{
             position: "absolute",
@@ -190,32 +268,42 @@ export default function StartLocationCombobox({
             overflowY: "auto",
           }}
         >
-          {standardOptions.map((opt) => (
-            <li
-              key={opt.value}
-              role="option"
-              aria-selected={value === opt.value}
-              onClick={() => handleSelectOption(opt.value)}
-              style={{
-                padding: "8px 12px",
-                cursor: "pointer",
-                background: value === opt.value ? V.priC || "rgba(0,0,0,0.05)" : "transparent",
-                color: value === opt.value ? V.pri : V.ink,
-                fontSize: 14,
-                fontFamily: typography.font,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>{opt.label}</span>
-              {value === opt.value && <Icon name="check" size={14} />}
-            </li>
-          ))}
+          {standardOptions.map((opt, index) => {
+            const globalIndex = index;
+            const isSelected = value === opt.value;
+            const isHighlighted = activeIndex === globalIndex;
+            const activeOrSelected = isSelected || isHighlighted;
+
+            return (
+              <li
+                key={opt.value}
+                id={`${optionIdPrefix}-${globalIndex}`}
+                role="option"
+                aria-selected={isSelected || isHighlighted}
+                onClick={() => handleSelectOption(opt.value)}
+                onMouseEnter={() => setActiveIndex(globalIndex)}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  background: activeOrSelected ? V.priC || "rgba(0,0,0,0.05)" : "transparent",
+                  color: activeOrSelected ? V.pri : V.ink,
+                  fontSize: 14,
+                  fontFamily: typography.font,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>{opt.label}</span>
+                {isSelected && <Icon name="check" size={14} />}
+              </li>
+            );
+          })}
 
           {recents.length > 0 && (
             <>
               <li
+                role="presentation"
                 style={{
                   padding: "8px 12px 4px 12px",
                   fontSize: 11,
@@ -229,30 +317,39 @@ export default function StartLocationCombobox({
               >
                 {t("login_recent_locations") || "Recent Destinations"}
               </li>
-              {recents.map((loc) => (
-                <li
-                  key={loc}
-                  role="option"
-                  aria-selected={value === loc}
-                  onClick={() => handleSelectOption(loc)}
-                  style={{
-                    padding: "8px 12px",
-                    cursor: "pointer",
-                    background: value === loc ? V.priC || "rgba(0,0,0,0.05)" : "transparent",
-                    color: value === loc ? V.pri : V.ink,
-                    fontSize: 14,
-                    fontFamily: typography.font,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {loc}
-                  </span>
-                  {value === loc && <Icon name="check" size={14} />}
-                </li>
-              ))}
+              {recents.map((loc, index) => {
+                const globalIndex = standardOptions.length + index;
+                const isSelected = value === loc;
+                const isHighlighted = activeIndex === globalIndex;
+                const activeOrSelected = isSelected || isHighlighted;
+
+                return (
+                  <li
+                    key={loc}
+                    id={`${optionIdPrefix}-${globalIndex}`}
+                    role="option"
+                    aria-selected={isSelected || isHighlighted}
+                    onClick={() => handleSelectOption(loc)}
+                    onMouseEnter={() => setActiveIndex(globalIndex)}
+                    style={{
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                      background: activeOrSelected ? V.priC || "rgba(0,0,0,0.05)" : "transparent",
+                      color: activeOrSelected ? V.pri : V.ink,
+                      fontSize: 14,
+                      fontFamily: typography.font,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {loc}
+                    </span>
+                    {isSelected && <Icon name="check" size={14} />}
+                  </li>
+                );
+              })}
             </>
           )}
         </ul>
@@ -260,3 +357,4 @@ export default function StartLocationCombobox({
     </div>
   );
 }
+
