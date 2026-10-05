@@ -7,11 +7,16 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.linkpoint.R
+import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
+import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.LLSDMap
 import com.linkpoint.push.PushEvent
 import com.linkpoint.push.PushEventBus
 import com.linkpoint.push.PushEventType
+import com.linkpoint.teleport.TeleportLure
+import com.linkpoint.teleport.TeleportManager
+import com.linkpoint.teleport.TeleportResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -28,7 +34,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 class NotificationManager(
-    private val context: Context
+    private val context: Context,
+    capabilityManager: CapabilityManager? = null
 ) : EventHandler {
 
     companion object {
@@ -51,15 +58,49 @@ class NotificationManager(
     private val _unreadCount = MutableStateFlow(0)
     val unreadCount: StateFlow<Int> = _unreadCount
 
+    private val _activeLure = MutableStateFlow<TeleportLure?>(null)
+    val activeLure: StateFlow<TeleportLure?> = _activeLure
+
     private val _notificationEvents = MutableSharedFlow<NotificationEvent>(replay = 0, extraBufferCapacity = 32)
     val notificationEvents: SharedFlow<NotificationEvent> = _notificationEvents
 
     private val _syncOnOpenRequested = MutableStateFlow(false)
     val syncOnOpenRequested: StateFlow<Boolean> = _syncOnOpenRequested
 
+    private var teleportEventsJob: kotlinx.coroutines.Job? = null
+
+    var teleportManager: TeleportManager? = null
+        set(value) {
+            field = value
+            observeTeleportEvents(value)
+        }
+
     init {
         createNotificationChannels()
         observePushEvents()
+        capabilityManager?.let { registerCapabilities(it) }
+    }
+
+    fun registerCapabilities(capabilityManager: CapabilityManager) {
+        capabilityManager.registerEventHandler("TeleportOfferRequest", this, EventQueueDispatcher.dispatcher)
+    }
+
+    private fun observeTeleportEvents(tm: TeleportManager?) {
+        teleportEventsJob?.cancel()
+        if (tm != null) {
+            teleportEventsJob = scope.launch {
+                tm.teleportEvents.collectLatest { event ->
+                    when (event) {
+                        is com.linkpoint.teleport.TeleportEvent.Completed,
+                        is com.linkpoint.teleport.TeleportEvent.Failed,
+                        is com.linkpoint.teleport.TeleportEvent.Cancelled -> {
+                            _activeLure.value = null
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
     }
 
     private fun observePushEvents() {
@@ -192,20 +233,61 @@ class NotificationManager(
     }
 
     private fun handleTeleportOffer(body: LLSDMap) {
-        val fromId = UUID.fromString(body.getString("from_id") ?: return)
+        val fromId = body.getUUID("from_id")
+            ?: body.getString("from_id")?.let { try { UUID.fromString(it) } catch (e: Exception) { null } }
+            ?: return
         val fromName = body.getString("from_name") ?: "Someone"
         val regionName = body.getString("region_name") ?: "Unknown region"
+        val message = body.getString("message") ?: ""
+        val lureId = body.getUUID("lure_id")
+            ?: body.getString("lure_id")?.let { try { UUID.fromString(it) } catch (e: Exception) { null } }
+            ?: UUID.randomUUID()
+
+        val lure = TeleportLure(
+            lureId = lureId,
+            senderId = fromId,
+            senderName = fromName,
+            regionName = regionName,
+            message = message,
+            timestamp = System.currentTimeMillis()
+        )
+
+        _activeLure.value = lure
+
         addNotification(
             SLNotification(
                 id = UUID.randomUUID(),
                 type = NotificationType.TELEPORT_OFFER,
                 title = "Teleport Offer from $fromName",
-                message = "To: $regionName",
+                message = if (message.isNotBlank()) "$message (To: $regionName)" else "To: $regionName",
                 fromId = fromId,
                 timestamp = System.currentTimeMillis()
             )
         )
         showSystemNotification(CHANNEL_TELEPORT, "Teleport Offer from $fromName", "To: $regionName", NotificationCompat.PRIORITY_HIGH)
+    }
+
+    suspend fun acceptLure(lure: TeleportLure): TeleportResult {
+        if (_activeLure.value?.lureId == lure.lureId || _activeLure.value == lure) {
+            _activeLure.value = null
+        }
+        val tm = teleportManager
+        return if (tm != null) {
+            tm.acceptTeleportLure(lure)
+        } else {
+            TeleportResult.Failure("TeleportManager is not initialized")
+        }
+    }
+
+    fun declineLure(lure: TeleportLure) {
+        if (_activeLure.value?.lureId == lure.lureId || _activeLure.value == lure) {
+            _activeLure.value = null
+        }
+        teleportManager?.declineTeleportLure(lure)
+    }
+
+    fun clearActiveLure() {
+        _activeLure.value = null
     }
 
     private fun handleFriendshipOffer(body: LLSDMap) {
@@ -267,6 +349,7 @@ class NotificationManager(
     fun clearAll() {
         notifications.clear()
         _unreadCount.value = 0
+        _activeLure.value = null
     }
 
     private fun createChatPendingIntent(fromId: UUID?, fromName: String?): android.app.PendingIntent? {
@@ -326,8 +409,10 @@ class NotificationManager(
     }
 
     fun shutdown() {
+        teleportEventsJob?.cancel()
         scope.cancel()
         notifications.clear()
+        _activeLure.value = null
     }
 }
 

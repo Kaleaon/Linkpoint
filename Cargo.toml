@@ -23,3 +23,4 @@ url = "2"
 
 [patch.crates-io]
 quick-xml = { path = "crates/quick-xml" }
+serde-llsd-benthic = { path = "crates/serde-llsd-benthic" }

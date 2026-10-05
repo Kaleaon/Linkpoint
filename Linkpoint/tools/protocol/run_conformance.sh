@@ -121,6 +121,19 @@ rc=${PIPESTATUS[0]}
 set -e
 record_layer "verify_protocol_docs.py" "${rc}"
 
+# Layer 3.5: Unified Code Generator CLI conformance & generator unit tests
+section "layer 3.5: Unified Code Generator CLI conformance"
+set +e
+python3 "${REPO_ROOT}/tools/protocol_gen/cli.py" validate 2>&1 \
+  | tee "${REPORTS_DIR}/protocol-generator-validate.log"
+rc1=${PIPESTATUS[0]}
+python3 -m unittest discover -s "${REPO_ROOT}/tools/protocol_gen/tests" 2>&1 \
+  | tee "${REPORTS_DIR}/protocol-generator-unittest.log"
+rc2=${PIPESTATUS[0]}
+rc=$(( rc1 | rc2 ))
+set -e
+record_layer "protocol-gen CLI conformance" "${rc}"
+
 # Layer 4: Gradle conformance test bundle
 if [[ ${skip_gradle} -eq 0 ]]; then
   section "layer 4: gradle conformance suite"
@@ -136,6 +149,7 @@ if [[ ${skip_gradle} -eq 0 ]]; then
       --tests 'com.linkpoint.protocol.messages.ManagerMessageIdUsageTest' \
       --tests 'com.linkpoint.protocol.capabilities.CapabilityDeclarationAuditTest' \
       --tests 'com.linkpoint.protocol.llsd.LLSDParserFuzzTargetTest' \
+      --tests 'com.linkpoint.protocol.llsd.LLSDConformanceTest' \
   ) 2>&1 | tee "${REPORTS_DIR}/gradle-conformance.log"
   rc=${PIPESTATUS[0]}
   set -e

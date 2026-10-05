@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.secondlife.com/protocol/llsd/agent_domain.json",
+  "title": "AgentDomainCapabilities",
+  "description": "LLSD Schema for Agent Domain, Preferences, and Profile capabilities",
+  "type": "object",
+  "properties": {
+    "agent_id": { "type": "string", "format": "uuid" },
+    "session_id": { "type": "string", "format": "uuid" },
+    "display_name": { "type": "string" },
+    "legacy_first_name": { "type": "string" },
+    "legacy_last_name": { "type": "string" },
+    "hover_height": { "type": "number" },
+    "active_group_id": { "type": "string", "format": "uuid" },
+    "maturity_rating": { "type": "string", "enum": ["pg", "mature", "adult"] }
+  },
+  "required": ["agent_id", "session_id"]
+}

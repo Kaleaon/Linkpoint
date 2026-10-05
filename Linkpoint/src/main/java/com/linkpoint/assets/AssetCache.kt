@@ -15,15 +15,15 @@ import java.util.UUID
  * - Memory: 100MB - 2GB (default 512MB)
  * - Disk: 512MB - 10GB (default 2GB)
  */
-class AssetCache(private val context: Context) {
+class AssetCache(
+    private val context: Context,
+    val cacheManager: CacheManager = CacheManager(context)
+) {
 
     companion object {
         private const val TAG = "AssetCache"
         private const val DISK_CACHE_DIR = "asset_cache"
     }
-
-    // Cache manager for getting configured sizes
-    private val cacheManager by lazy { CacheManager(context) }
 
     // Memory cache (LRU) - uses configured size from CacheManager
     private val memoryCache: LruCache<String, ByteArray> by lazy {
@@ -48,9 +48,9 @@ class AssetCache(private val context: Context) {
         }
     }
 
-    // Fallback disk cache directory for asset types without CacheManager mapping
-    private val diskCacheDir: File by lazy {
-        File(context.cacheDir, DISK_CACHE_DIR).also { it.mkdirs() }
+    // Legacy unsegregated disk cache directory for cleanup of pre-grid-segregated assets
+    private val legacyDiskCacheDir: File by lazy {
+        File(context.cacheDir, DISK_CACHE_DIR)
     }
 
     // Configured disk cache size in bytes
@@ -142,8 +142,10 @@ class AssetCache(private val context: Context) {
             CacheableAssetType.values().forEach { type ->
                 cacheManager.getPublicAssetDirectory(type).listFiles()?.forEach { it.delete() }
             }
-            // Clear fallback directory
-            diskCacheDir.listFiles()?.forEach { it.delete() }
+            // Clear general asset directory from CacheManager
+            cacheManager.getGeneralAssetDirectory().listFiles()?.forEach { it.delete() }
+            // Legacy cleanup: remove unsegregated files in File(context.cacheDir, "asset_cache")
+            legacyDiskCacheDir.listFiles()?.forEach { it.delete() }
         }
         Log.i(TAG, "Cache cleared")
     }
@@ -156,7 +158,8 @@ class AssetCache(private val context: Context) {
         CacheableAssetType.values().forEach { type ->
             cacheManager.getPublicAssetDirectory(type).listFiles()?.let { files.addAll(it) }
         }
-        diskCacheDir.listFiles()?.let { files.addAll(it) }
+        cacheManager.getGeneralAssetDirectory().listFiles()?.let { files.addAll(it) }
+        legacyDiskCacheDir.listFiles()?.let { files.addAll(it) }
         return files
     }
 
@@ -229,14 +232,14 @@ class AssetCache(private val context: Context) {
     /**
      * Get the disk file for an asset using the Public/<Grid>/<assetType>/<uuid> structure.
      * Assets with a known cacheable type are stored in CacheManager directories;
-     * other asset types fall back to the general disk cache.
+     * other asset types fall back to the general disk cache in CacheManager.
      */
     private fun getDiskFile(assetId: UUID, assetType: AssetType): File {
         val cacheableType = toCacheableAssetType(assetType)
         val dir = if (cacheableType != null) {
             cacheManager.getPublicAssetDirectory(cacheableType)
         } else {
-            diskCacheDir.also { it.mkdirs() }
+            cacheManager.getGeneralAssetDirectory()
         }
         return File(dir, assetId.toString())
     }

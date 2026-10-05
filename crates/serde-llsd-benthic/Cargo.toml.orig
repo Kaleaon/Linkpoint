@@ -1,0 +1,21 @@
+[package]
+name = "serde-llsd-benthic"
+version = "0.3.3"
+edition = "2021"
+authors = ["John-Nagle <nagle@animats.com>, wgahnagl"]
+description = "Library for serializing and de-serializing data in Linden Lab Structured Data format. This format is used by Second Life and Open Simulator"
+license = "LGPL-2.1 OR LGPL-3.0"
+repository = "https://github.com/benthic-mmo/serde-llsd.git"
+homepage = "https://github.com/benthic-mmo/serde-llsd"
+documentation = "https://docs.rs/benthic-mmo"
+
+[dependencies]	
+anyhow = "1"
+quick-xml = "0.23"
+uuid = { version = "1", features = ["v4"] }
+hex = "0.4"
+base64 = "0.21"
+ascii85 = "0.2"
+chrono = "0.4"
+enum-as-inner = "0.5"
+urlencoding = "2"

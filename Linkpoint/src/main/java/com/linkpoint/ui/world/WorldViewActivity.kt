@@ -306,7 +306,22 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 onFly = { btnFly.performClick() },
                 onRun = { btnRun.performClick() },
                 onJump = { btnJump.performClick() },
-                onSit = { btnSit.performClick() }
+                onSit = { btnSit.performClick() },
+                onAcceptLure = { lure ->
+                    lifecycleScope.launch {
+                        if (app.isNotificationManagerInitialized()) {
+                            val result = app.notificationManager.acceptLure(lure)
+                            if (result is com.linkpoint.teleport.TeleportResult.Failure) {
+                                Toast.makeText(this@WorldViewActivity, result.message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                },
+                onDeclineLure = { lure ->
+                    if (app.isNotificationManagerInitialized()) {
+                        app.notificationManager.declineLure(lure)
+                    }
+                }
             )
         }
 
@@ -1140,6 +1155,14 @@ class WorldViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             app.sessionManager.currentRegion.collectLatest { region ->
                 regionNameText.text = region?.name ?: "Unknown Region"
                 worldUiState.update { it.copy(regionName = region?.name ?: "Unknown Region") }
+            }
+        }
+
+        if (app.isNotificationManagerInitialized()) {
+            lifecycleScope.launch {
+                app.notificationManager.activeLure.collectLatest { lure ->
+                    worldUiState.update { it.copy(activeTeleportLure = lure) }
+                }
             }
         }
 
