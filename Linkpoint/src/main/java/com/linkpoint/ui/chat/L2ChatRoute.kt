@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.linkpoint.LinkpointApp
 import com.linkpoint.chat.IMMessage
+import com.linkpoint.chat.SLChatEvent
 import com.linkpoint.chat.SessionType
 import com.linkpoint.protocol.messages.ChatSourceType
 import com.linkpoint.ui.common.UiLoadState
@@ -161,6 +162,26 @@ fun L2ChatRoute(
             }
         },
         onNavigateBack = onNavigateBack,
+        onAcceptEvent = { event ->
+            if (!imAvailable) return@ChatScreen
+            when (event) {
+                is SLChatEvent.FriendshipOffer -> app.imManager.respondToFriendshipOffer(event, true)
+                is SLChatEvent.GroupInvitation -> app.imManager.respondToGroupInvitation(event, true)
+                is SLChatEvent.TeleportLure -> app.imManager.respondToTeleportLure(event, true)
+                is SLChatEvent.InventoryOffer -> app.imManager.respondToInventoryOffer(event, true)
+                else -> Unit
+            }
+        },
+        onDeclineEvent = { event ->
+            if (!imAvailable) return@ChatScreen
+            when (event) {
+                is SLChatEvent.FriendshipOffer -> app.imManager.respondToFriendshipOffer(event, false)
+                is SLChatEvent.GroupInvitation -> app.imManager.respondToGroupInvitation(event, false)
+                is SLChatEvent.TeleportLure -> app.imManager.respondToTeleportLure(event, false)
+                is SLChatEvent.InventoryOffer -> app.imManager.respondToInventoryOffer(event, false)
+                else -> Unit
+            }
+        },
         modifier = modifier,
     )
 }
@@ -207,5 +228,6 @@ private fun IMMessage.toUiMessage(myAgentId: UUID, channel: ChatChannel): ChatMe
         type = MessageType.NORMAL,
         channel = channel,
         isMine = isOutgoing || fromAgentId == myAgentId,
+        chatEvent = this,
     )
 }

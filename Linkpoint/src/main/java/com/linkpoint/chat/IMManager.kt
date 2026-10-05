@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Instant Message manager
@@ -39,6 +41,17 @@ class IMManager(
         private const val TAG = "IMManager"
         private const val MAX_SESSION_HISTORY = 200
 
+        private fun logDebug(tag: String, msg: String) {
+            try { Log.d(tag, msg) } catch (_: Throwable) { println("[$tag] $msg") }
+        }
+
+        private fun logWarn(tag: String, msg: String, tr: Throwable? = null) {
+            try { if (tr != null) Log.w(tag, msg, tr) else Log.w(tag, msg) } catch (_: Throwable) { println("[$tag] $msg ${tr?.message ?: ""}") }
+        }
+
+        private fun logError(tag: String, msg: String, tr: Throwable? = null) {
+            try { if (tr != null) Log.e(tag, msg, tr) else Log.e(tag, msg) } catch (_: Throwable) { println("[$tag] $msg ${tr?.message ?: ""}") }
+        }
         // IM dialog types
         const val IM_NOTHING_SPECIAL = 0
         const val IM_MESSAGEBOX = 1
@@ -88,14 +101,13 @@ class IMManager(
     private val sessions = ConcurrentHashMap<UUID, IMSession>()
 
     // Session messages
-    private val sessionMessages = ConcurrentHashMap<UUID, MutableList<IMMessage>>()
+    private val sessionMessages = ConcurrentHashMap<UUID, MutableList<SLChatEvent>>()
 
-    private val lastMessageBySession = ConcurrentHashMap<UUID, IMMessage>()
-
+    private val lastMessageBySession = ConcurrentHashMap<UUID, SLChatEvent>()
+    
     // Events
-    private val _messageFlow = MutableSharedFlow<IMMessage>(replay = 0, extraBufferCapacity = 64)
-    val messageFlow: SharedFlow<IMMessage> = _messageFlow
-
+    private val _messageFlow = MutableSharedFlow<SLChatEvent>(replay = 0, extraBufferCapacity = 64)
+    val messageFlow: SharedFlow<SLChatEvent> = _messageFlow
     private val _sessionFlow = MutableSharedFlow<IMSessionEvent>(replay = 0, extraBufferCapacity = 16)
     val sessionFlow: SharedFlow<IMSessionEvent> = _sessionFlow
 
@@ -232,7 +244,7 @@ class IMManager(
                     scope.launch {
                         _sessionFlow.emit(IMSessionEvent.ParticipantJoined(sessionId, agentId))
                     }
-                    Log.d(TAG, "Participant $agentId joined session $sessionId")
+                    logDebug(TAG, "Participant $agentId joined session $sessionId")
                 }
             }
             "leave" -> {
@@ -244,7 +256,7 @@ class IMManager(
                     scope.launch {
                         _sessionFlow.emit(IMSessionEvent.ParticipantLeft(sessionId, agentId))
                     }
-                    Log.d(TAG, "Participant $agentId left session $sessionId")
+                    logDebug(TAG, "Participant $agentId left session $sessionId")
                 }
             }
             "typing" -> {
@@ -261,7 +273,7 @@ class IMManager(
                 }
             }
             else -> {
-                Log.d(TAG, "Unknown session event: $eventType for session $sessionId")
+                logDebug(TAG, "Unknown session event: $eventType for session $sessionId")
             }
         }
 
@@ -280,19 +292,19 @@ class IMManager(
                 scope.launch {
                     _sessionFlow.emit(IMSessionEvent.Joined(session))
                 }
-                Log.d(TAG, "Session $sessionId started successfully")
+                logDebug(TAG, "Session $sessionId started successfully")
             }
             if (startedGroupSessions.add(sessionId)) {
                 val queued = pendingGroupMessages.remove(sessionId)
                 if (queued != null && queued.isNotEmpty()) {
-                    Log.d(TAG, "Draining ${queued.size} pending group messages for $sessionId")
+                    logDebug(TAG, "Draining ${queued.size} pending group messages for $sessionId")
                     queued.forEach { sendGroupChatDialog17(sessionId, it) }
                 }
             }
             updateSessionList()
         } else {
             val error = body.getString("error") ?: "Unknown error"
-            Log.e(TAG, "Failed to start session $sessionId: $error")
+            logError(TAG, "Failed to start session $sessionId: $error")
             pendingGroupMessages.remove(sessionId)
             startedGroupSessions.remove(sessionId)
             sessions.remove(sessionId)
@@ -310,7 +322,8 @@ class IMManager(
         message: String,
         sessionId: UUID,
         dialogType: Int,
-        timestamp: Long
+        timestamp: Long,
+        binaryBucket: ByteArray = byteArrayOf()
     ) {
         scope.launch {
             val session = sessions.getOrPut(sessionId) {
@@ -330,18 +343,17 @@ class IMManager(
                     session.typingParticipants = session.typingParticipants - fromAgentId
                 }
                 else -> {
-                    val imMessage = IMMessage(
-                        id = UUID.randomUUID(),
-                        sessionId = sessionId,
+                    val event = decodeToSLChatEvent(
                         fromAgentId = fromAgentId,
                         fromName = fromName,
                         message = message,
+                        sessionId = sessionId,
                         dialogType = dialogType,
                         timestamp = timestamp,
+                        binaryBucket = binaryBucket,
                         isOutgoing = false
                     )
-
-                    addMessage(sessionId, imMessage)
+                    addMessage(sessionId, event)
                     session.typingParticipants = session.typingParticipants - fromAgentId
                     pendingSyncSessions.update { it - sessionId }
                 }
@@ -351,14 +363,119 @@ class IMManager(
         }
     }
 
+
+    fun decodeToSLChatEvent(
+        fromAgentId: UUID,
+        fromName: String,
+        message: String,
+        sessionId: UUID,
+        dialogType: Int,
+        timestamp: Long,
+        binaryBucket: ByteArray = byteArrayOf(),
+        isOutgoing: Boolean = false
+    ): SLChatEvent {
+        return try {
+            when (dialogType) {
+                IM_FRIENDSHIP_OFFERED -> SLChatEvent.FriendshipOffer(
+                    sessionId = sessionId,
+                    fromAgentId = fromAgentId,
+                    fromName = fromName,
+                    message = message.ifBlank { "$fromName has offered you friendship." },
+                    dialogType = dialogType,
+                    timestamp = timestamp,
+                    isOutgoing = isOutgoing
+                )
+                IM_FRIENDSHIP_ACCEPTED, IM_FRIENDSHIP_DECLINED -> SLChatEvent.FriendshipResult(
+                    sessionId = sessionId,
+                    fromAgentId = fromAgentId,
+                    fromName = fromName,
+                    message = message,
+                    dialogType = dialogType,
+                    timestamp = timestamp,
+                    isOutgoing = isOutgoing,
+                    isAccepted = dialogType == IM_FRIENDSHIP_ACCEPTED
+                )
+                IM_GROUP_INVITATION -> {
+                    val joinFee = if (binaryBucket.size >= 4) {
+                        try {
+                            ByteBuffer.wrap(binaryBucket).order(ByteOrder.BIG_ENDIAN).int
+                        } catch (e: Exception) {
+                            0
+                        }
+                    } else 0
+                    SLChatEvent.GroupInvitation(
+                        sessionId = sessionId,
+                        fromAgentId = fromAgentId,
+                        fromName = fromName,
+                        message = message.ifBlank { "$fromName invited you to join a group." },
+                        dialogType = dialogType,
+                        timestamp = timestamp,
+                        isOutgoing = isOutgoing,
+                        groupId = fromAgentId,
+                        joinFee = joinFee
+                    )
+                }
+                IM_LURE_USER, IM_GODLIKE_LURE_USER -> SLChatEvent.TeleportLure(
+                    sessionId = sessionId,
+                    fromAgentId = fromAgentId,
+                    fromName = fromName,
+                    message = message.ifBlank { "$fromName has offered to teleport you." },
+                    dialogType = dialogType,
+                    timestamp = timestamp,
+                    isOutgoing = isOutgoing,
+                    lureId = sessionId,
+                    regionName = message
+                )
+                IM_INVENTORY_OFFERED, IM_TASK_INVENTORY_OFFERED -> SLChatEvent.InventoryOffer(
+                    sessionId = sessionId,
+                    fromAgentId = fromAgentId,
+                    fromName = fromName,
+                    message = message.ifBlank { "$fromName offered you an item." },
+                    dialogType = dialogType,
+                    timestamp = timestamp,
+                    isOutgoing = isOutgoing
+                )
+                IM_MESSAGEBOX, IM_FROM_TASK_AS_ALERT -> SLChatEvent.System(
+                    sessionId = sessionId,
+                    fromAgentId = fromAgentId,
+                    fromName = fromName,
+                    message = message,
+                    dialogType = dialogType,
+                    timestamp = timestamp,
+                    isOutgoing = isOutgoing
+                )
+                else -> SLChatEvent.Text(
+                    sessionId = sessionId,
+                    fromAgentId = fromAgentId,
+                    fromName = fromName,
+                    message = message,
+                    dialogType = dialogType,
+                    timestamp = timestamp,
+                    isOutgoing = isOutgoing
+                )
+            }
+        } catch (e: Exception) {
+            logWarn(TAG, "Failed to decode binary bucket or dialog $dialogType, falling back to text event", e)
+            SLChatEvent.Text(
+                sessionId = sessionId,
+                fromAgentId = fromAgentId,
+                fromName = fromName,
+                message = message,
+                dialogType = dialogType,
+                timestamp = timestamp,
+                isOutgoing = isOutgoing
+            )
+        }
+    }
+    
     fun sendIM(sessionId: UUID, message: String) {
         val session = sessions[sessionId]
         if (session == null) {
-            Log.w(TAG, "sendIM: no session $sessionId — message dropped")
+            logWarn(TAG, "sendIM: no session $sessionId — message dropped")
             return
         }
 
-        val outgoing = IMMessage(
+        val outgoing = SLChatEvent.Text(
             id = UUID.randomUUID(),
             sessionId = sessionId,
             fromAgentId = agentId,
@@ -378,13 +495,13 @@ class IMManager(
                         sendSessionChat(session, message)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "sendIM failed for session $sessionId", e)
+                logError(TAG, "sendIM failed for session $sessionId", e)
                 false
             }
             if (!ok) {
                 addMessage(
                     sessionId,
-                    IMMessage(
+                    SLChatEvent.System(
                         id = UUID.randomUUID(),
                         sessionId = sessionId,
                         fromAgentId = UUID(0, 0),
@@ -399,10 +516,112 @@ class IMManager(
         }
     }
 
+    fun respondToFriendshipOffer(event: SLChatEvent.FriendshipOffer, accept: Boolean) {
+        if (event.actionState != CardActionState.PENDING) {
+            logDebug(TAG, "respondToFriendshipOffer already processed (state=${event.actionState})")
+            return
+        }
+        event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
+        val dialog = if (accept) IM_FRIENDSHIP_ACCEPTED else IM_FRIENDSHIP_DECLINED
+        val responseText = if (accept) "Accepted friendship offer" else "Declined friendship offer"
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = event.fromAgentId,
+            dialog = dialog,
+            id = event.sessionId,
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",
+            message = responseText
+        )
+        udpConnection.sendPacket(
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+            payload,
+            reliable = true
+        )
+        logDebug(TAG, "Friendship response (dialog=$dialog) sent to ${event.fromAgentId}")
+    }
+
+    fun respondToGroupInvitation(event: SLChatEvent.GroupInvitation, accept: Boolean) {
+        if (event.actionState != CardActionState.PENDING) {
+            logDebug(TAG, "respondToGroupInvitation already processed (state=${event.actionState})")
+            return
+        }
+        event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
+        val dialog = if (accept) IM_GROUP_INVITATION_ACCEPT else IM_GROUP_INVITATION_DECLINE
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = event.groupId,
+            dialog = dialog,
+            id = event.sessionId,
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",
+            message = "",
+            binaryBucket = byteArrayOf()
+        )
+        udpConnection.sendPacket(
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+            payload,
+            reliable = true
+        )
+        logDebug(TAG, "Group invite response (dialog=$dialog) sent to ${event.groupId}")
+    }
+
+    fun respondToTeleportLure(event: SLChatEvent.TeleportLure, accept: Boolean) {
+        if (event.actionState != CardActionState.PENDING) {
+            logDebug(TAG, "respondToTeleportLure already processed (state=${event.actionState})")
+            return
+        }
+        event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
+        val dialog = if (accept) IM_LURE_ACCEPTED else IM_LURE_DECLINED
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = event.fromAgentId,
+            dialog = dialog,
+            id = event.lureId,
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",
+            message = ""
+        )
+        udpConnection.sendPacket(
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+            payload,
+            reliable = true
+        )
+        logDebug(TAG, "Teleport lure response (dialog=$dialog) sent to ${event.fromAgentId}")
+    }
+
+    fun respondToInventoryOffer(event: SLChatEvent.InventoryOffer, accept: Boolean) {
+        if (event.actionState != CardActionState.PENDING) {
+            logDebug(TAG, "respondToInventoryOffer already processed (state=${event.actionState})")
+            return
+        }
+        event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
+        val dialog = if (accept) IM_INVENTORY_ACCEPTED else IM_INVENTORY_DECLINED
+        val payload = SLMessagePackers.packImprovedInstantMessage(
+            identity = outboundIdentity(),
+            fromGroup = false,
+            toAgentId = event.fromAgentId,
+            dialog = dialog,
+            id = event.sessionId,
+            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            fromAgentName = "You",
+            message = ""
+        )
+        udpConnection.sendPacket(
+            MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+            payload,
+            reliable = true
+        )
+        logDebug(TAG, "Inventory offer response (dialog=$dialog) sent to ${event.fromAgentId}")
+    }
+
     private fun sendP2PInstantMessage(session: IMSession, message: String): Boolean {
         val targetId = session.participants.firstOrNull()
         if (targetId == null) {
-            Log.w(TAG, "sendP2PInstantMessage: session ${session.sessionId} has no participants")
+            logWarn(TAG, "sendP2PInstantMessage: session ${session.sessionId} has no participants")
             return false
         }
         val payload = SLMessagePackers.packImprovedInstantMessage(
@@ -420,7 +639,7 @@ class IMManager(
             payload,
             reliable = true
         )
-        Log.d(TAG, "P2P IM sent to $targetId (session=${session.sessionId})")
+        logDebug(TAG, "P2P IM sent to $targetId (session=${session.sessionId})")
         return true
     }
 
@@ -431,7 +650,7 @@ class IMManager(
                 .computeIfAbsent(sessionId) { mutableListOf() }
                 .add(message)
             sendGroupSessionStart(sessionId)
-            Log.d(TAG, "Group chat queued for $sessionId (waiting for session-start reply)")
+            logDebug(TAG, "Group chat queued for $sessionId (waiting for session-start reply)")
             return true
         }
         return sendGroupChatDialog17(sessionId, message)
@@ -454,7 +673,7 @@ class IMManager(
             payload,
             reliable = true
         )
-        Log.d(TAG, "Group session-start (Dialog=15) sent for $groupId")
+        logDebug(TAG, "Group session-start (Dialog=15) sent for $groupId")
     }
 
     private fun sendGroupChatDialog17(sessionId: UUID, message: String): Boolean {
@@ -474,7 +693,7 @@ class IMManager(
             payload,
             reliable = true
         )
-        Log.d(TAG, "Group chat (Dialog=17) sent to session $sessionId")
+        logDebug(TAG, "Group chat (Dialog=17) sent to session $sessionId")
         return true
     }
 
@@ -585,17 +804,16 @@ class IMManager(
                 payload,
                 reliable = false
             )
-            Log.d(TAG, "Sent typing dialog=$dialog to session $sessionId")
+            logDebug(TAG, "Sent typing dialog=$dialog to session $sessionId")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to send typing packet (dialog=$dialog)", e)
+            logError(TAG, "Failed to send typing packet (dialog=$dialog)", e)
         }
     }
-
-    fun getSessionMessages(sessionId: UUID): List<IMMessage> {
+    fun getSessionMessages(sessionId: UUID): List<SLChatEvent> {
         return sessionMessages[sessionId]?.toList() ?: emptyList()
     }
 
-    fun getLastSessionMessage(sessionId: UUID): IMMessage? {
+    fun getLastSessionMessage(sessionId: UUID): SLChatEvent? {
         return lastMessageBySession[sessionId]
     }
 
@@ -603,8 +821,7 @@ class IMManager(
         _unreadCounts.value = _unreadCounts.value - sessionId
         pendingSyncSessions.update { it - sessionId }
     }
-
-    private fun addMessage(sessionId: UUID, message: IMMessage) {
+    private fun addMessage(sessionId: UUID, message: SLChatEvent) {
         val messages = sessionMessages.getOrPut(sessionId) { mutableListOf() }
         messages.add(message)
         lastMessageBySession[sessionId] = message
@@ -654,16 +871,7 @@ enum class SessionType {
     P2P, GROUP, CONFERENCE
 }
 
-data class IMMessage(
-    val id: UUID,
-    val sessionId: UUID,
-    val fromAgentId: UUID,
-    val fromName: String,
-    val message: String,
-    val dialogType: Int,
-    val timestamp: Long,
-    val isOutgoing: Boolean = false
-)
+typealias IMMessage = SLChatEvent
 
 sealed class IMSessionEvent {
     data class Invited(val session: IMSession) : IMSessionEvent()

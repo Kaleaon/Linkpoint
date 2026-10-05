@@ -45,6 +45,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
+import com.linkpoint.chat.CardActionState
+import com.linkpoint.chat.SLChatEvent
 import com.linkpoint.ui.common.UiLoadState
 import com.linkpoint.ui.common.UiTelemetryEvents
 import com.linkpoint.ui.common.logUiTelemetry
@@ -91,6 +103,7 @@ data class ChatMessage(
     val channel: ChatChannel,
     val status: MessageStatus = MessageStatus.SENT,
     val isMine: Boolean = false,
+    val chatEvent: SLChatEvent? = null,
 )
 
 /**
@@ -110,6 +123,8 @@ fun ChatScreen(
     onRetry: () -> Unit,
     onSendMessage: (String, ChatChannel) -> Unit,
     onNavigateBack: () -> Unit,
+    onAcceptEvent: (SLChatEvent) -> Unit = {},
+    onDeclineEvent: (SLChatEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var selectedChannel by remember { mutableIntStateOf(0) }
@@ -214,7 +229,11 @@ fun ChatScreen(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         items(filteredMessages, key = { it.id }) { message ->
-                            ChatBubble(message = message)
+                            ChatBubble(
+                                message = message,
+                                onAcceptEvent = onAcceptEvent,
+                                onDeclineEvent = onDeclineEvent,
+                            )
                         }
                     }
                 }
@@ -284,8 +303,44 @@ fun ChatScreen(
 @Composable
 fun ChatBubble(
     message: ChatMessage,
+    onAcceptEvent: (SLChatEvent) -> Unit = {},
+    onDeclineEvent: (SLChatEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val event = message.chatEvent
+    if (event is SLChatEvent.FriendshipOffer) {
+        FriendshipOfferCard(
+            event = event,
+            onAccept = { onAcceptEvent(event) },
+            onDecline = { onDeclineEvent(event) },
+            modifier = modifier,
+        )
+        return
+    } else if (event is SLChatEvent.GroupInvitation) {
+        GroupInvitationCard(
+            event = event,
+            onAccept = { onAcceptEvent(event) },
+            onDecline = { onDeclineEvent(event) },
+            modifier = modifier,
+        )
+        return
+    } else if (event is SLChatEvent.TeleportLure) {
+        TeleportLureCard(
+            event = event,
+            onAccept = { onAcceptEvent(event) },
+            onDecline = { onDeclineEvent(event) },
+            modifier = modifier,
+        )
+        return
+    } else if (event is SLChatEvent.InventoryOffer) {
+        InventoryOfferCard(
+            event = event,
+            onAccept = { onAcceptEvent(event) },
+            onDecline = { onDeclineEvent(event) },
+            modifier = modifier,
+        )
+        return
+    }
     val cs = MaterialTheme.colorScheme
     val tokens = Linkpoint2.tokens
     val mine = message.isMine
@@ -379,4 +434,242 @@ fun ChatMessageItem(
     modifier: Modifier = Modifier,
 ) {
     ChatBubble(message = message, modifier = modifier)
+}
+
+@Composable
+fun FriendshipOfferCard(
+    event: SLChatEvent.FriendshipOffer,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cs = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = cs.surfaceVariant),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.PersonAdd,
+                    contentDescription = null,
+                    tint = cs.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Friendship Request",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = cs.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = event.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = cs.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            ActionButtonsOrBadge(
+                actionState = event.actionState,
+                onAccept = onAccept,
+                onDecline = onDecline
+            )
+        }
+    }
+}
+
+@Composable
+fun GroupInvitationCard(
+    event: SLChatEvent.GroupInvitation,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cs = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = cs.surfaceVariant),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Group,
+                    contentDescription = null,
+                    tint = cs.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Group Invitation",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = cs.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = event.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = cs.onSurfaceVariant
+            )
+            if (event.joinFee > 0) {
+                Text(
+                    text = "Join Fee: ${event.joinFee} L$",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = cs.secondary,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            ActionButtonsOrBadge(
+                actionState = event.actionState,
+                onAccept = onAccept,
+                onDecline = onDecline
+            )
+        }
+    }
+}
+
+@Composable
+fun TeleportLureCard(
+    event: SLChatEvent.TeleportLure,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cs = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = cs.surfaceVariant),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Place,
+                    contentDescription = null,
+                    tint = cs.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Teleport Invitation",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = cs.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = event.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = cs.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            ActionButtonsOrBadge(
+                actionState = event.actionState,
+                acceptLabel = "Teleport",
+                onAccept = onAccept,
+                onDecline = onDecline
+            )
+        }
+    }
+}
+
+@Composable
+fun InventoryOfferCard(
+    event: SLChatEvent.InventoryOffer,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val cs = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = cs.surfaceVariant),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.CardGiftcard,
+                    contentDescription = null,
+                    tint = cs.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Inventory Offer",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = cs.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = event.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = cs.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            ActionButtonsOrBadge(
+                actionState = event.actionState,
+                onAccept = onAccept,
+                onDecline = onDecline
+            )
+        }
+    }
+}
+
+@Composable
+fun ActionButtonsOrBadge(
+    actionState: CardActionState,
+    acceptLabel: String = "Accept",
+    declineLabel: String = "Decline",
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
+    when (actionState) {
+        CardActionState.PENDING -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                OutlinedButton(onClick = onDecline, modifier = Modifier.padding(end = 8.dp)) {
+                    Text(declineLabel)
+                }
+                Button(onClick = onAccept) {
+                    Text(acceptLabel)
+                }
+            }
+        }
+        CardActionState.ACCEPTED -> {
+            Text(
+                text = "Accepted ✓",
+                style = MaterialTheme.typography.labelLarge,
+                color = cs.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        CardActionState.DECLINED -> {
+            Text(
+                text = "Declined ✗",
+                style = MaterialTheme.typography.labelLarge,
+                color = cs.outline,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        CardActionState.EXPIRED -> {
+            Text(
+                text = "Expired",
+                style = MaterialTheme.typography.labelLarge,
+                color = cs.outline
+            )
+        }
+    }
 }
