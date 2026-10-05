@@ -3903,6 +3903,12 @@ export interface GameControlInputPacket {
 }
 
 // Generated LLSD Capability Schemas
+export interface CapabilitiesRequestResponseCapabilities {
+  capabilities: string[];
+  seed_response?: string;
+  fetch_inventory?: string;
+}
+
 export interface EventQueueGetCapabilities {
   ack?: number;
   events: string[];
@@ -3917,10 +3923,4 @@ export interface AgentDomainCapabilitiesCapabilities {
   hover_height?: number;
   active_group_id?: string;
   maturity_rating?: string;
-}
-
-export interface CapabilitiesRequestResponseCapabilities {
-  capabilities: string[];
-  seed_response?: string;
-  fetch_inventory?: string;
 }

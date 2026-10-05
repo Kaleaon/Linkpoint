@@ -5,27 +5,27 @@
 
 package com.linkpoint.protocol.generated
 
+// LLSD Schema: CapabilitiesRequestResponse
+data class CapabilitiesRequestResponseCapabilities(
+    val capabilities: List<String>? = null,
+    val seed_response: String? = null,
+    val fetch_inventory: String? = null
+)
+
 // LLSD Schema: EventQueueGet
 data class EventQueueGetCapabilities(
     val ack: Int? = null,
-    val events: List<String> = null
+    val events: List<String>? = null
 )
 
 // LLSD Schema: AgentDomainCapabilities
 data class AgentDomainCapabilitiesCapabilities(
-    val agent_id: String = null,
-    val session_id: String = null,
+    val agent_id: String? = null,
+    val session_id: String? = null,
     val display_name: String? = null,
     val legacy_first_name: String? = null,
     val legacy_last_name: String? = null,
     val hover_height: Double? = null,
     val active_group_id: String? = null,
     val maturity_rating: String? = null
-)
-
-// LLSD Schema: CapabilitiesRequestResponse
-data class CapabilitiesRequestResponseCapabilities(
-    val capabilities: List<String> = null,
-    val seed_response: String? = null,
-    val fetch_inventory: String? = null
 )

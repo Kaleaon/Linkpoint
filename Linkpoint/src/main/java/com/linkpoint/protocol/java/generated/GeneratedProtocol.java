@@ -16,9 +16,9 @@ public class GeneratedProtocol {
 
     static {
         REGISTERED_MESSAGES.put("TestMessage", 1);
-        REGISTERED_MESSAGES.put("PacketAck", 4294967291);
-        REGISTERED_MESSAGES.put("OpenCircuit", 4294967292);
-        REGISTERED_MESSAGES.put("CloseCircuit", 4294967293);
+        REGISTERED_MESSAGES.put("PacketAck", (int) 4294967291L);
+        REGISTERED_MESSAGES.put("OpenCircuit", (int) 4294967292L);
+        REGISTERED_MESSAGES.put("CloseCircuit", (int) 4294967293L);
         REGISTERED_MESSAGES.put("StartPingCheck", 1);
         REGISTERED_MESSAGES.put("CompletePingCheck", 2);
         REGISTERED_MESSAGES.put("AddCircuitCode", 2);
