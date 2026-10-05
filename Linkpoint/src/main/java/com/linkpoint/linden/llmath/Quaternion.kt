@@ -2,6 +2,7 @@ package com.linkpoint.linden.llmath
 
 import kotlin.math.*
 
+@Deprecated("Deprecated in favor of unified native linkpoint-scene Rust core rendering library")
 class Quaternion(var x: Float, var y: Float, var z: Float, var w: Float) {
 
     constructor() : this(0f, 0f, 0f, 1f)

@@ -84,6 +84,8 @@ def main():
     parser.add_argument("--baseline-file", type=Path, default=Path("coverage-baseline.json"))
     parser.add_argument("--allow-negative-delta", action="store_true", help="Allow negative delta coverage for urgent fixes")
     parser.add_argument("--update-baseline", action="store_true", help="Update baseline file with current coverage")
+    parser.add_argument("--ignore-missing", action="store_true", help="Ignore missing reports for unprovided components")
+    parser.add_argument("--rust-only", action="store_true", help="Evaluate only Rust component coverage")
     args = parser.parse_args()
 
     # Load baseline config
@@ -148,6 +150,9 @@ def main():
         ("rust", "🦀 Rust", "Rust Workspace Tests (LLVM-cov)"),
     ]
 
+    if args.rust_only:
+        components = [c for c in components if c[0] == "rust"]
+
     table_rows = []
 
     for key, display_name, description in components:
@@ -157,10 +162,14 @@ def main():
         min_thresh = comp_base.get("min_threshold", 0.0)
 
         if comp_res is None:
-            status_str = "❌ FAIL (Missing Report)"
-            all_passed = False
-            table_rows.append(f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ❌ MISSING |")
-            gate_evaluations.append(f"- **{display_name}**: ❌ Missing report file")
+            if args.ignore_missing or args.rust_only:
+                table_rows.append(f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ⚪ IGNORED |")
+                gate_evaluations.append(f"- **{display_name}**: ⚪ Missing report file (ignored)")
+            else:
+                status_str = "❌ FAIL (Missing Report)"
+                all_passed = False
+                table_rows.append(f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ❌ MISSING |")
+                gate_evaluations.append(f"- **{display_name}**: ❌ Missing report file")
             continue
 
         curr_pct = comp_res["percentage"]

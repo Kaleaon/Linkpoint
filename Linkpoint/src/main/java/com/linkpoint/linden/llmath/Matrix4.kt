@@ -3,6 +3,7 @@ package com.linkpoint.linden.llmath
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+@Deprecated("Deprecated in favor of unified native linkpoint-scene Rust core rendering library")
 class Matrix4 private constructor(val values: FloatArray) {
 
     init {

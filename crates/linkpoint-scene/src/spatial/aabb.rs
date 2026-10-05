@@ -151,7 +151,7 @@ impl AABB {
             let lane1 = vgetq_lane_u32::<1>(combined);
             let lane2 = vgetq_lane_u32::<2>(combined);
 
-            (lane0 & lane1 & lane2) != 0
+            lane0 != 0 && lane1 != 0 && lane2 != 0
         }
     }
 
@@ -229,7 +229,7 @@ impl AABB {
                 let lane1 = vgetq_lane_u32::<1>(combined);
                 let lane2 = vgetq_lane_u32::<2>(combined);
 
-                results.push((lane0 & lane1 & lane2) != 0);
+                results.push(lane0 != 0 && lane1 != 0 && lane2 != 0);
             }
         }
 
