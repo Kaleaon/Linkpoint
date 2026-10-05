@@ -540,8 +540,8 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeGetImageSize(
         return nullptr;
     }
 
-    int width = image->x1 - image->x0;
-    int height = image->y1 - image->y0;
+    width = image->x1 - image->x0;
+    height = image->y1 - image->y0;
 
     opj_image_destroy(image);
     opj_stream_destroy(stream);
