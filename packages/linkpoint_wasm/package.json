@@ -1,0 +1,13 @@
+{
+  "name": "@linkpoint/wasm",
+  "version": "0.1.0",
+  "description": "WebAssembly Rust LLSD parser and protocol bindings for Linkpoint",
+  "main": "linkpoint_protocol.js",
+  "types": "linkpoint_protocol.d.ts",
+  "files": [
+    "linkpoint_protocol.js",
+    "linkpoint_protocol_bg.wasm",
+    "linkpoint_protocol_bg.wasm.d.ts",
+    "linkpoint_protocol.d.ts"
+  ]
+}
