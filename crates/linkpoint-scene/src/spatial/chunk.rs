@@ -188,3 +188,33 @@ impl ChunkGrid {
         total
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_chunk_grid_handoff_edge_cases() {
+        let grid = ChunkGrid::new([0.0, 0.0, 0.0], [256.0, 256.0, 256.0], [64.0, 64.0, 64.0]);
+
+        let entity = SpatialEntity::new(
+            "test_e",
+            AABB::new([1.0, 1.0, 1.0], [5.0, 5.0, 5.0]),
+            [2.0, 2.0, 2.0],
+        );
+
+        let same_chunk = ChunkId { x: 0, y: 0, z: 0 };
+        let same_res = grid.handoff_boundary_entities(entity.clone(), same_chunk);
+        assert_eq!(same_res, Ok(0.0));
+
+        let out_of_bounds = SpatialEntity::new(
+            "out_e",
+            AABB::new([500.0, 500.0, 500.0], [510.0, 510.0, 510.0]),
+            [505.0, 505.0, 505.0],
+        );
+        let err_res = grid.handoff_boundary_entities(out_of_bounds, same_chunk);
+        assert!(err_res.is_err());
+
+        let _mem = grid.total_memory_usage_bytes();
+    }
+}
