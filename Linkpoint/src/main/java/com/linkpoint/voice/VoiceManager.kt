@@ -2,6 +2,7 @@ package com.linkpoint.voice
 
 import android.content.Context
 import android.util.Log
+import com.linkpoint.protocol.GridKind
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,6 +46,9 @@ class VoiceManager(
      * Tests pass null and exercise the legacy flow directly.
      */
     private val simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager? = null,
+    initialGridKind: GridKind = GridKind.SECOND_LIFE,
+    initialVoiceConfig: VoiceConfig? = null,
+    adapterFactory: VoiceTransportAdapterFactory? = null
     private val parcelManager: com.linkpoint.world.ParcelManager? = null,
 ) {
     companion object {
@@ -66,6 +70,19 @@ class VoiceManager(
     private var peerConnectionFactory: PeerConnectionFactory? = null
     private var localAudioTrack: AudioTrack? = null
     private var audioSource: AudioSource? = null
+
+    // Grid and Adapter configuration
+    var currentGridKind: GridKind = initialGridKind
+        private set
+    var currentVoiceConfig: VoiceConfig? = initialVoiceConfig
+        private set
+
+    private val transportAdapterFactory: VoiceTransportAdapterFactory =
+        adapterFactory ?: VoiceTransportAdapterFactory(capabilityManager) { peerConnectionFactory }
+
+    var activeAdapter: VoiceTransportAdapter =
+        transportAdapterFactory.createAdapter(currentGridKind, currentVoiceConfig)
+        private set
 
     // Voice sessions
     private val activeSessions = ConcurrentHashMap<String, VoiceSession>()
@@ -252,12 +269,35 @@ class VoiceManager(
     }
 
     /**
+     * Updates the grid kind and voice configuration, replacing [activeAdapter] if needed.
+     */
+    fun updateGridKind(gridKind: GridKind, voiceConfig: VoiceConfig? = null) {
+        if (gridKind != currentGridKind || voiceConfig != currentVoiceConfig) {
+            activeAdapter.disconnect()
+            activeAdapter.dispose()
+            currentGridKind = gridKind
+            currentVoiceConfig = voiceConfig
+            activeAdapter = transportAdapterFactory.createAdapter(currentGridKind, currentVoiceConfig)
+            Log.i(TAG, "Switched VoiceTransportAdapter to $gridKind (config=$voiceConfig)")
+        }
+    }
+
+    /**
      * Join spatial voice on an OpenSim region or non-SL WebRTC grid.
      * Requests `ParcelVoiceInfoRequest` and `ProvisionVoiceAccountRequest` credentials,
      * converts OpenSim SIP credentials via [OpenSimVoiceSignalingAdapter],
      * and starts a [WebRtcVoiceSession] without calling legacy native Vivox C++ JNI stubs.
      */
     suspend fun joinOpenSimVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
+        if (currentGridKind == GridKind.OPENSIM) {
+            val success = activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
+            if (success) {
+                _isConnected.value = true
+                return@withContext true
+            }
+        }
+
+        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
             Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
@@ -310,20 +350,32 @@ class VoiceManager(
     }
 
     /**
-     * Top-level entry point for spatial voice. Picks the SL WebRTC flow
-     * for WebRTC-enabled regions (`voice_server_type == "webrtc"`) and
-     * routes OpenSim grids / non-SL WebRTC regions to [joinOpenSimVoice]
-     * via [OpenSimVoiceSignalingAdapter].
+     * Top-level entry point for spatial voice. Picks the WebRTC flow
+     * for WebRTC-enabled regions or OpenSim grids via [VoiceTransportAdapter], and falls back to legacy
+     * parcel voice for non-WebRTC regions.
      *
      * Bypasses legacy native Vivox C++ JNI stubs completely on 64-bit Android runtimes.
      */
     suspend fun joinSpatialVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
+        val effectiveConfig = (currentVoiceConfig ?: VoiceConfig()).copy(
+            parcelLocalId = parcelLocalId ?: currentVoiceConfig?.parcelLocalId
+        )
+        currentVoiceConfig = effectiveConfig
+
+        if (currentGridKind == GridKind.OPENSIM || isWebRtcVoiceRegion()) {
+            val success = activeAdapter.connectSpatialVoice(parcelLocalId, effectiveConfig)
+            if (success) {
+                _isConnected.value = true
+                return@withContext true
+            }
         val targetParcel = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
         if (isWebRtcVoiceRegion()) {
             joinSpatialVoiceWebRtc(targetParcel)
         } else {
             joinOpenSimVoice(parcelLocalId)
         }
+
+        joinParcelVoice()
     }
 
     /**
@@ -339,6 +391,8 @@ class VoiceManager(
     /**
      * Extract active grid/region host domain from capabilities or login URL.
      */
+    private fun defaultWebRtcIceServers(): List<PeerConnection.IceServer> =
+        activeAdapter.resolveIceServers(emptyList(), currentVoiceConfig)
     fun getGridHost(): String? {
         val capUrl = capabilityManager.getCapability(CapabilityManager.CAP_PROVISION_VOICE)
             ?: capabilityManager.getCapability("SeedCapability")
@@ -377,6 +431,7 @@ class VoiceManager(
     @Volatile private var currentWebRtcSession: WebRtcVoiceSession? = null
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
+        return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC)) {
             Log.w(TAG, "WebRTC voice unavailable: ProvisionVoiceAccountRequest capability missing on this region")
@@ -457,6 +512,7 @@ class VoiceManager(
      * Leave current voice channel
      */
     fun leaveVoice() {
+        activeAdapter.disconnect()
         currentParcelSession?.let { session ->
             session.disconnect()
             activeSessions.remove(session.channelUri)
@@ -823,6 +879,7 @@ class VoiceManager(
 
     fun shutdown() {
         scope.cancel()
+        activeAdapter.dispose()
 
         for (session in activeSessions.values) {
             session.disconnect()

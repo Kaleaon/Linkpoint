@@ -41,7 +41,8 @@ class JavaEmitter(BaseEmitter):
         out.append("    public static final Map<String, Integer> REGISTERED_MESSAGES = new HashMap<>();\n")
         out.append("    static {")
         for msg in ast.messages:
-            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {msg.message_number});')
+            num_val = f"(int) {msg.message_number}L" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
+            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {num_val});')
         out.append("    }\n")
 
         out.append("""    public static byte[] decompressZerocoded(byte[] src) {

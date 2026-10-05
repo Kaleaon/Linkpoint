@@ -72,16 +72,17 @@ class KotlinEmitter(BaseEmitter):
 
         # Message data classes
         for msg in ast.messages:
+            num_val = f"{msg.message_number}.toInt()" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
             out.append(f"// Message: {msg.name} ({msg.frequency} {msg.message_number})")
             out.append(f"data class {msg.name}Packet(")
             out.append(f'    val messageName: String = "{msg.name}",')
-            out.append(f"    val messageNumber: Int = {msg.message_number},")
+            out.append(f"    val messageNumber: Int = {num_val},")
             out.append(f'    val frequency: String = "{msg.frequency}",')
             out.append(f'    val isZerocoded: Boolean = {"true" if msg.encoding == "Zerocoded" else "false"}')
             out.append(") {\n")
             out.append("    fun serialize(): ByteArray {")
             out.append("        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)")
-            out.append(f"        buffer.putInt({msg.message_number})")
+            out.append(f"        buffer.putInt({num_val})")
             out.append("        return buffer.array().copyOf(buffer.position())")
             out.append("    }\n")
             out.append("}\n")
@@ -109,7 +110,8 @@ class KotlinEmitter(BaseEmitter):
                     kt_type = "List<String>"
 
                 opt = "?" if not prop.required else ""
-                fields_def.append(f"    val {p_name}: {kt_type}{opt} = null")
+                default_val = " = null" if opt else ""
+                fields_def.append(f"    val {p_name}: {kt_type}{opt}{default_val}")
             out.append(",\n".join(fields_def))
             out.append(")\n")
 
