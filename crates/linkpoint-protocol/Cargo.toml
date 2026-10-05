@@ -4,9 +4,21 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
 [dependencies]
 linkpoint-core = { path = "../linkpoint-core" }
-serde.workspace = true
-serde-llsd-benthic.workspace = true
+base64 = "0.21"
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+serde-llsd-benthic = { version = "0.3.3", default-features = false }
+serde_json = "1"
 thiserror.workspace = true
-url.workspace = true
+url = { version = "2", default-features = false }
+uuid = { version = "1", features = ["v4", "serde", "js"] }
+wasm-bindgen = { version = "0.2", optional = true }
+
+[features]
+default = []
+wasm = ["dep:wasm-bindgen"]
+

@@ -66,7 +66,7 @@ class VoiceControlView @JvmOverloads constructor(
         } else {
             // Voice connection is async, so we launch a coroutine
             viewScope.launch {
-                voiceManager.joinParcelVoice()
+                voiceManager.connect()
             }
             onVoiceToggleListener?.invoke(true)
         }
