@@ -10,7 +10,7 @@ let output = '';
 try {
   output = execSync('npm audit --json', { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
 } catch (error) {
-  output = error.stdout || '';
+  output = String(error.stdout || '');
 }
 
 if (!output) {
@@ -32,22 +32,45 @@ if (auditResult.error) {
 }
 
 const vulnerabilities = auditResult.vulnerabilities || {};
-const unhandledAdvisories = [];
 
-for (const [pkgName, vuln] of Object.entries(vulnerabilities)) {
+function getAdvisoriesForPackage(pkgName, vulnerabilitiesMap, visited = new Set()) {
+  if (visited.has(pkgName)) return [];
+  visited.add(pkgName);
+
+  const vuln = vulnerabilitiesMap[pkgName];
+  if (!vuln) return [];
+
+  const advisories = [];
   const viaList = Array.isArray(vuln.via) ? vuln.via : [];
+
   for (const item of viaList) {
     if (item && typeof item === 'object') {
-      const url = item.url || '';
-      const match = url.match(/GHSA-[a-zA-Z0-9-]+/i);
-      const ghsaId = match ? match[0].toUpperCase() : (url ? url.split('/').pop().toUpperCase() : 'UNKNOWN');
-      const rawSeverity = item.severity || vuln.severity || '';
-      const severity = rawSeverity.toLowerCase();
-      if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
+      advisories.push({ ...item, pkgName, vulnSeverity: vuln.severity });
+    } else if (typeof item === 'string') {
+      advisories.push(...getAdvisoriesForPackage(item, vulnerabilitiesMap, visited));
+    }
+  }
+  return advisories;
+}
+
+const unhandledAdvisories = [];
+const seenKeys = new Set();
+
+for (const pkgName of Object.keys(vulnerabilities)) {
+  const advisories = getAdvisoriesForPackage(pkgName, vulnerabilities);
+  for (const item of advisories) {
+    const url = item.url || '';
+    const match = url.match(/GHSA-[a-zA-Z0-9-]+/i);
+    const ghsaId = match ? match[0].toUpperCase() : (url ? url.split('/').pop().toUpperCase() : 'UNKNOWN');
+    const severity = String(item.severity || item.vulnSeverity || '').toLowerCase();
+    if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
+      const key = `${pkgName}:${ghsaId}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
         unhandledAdvisories.push({
           package: pkgName,
           ghsaId,
-          title: item.title || vuln.name || pkgName,
+          title: item.title || item.name || pkgName,
           severity,
           url,
         });
