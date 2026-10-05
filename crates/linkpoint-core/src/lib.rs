@@ -617,4 +617,68 @@ mod tests {
         };
         assert!(!message.contains("secret upstream detail"));
     }
+
+    #[test]
+    fn object_touch_and_lifecycle_commands() {
+        let mut session = Session::new(FakeTransport::default());
+        session
+            .execute(ViewerCommand::SessionLogin(request()))
+            .unwrap();
+
+        // Object touch
+        session
+            .execute(ViewerCommand::ObjectTouch {
+                object_id: "obj_123".into(),
+                face: Some(1),
+            })
+            .unwrap();
+
+        // Lifecycle suspend & resume
+        session.execute(ViewerCommand::LifecycleSuspend).unwrap();
+        assert_eq!(session.state(), SessionState::Suspended);
+
+        session.execute(ViewerCommand::LifecycleResume).unwrap();
+        assert_eq!(session.state(), SessionState::Connected);
+
+        // Validation errors
+        assert!(
+            session
+                .execute(ViewerCommand::ChatSend { body: "   ".into() })
+                .is_err()
+        );
+        assert!(
+            session
+                .execute(ViewerCommand::ObjectTouch {
+                    object_id: "".into(),
+                    face: None,
+                })
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn core_error_codes_and_public_messages() {
+        let err_dis = CoreError::Disconnected;
+        assert_eq!(err_dis.code(), "disconnected");
+        assert_eq!(
+            err_dis.public_message(),
+            "the command is unavailable while disconnected"
+        );
+
+        let err_req = CoreError::InvalidRequest("bad input".into());
+        assert_eq!(err_req.code(), "invalid-request");
+
+        let err_unavail = CoreError::Unavailable("down".into());
+        assert_eq!(err_unavail.code(), "unavailable");
+
+        let err_auth = CoreError::Authentication;
+        assert_eq!(err_auth.code(), "authentication-failed");
+
+        let err_trans = CoreError::Transport("secret tcp connection reset".into());
+        assert_eq!(err_trans.code(), "transport-failed");
+        assert_eq!(
+            err_trans.public_message(),
+            "The viewer could not reach the grid."
+        );
+    }
 }
