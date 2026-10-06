@@ -4,6 +4,10 @@ import android.opengl.GLES32
 import android.opengl.Matrix
 import com.linkpoint.protocol.messages.PrimShapeParams
 import com.linkpoint.protocol.textures.TextureEntryParser
+import com.linkpoint.render.geometry.PrimMeshData
+import com.linkpoint.render.geometry.PrimMeshGenerator
+import com.linkpoint.render.geometry.PrimShape
+import com.linkpoint.render.geometry.PrimShapeKey
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
 import com.linkpoint.render.materials.GlesMaterialTranslator
@@ -12,10 +16,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Manages all SL primitives in the scene and dispatches draw calls using index-based primitive draw buckets.
- *
- * Internal primitive data is stored in flat, continuous primitive arrays indexed by integer handles (slots).
- * Render passes operate directly on primitive integer arrays without boxed collection allocations or Kotlin lambdas.
+ * Manages all SL primitives in the scene and dispatches draw calls.
  */
 class DrawablePrimStore {
 
@@ -50,6 +51,7 @@ class DrawablePrimStore {
     data class PrimInstance(
         val id: Long,
         val modelMatrix: FloatArray = FloatArray(16).also { Matrix.setIdentityM(it, 0) },
+        var shapeKey: PrimShapeKey = PrimShapeKey.defaultFor(PrimShape.BOX),
         var shape: ShapeKind = ShapeKind.BOX,
         var hollow: Boolean = false,
         var scaleX: Float = 1f, var scaleY: Float = 1f, var scaleZ: Float = 1f,
@@ -69,6 +71,74 @@ class DrawablePrimStore {
         private const val MAX_FACES_PER_PRIM = 16
     }
 
+    /** Key for grouping identical face material properties for instanced batching. */
+    data class MaterialBatchKey(
+        val textureHandle: Int,
+        val normalHandle: Int,
+        val metallicRoughnessHandle: Int,
+        val emissiveHandle: Int,
+        val occlusionHandle: Int,
+        val colorR: Float,
+        val colorG: Float,
+        val colorB: Float,
+        val colorA: Float,
+        val scaleS: Float,
+        val scaleT: Float,
+        val offsetS: Float,
+        val offsetT: Float,
+        val rotation: Float,
+        val metallicFactor: Float,
+        val roughnessFactor: Float,
+        val glow: Float
+    )
+
+    data class InstancedBatchKey(
+        val shape: ShapeKind,
+        val material: MaterialBatchKey
+    )
+
+    /**
+     * Reusable pre-allocated dynamic VBO pool for streaming instance transform matrices
+     * with zero per-frame runtime allocations.
+     */
+    class InstanceVboPool(private var resourceManager: com.linkpoint.render.lumiya.glres.GLResourceManager? = null) {
+        private var vboHandle: Int = 0
+        private var capacityInstances: Int = 1024
+        var floatBuffer: java.nio.FloatBuffer = java.nio.ByteBuffer.allocateDirect(capacityInstances * 16 * 4)
+            .order(java.nio.ByteOrder.nativeOrder())
+            .asFloatBuffer()
+            private set
+
+        fun setResourceManager(rm: com.linkpoint.render.lumiya.glres.GLResourceManager) {
+            this.resourceManager = rm
+        }
+
+        fun getVboHandle(): Int {
+            val rm = resourceManager
+            if (vboHandle == 0 && rm != null) {
+                vboHandle = rm.createBuffer()
+            }
+            return vboHandle
+        }
+
+        fun ensureCapacity(requiredInstances: Int) {
+            if (requiredInstances > capacityInstances) {
+                capacityInstances = (requiredInstances * 1.5).toInt().coerceAtLeast(1024)
+                floatBuffer = java.nio.ByteBuffer.allocateDirect(capacityInstances * 16 * 4)
+                    .order(java.nio.ByteOrder.nativeOrder())
+                    .asFloatBuffer()
+            }
+        }
+
+        fun destroy() {
+            if (vboHandle != 0) {
+                resourceManager?.deleteBuffer(vboHandle)
+                vboHandle = 0
+            }
+        }
+    }
+
+    private val instanceVboPool = InstanceVboPool()
     // Thread-safe map of primId -> integer slot handle
     @JvmField
     internal val prims = ConcurrentHashMap<Long, Int>()
@@ -283,6 +353,9 @@ class DrawablePrimStore {
         Matrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
     }
 
+    /**
+     * Insert / update a prim with the full ObjectUpdate metadata.
+     */
     fun upsertPrim(
         id: Long,
         posX: Float, posY: Float, posZ: Float,
@@ -457,9 +530,33 @@ class DrawablePrimStore {
         clear()
         shapeVAOs?.values?.forEach { bufferManager?.destroyVAO(it) }
         shapeVAOs = null
+        instanceVboPool.destroy()
     }
 
     // ── Draw Passes ──────────────────────────────────────────────────────
+
+    private fun getMaterialBatchKey(slot: Int, faceIndex: Int = 0): MaterialBatchKey {
+        val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
+        return MaterialBatchKey(
+            faceTextureHandle[fIdx],
+            faceNormalHandle[fIdx],
+            faceMetallicRoughnessHandle[fIdx],
+            faceEmissiveHandle[fIdx],
+            faceOcclusionHandle[fIdx],
+            faceColorR[fIdx],
+            faceColorG[fIdx],
+            faceColorB[fIdx],
+            faceColorA[fIdx],
+            faceScaleS[fIdx],
+            faceScaleT[fIdx],
+            faceOffsetS[fIdx],
+            faceOffsetT[fIdx],
+            faceRotation[fIdx],
+            faceMetallicFactor[fIdx],
+            faceRoughnessFactor[fIdx],
+            faceGlow[fIdx]
+        )
+    }
 
     fun drawOpaque(
         ctx: LumiyaRenderContext,
@@ -467,6 +564,9 @@ class DrawablePrimStore {
     ) {
         ensureShapes(ctx)
         val program = ctx.primProgram ?: return
+        val bm = bufferManager ?: GLBufferManager(ctx.resourceManager).also { bufferManager = it }
+        instanceVboPool.setResourceManager(ctx.resourceManager)
+
         program.use()
         program.setLighting(
             ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
@@ -491,24 +591,78 @@ class DrawablePrimStore {
         for (shape in 0 until 6) {
             val count = opaqueCounts[shape]
             if (count == 0) continue
-            val vao = shapeVAOs?.get(ShapeKind.values()[shape]) ?: continue
+            val shapeKind = ShapeKind.values()[shape]
+            val vao = shapeVAOs?.get(shapeKind) ?: continue
             GLES32.glBindVertexArray(vao.vao)
             val bucket = opaqueBuckets[shape]
-            for (i in 0 until count) {
-                val slot = bucket[i]
-                val id = slotIds[slot]
-                occlusion?.beginQuery(id)
-                drawPrimFaces(program, slot, vao.indexCount)
-                occlusion?.endQuery()
+            val grouped = (0 until count).groupBy { i ->
+                val s = bucket[i]
+                getMaterialBatchKey(s, 0)
+            }
+
+            for ((_, indices) in grouped) {
+                if (indices.size == 1) {
+                    program.setUseInstancing(false)
+                    val s = bucket[indices[0]]
+                    val id = slotIds[s]
+                    if (occlusion != null) occlusion.beginQuery(id)
+                    drawPrimFaces(program, s, vao.indexCount)
+                    if (occlusion != null) occlusion.endQuery()
+                } else {
+                    program.setUseInstancing(true)
+                    val firstSlot = bucket[indices[0]]
+                    val firstFaceIdx = firstSlot * MAX_FACES_PER_PRIM
+
+                    val desc = faceDescriptors[firstFaceIdx] ?: buildFaceDescriptor(firstSlot, 0)
+                    buildTexMatrix(firstSlot, 0, scratchTexMatrix)
+                    program.setTexMatrix(scratchTexMatrix)
+                    GlesMaterialTranslator.apply(program, desc, faceTextureBindings[firstFaceIdx])
+
+                    val groupSize = indices.size
+                    instanceVboPool.ensureCapacity(groupSize)
+                    val floatBuffer = instanceVboPool.floatBuffer
+                    floatBuffer.clear()
+                    for (idx in indices) {
+                        val s = bucket[idx]
+                        val id = slotIds[s]
+                        if (occlusion != null) occlusion.beginQuery(id)
+                        floatBuffer.put(slotModelMatrices, s * 16, 16)
+                        if (occlusion != null) occlusion.endQuery()
+                    }
+                    floatBuffer.flip()
+
+                    val instanceVbo = instanceVboPool.getVboHandle()
+                    GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, instanceVbo)
+                    GLES32.glBufferData(
+                        GLES32.GL_ARRAY_BUFFER,
+                        groupSize * 16 * 4,
+                        floatBuffer,
+                        GLES32.GL_DYNAMIC_DRAW
+                    )
+
+                    bm.setupInstanceMatrixAttributes(instanceVbo, baseLocation = 3, divisor = 1)
+
+                    GLES32.glDrawElementsInstanced(
+                        GLES32.GL_TRIANGLES,
+                        vao.indexCount,
+                        GLES32.GL_UNSIGNED_SHORT,
+                        0,
+                        groupSize
+                    )
+
+                    bm.setupInstanceMatrixAttributes(instanceVbo, baseLocation = 3, divisor = 0)
+                }
             }
         }
         GLES32.glBindVertexArray(0)
+        program.setUseInstancing(false)
     }
 
     fun drawTransparent(ctx: LumiyaRenderContext) {
         ensureShapes(ctx)
         val program = ctx.primProgram ?: return
         program.use()
+        program.setUseInstancing(false)
         program.setLighting(
             ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
             ctx.sunColorR, ctx.sunColorG, ctx.sunColorB,
@@ -528,24 +682,28 @@ class DrawablePrimStore {
             transparentCount++
         }
 
-        if (transparentCount > 0) {
-            quickSortTransparent(0, transparentCount - 1)
+        if (transparentCount == 0) return
 
-            var lastShape: Int = -1
-            var lastVao: GLBufferManager.MeshVAO? = null
-            for (i in 0 until transparentCount) {
-                val slot = transparentSlots[i]
-                val shape = slotShape[slot]
-                if (shape != lastShape) {
-                    lastShape = shape
-                    lastVao = shapeVAOs?.get(ShapeKind.values()[shape])
-                    lastVao?.let { GLES32.glBindVertexArray(it.vao) }
+        quickSortTransparent(0, transparentCount - 1)
+
+        var lastShapeOrdinal = -1
+        for (i in 0 until transparentCount) {
+            val slot = transparentSlots[i]
+            val shapeOrdinal = slotShape[slot]
+            if (shapeOrdinal != lastShapeOrdinal) {
+                val shapeKind = ShapeKind.values()[shapeOrdinal]
+                val vao = shapeVAOs?.get(shapeKind)
+                if (vao != null) {
+                    GLES32.glBindVertexArray(vao.vao)
                 }
-                val v = lastVao ?: continue
-                drawPrimFaces(program, slot, v.indexCount)
+                lastShapeOrdinal = shapeOrdinal
             }
-            GLES32.glBindVertexArray(0)
+            val shapeKind = ShapeKind.values()[shapeOrdinal]
+            val vao = shapeVAOs?.get(shapeKind) ?: continue
+            drawPrimFaces(program, slot, vao.indexCount)
         }
+        GLES32.glBindVertexArray(0)
+        program.setUseInstancing(false)
     }
 
     fun drawEmissive(ctx: LumiyaRenderContext) {
@@ -569,6 +727,7 @@ class DrawablePrimStore {
         if (totalEmissive == 0) return
 
         program.use()
+        program.setUseInstancing(false)
         program.setLighting(0f, 0f, 1f, 0f, 0f, 0f, 1f, 1f, 1f)
 
         GLES32.glEnable(GLES32.GL_BLEND)
@@ -578,7 +737,8 @@ class DrawablePrimStore {
         for (shape in 0 until 6) {
             val count = emissiveCounts[shape]
             if (count == 0) continue
-            val vao = shapeVAOs?.get(ShapeKind.values()[shape]) ?: continue
+            val shapeKind = ShapeKind.values()[shape]
+            val vao = shapeVAOs?.get(shapeKind) ?: continue
             GLES32.glBindVertexArray(vao.vao)
             val bucket = emissiveBuckets[shape]
             for (i in 0 until count) {
@@ -593,15 +753,37 @@ class DrawablePrimStore {
             GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
         )
         GLES32.glDepthMask(true)
+        program.setUseInstancing(false)
     }
 
     // ── Internal Helpers ─────────────────────────────────────────────────
+
+    private fun ensureShapes(ctx: LumiyaRenderContext) {
+        if (shapeVAOs != null) return
+        val bm = bufferManager ?: GLBufferManager(ctx.resourceManager).also { bufferManager = it }
+        val map = mutableMapOf<ShapeKind, GLBufferManager.MeshVAO>()
+        for (shape in ShapeKind.values()) {
+            val key = when (shape) {
+                ShapeKind.BOX -> PrimShapeKey.defaultFor(PrimShape.BOX)
+                ShapeKind.SPHERE -> PrimShapeKey.defaultFor(PrimShape.SPHERE)
+                ShapeKind.CYLINDER -> PrimShapeKey.defaultFor(PrimShape.CYLINDER)
+                ShapeKind.TORUS -> PrimShapeKey.defaultFor(PrimShape.TORUS)
+                ShapeKind.PRISM -> PrimShapeKey.defaultFor(PrimShape.PRISM)
+                ShapeKind.RING -> PrimShapeKey.defaultFor(PrimShape.RING)
+            }
+            val meshData = PrimMeshGenerator.generateMesh(key)
+            val interleaved = meshData.toInterleavedBuffer()
+            map[shape] = bm.buildVAO(interleaved, meshData.indices, listOf(0 to 3, 1 to 3, 2 to 2))
+        }
+        shapeVAOs = map
+    }
 
     private fun drawPrimFaces(
         program: com.linkpoint.render.lumiya.shaders.PrimShaderProgram,
         slot: Int,
         totalIndexCount: Int
     ) {
+        program.setUseInstancing(false)
         program.setModelMatrix(slotModelMatrices, slot * 16)
         val faceIdx = slot * MAX_FACES_PER_PRIM
         buildTexMatrix(slot, 0, scratchTexMatrix)
@@ -619,19 +801,10 @@ class DrawablePrimStore {
         slot: Int,
         totalIndexCount: Int
     ) {
-        val count = slotFaceCount[slot]
-        val base = slot * MAX_FACES_PER_PRIM
-        var glowFace = -1
-        for (i in 0 until count) {
-            if (faceGlow[base + i] > GLOW_THRESHOLD) {
-                glowFace = i
-                break
-            }
-        }
-        if (glowFace < 0) return
-        val fIdx = base + glowFace
+        program.setUseInstancing(false)
         program.setModelMatrix(slotModelMatrices, slot * 16)
-        buildTexMatrix(slot, glowFace, scratchTexMatrix)
+        val fIdx = slot * MAX_FACES_PER_PRIM
+        buildTexMatrix(slot, 0, scratchTexMatrix)
         program.setTexMatrix(scratchTexMatrix)
 
         val g = faceGlow[fIdx]
@@ -653,31 +826,6 @@ class DrawablePrimStore {
         GLES32.glDrawElements(GLES32.GL_TRIANGLES, totalIndexCount, GLES32.GL_UNSIGNED_SHORT, 0)
     }
 
-    private fun quickSortTransparent(low: Int, high: Int) {
-        if (low >= high) return
-        val pivot = transparentDepths[(low + high) / 2]
-        var i = low
-        var j = high
-        while (i <= j) {
-            while (transparentDepths[i] > pivot) i++
-            while (transparentDepths[j] < pivot) j--
-            if (i <= j) {
-                val tmpDepth = transparentDepths[i]
-                transparentDepths[i] = transparentDepths[j]
-                transparentDepths[j] = tmpDepth
-
-                val tmpSlot = transparentSlots[i]
-                transparentSlots[i] = transparentSlots[j]
-                transparentSlots[j] = tmpSlot
-
-                i++
-                j--
-            }
-        }
-        if (low < j) quickSortTransparent(low, j)
-        if (i < high) quickSortTransparent(i, high)
-    }
-
     private fun shapeFromParams(p: PrimShapeParams): ShapeKind {
         val isCircularPath = (p.pathCurve and 0x30) != 0
         val profile = p.profileType
@@ -696,56 +844,60 @@ class DrawablePrimStore {
     }
 
     private fun applyTextureEntry(slot: Int, shape: ShapeKind, hollow: Boolean, textureEntry: ByteArray?) {
-        val faceCount = faceCountFor(shape, hollow).coerceAtMost(MAX_FACES_PER_PRIM)
+        val faceCount = faceCountFor(shape, hollow)
         slotFaceCount[slot] = faceCount
 
-        if (textureEntry != null && textureEntry.isNotEmpty()) {
-            val parsed = try {
-                TextureEntryParser.parseFull(textureEntry, faceCount)
-            } catch (t: Throwable) {
-                null
-            }
-            if (parsed != null) {
-                val base = slot * MAX_FACES_PER_PRIM
-                var hasAlpha = false
-                for (i in 0 until faceCount) {
-                    val src = parsed.getOrNull(i) ?: continue
-                    val fIdx = base + i
-                    val msb = src.textureId.mostSignificantBits
-                    val lsb = src.textureId.leastSignificantBits
-                    if (faceTextureIdMsb[fIdx] != msb || faceTextureIdLsb[fIdx] != lsb) {
-                        faceTextureIdMsb[fIdx] = msb
-                        faceTextureIdLsb[fIdx] = lsb
-                        faceTextureHandle[fIdx] = 0
-                    }
-                    faceColorR[fIdx] = src.colorR
-                    faceColorG[fIdx] = src.colorG
-                    faceColorB[fIdx] = src.colorB
-                    faceColorA[fIdx] = src.colorA
-                    faceScaleS[fIdx] = src.scaleS
-                    faceScaleT[fIdx] = src.scaleT
-                    faceOffsetS[fIdx] = src.offsetS
-                    faceOffsetT[fIdx] = src.offsetT
-                    faceRotation[fIdx] = src.rotation
-                    faceGlow[fIdx] = src.glow
+        if (textureEntry == null || textureEntry.isEmpty()) return
+        val parsed = try {
+            TextureEntryParser.parseFull(textureEntry, faceCount)
+        } catch (t: Throwable) {
+            null
+        } ?: return
 
-                    if (src.colorA < 0.999f) hasAlpha = true
-                    updateFaceMaterial(slot, i)
-                }
-                slotIsTransparent[slot] = hasAlpha
-                return
-            }
-        }
-
+        var transparent = false
         val base = slot * MAX_FACES_PER_PRIM
         for (i in 0 until faceCount) {
+            val src = parsed.getOrNull(i) ?: continue
+            val fIdx = base + i
+            val oldMsb = faceTextureIdMsb[fIdx]
+            val oldLsb = faceTextureIdLsb[fIdx]
+            val newMsb = src.textureId.mostSignificantBits
+            val newLsb = src.textureId.leastSignificantBits
+            if (oldMsb != newMsb || oldLsb != newLsb) {
+                faceTextureIdMsb[fIdx] = newMsb
+                faceTextureIdLsb[fIdx] = newLsb
+                faceTextureHandle[fIdx] = 0
+            }
+            faceColorR[fIdx] = src.colorR
+            faceColorG[fIdx] = src.colorG
+            faceColorB[fIdx] = src.colorB
+            faceColorA[fIdx] = src.colorA
+            faceScaleS[fIdx] = src.scaleS
+            faceScaleT[fIdx] = src.scaleT
+            faceOffsetS[fIdx] = src.offsetS
+            faceOffsetT[fIdx] = src.offsetT
+            faceRotation[fIdx] = src.rotation
+            faceGlow[fIdx] = src.glow
+
+            if (src.colorA < 0.999f) transparent = true
             updateFaceMaterial(slot, i)
         }
+        slotIsTransparent[slot] = transparent
+    }
+
+    private fun hasEmissive(slot: Int): Boolean {
+        val count = slotFaceCount[slot]
+        val base = slot * MAX_FACES_PER_PRIM
+        for (i in 0 until count) {
+            if (faceGlow[base + i] > GLOW_THRESHOLD) return true
+        }
+        return false
     }
 
     private fun updateFaceMaterial(slot: Int, faceIndex: Int) {
         val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
-        faceDescriptors[fIdx] = buildFaceDescriptor(slot, faceIndex)
+        val desc = buildFaceDescriptor(slot, faceIndex)
+        faceDescriptors[fIdx] = desc
         faceTextureBindings[fIdx] = GlesMaterialTranslator.TextureBindings(
             baseColorHandle = faceTextureHandle[fIdx],
             normalHandle = faceNormalHandle[fIdx],
@@ -757,9 +909,12 @@ class DrawablePrimStore {
 
     private fun buildFaceDescriptor(slot: Int, faceIndex: Int): MaterialDescriptor {
         val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
-        val handle = faceTextureHandle[fIdx]
-        val texId = UUID(faceTextureIdMsb[fIdx], faceTextureIdLsb[fIdx])
+        val texHandle = faceTextureHandle[fIdx]
+        val msb = faceTextureIdMsb[fIdx]
+        val lsb = faceTextureIdLsb[fIdx]
+        val texUuid = if (msb != 0L || lsb != 0L) UUID(msb, lsb) else NULL_UUID
         val glow = faceGlow[fIdx]
+
         return MaterialDescriptor(
             baseColor = MaterialDescriptor.Float4(
                 faceColorR[fIdx],
@@ -767,10 +922,10 @@ class DrawablePrimStore {
                 faceColorB[fIdx],
                 faceColorA[fIdx]
             ),
-            baseColorTexture = if (handle != 0) {
+            baseColorTexture = if (texHandle != 0 || texUuid != NULL_UUID) {
                 MaterialDescriptor.TextureRef(
-                    texId,
-                    texId,
+                    texUuid,
+                    texUuid,
                     isDownloadable = true
                 )
             } else null,
@@ -785,15 +940,6 @@ class DrawablePrimStore {
                 faceRotation[fIdx]
             )
         )
-    }
-
-    private fun hasEmissive(slot: Int): Boolean {
-        val count = slotFaceCount[slot]
-        val base = slot * MAX_FACES_PER_PRIM
-        for (i in 0 until count) {
-            if (faceGlow[base + i] > GLOW_THRESHOLD) return true
-        }
-        return false
     }
 
     private fun faceCountFor(shape: ShapeKind, hollow: Boolean): Int {
@@ -813,9 +959,9 @@ class DrawablePrimStore {
         val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
         val offS = faceOffsetS[fIdx]
         val offT = faceOffsetT[fIdx]
-        val rot = faceRotation[fIdx]
         val scS = faceScaleS[fIdx]
         val scT = faceScaleT[fIdx]
+        val rot = faceRotation[fIdx]
 
         Matrix.setIdentityM(outMatrix, 0)
         Matrix.translateM(outMatrix, 0, 0.5f + offS, 0.5f + offT, 0f)
@@ -824,20 +970,6 @@ class DrawablePrimStore {
         }
         Matrix.scaleM(outMatrix, 0, scS, scT, 1f)
         Matrix.translateM(outMatrix, 0, -0.5f, -0.5f, 0f)
-    }
-
-    private fun ensureShapes(ctx: LumiyaRenderContext) {
-        if (shapeVAOs != null) return
-        val bm = GLBufferManager(ctx.resourceManager)
-        bufferManager = bm
-        shapeVAOs = mapOf(
-            ShapeKind.BOX to buildBox(bm),
-            ShapeKind.SPHERE to buildSphere(bm),
-            ShapeKind.CYLINDER to buildCylinder(bm),
-            ShapeKind.TORUS to buildTorus(bm),
-            ShapeKind.PRISM to buildPrism(bm),
-            ShapeKind.RING to buildRing(bm)
-        )
     }
 
     private fun distanceToCamera(ctx: LumiyaRenderContext, slot: Int): Float {
@@ -862,207 +994,28 @@ class DrawablePrimStore {
         )
     }
 
-    // ── Shared Shape Geometry Builders ───────────────────────────────────
+    private fun quickSortTransparent(low: Int, high: Int) {
+        if (low >= high) return
+        val pivot = transparentDepths[(low + high) ushr 1]
+        var i = low
+        var j = high
+        while (i <= j) {
+            while (transparentDepths[i] > pivot) i++
+            while (transparentDepths[j] < pivot) j--
+            if (i <= j) {
+                val tmpSlot = transparentSlots[i]
+                transparentSlots[i] = transparentSlots[j]
+                transparentSlots[j] = tmpSlot
 
-    private fun buildBox(bm: GLBufferManager): GLBufferManager.MeshVAO {
-        val h = 0.5f
-        val v = floatArrayOf(
-            -h,-h, h,  0f,0f,1f,  0f,0f,   h,-h, h,  0f,0f,1f,  1f,0f,
-             h, h, h,  0f,0f,1f,  1f,1f,  -h, h, h,  0f,0f,1f,  0f,1f,
-             h,-h,-h,  0f,0f,-1f, 0f,0f,  -h,-h,-h,  0f,0f,-1f, 1f,0f,
-            -h, h,-h,  0f,0f,-1f, 1f,1f,   h, h,-h,  0f,0f,-1f, 0f,1f,
-            -h, h, h,  0f,1f,0f,  0f,0f,   h, h, h,  0f,1f,0f,  1f,0f,
-             h, h,-h,  0f,1f,0f,  1f,1f,  -h, h,-h,  0f,1f,0f,  0f,1f,
-            -h,-h,-h,  0f,-1f,0f, 0f,0f,   h,-h,-h,  0f,-1f,0f, 1f,0f,
-             h,-h, h,  0f,-1f,0f, 1f,1f,  -h,-h, h,  0f,-1f,0f, 0f,1f,
-             h,-h, h,  1f,0f,0f,  0f,0f,   h,-h,-h,  1f,0f,0f,  1f,0f,
-             h, h,-h,  1f,0f,0f,  1f,1f,   h, h, h,  1f,0f,0f,  0f,1f,
-            -h,-h,-h, -1f,0f,0f,  0f,0f,  -h,-h, h, -1f,0f,0f,  1f,0f,
-            -h, h, h, -1f,0f,0f,  1f,1f,  -h, h,-h, -1f,0f,0f,  0f,1f
-        )
-        val idx = shortArrayOf(
-            0,1,2, 0,2,3,   4,5,6, 4,6,7,   8,9,10, 8,10,11,
-            12,13,14, 12,14,15, 16,17,18, 16,18,19, 20,21,22, 20,22,23
-        )
-        return bm.buildVAO(v, idx, listOf(0 to 3, 1 to 3, 2 to 2))
-    }
+                val tmpDepth = transparentDepths[i]
+                transparentDepths[i] = transparentDepths[j]
+                transparentDepths[j] = tmpDepth
 
-    private fun buildSphere(bm: GLBufferManager, segments: Int = 24, rings: Int = 16): GLBufferManager.MeshVAO {
-        val verts = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
-        for (r in 0..rings) {
-            val phi = Math.PI * r / rings
-            val sinPhi = Math.sin(phi).toFloat()
-            val cosPhi = Math.cos(phi).toFloat()
-            for (s in 0..segments) {
-                val theta = 2.0 * Math.PI * s / segments
-                val sinTheta = Math.sin(theta).toFloat()
-                val cosTheta = Math.cos(theta).toFloat()
-                val x = cosTheta * sinPhi * 0.5f
-                val y = sinTheta * sinPhi * 0.5f
-                val z = cosPhi * 0.5f
-                verts.add(x); verts.add(y); verts.add(z)
-                verts.add(cosTheta * sinPhi); verts.add(sinTheta * sinPhi); verts.add(cosPhi)
-                verts.add(s.toFloat() / segments); verts.add(r.toFloat() / rings)
+                i++
+                j--
             }
         }
-        for (r in 0 until rings) {
-            for (s in 0 until segments) {
-                val cur = r * (segments + 1) + s
-                val next = cur + segments + 1
-                indices.add(cur.toShort()); indices.add(next.toShort()); indices.add((cur + 1).toShort())
-                indices.add((cur + 1).toShort()); indices.add(next.toShort()); indices.add((next + 1).toShort())
-            }
-        }
-        return bm.buildVAO(verts.toFloatArray(), indices.toShortArray(), listOf(0 to 3, 1 to 3, 2 to 2))
-    }
-
-    private fun buildCylinder(bm: GLBufferManager, segments: Int = 24): GLBufferManager.MeshVAO {
-        val verts = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
-        val h = 0.5f
-        for (i in 0..segments) {
-            val angle = 2.0 * Math.PI * i / segments
-            val x = Math.cos(angle).toFloat() * 0.5f
-            val y = Math.sin(angle).toFloat() * 0.5f
-            val nx = Math.cos(angle).toFloat()
-            val ny = Math.sin(angle).toFloat()
-            val u = i.toFloat() / segments
-            verts.addAll(listOf(x, y, -h, nx, ny, 0f, u, 0f))
-            verts.addAll(listOf(x, y, h, nx, ny, 0f, u, 1f))
-        }
-        for (i in 0 until segments) {
-            val b0 = (i * 2).toShort()
-            val t0 = (i * 2 + 1).toShort()
-            val b1 = (i * 2 + 2).toShort()
-            val t1 = (i * 2 + 3).toShort()
-            indices.addAll(listOf(b0, b1, t0, b1, t1, t0))
-        }
-        val baseTop = verts.size / 8
-        verts.addAll(listOf(0f, 0f, h, 0f, 0f, 1f, 0.5f, 0.5f))
-        for (i in 0..segments) {
-            val angle = 2.0 * Math.PI * i / segments
-            val x = Math.cos(angle).toFloat() * 0.5f
-            val y = Math.sin(angle).toFloat() * 0.5f
-            verts.addAll(listOf(x, y, h, 0f, 0f, 1f, x + 0.5f, y + 0.5f))
-        }
-        for (i in 0 until segments) {
-            indices.addAll(listOf(baseTop.toShort(), (baseTop + 1 + i).toShort(), (baseTop + 2 + i).toShort()))
-        }
-        val baseBottom = verts.size / 8
-        verts.addAll(listOf(0f, 0f, -h, 0f, 0f, -1f, 0.5f, 0.5f))
-        for (i in 0..segments) {
-            val angle = 2.0 * Math.PI * i / segments
-            val x = Math.cos(angle).toFloat() * 0.5f
-            val y = Math.sin(angle).toFloat() * 0.5f
-            verts.addAll(listOf(x, y, -h, 0f, 0f, -1f, x + 0.5f, y + 0.5f))
-        }
-        for (i in 0 until segments) {
-            indices.addAll(listOf(baseBottom.toShort(), (baseBottom + 2 + i).toShort(), (baseBottom + 1 + i).toShort()))
-        }
-        return bm.buildVAO(verts.toFloatArray(), indices.toShortArray(), listOf(0 to 3, 1 to 3, 2 to 2))
-    }
-
-    private fun buildTorus(bm: GLBufferManager, majorSegments: Int = 24, minorSegments: Int = 12): GLBufferManager.MeshVAO {
-        val verts = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
-        val majorRadius = 0.35f
-        val minorRadius = 0.15f
-        for (i in 0..majorSegments) {
-            val u = i.toDouble() / majorSegments
-            val theta = u * 2.0 * Math.PI
-            val cosTheta = Math.cos(theta).toFloat()
-            val sinTheta = Math.sin(theta).toFloat()
-            for (j in 0..minorSegments) {
-                val v = j.toDouble() / minorSegments
-                val phi = v * 2.0 * Math.PI
-                val cosPhi = Math.cos(phi).toFloat()
-                val sinPhi = Math.sin(phi).toFloat()
-                val x = (majorRadius + minorRadius * cosPhi) * cosTheta
-                val y = (majorRadius + minorRadius * cosPhi) * sinTheta
-                val z = minorRadius * sinPhi
-                val nx = cosPhi * cosTheta
-                val ny = cosPhi * sinTheta
-                val nz = sinPhi
-                verts.addAll(listOf(x, y, z, nx, ny, nz, u.toFloat(), v.toFloat()))
-            }
-        }
-        val rowStride = minorSegments + 1
-        for (i in 0 until majorSegments) {
-            for (j in 0 until minorSegments) {
-                val a = (i * rowStride + j).toShort()
-                val b = ((i + 1) * rowStride + j).toShort()
-                val c = ((i + 1) * rowStride + j + 1).toShort()
-                val d = (i * rowStride + j + 1).toShort()
-                indices.addAll(listOf(a, b, c, a, c, d))
-            }
-        }
-        return bm.buildVAO(verts.toFloatArray(), indices.toShortArray(), listOf(0 to 3, 1 to 3, 2 to 2))
-    }
-
-    private fun buildPrism(bm: GLBufferManager): GLBufferManager.MeshVAO {
-        val h = 0.5f
-        val s = 0.5f
-        val v = floatArrayOf(
-            -s,-s,-h,  0f,-1f,0f, 0f,0f,
-             s,-s,-h,  0f,-1f,0f, 1f,0f,
-             0f, s,-h,  0f,1f,0f, 0.5f,1f,
-            -s,-s, h,  0f,-1f,0f, 0f,0f,
-             s,-s, h,  0f,-1f,0f, 1f,0f,
-             0f, s, h,  0f,1f,0f, 0.5f,1f,
-            -s,-s,-h,  0f,-1f,0f, 0f,0f,
-             s,-s,-h,  0f,-1f,0f, 1f,0f,
-             s,-s, h,  0f,-1f,0f, 1f,1f,
-            -s,-s, h,  0f,-1f,0f, 0f,1f,
-             s,-s,-h,  0.7f,0.7f,0f, 0f,0f,
-             0f, s,-h,  0.7f,0.7f,0f, 1f,0f,
-             0f, s, h,  0.7f,0.7f,0f, 1f,1f,
-             s,-s, h,  0.7f,0.7f,0f, 0f,1f,
-             0f, s,-h, -0.7f,0.7f,0f, 0f,0f,
-            -s,-s,-h, -0.7f,0.7f,0f, 1f,0f,
-            -s,-s, h, -0.7f,0.7f,0f, 1f,1f,
-             0f, s, h, -0.7f,0.7f,0f, 0f,1f
-        )
-        val idx = shortArrayOf(
-            0,2,1,
-            3,4,5,
-            6,7,8, 6,8,9,
-            10,11,12, 10,12,13,
-            14,15,16, 14,16,17
-        )
-        return bm.buildVAO(v, idx, listOf(0 to 3, 1 to 3, 2 to 2))
-    }
-
-    private fun buildRing(bm: GLBufferManager, segments: Int = 24): GLBufferManager.MeshVAO {
-        val verts = mutableListOf<Float>()
-        val indices = mutableListOf<Short>()
-        val majorRadius = 0.35f
-        val sideHalf = 0.15f
-        for (i in 0..segments) {
-            val theta = 2.0 * Math.PI * i / segments
-            val cosT = Math.cos(theta).toFloat()
-            val sinT = Math.sin(theta).toFloat()
-            val cx = majorRadius * cosT
-            val cy = majorRadius * sinT
-            val u = i.toFloat() / segments
-            verts.addAll(listOf(cx + sideHalf * cosT, cy + sideHalf * sinT, sideHalf, cosT, sinT, 0f, u, 0f))
-            verts.addAll(listOf(cx + sideHalf * cosT, cy + sideHalf * sinT, -sideHalf, cosT, sinT, 0f, u, 1f))
-            verts.addAll(listOf(cx - sideHalf * cosT, cy - sideHalf * sinT, -sideHalf, -cosT, -sinT, 0f, u, 0f))
-            verts.addAll(listOf(cx - sideHalf * cosT, cy - sideHalf * sinT, sideHalf, -cosT, -sinT, 0f, u, 1f))
-        }
-        val stride = 4
-        for (i in 0 until segments) {
-            val a = i * stride
-            val b = (i + 1) * stride
-            indices.addAll(listOf(a.toShort(), (a + 1).toShort(), b.toShort(),
-                                   (a + 1).toShort(), (b + 1).toShort(), b.toShort()))
-            indices.addAll(listOf((a + 3).toShort(), a.toShort(), (b + 3).toShort(),
-                                   a.toShort(), b.toShort(), (b + 3).toShort()))
-            indices.addAll(listOf((a + 1).toShort(), (a + 2).toShort(), (b + 1).toShort(),
-                                   (a + 2).toShort(), (b + 2).toShort(), (b + 1).toShort()))
-            indices.addAll(listOf((a + 2).toShort(), (a + 3).toShort(), (b + 2).toShort(),
-                                   (a + 3).toShort(), (b + 3).toShort(), (b + 2).toShort()))
-        }
-        return bm.buildVAO(verts.toFloatArray(), indices.toShortArray(), listOf(0 to 3, 1 to 3, 2 to 2))
+        if (low < j) quickSortTransparent(low, j)
+        if (i < high) quickSortTransparent(i, high)
     }
 }
