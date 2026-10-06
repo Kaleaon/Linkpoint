@@ -166,6 +166,9 @@ def populate_rgba_buffer_native(buffer_size: int, seed: int) -> Optional[bytes]:
     Attempts to populate RGBA pixel memory buffer using compiled C extension via ctypes.
     Returns bytes object if offload succeeded, None if native execution failed.
     """
+    if buffer_size <= 0 or buffer_size % 4 != 0 or buffer_size > 268435456:
+        return None
+
     native_lib = _get_native_lib()
     if native_lib is None:
         return None
@@ -203,42 +206,79 @@ class DecodeProgressEvent:
     total_bytes: int = 0
 
 
-def create_placeholder_texture(width: int = 16, height: int = 16, color: tuple = (128, 128, 128, 255)) -> bytes:
-    """Generates a default RGBA placeholder buffer."""
-    r, g, b, a = color
-    pixel = bytes([r, g, b, a])
-    return pixel * (width * height)
+def is_power_of_two(dim: int) -> bool:
+    """Checks if a dimension is non-zero, <= 8192, and an exact power of two."""
+    return bool(dim > 0 and dim <= 8192 and (dim & (dim - 1)) == 0)
+
+
+def create_placeholder_texture(width: int = 16, height: int = 16, color: tuple = (128, 128, 128, 128)) -> bytes:
+    """Generates a default 16x16 grid 50% opacity neutral gray RGBA placeholder buffer."""
+    buf = bytearray(width * height * 4)
+    grid_step = 16
+    for y in range(height):
+        is_grid_y = (y % grid_step == 0)
+        row_offset = y * width * 4
+        for x in range(width):
+            is_grid_x = (x % grid_step == 0)
+            offset = row_offset + x * 4
+            if is_grid_y or is_grid_x:
+                buf[offset] = 102      # R
+                buf[offset + 1] = 102  # G
+                buf[offset + 2] = 102  # B
+                buf[offset + 3] = 128  # A (50% opacity)
+            else:
+                buf[offset] = color[0]
+                buf[offset + 1] = color[1]
+                buf[offset + 2] = color[2]
+                buf[offset + 3] = color[3] if len(color) > 3 else 128
+    return bytes(buf)
 
 
 def parse_jp2_dimensions(raw_bytes: bytes) -> tuple:
     """
     Parses dimensions from JPEG2000 (JP2 or J2K codestream) header.
-    Falls back to default dimensions if header is incomplete or standard raw image.
+    Validates codestream signature, payload boundaries, and power-of-two mipmap requirements.
+    Raises ValueError if header is invalid, truncated, or non-power-of-two.
     """
     if not raw_bytes or len(raw_bytes) < 12:
-        return (16, 16)
+        raise ValueError("Truncated JPEG2000 payload boundary: length < 12 bytes")
 
     if raw_bytes.startswith(b"\x00\x00\x00\x0c\x6a\x50\x20\x20"):
         idx = raw_bytes.find(b"ihdr")
-        if idx != -1 and len(raw_bytes) >= idx + 12:
-            try:
-                height, width = struct.unpack(">II", raw_bytes[idx + 4 : idx + 12])
-                if 0 < width <= 8192 and 0 < height <= 8192:
-                    return (width, height)
-            except struct.error:
-                pass
+        if idx == -1 or len(raw_bytes) < idx + 12:
+            raise ValueError("Incomplete or truncated ihdr box in JP2 header")
+
+        if idx >= 4:
+            possible_box_len = struct.unpack(">I", raw_bytes[idx - 4 : idx])[0]
+            if 8 <= possible_box_len <= 1048576 and (idx - 4 + possible_box_len > len(raw_bytes)):
+                raise ValueError("Truncated JP2 box boundary in payload stream")
+
+        try:
+            height, width = struct.unpack(">II", raw_bytes[idx + 4 : idx + 12])
+            if not (is_power_of_two(width) and is_power_of_two(height)):
+                raise ValueError(f"Non-power-of-two texture dimensions: {width}x{height}")
+            return (width, height)
+        except struct.error as e:
+            raise ValueError(f"Malformed ihdr box structure: {e}")
 
     if raw_bytes.startswith(b"\xff\x4f"):
         idx = raw_bytes.find(b"\xff\x51")
-        if idx != -1 and len(raw_bytes) >= idx + 14:
-            try:
-                xsiz, ysiz = struct.unpack(">II", raw_bytes[idx + 6 : idx + 14])
-                if 0 < xsiz <= 8192 and 0 < ysiz <= 8192:
-                    return (xsiz, ysiz)
-            except struct.error:
-                pass
+        if idx == -1 or len(raw_bytes) < idx + 14:
+            raise ValueError("Incomplete or truncated SIZ marker segment in J2K codestream")
+        try:
+            xsiz, ysiz = struct.unpack(">II", raw_bytes[idx + 6 : idx + 14])
+            xosiz, yosiz = 0, 0
+            if len(raw_bytes) >= idx + 22:
+                xosiz, yosiz = struct.unpack(">II", raw_bytes[idx + 14 : idx + 22])
+            width = max(0, xsiz - xosiz)
+            height = max(0, ysiz - yosiz)
+            if not (is_power_of_two(width) and is_power_of_two(height)):
+                raise ValueError(f"Non-power-of-two texture dimensions: {width}x{height}")
+            return (width, height)
+        except struct.error as e:
+            raise ValueError(f"Malformed SIZ marker segment structure: {e}")
 
-    return (64, 64)
+    raise ValueError("Invalid JPEG2000 header signature")
 
 
 def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
@@ -246,14 +286,11 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
     Decompresses JPEG2000 raw bytes into raw RGBA pixel buffer.
     """
     if not raw_bytes:
-        placeholder = create_placeholder_texture(16, 16, (128, 128, 128, 255))
+        placeholder = create_placeholder_texture(16, 16, (128, 128, 128, 128))
         return DecodedTexture(texture_id, placeholder, 16, 16, status="fallback")
 
     try:
         width, height = parse_jp2_dimensions(raw_bytes)
-
-        if raw_bytes.startswith(b"CORRUPT") or raw_bytes.startswith(b"INVALID"):
-            raise ValueError("Corrupted JPEG2000 payload")
 
         buffer_size = width * height * 4
         seed = len(raw_bytes) % 255
@@ -274,7 +311,7 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
         )
     except Exception as e:
         logger.warning(f"Failed to decode JPEG2000 texture {texture_id}: {e}")
-        placeholder = create_placeholder_texture(16, 16, (200, 100, 100, 255))
+        placeholder = create_placeholder_texture(16, 16, (128, 128, 128, 128))
         return DecodedTexture(
             texture_id=texture_id,
             buffer=placeholder,

@@ -24,6 +24,30 @@ export function getSceneBounds(entities: readonly SceneEntity[]): SceneBounds {
   return { center, radius };
 }
 
+/** Generates a 16x16 grid 50% opacity neutral gray placeholder texture data URI. */
+export function getPlaceholderTextureUri(): string {
+  if (typeof document !== "undefined" && typeof document.createElement === "function") {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 16;
+      canvas.height = 16;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+        ctx.fillRect(0, 0, 16, 16);
+        ctx.strokeStyle = "rgba(102, 102, 102, 0.5)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, 16, 16);
+        return canvas.toDataURL("image/png");
+      }
+    } catch {
+      // Fallback to static base64 if canvas context is unavailable
+    }
+  }
+  // Static 16x16 neutral gray 50% opacity placeholder data URI fallback
+  return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAFUlEQVR42mNk+M9QzwAEjAxgVC1AAn90A4K06180AAAAAElFTkSuQmCC";
+}
+
 interface EntityRecord {
   entity: SceneEntity;
   rootNode: any;
@@ -185,29 +209,53 @@ export async function createBabylonRenderer(canvas: HTMLCanvasElement): Promise<
         pbr.emissiveColor = new Color3(materialAttr.emissiveColor[0], materialAttr.emissiveColor[1], materialAttr.emissiveColor[2]);
       }
 
+      const createSafeTexture = (uri: string) => {
+        try {
+          const tex = new Texture(
+            uri,
+            scene,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            () => {
+              const placeholderUri = getPlaceholderTextureUri();
+              if (tex.url !== placeholderUri) {
+                tex.updateURL(placeholderUri);
+              }
+            }
+          );
+          if ((tex as any).onErrorObservable) {
+            (tex as any).onErrorObservable.add(() => {
+              const placeholderUri = getPlaceholderTextureUri();
+              if (tex.url !== placeholderUri) {
+                tex.updateURL(placeholderUri);
+              }
+            });
+          }
+          applyTextureTransform(tex, materialAttr.textureTransform);
+          record.textures.push(tex);
+          return tex;
+        } catch {
+          const placeholderUri = getPlaceholderTextureUri();
+          const tex = new Texture(placeholderUri, scene);
+          applyTextureTransform(tex, materialAttr.textureTransform);
+          record.textures.push(tex);
+          return tex;
+        }
+      };
+
       if (materialAttr.baseColorTextureUri) {
-        const tex = new Texture(materialAttr.baseColorTextureUri, scene);
-        applyTextureTransform(tex, materialAttr.textureTransform);
-        pbr.baseTexture = tex;
-        record.textures.push(tex);
+        pbr.baseTexture = createSafeTexture(materialAttr.baseColorTextureUri);
       }
       if (materialAttr.normalMapUri) {
-        const tex = new Texture(materialAttr.normalMapUri, scene);
-        applyTextureTransform(tex, materialAttr.textureTransform);
-        pbr.normalTexture = tex;
-        record.textures.push(tex);
+        pbr.normalTexture = createSafeTexture(materialAttr.normalMapUri);
       }
       if (materialAttr.metallicRoughnessTextureUri) {
-        const tex = new Texture(materialAttr.metallicRoughnessTextureUri, scene);
-        applyTextureTransform(tex, materialAttr.textureTransform);
-        pbr.metallicRoughnessTexture = tex;
-        record.textures.push(tex);
+        pbr.metallicRoughnessTexture = createSafeTexture(materialAttr.metallicRoughnessTextureUri);
       }
       if (materialAttr.emissiveTextureUri) {
-        const tex = new Texture(materialAttr.emissiveTextureUri, scene);
-        applyTextureTransform(tex, materialAttr.textureTransform);
-        pbr.emissiveTexture = tex;
-        record.textures.push(tex);
+        pbr.emissiveTexture = createSafeTexture(materialAttr.emissiveTextureUri);
       }
 
       record.material = pbr;
