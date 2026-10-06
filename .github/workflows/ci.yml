@@ -243,8 +243,6 @@ jobs:
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
