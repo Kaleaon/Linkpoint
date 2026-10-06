@@ -7,4 +7,3 @@ export const Z_INDEX = {
   NAV_BANNER: 999,
   SYSTEM_DIALOG: 10000,
 };
-
