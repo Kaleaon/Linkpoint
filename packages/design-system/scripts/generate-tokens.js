@@ -12,9 +12,21 @@ const kotlinOutputPath = path.resolve(
   "../../../Linkpoint/ui-components/src/main/java/com/linkpoint/ui/components/linkpoint2/tokens/GeneratedTokens.kt"
 );
 
+const communitySourceDir = path.resolve(__dirname, "../../../ktheme-pr/themes/community");
+const communityTargetDir = path.resolve(__dirname, "../themes/community");
+const rootThemesDir = path.resolve(__dirname, "../themes");
+const indexTsPath = path.resolve(__dirname, "../src/index.ts");
+const tokensIndexTsPath = path.resolve(__dirname, "../src/tokens/index.ts");
+
 function toPascalCase(str) {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function toCamelCase(str) {
+  if (!str) return "";
+  const cleaned = str.replace(/[^a-zA-Z0-9_-]/g, "");
+  return cleaned.replace(/[-_]+([a-zA-Z0-9])/g, (_, c) => c.toUpperCase());
 }
 
 function toKotlinColor(hex) {
@@ -106,7 +118,220 @@ ${generateKotlinBody(tokenData, 1)}
   console.log(`Generated Kotlin tokens at: ${kotlinOutputPath}`);
 }
 
+function syncCommunityThemes() {
+  if (!fs.existsSync(communitySourceDir)) {
+    console.warn(`Community themes source directory does not exist: ${communitySourceDir}`);
+    return;
+  }
+
+  fs.mkdirSync(communityTargetDir, { recursive: true });
+  const files = fs.readdirSync(communitySourceDir).filter((f) => f.endsWith(".json"));
+
+  for (const file of files) {
+    const srcPath = path.join(communitySourceDir, file);
+    const destPath = path.join(communityTargetDir, file);
+    fs.copyFileSync(srcPath, destPath);
+    console.log(`Synced community theme: ${file}`);
+  }
+}
+
+function jsonToPalettePack(data) {
+  const meta = data.metadata || {};
+  const cs = data.colorScheme || {};
+  const isLight = !data.darkMode;
+
+  const bg = cs.background || "#000000";
+  const surf = cs.surface || bg;
+  const surf2 = cs.surfaceVariant || surf;
+  const ink = cs.onBackground || cs.onSurface || "#FFFFFF";
+  const ink2 = cs.onSurfaceVariant || ink;
+  const pri = cs.primary || "#000000";
+  const onpri = cs.onPrimary || bg;
+  const priC = cs.primaryContainer || pri;
+  const onpriC = cs.onPrimaryContainer || ink;
+  const sec = cs.secondary || pri;
+  const onsec = cs.onSecondary || bg;
+  const sec2 = cs.secondaryContainer || sec;
+  const bdg = cs.secondary || cs.outline || sec;
+  const onbdg = cs.onSecondary || onpri;
+  const info = cs.tertiary || cs.secondary || pri;
+  const outv = cs.outlineVariant || cs.outline || surf2;
+  const ok = cs.primary || sec;
+  const err = cs.error || "#CF6679";
+  const warn = cs.tertiary || pri;
+  const sky1 = cs.surfaceVariant || surf;
+  const sky2 = cs.surface || bg;
+  const gnd = cs.surface || bg;
+  const gnd2 = cs.background || bg;
+
+  return {
+    name: meta.name || meta.id,
+    note: `${meta.id}, ${meta.description || meta.name}`,
+    light: isLight,
+    c: {
+      bg, surf, surf2,
+      ink, ink2,
+      pri, onpri, priC, onpriC,
+      sec, onsec, sec2,
+      bdg, onbdg,
+      info, outv,
+      ok, err, warn,
+      sky1, sky2, gnd, gnd2
+    }
+  };
+}
+
+export function generateThemeRegistries() {
+  syncCommunityThemes();
+
+  const themes = [];
+
+  // Core themes
+  if (fs.existsSync(rootThemesDir)) {
+    const files = fs.readdirSync(rootThemesDir).filter((f) => f.endsWith(".json"));
+    for (const file of files) {
+      const filePath = path.join(rootThemesDir, file);
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const data = JSON.parse(raw);
+      const fileStem = path.basename(file, ".json");
+      const id = data.metadata?.id || fileStem;
+      themes.push({
+        id,
+        fileStem,
+        file,
+        varName: toCamelCase(fileStem),
+        importPath: `../themes/${file}`,
+        isCommunity: false,
+        data
+      });
+    }
+  }
+
+  // Community themes
+  if (fs.existsSync(communityTargetDir)) {
+    const files = fs.readdirSync(communityTargetDir).filter((f) => f.endsWith(".json"));
+    for (const file of files) {
+      const filePath = path.join(communityTargetDir, file);
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const data = JSON.parse(raw);
+      const fileStem = path.basename(file, ".json");
+      const id = data.metadata?.id || fileStem;
+      themes.push({
+        id,
+        fileStem,
+        file,
+        varName: toCamelCase(fileStem),
+        importPath: `../themes/community/${file}`,
+        isCommunity: true,
+        data
+      });
+    }
+  }
+
+  // Deduplicate and sort
+  const themeNameSet = new Set();
+  for (const t of themes) {
+    themeNameSet.add(t.fileStem);
+    if (t.id) themeNameSet.add(t.id);
+  }
+
+  // 1. Generate src/index.ts
+  const importLines = themes.map((t) => `import ${t.varName} from "${t.importPath}";`);
+
+  const mapEntries = [];
+  for (const t of themes) {
+    mapEntries.push(`  "${t.fileStem}": ${t.varName}`);
+    if (t.id && t.id !== t.fileStem) {
+      mapEntries.push(`  "${t.id}": ${t.varName}`);
+    }
+  }
+
+  const srcIndexContent = `/**
+ * @linkpoint/design-system root export.
+ * DO NOT EDIT DIRECTLY. Generated by packages/design-system/scripts/generate-tokens.js
+ */
+
+export * from "./tokens/index.js";
+export * from "./css/index.js";
+export * from "./react/index.js";
+
+${importLines.join("\n")}
+
+const THEME_MAP: Record<string, unknown> = {
+${mapEntries.join(",\n")}
+};
+
+export async function loadTheme(name: import("./tokens/index.js").ThemeName): Promise<unknown> {
+  const theme = THEME_MAP[name];
+  if (theme) {
+    return theme;
+  }
+  throw new Error(\`Unknown theme: \${name}\`);
+}
+`;
+
+  fs.writeFileSync(indexTsPath, srcIndexContent, "utf-8");
+  console.log(`Generated src/index.ts with ${themes.length} theme imports`);
+
+  // 2. Update src/tokens/index.ts
+  let tokensIndexContent = fs.readFileSync(tokensIndexTsPath, "utf-8");
+
+  // Update themeNames array
+  const sortedThemeNames = Array.from(themeNameSet).sort();
+  const themeNamesTuple = `export const themeNames = [\n` +
+    sortedThemeNames.map((n) => `  "${n}"`).join(",\n") +
+    `,\n] as const;`;
+
+  tokensIndexContent = tokensIndexContent.replace(
+    /export const themeNames = \[\s*[\s\S]*?\s*\] as const;/m,
+    themeNamesTuple
+  );
+
+  // Update PALETTES object to include community themes
+  const paletteBlockMatch = tokensIndexContent.match(/export const PALETTES: Record<string, PalettePack> = \{([\s\S]*?)\n\};/m);
+  if (paletteBlockMatch) {
+    let paletteBlock = paletteBlockMatch[1];
+    let addedEntries = [];
+
+    for (const t of themes) {
+      const escapedStem = t.fileStem.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const escapedId = t.id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const keyRegex = new RegExp(`(?:['"](?:${escapedStem}|${escapedId})['"]|\\b(?:${t.fileStem}|${t.id})\\b)\\s*:`, 'm');
+
+      if (!keyRegex.test(paletteBlock)) {
+        const pack = jsonToPalettePack(t.data);
+        const entryKey = t.fileStem;
+        const entryStr = `  "${entryKey}": {\n` +
+          `    name: ${JSON.stringify(pack.name)},\n` +
+          `    note: ${JSON.stringify(pack.note)},\n` +
+          `    light: ${pack.light},\n` +
+          `    c: {\n` +
+          `      bg: "${pack.c.bg}", surf: "${pack.c.surf}", surf2: "${pack.c.surf2}",\n` +
+          `      ink: "${pack.c.ink}", ink2: "${pack.c.ink2}",\n` +
+          `      pri: "${pack.c.pri}", onpri: "${pack.c.onpri}", priC: "${pack.c.priC}", onpriC: "${pack.c.onpriC}",\n` +
+          `      sec: "${pack.c.sec}", onsec: "${pack.c.onsec}", sec2: "${pack.c.sec2}",\n` +
+          `      bdg: "${pack.c.bdg}", onbdg: "${pack.c.onbdg}",\n` +
+          `      info: "${pack.c.info}", outv: "${pack.c.outv}",\n` +
+          `      ok: "${pack.c.ok}", err: "${pack.c.err}", warn: "${pack.c.warn}",\n` +
+          `      sky1: "${pack.c.sky1}", sky2: "${pack.c.sky2}", gnd: "${pack.c.gnd}", gnd2: "${pack.c.gnd2}"\n` +
+          `    }\n` +
+          `  }`;
+        addedEntries.push(entryStr);
+      }
+    }
+
+    if (addedEntries.length > 0) {
+      const newPaletteBlock = `export const PALETTES: Record<string, PalettePack> = {${paletteBlock},\n${addedEntries.join(",\n")}\n};`;
+      tokensIndexContent = tokensIndexContent.replace(/export const PALETTES: Record<string, PalettePack> = \{[\s\S]*?\n\};/m, newPaletteBlock);
+    }
+  }
+
+  fs.writeFileSync(tokensIndexTsPath, tokensIndexContent, "utf-8");
+  console.log(`Updated src/tokens/index.ts with themeNames and PALETTES`);
+}
+
 // Execute when run directly
 if (process.argv[1] && (process.argv[1].endsWith("generate-tokens.js") || process.argv[1].endsWith("generate-tokens"))) {
   generateTokens();
+  generateThemeRegistries();
 }
