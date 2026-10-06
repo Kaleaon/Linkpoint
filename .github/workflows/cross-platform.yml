@@ -47,8 +47,10 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
-          git rm --cached -r .
-          git reset --hard
+<<<<<<< HEAD
+          git add --renormalize .
+          git reset
+          git checkout .
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -91,8 +93,10 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
-          git rm --cached -r .
-          git reset --hard
+<<<<<<< HEAD
+          git add --renormalize .
+          git reset
+          git checkout .
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

@@ -20,7 +20,8 @@
     "generate-tokens": "npm run generate-tokens -w @linkpoint/design-system",
     "test": "npm run test:web",
     "test:coverage": "vitest run --coverage",
-    "test:playwright": "playwright test --config packages/design-system/playwright.config.ts",
+    "test:playwright": "playwright test --config packages/design-system/playwright.config.ts && playwright test --config apps/linkpoint/playwright.config.ts",
+    "test:visual": "playwright test --config apps/linkpoint/playwright.config.ts",
     "test:web": "vitest run",
     "typecheck": "tsc --noEmit",
     "postinstall": "node apps/linkpoint/scripts/patch-metaverse.cjs"
