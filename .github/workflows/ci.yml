@@ -292,7 +292,7 @@ jobs:
             python3 scripts/evaluate_coverage.py \
               --android-report coverage-artifacts/android-coverage/jacocoTestReport.xml \
               --web-report coverage-artifacts/web-coverage/lcov.info \
-              --rust-report coverage-artifacts/rust-coverage/lcov.info || true
+              --rust-report coverage-artifacts/rust-coverage/lcov.info
           fi
 
       - name: Evaluate job status
