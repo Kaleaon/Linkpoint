@@ -1,8 +1,19 @@
 import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
+  plugins: [react()],
   test: {
-    include: ["packages/**/*.test.ts", "apps/linkpoint/src/lib/llsd.test.ts"],
+    environment: "jsdom",
+    globals: true,
+    silent: true,
+    setupFiles: [path.resolve(__dirname, "./apps/linkpoint/vitest.setup.ts")],
+    include: [
+      "packages/**/*.test.ts",
+      "apps/linkpoint/src/lib/llsd.test.ts",
+      "apps/linkpoint/src/linkpoint/__tests__/**/*.{test,spec}.{ts,tsx}"
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "json-summary", "json"],
@@ -16,5 +27,10 @@ export default defineConfig({
         "**/__tests__/**"
       ]
     }
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./apps/linkpoint"),
+    },
   },
 });

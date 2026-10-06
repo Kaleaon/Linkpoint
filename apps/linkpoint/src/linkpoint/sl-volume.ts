@@ -345,7 +345,45 @@ function smoothNormals(vertices: number[], indices: number[], weld?: Array<[numb
   return normals;
 }
 
+function cullDegenerateTriangles(vertices: number[], indices: number[]): number[] {
+  const clean: number[] = [];
+  for (let i = 0; i + 2 < indices.length; i += 3) {
+    const i0 = indices[i], i1 = indices[i + 1], i2 = indices[i + 2];
+    if (i0 === i1 || i1 === i2 || i0 === i2) continue;
+    const a = [vertices[i0 * 3], vertices[i0 * 3 + 1], vertices[i0 * 3 + 2]];
+    const b = [vertices[i1 * 3], vertices[i1 * 3 + 1], vertices[i1 * 3 + 2]];
+    const c = [vertices[i2 * 3], vertices[i2 * 3 + 1], vertices[i2 * 3 + 2]];
+    const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const e2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+    const lenSq = n[0] * n[0] + n[1] * n[1] + n[2] * n[2];
+    if (lenSq >= 1e-12) {
+      clean.push(i0, i1, i2);
+    }
+  }
+  return clean;
+}
+
 export function generateVolume(params: VolumeParams, detail = DEFAULT_DETAIL): VolumeFace[] {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const wasmModule = require('@linkpoint/wasm');
+    if (typeof wasmModule?.wasm_generate_volume === 'function') {
+      const json = wasmModule.wasm_generate_volume(JSON.stringify(params), detail);
+      if (json) {
+        const faces = JSON.parse(json) as VolumeFace[];
+        if (Array.isArray(faces) && faces.length > 0) {
+          return faces;
+        }
+      }
+    }
+  } catch (_err) {
+    // Fall back to TypeScript implementation if WASM is uninitialized
+  }
+  return generateVolumeJS(params, detail);
+}
+
+export function generateVolumeJS(params: VolumeParams, detail = DEFAULT_DETAIL): VolumeFace[] {
   detail = Math.max(detail, MIN_LOD);
   let split = Math.floor(detail * 0.66);
   const squareish = [PROFILE_SQUARE, PROFILE_ISOTRI, PROFILE_EQUITRI, PROFILE_RIGHTTRI].includes(params.profileCurve & PROFILE_MASK);
@@ -436,7 +474,7 @@ function buildCap(pf: ProfileFace, profile: Profile, path: Path, mesh: P3[], siz
   const flat = normalize(want);
   const normals: number[] = [];
   for (let i = 0; i < vertices.length / 3; i++) normals.push(flat[0], flat[1], flat[2]);
-  return { kind: pf.kind, vertices, normals, texCoords, indices };
+  return { kind: pf.kind, vertices, normals, texCoords, indices: cullDegenerateTriangles(vertices, indices) };
 }
 
 function buildSide(pf: ProfileFace, profile: Profile, path: Path, mesh: P3[], sizeS: number, hollow: boolean): Omit<VolumeFace, 'faceIndex'> | null {
@@ -493,7 +531,7 @@ function buildSide(pf: ProfileFace, profile: Profile, path: Path, mesh: P3[], si
   if (!path.open && sizeT > 2) for (let s = 0; s < cols; s++) weld.push([s, (sizeT - 1) * cols + s]);
   const normals = smoothNormals(vertices, indices, weld);
   void hollow;
-  return { kind: pf.kind, vertices, normals, texCoords, indices };
+  return { kind: pf.kind, vertices, normals, texCoords, indices: cullDegenerateTriangles(vertices, indices) };
 }
 
 /** Parameters from the simulator's unpacked ObjectUpdate shape fields (already in the viewer's units). */
