@@ -8,6 +8,9 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.chat.IMManager
+import com.linkpoint.chat.ChatProtocolAdapter
+import com.linkpoint.chat.GroupMessageResult
+import com.linkpoint.chat.GroupSessionState
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
@@ -233,6 +236,79 @@ class GroupsManager(
     @Volatile
     private var imManager: IMManager? = null
 
+    val fallbackChatProtocolAdapter = ChatProtocolAdapter(
+        sendSessionStartHandler = { groupId ->
+            sendFallbackGroupSessionStart(groupId)
+        },
+        sendGroupMessageHandler = { groupId, sessionUuid, message ->
+            sendFallbackGroupMessage(groupId, sessionUuid, message)
+        }
+    )
+
+    private fun sendFallbackGroupSessionStart(groupId: UUID): Boolean {
+        return try {
+            val identity = AgentIdentity(
+                agentId = agentId,
+                sessionId = udpConnection.getSessionId(),
+                circuitCode = udpConnection.getCircuitCode()
+            ).requireValid("GroupsManager.sendFallbackGroupSessionStart")
+            val ts = (System.currentTimeMillis() / 1000).toInt()
+
+            udpConnection.sendPacket(
+                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+                SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = groupId,
+                    dialog = IMManager.IM_SESSION_GROUP_START,
+                    id = groupId,
+                    timestamp = ts,
+                    fromAgentName = "You",
+                    message = "",
+                    binaryBucket = byteArrayOf(0)
+                ),
+                reliable = true
+            )
+            Log.i(TAG, "Sent fallback group session-start (Dialog=15) for $groupId")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send fallback group session-start", e)
+            false
+        }
+    }
+
+    private fun sendFallbackGroupMessage(groupId: UUID, sessionUuid: UUID, message: String): Boolean {
+        return try {
+            val identity = AgentIdentity(
+                agentId = agentId,
+                sessionId = udpConnection.getSessionId(),
+                circuitCode = udpConnection.getCircuitCode()
+            ).requireValid("GroupsManager.sendFallbackGroupMessage")
+            val ts = (System.currentTimeMillis() / 1000).toInt()
+
+            udpConnection.sendPacket(
+                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+                SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = groupId,
+                    dialog = IMManager.IM_SESSION_SEND,
+                    id = sessionUuid,
+                    timestamp = ts,
+                    fromAgentName = "You",
+                    message = message,
+                    binaryBucket = byteArrayOf(0)
+                ),
+                reliable = true
+            )
+            Log.i(TAG, "Sent fallback group chat (Dialog=17) to $groupId")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send fallback group chat", e)
+            false
+        }
+    }
+
     fun setIMManager(manager: IMManager) {
         imManager = manager
     }
@@ -272,52 +348,16 @@ class GroupsManager(
                 false
             }
         }
-        // Fallback path — self-contained, no shared state. Sends the
-        // session-start and the chat line back-to-back. The simulator is
-        // idempotent on Dialog=15 (a duplicate session-start is a no-op),
-        // so this is safe even when the session is already up.
+        // Fallback path — leverages ChatProtocolAdapter state machine for negotiation & dispatch
         return try {
-            val identity = AgentIdentity(
-                agentId = agentId,
-                sessionId = udpConnection.getSessionId(),
-                circuitCode = udpConnection.getCircuitCode()
-            ).requireValid("GroupsManager.sendGroupChat")
-            val ts = (System.currentTimeMillis() / 1000).toInt()
-
-            udpConnection.sendPacket(
-                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
-                SLMessagePackers.packImprovedInstantMessage(
-                    identity = identity,
-                    fromGroup = false,
-                    toAgentId = groupId,
-                    dialog = IMManager.IM_SESSION_GROUP_START,
-                    id = groupId,
-                    timestamp = ts,
-                    fromAgentName = "You",
-                    message = "",
-                    binaryBucket = byteArrayOf(0)
-                ),
-                reliable = true
-            )
-            udpConnection.sendPacket(
-                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
-                SLMessagePackers.packImprovedInstantMessage(
-                    identity = identity,
-                    fromGroup = false,
-                    toAgentId = groupId,
-                    dialog = IMManager.IM_SESSION_SEND,
-                    id = groupId,
-                    timestamp = ts,
-                    fromAgentName = "You",
-                    message = message,
-                    binaryBucket = byteArrayOf(0)
-                ),
-                reliable = true
-            )
-            Log.i(TAG, "Sent group chat (Dialog=15+17) to $groupId via fallback path")
-            true
+            val result = fallbackChatProtocolAdapter.sendGroupMessage(groupId, message)
+            if (fallbackChatProtocolAdapter.getSessionState(groupId) == GroupSessionState.NEGOTIATING) {
+                // In standalone fallback mode without capability start reply handlers, auto-confirm session start
+                fallbackChatProtocolAdapter.onSessionStartReply(groupId, groupId, true)
+            }
+            result != GroupMessageResult.FAILED
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to send group chat", e)
+            Log.e(TAG, "Failed to send group chat via fallback adapter", e)
             false
         }
     }
@@ -516,6 +556,7 @@ class GroupsManager(
     }
 
     fun shutdown() {
+        fallbackChatProtocolAdapter.onDisconnected()
         scope.cancel()
     }
 
