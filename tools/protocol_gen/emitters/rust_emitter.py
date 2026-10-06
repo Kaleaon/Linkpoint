@@ -14,13 +14,15 @@ class RustEmitter(BaseEmitter):
         code = self._generate_rust_code(ast)
         out_file = os.path.join(out_dir, "mod.rs")
 
-        with open(out_file, "w", encoding="utf-8") as f:
+        with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
 
         try:
             subprocess.run(["rustfmt", out_file], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             with open(out_file, "r", encoding="utf-8") as f:
-                code = f.read()
+                code = f.read().replace("\r\n", "\n")
+            with open(out_file, "w", encoding="utf-8", newline="\n") as f:
+                f.write(code)
         except Exception:
             pass
 

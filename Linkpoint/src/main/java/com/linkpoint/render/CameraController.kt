@@ -46,6 +46,9 @@ class CameraController {
     @Volatile var yawDeg: Float = 0f
     @Volatile var pitchDeg: Float = -15f
     @Volatile var followDistance: Float = 5f
+    @Volatile var panMode: Boolean = false
+    @Volatile var panX: Float = 0f
+    @Volatile var panY: Float = 0f
 
     // Limits exposed for the preferences screen.
     @Volatile var minFollowDistance: Float = 1.0f
@@ -110,6 +113,24 @@ class CameraController {
             .coerceIn(minFollowDistance, maxFollowDistance)
     }
 
+    fun togglePanMode(): Boolean {
+        panMode = !panMode
+        renderStateManager?.notifyCameraOrAvatarMotion()
+        return panMode
+    }
+
+    /**
+     * Apply a pan gesture. dxPixels is horizontal panning, dyPixels is vertical panning.
+     */
+    fun applyPan(dxPixels: Float, dyPixels: Float) {
+        if (dxPixels != 0f || dyPixels != 0f) {
+            renderStateManager?.notifyCameraOrAvatarMotion()
+        }
+        val panScale = 0.015f
+        panX += -dxPixels * panScale
+        panY += dyPixels * panScale
+    }
+
     /**
      * Compute the eye/target positions for the current frame. Eye is where
      * the camera sits, target is the look-at point. Both in SL world
@@ -118,9 +139,9 @@ class CameraController {
      */
     fun computeView(out: FloatArray) {
         require(out.size >= 6) { "CameraController.computeView needs 6 floats" }
-        val px = agentPosition.x
+        val px = agentPosition.x + panX
         val py = agentPosition.y
-        val pz = agentPosition.z
+        val pz = agentPosition.z + panY
 
         when (mode) {
             Mode.FOLLOW -> {
@@ -163,5 +184,8 @@ class CameraController {
         yawDeg = 0f
         pitchDeg = -15f
         followDistance = max(minFollowDistance, min(maxFollowDistance, 5f))
+        panX = 0f
+        panY = 0f
+        panMode = false
     }
 }

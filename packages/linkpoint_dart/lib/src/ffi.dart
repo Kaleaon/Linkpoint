@@ -47,14 +47,44 @@ class LinkpointProtocolFFI {
       ];
       for (final p in searchPaths) {
         if (File(p).existsSync()) {
-          _lib = DynamicLibrary.open(p);
-          return _lib!;
+          try {
+            _lib = DynamicLibrary.open(p);
+            return _lib!;
+          } catch (_) {}
         }
       }
       _lib = DynamicLibrary.open('liblinkpoint_protocol.so');
     } else if (Platform.isMacOS) {
+      final searchPaths = [
+        'liblinkpoint_protocol.dylib',
+        '../../target/release/liblinkpoint_protocol.dylib',
+        'target/release/liblinkpoint_protocol.dylib',
+        '/app/Linkpoint/target/release/liblinkpoint_protocol.dylib',
+      ];
+      for (final p in searchPaths) {
+        if (File(p).existsSync()) {
+          try {
+            _lib = DynamicLibrary.open(p);
+            return _lib!;
+          } catch (_) {}
+        }
+      }
       _lib = DynamicLibrary.open('liblinkpoint_protocol.dylib');
     } else if (Platform.isWindows) {
+      final searchPaths = [
+        'linkpoint_protocol.dll',
+        '../../target/release/linkpoint_protocol.dll',
+        'target/release/linkpoint_protocol.dll',
+        '/app/Linkpoint/target/release/linkpoint_protocol.dll',
+      ];
+      for (final p in searchPaths) {
+        if (File(p).existsSync()) {
+          try {
+            _lib = DynamicLibrary.open(p);
+            return _lib!;
+          } catch (_) {}
+        }
+      }
       _lib = DynamicLibrary.open('linkpoint_protocol.dll');
     } else {
       _lib = DynamicLibrary.process();

@@ -1,10 +1,21 @@
 use std::process::Command;
 
+fn get_python_command() -> &'static str {
+    for cmd in &["python3", "python", "py"] {
+        if Command::new(cmd).arg("--version").output().is_ok() {
+            return cmd;
+        }
+    }
+    "python3"
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=../../schemas/protocol/message_template.msg");
     println!("cargo:rerun-if-changed=../../schemas/protocol/llsd");
 
-    let status = Command::new("python3")
+    let py_cmd = get_python_command();
+
+    let status = Command::new(py_cmd)
         .args([
             "tools/protocol_gen/cli.py",
             "generate",

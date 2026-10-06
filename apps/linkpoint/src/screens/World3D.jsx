@@ -17,6 +17,7 @@ export default function World3D({ desktopBackdrop = false }) {
   const [cameraPreset, setCameraPreset] = useState("rear");
   const [selection, setSelection] = useState(app.world.selectedObject);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [panMode, setPanMode] = useState(() => app.world.getPanMode());
   const [textureProgress, setTextureProgress] = useState(() => app.world.scene3d?.getTextureProgress() || null);
 
   const refresh = () => setPosition(app.world.camera3d?.position.map(Math.round) || [0, 0, 0]);
@@ -26,13 +27,15 @@ export default function World3D({ desktopBackdrop = false }) {
     const updateObjects = (objects) => { if (active) setObjectCount(objects.length); };
     const updateCamera = (camera) => { if (active && camera) { setPosition(camera.position.map(Math.round)); setCameraPreset(camera.preset); } };
     const updateProgress = (p) => { if (active) setTextureProgress(p); };
+    const updatePanMode = (enabled) => { if (active) setPanMode(enabled); };
     app.world.on("objects_changed", updateObjects);
     app.world.on("camera_changed", updateCamera);
     app.world.on("scene:texture-progress", updateProgress);
+    app.world.on("pan_mode_changed", updatePanMode);
     const updateSelection = (object) => { if (active) setSelection(object); };
     app.world.on("selection_changed", updateSelection);
     app.world.init(canvas).then(() => { if (active) { setReady(!!app.world.graphics3d); refresh(); } }).catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : "WebGL initialization failed"); });
-    return () => { active = false; app.world.off("objects_changed", updateObjects); app.world.off("camera_changed", updateCamera); app.world.off("scene:texture-progress", updateProgress); app.world.off("selection_changed", updateSelection); app.world.destroyRenderer(canvas); };
+    return () => { active = false; app.world.off("objects_changed", updateObjects); app.world.off("camera_changed", updateCamera); app.world.off("scene:texture-progress", updateProgress); app.world.off("pan_mode_changed", updatePanMode); app.world.off("selection_changed", updateSelection); app.world.destroyRenderer(canvas); };
   }, []);
 
   const move = (forward, right, up = 0) => { app.world.moveCamera(right, forward, up); refresh(); };
@@ -91,6 +94,26 @@ export default function World3D({ desktopBackdrop = false }) {
       </div> : null}
     </aside>}
     {!desktopBackdrop && <div aria-label="Camera view" style={{ position: "absolute", right: 14, top: 14, display: "flex", gap: 4 }}>
+      <button
+        type="button"
+        aria-label="Toggle Pan Mode"
+        aria-pressed={panMode}
+        onClick={() => {
+          const next = app.world.togglePanMode();
+          setPanMode(next);
+        }}
+        style={{
+          ...button,
+          minWidth: 0,
+          padding: "0 10px",
+          background: panMode ? V.pri : V.surf,
+          color: panMode ? V.onpri : V.pri,
+          fontSize: 9,
+          fontWeight: 700,
+        }}
+      >
+        {panMode ? "PAN: ON" : "PAN: OFF"}
+      </button>
       <button
         type="button"
         aria-label="Toggle outfit drawer"
