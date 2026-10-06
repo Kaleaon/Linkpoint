@@ -5848,9 +5848,10 @@ class AgentDomainCapabilitiesCapabilities:
 
 @dataclass
 class CapabilitiesRequestResponseCapabilities:
-    capabilities: List[str] = field(default_factory=list)
-    seed_response: Optional[str] = None
-    fetch_inventory: Optional[str] = None
+    capabilities: list[str] = field(default_factory=list)
+    seed_response: str | None = None
+    fetch_inventory: str | None = None
+
 
 @dataclass
 class EventQueueGetCapabilities:

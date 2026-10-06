@@ -73,12 +73,18 @@ void main() {
       }
     });
 
-    test('Memory leak check: 1000 parse and serialize iterations confirm zero lost buffers', () {
+    test(
+        'Memory leak check: 1000 parse and serialize iterations confirm zero lost buffers',
+        () {
       if (!LinkpointProtocolFFI.isAvailable) {
         markTestSkipped('FFI library liblinkpoint_protocol is not available');
         return;
       }
-      final jsonStr = jsonEncode({'agent_id': '00000000-0000-0000-0000-000000000000', 'balance': 1000, 'online': true});
+      final jsonStr = jsonEncode({
+        'agent_id': '00000000-0000-0000-0000-000000000000',
+        'balance': 1000,
+        'online': true
+      });
       for (var i = 0; i < 1000; i++) {
         final xml = LinkpointProtocolFFI.serializeXml(jsonStr);
         final jsonParsed = LinkpointProtocolFFI.parseXml(xml);
