@@ -54,6 +54,12 @@ class SafeMeshDecompressorTest {
         assertEquals(32 * 1024 * 1024L, lowMemDecompressor.maxQuotaBytes)
     }
 
+    @Test
+    fun testDefaultQuotaIs32MB() {
+        val defaultDecompressor = SafeMeshDecompressor()
+        assertEquals(32 * 1024 * 1024L, defaultDecompressor.maxQuotaBytes)
+    }
+
     @Test(expected = StreamStallException::class)
     fun testStallDetectionOnTruncatedPayload() {
         // Invalid compressed data payload that stalls inflater progress

@@ -83,6 +83,36 @@ class CascadingLodResolverTest {
     }
 
     @Test
+    fun testResolveMissingLowestLodCascadesInPriorityOrder() {
+        // Search order for MeshLOD.LOW: lowest_lod -> low_lod -> medium_lod -> high_lod
+        val headerMap = LLSDMap().apply {
+            this["medium_lod"] = createLodEntry(200, 30) // HIGH
+            this["high_lod"] = createLodEntry(0, 100)    // HIGHEST
+        }
+
+        val result = resolver.resolveLodMap(headerMap, MeshLOD.LOW)
+        assertNotNull(result)
+        assertEquals("medium_lod", result!!.lodKey)
+        assertEquals(MeshLOD.HIGH, result.resolvedLod)
+        assertEquals(2, result.cascadeDepth)
+    }
+
+    @Test
+    fun testResolveMissingLowLodCascadesInPriorityOrder() {
+        // Search order for MeshLOD.MEDIUM: low_lod -> medium_lod -> lowest_lod -> high_lod
+        val headerMap = LLSDMap().apply {
+            this["lowest_lod"] = createLodEntry(300, 10) // LOW
+            this["high_lod"] = createLodEntry(0, 100)    // HIGHEST
+        }
+
+        val result = resolver.resolveLodMap(headerMap, MeshLOD.MEDIUM)
+        assertNotNull(result)
+        assertEquals("lowest_lod", result!!.lodKey)
+        assertEquals(MeshLOD.LOW, result.resolvedLod)
+        assertEquals(2, result.cascadeDepth)
+    }
+
+    @Test
     fun testSkipsInvalidEntryWithZeroSizeOrNegativeOffset() {
         val headerMap = LLSDMap().apply {
             this["high_lod"] = createLodEntry(0, 0) // Invalid size 0

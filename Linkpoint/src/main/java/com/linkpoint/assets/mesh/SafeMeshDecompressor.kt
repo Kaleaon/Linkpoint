@@ -28,14 +28,14 @@ data class DecompressorTelemetry(
 /**
  * Bounded zlib decompressor for mesh streams with memory quotas and stall monitoring.
  *
- * @property maxQuotaBytes Maximum permitted output size in bytes (default 64 MB).
+ * @property maxQuotaBytes Maximum permitted output size in bytes (default 32 MB).
  */
 class SafeMeshDecompressor(
     val maxQuotaBytes: Long = DEFAULT_MAX_QUOTA_BYTES
 ) {
     companion object {
-        /** Default decompression quota: 64 MB */
-        const val DEFAULT_MAX_QUOTA_BYTES: Long = 64 * 1024 * 1024L
+        /** Default decompression quota: 32 MB */
+        const val DEFAULT_MAX_QUOTA_BYTES: Long = 32 * 1024 * 1024L
 
         /** Low-memory profile quota: 32 MB */
         const val LOW_MEMORY_QUOTA_BYTES: Long = 32 * 1024 * 1024L
