@@ -6802,18 +6802,6 @@ class GameControlInputPacket {
   }
 }
 
-class CapabilitiesRequestResponseCapabilities {
-  final List<String>? capabilities;
-  final String? seed_response;
-  final String? fetch_inventory;
-
-  CapabilitiesRequestResponseCapabilities({
-    this.capabilities,
-    this.seed_response,
-    this.fetch_inventory,
-  });
-}
-
 class AgentDomainCapabilitiesCapabilities {
   final String? agent_id;
   final String? session_id;
@@ -6833,6 +6821,18 @@ class AgentDomainCapabilitiesCapabilities {
     this.hover_height,
     this.active_group_id,
     this.maturity_rating,
+  });
+}
+
+class CapabilitiesRequestResponseCapabilities {
+  final List<String>? capabilities;
+  final String? seed_response;
+  final String? fetch_inventory;
+
+  CapabilitiesRequestResponseCapabilities({
+    this.capabilities,
+    this.seed_response,
+    this.fetch_inventory,
   });
 }
 
