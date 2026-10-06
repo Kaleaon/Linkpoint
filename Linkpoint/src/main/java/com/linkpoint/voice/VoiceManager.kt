@@ -49,8 +49,7 @@ class VoiceManager(
     private val parcelManager: com.linkpoint.world.ParcelManager? = null,
     initialGridKind: GridKind = GridKind.SECOND_LIFE,
     initialVoiceConfig: VoiceConfig? = null,
-    adapterFactory: VoiceTransportAdapterFactory? = null,
-    private val parcelManager: com.linkpoint.world.ParcelManager? = null
+    adapterFactory: VoiceTransportAdapterFactory? = null
 ) {
     companion object {
         private const val TAG = "VoiceManager"
@@ -292,7 +291,6 @@ class VoiceManager(
             }
         }
 
-        val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
             Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
@@ -368,13 +366,6 @@ class VoiceManager(
         }
 
         joinParcelVoice()
-    }
-
-    /**
-     * Connects to spatial voice asynchronously based on current grid capabilities and parcel state.
-     */
-    suspend fun connect(parcelLocalId: Int? = null): Boolean {
-        return joinSpatialVoice(parcelLocalId)
     }
 
     /**
