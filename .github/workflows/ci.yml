@@ -164,14 +164,16 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run Playwright visual tests
-        run: npm run test:playwright
+        run: npm run test:visual
 
       - name: Upload Playwright test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-results
-          path: packages/design-system/test-results/
+          path: |
+            apps/linkpoint/test-results/
+            packages/design-system/test-results/
 
   rust:
     name: Task 4 - Rust Core Workspace Checks
