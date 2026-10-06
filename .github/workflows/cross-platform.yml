@@ -41,11 +41,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Configure Git line endings
+      - uses: actions/checkout@v4
+      - name: Configure Git line endings and reset working tree
         run: |
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
-      - uses: actions/checkout@v4
+          git config core.autocrlf false
+          git add --renormalize .
+          git reset
+          git checkout .
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -75,11 +79,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Configure Git line endings
+      - uses: actions/checkout@v4
+      - name: Configure Git line endings and reset working tree
         run: |
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
-      - uses: actions/checkout@v4
+          git config core.autocrlf false
+          git add --renormalize .
+          git reset
+          git checkout .
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
