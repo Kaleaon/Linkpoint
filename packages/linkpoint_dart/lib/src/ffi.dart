@@ -36,14 +36,18 @@ class LinkpointProtocolFFI {
     }
   }
 
+  static bool isAvailable() => isAvailable;
+
   static DynamicLibrary _loadLibrary() {
     if (_lib != null) return _lib!;
     if (Platform.isLinux) {
       final searchPaths = [
         'liblinkpoint_protocol.so',
         '../../target/release/liblinkpoint_protocol.so',
-        '../../target/debug/liblinkpoint_protocol.so',
+        '../target/release/liblinkpoint_protocol.so',
         'target/release/liblinkpoint_protocol.so',
+        '../../target/debug/liblinkpoint_protocol.so',
+        '../target/debug/liblinkpoint_protocol.so',
         'target/debug/liblinkpoint_protocol.so',
         '/app/Linkpoint/target/release/liblinkpoint_protocol.so',
         '/app/Linkpoint/target/debug/liblinkpoint_protocol.so',
@@ -61,7 +65,11 @@ class LinkpointProtocolFFI {
       final searchPaths = [
         'liblinkpoint_protocol.dylib',
         '../../target/release/liblinkpoint_protocol.dylib',
+        '../target/release/liblinkpoint_protocol.dylib',
         'target/release/liblinkpoint_protocol.dylib',
+        '../../target/debug/liblinkpoint_protocol.dylib',
+        '../target/debug/liblinkpoint_protocol.dylib',
+        'target/debug/liblinkpoint_protocol.dylib',
         '/app/Linkpoint/target/release/liblinkpoint_protocol.dylib',
       ];
       for (final p in searchPaths) {
@@ -77,7 +85,11 @@ class LinkpointProtocolFFI {
       final searchPaths = [
         'linkpoint_protocol.dll',
         '../../target/release/linkpoint_protocol.dll',
+        '../target/release/linkpoint_protocol.dll',
         'target/release/linkpoint_protocol.dll',
+        '../../target/debug/linkpoint_protocol.dll',
+        '../target/debug/linkpoint_protocol.dll',
+        'target/debug/linkpoint_protocol.dll',
         '/app/Linkpoint/target/release/linkpoint_protocol.dll',
       ];
       for (final p in searchPaths) {
