@@ -14,6 +14,11 @@ cargo build --target wasm32-unknown-unknown --features wasm -p linkpoint-protoco
 OUT_DIR="packages/linkpoint_wasm"
 mkdir -p "${OUT_DIR}"
 
+if ! command -v wasm-bindgen >/dev/null 2>&1; then
+    echo "Warning: wasm-bindgen CLI not found; attempting cargo install wasm-bindgen-cli..."
+    cargo install wasm-bindgen-cli --version 0.2.129 || true
+fi
+
 if command -v wasm-bindgen >/dev/null 2>&1; then
     wasm-bindgen target/wasm32-unknown-unknown/release/linkpoint_protocol.wasm --out-dir "${OUT_DIR}" --target bundler
 else

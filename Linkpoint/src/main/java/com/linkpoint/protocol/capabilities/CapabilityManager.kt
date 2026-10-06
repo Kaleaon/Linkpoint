@@ -1153,6 +1153,29 @@ open class CapabilityManager : CapabilityRequester {
     fun getAvailableCapabilities(): List<String> = capabilities.keys.toList()
 
     /**
+     * Get current seed capability URL
+     */
+    fun getSeedCapability(): String? = seedCapability
+
+    /**
+     * Get an in-memory snapshot of resolved capability URLs
+     */
+    fun getCapabilitiesSnapshot(): Map<String, String> = java.util.HashMap(capabilities)
+
+    /**
+     * Restore seed capability URL and in-memory capability mapping during rollback
+     */
+    fun restoreCapabilities(seedCap: String?, snapshot: Map<String, String>?) {
+        this.seedCapability = seedCap
+        this.lastSeedCapabilityUsed = seedCap
+        if (snapshot != null) {
+            this.capabilities.clear()
+            this.capabilities.putAll(snapshot)
+            this._isReady.value = snapshot.isNotEmpty()
+        }
+    }
+
+    /**
      * Get the total number of capabilities
      */
     fun getCapabilityCount(): Int = capabilities.size

@@ -213,7 +213,7 @@ class MeshManager(
             downloadedBytes.addAndGet(lodCompressed.size.toLong())
             val faces = parseGeometryFromLodBytes(meshId, decompressed)
             val skinData = skinMap?.let { parseSkinData(it) }
-            MeshData(meshId = meshId, faces = faces, skinData = skinData, lod = lod)
+            MeshData(meshId = meshId, faces = faces, skinData = skinData, lod = lodResolution.resolvedLod)
         } catch (e: Exception) {
             Log.w(TAG, "Ranged-fetch parse failed for $meshId, will retry full asset: ${e.message}")
             null
@@ -450,7 +450,7 @@ class MeshManager(
             val decompressed = decompressor.decompress(compressedData)
 
             // Parse mesh geometry
-            return parseMeshGeometry(meshId, decompressed, header, lod)
+            return parseMeshGeometry(meshId, decompressed, header, lodResolution.resolvedLod)
         } catch (e: Exception) {
             Log.e(TAG, "Mesh parse error: $meshId", e)
             lastError = "Parse: ${e.javaClass.simpleName}: ${e.message}"

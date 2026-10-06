@@ -86,14 +86,21 @@ class CascadingLodResolver {
         MeshLOD.LOW -> "lowest_lod"
     }
 
+    companion object {
+        private val HIGHEST_CANDIDATES = listOf(MeshLOD.HIGHEST, MeshLOD.HIGH, MeshLOD.MEDIUM, MeshLOD.LOW)
+        private val HIGH_CANDIDATES = listOf(MeshLOD.HIGH, MeshLOD.HIGHEST, MeshLOD.MEDIUM, MeshLOD.LOW)
+        private val MEDIUM_CANDIDATES = listOf(MeshLOD.MEDIUM, MeshLOD.HIGH, MeshLOD.LOW, MeshLOD.HIGHEST)
+        private val LOW_CANDIDATES = listOf(MeshLOD.LOW, MeshLOD.MEDIUM, MeshLOD.HIGH, MeshLOD.HIGHEST)
+    }
+
     /**
      * Preferred fallback search sequence for a given requested LOD tier.
      */
     private fun getLodCandidates(requested: MeshLOD): List<MeshLOD> = when (requested) {
-        MeshLOD.HIGHEST -> listOf(MeshLOD.HIGHEST, MeshLOD.HIGH, MeshLOD.MEDIUM, MeshLOD.LOW)
-        MeshLOD.HIGH -> listOf(MeshLOD.HIGH, MeshLOD.HIGHEST, MeshLOD.MEDIUM, MeshLOD.LOW)
-        MeshLOD.MEDIUM -> listOf(MeshLOD.MEDIUM, MeshLOD.HIGH, MeshLOD.LOW, MeshLOD.HIGHEST)
-        MeshLOD.LOW -> listOf(MeshLOD.LOW, MeshLOD.MEDIUM, MeshLOD.HIGH, MeshLOD.HIGHEST)
+        MeshLOD.HIGHEST -> HIGHEST_CANDIDATES
+        MeshLOD.HIGH -> HIGH_CANDIDATES
+        MeshLOD.MEDIUM -> MEDIUM_CANDIDATES
+        MeshLOD.LOW -> LOW_CANDIDATES
     }
 
     private fun recordTelemetry(depth: Int) {
