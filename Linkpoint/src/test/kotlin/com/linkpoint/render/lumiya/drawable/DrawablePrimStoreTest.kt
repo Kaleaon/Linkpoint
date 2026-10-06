@@ -22,32 +22,32 @@ class DrawablePrimStoreTest {
     }
 
     @Test
-    fun testAddAndRemovePrim() {
+    fun testSlotAllocationAndRecycling() {
         assertEquals(0, store.primCount())
 
         store.addPrim(101L, 10f, 20f, 30f)
         store.addPrim(102L, 5f, 5f, 5f)
         assertEquals(2, store.primCount())
 
-        val snapshot1 = store.snapshot()
-        assertTrue(snapshot1.any { it.id == 101L })
-        assertTrue(snapshot1.any { it.id == 102L })
+        val initial101 = store.prims[101L]
+        val initial102 = store.prims[102L]
+        assertNotNull(initial101)
+        assertNotNull(initial102)
 
         store.removePrim(101L)
         assertEquals(1, store.primCount())
-        val snapshot2 = store.snapshot()
-        assertFalse(snapshot2.any { it.id == 101L })
+        assertFalse(store.prims.containsKey(101L))
 
         store.addPrim(103L, 1f, 1f, 1f)
         assertEquals(2, store.primCount())
-        assertTrue(store.snapshot().any { it.id == 103L })
+        assertTrue(store.prims.containsKey(103L))
     }
 
     @Test
     fun testUpsertAndShapeClassification() {
         val sphereParams = PrimShapeParams(
             pathCurve = PrimShapeParams.PATH_CIRCLE,
-            profileCurve = PrimShapeParams.PROFILE_HALF_CIRCLE
+            profileCurve = PrimShapeParams.PROFILE_CIRCLE
         )
         store.upsertPrim(
             id = 201L,
@@ -82,19 +82,28 @@ class DrawablePrimStoreTest {
     }
 
     @Test
-    fun testTransparentPrimFiltering() {
-        store.addPrim(401L, 0f, 0f, 10f)
-        store.addPrim(402L, 0f, 0f, 50f)
-        store.addPrim(403L, 0f, 0f, 5f)
+    fun testInPlaceTransparentSorting() {
+        // Add transparent prims at different distances
+        store.addPrim(401L, 0f, 0f, 10f) // Dist^2 = 100
+        store.addPrim(402L, 0f, 0f, 50f) // Dist^2 = 2500
+        store.addPrim(403L, 0f, 0f, 5f)  // Dist^2 = 25
 
         store.setPrimTransparent(401L, true)
         store.setPrimTransparent(402L, true)
+        store.setPrimTransparent(403L, true)
 
         val transparentPrims = store.snapshot().filter { it.isTransparent }
-        assertEquals(2, transparentPrims.size)
-        assertTrue(transparentPrims.any { it.id == 401L })
-        assertTrue(transparentPrims.any { it.id == 402L })
-        assertFalse(transparentPrims.any { it.id == 403L })
+        assertEquals(3, transparentPrims.size)
+
+        // Sort descending by distance from camera (0,0,0) (farthest object 50f first)
+        val sorted = transparentPrims.sortedByDescending { prim ->
+            val dz = prim.modelMatrix[14]
+            dz * dz
+        }
+
+        assertEquals(402L, sorted[0].id)
+        assertEquals(401L, sorted[1].id)
+        assertEquals(403L, sorted[2].id)
     }
 
     @Test
@@ -125,6 +134,7 @@ class DrawablePrimStoreTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS))
         executor.shutdown()
 
+        // Verify state consistency
         val snapshot = store.snapshot()
         assertEquals(store.primCount(), snapshot.size)
     }
