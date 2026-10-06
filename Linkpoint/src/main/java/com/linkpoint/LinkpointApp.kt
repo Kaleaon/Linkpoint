@@ -461,6 +461,8 @@ class LinkpointApp : Application() {
 
     // Protocol layer
     lateinit var capabilityManager: CapabilityManager
+    lateinit var regionCrossingManager: com.linkpoint.world.RegionCrossingManager
+        private set
     /**
      * Per-region SimulatorFeatures snapshot. Populated after the seed cap
      * is fetched and re-fetched on region change. Renderer / inventory /
@@ -786,6 +788,13 @@ class LinkpointApp : Application() {
         // Protocol components
         capabilityManager = CapabilityManager().apply { androidContext = this@LinkpointApp }
         simulatorFeatures = com.linkpoint.world.SimulatorFeaturesManager(capabilityManager)
+        applicationScope.launch {
+            simulatorFeatures.features.collect { proj ->
+                if (proj != null && ::terrainManager.isInitialized) {
+                    terrainManager.setRegionSize(proj.regionSizeX, proj.regionSizeY)
+                }
+            }
+        }
         udpConnection = UDPConnectionFixed()
 
         // Protocol handler
@@ -1280,6 +1289,9 @@ class LinkpointApp : Application() {
         // Modern features: Animesh and Bakes on Mesh
         animeshManager = AnimeshManager(meshManager, animationManager)
         bomManager = BakesOnMeshManager(capabilityManager, textureManager)
+
+        // Region crossing manager
+        regionCrossingManager = com.linkpoint.world.RegionCrossingManager(udpConnection, capabilityManager)
 
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
@@ -1855,7 +1867,9 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload == null) return@registerHandler
-                val result = com.linkpoint.protocol.terrain.LayerDataParser.parse(payload)
+                val sizeX = if (::simulatorFeatures.isInitialized) simulatorFeatures.features.value?.regionSizeX ?: 2048 else 2048
+                val sizeY = if (::simulatorFeatures.isInitialized) simulatorFeatures.features.value?.regionSizeY ?: 2048 else 2048
+                val result = com.linkpoint.protocol.terrain.LayerDataParser.parse(payload, sizeX, sizeY)
                 if (result != null) {
                     layerDataCount++
                     if (layerDataCount <= 5 || layerDataCount % 50 == 0) {

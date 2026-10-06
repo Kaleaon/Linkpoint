@@ -10,6 +10,7 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.linkpoint.R
 import com.linkpoint.inventory.InventoryItem
+import com.linkpoint.inventory.ItemPermissions
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -72,12 +73,10 @@ class ItemDetailDialog : DialogFragment() {
 
     private fun formatPermissions(mask: Int): String {
         val permissions = mutableListOf<String>()
-        if (mask and 0x00000004 != 0) permissions.add("Modify")
-        if (mask and 0x00000008 != 0) permissions.add("Transfer")
-        if (mask and 0x00000010 != 0) permissions.add("Copy")
-        if (mask and 0x00000020 != 0) permissions.add("Everyone Copy")
-        if (mask and 0x00000080 != 0) permissions.add("Everyone Modify")
-        if (mask and 0x00000100 != 0) permissions.add("Everyone Transfer")
+        if (mask and ItemPermissions.PERM_MODIFY != 0) permissions.add("Modify")
+        if (mask and ItemPermissions.PERM_COPY != 0) permissions.add("Copy")
+        if (mask and ItemPermissions.PERM_TRANSFER != 0) permissions.add("Transfer")
+        if (mask and ItemPermissions.PERM_MOVE != 0) permissions.add("Move")
         return if (permissions.isEmpty()) "None" else permissions.joinToString(", ")
     }
 

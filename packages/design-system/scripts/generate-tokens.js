@@ -9,7 +9,7 @@ const jsonPath = path.resolve(__dirname, "../src/tokens/tokens.json");
 const tsOutputPath = path.resolve(__dirname, "../src/tokens/tokens.ts");
 const kotlinOutputPath = path.resolve(
   __dirname,
-  "../../../Linkpoint/src/main/java/com/linkpoint/ui/components/linkpoint2/tokens/GeneratedTokens.kt"
+  "../../../Linkpoint/ui-components/src/main/java/com/linkpoint/ui/components/linkpoint2/tokens/GeneratedTokens.kt"
 );
 
 function toPascalCase(str) {
@@ -107,6 +107,6 @@ ${generateKotlinBody(tokenData, 1)}
 }
 
 // Execute when run directly
-if (process.argv[1] && process.argv[1].endsWith("generate-tokens.js")) {
+if (process.argv[1] && (process.argv[1].endsWith("generate-tokens.js") || process.argv[1].endsWith("generate-tokens"))) {
   generateTokens();
 }

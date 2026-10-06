@@ -80,12 +80,25 @@ class WorldMap(
     fun setFriendsManagerProvider(provider: () -> FriendsManager?) {
         friendsManagerProvider = provider
     }
+    // Active manifold frame identifier
+    @Volatile var activeManifoldFrameId: String = "flat-2d"
+
+    private fun makeCacheKey(gridX: Int, gridY: Int, frameId: String? = null): String {
+        val fid = frameId ?: activeManifoldFrameId
+        return "$fid-$gridX-$gridY"
+    }
+
+    private fun makeTileCacheKey(zoom: Int, x: Int, y: Int, frameId: String? = null): String {
+        val fid = frameId ?: activeManifoldFrameId
+        return "$zoom-$fid-$x-$y"
+    }
 
     /**
-     * Cache region info from MapBlockReply message.
+     * Cache region info from MapBlockReply message with frame-aware cache key.
      */
-    fun cacheRegionInfo(gridX: Int, gridY: Int, name: String, mapImageId: UUID) {
-        val key = "$gridX-$gridY"
+    fun cacheRegionInfo(gridX: Int, gridY: Int, name: String, mapImageId: UUID, frameId: String? = null) {
+        val fid = frameId ?: activeManifoldFrameId
+        val key = makeCacheKey(gridX, gridY, fid)
         val regionHandle = (gridX.toLong() shl 32) or gridY.toLong()
         val info = RegionMapInfo(
             name = name,
@@ -93,10 +106,14 @@ class WorldMap(
             gridY = gridY,
             regionHandle = regionHandle,
             access = 0, // Default access level
-            mapImageId = mapImageId
+            mapImageId = mapImageId,
+            manifoldFrameId = fid
         )
         regions[key] = info
-        Log.d(TAG, "Cached region info: $name at ($gridX, $gridY)")
+        regions["$gridX-$gridY"] = info // Also cache legacy key for un-scoped lookup
+        try {
+            Log.d(TAG, "Cached region info: $name at ($gridX, $gridY) frame=$fid key=$key")
+        } catch (_: Throwable) {}
     }
 
     // Byte-bounded memory LRU cache for decoded tile bitmaps
@@ -151,16 +168,19 @@ class WorldMap(
     }
 
     /**
-     * Get map tile
+     * Get map tile using frame-aware cache key.
      */
-    suspend fun getMapTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
-        val key = "$zoom-$x-$y"
+    suspend fun getMapTile(x: Int, y: Int, zoom: Int = ZOOM_REGION, frameId: String? = null): Bitmap? {
+        val fid = frameId ?: activeManifoldFrameId
+        val key = makeTileCacheKey(zoom, x, y, fid)
 
         // Check memory LRU cache first
         mapTiles.get(key)?.let {
             if (!it.isRecycled) return it
         }
-
+        mapTiles.get("$zoom-$x-$y")?.let {
+            if (!it.isRecycled) return it
+        }
         return withContext(Dispatchers.IO) {
             try {
                 val tileUuid = UUID.nameUUIDFromBytes("maptile_$key".toByteArray())
@@ -285,12 +305,13 @@ class WorldMap(
      * Get region info by grid coordinates.
      * Returns cached info if available, otherwise queries the simulator.
      */
-    suspend fun getRegionInfoByGrid(x: Int, y: Int): RegionMapInfo? {
-        val key = "$x-$y"
-
+    suspend fun getRegionInfoByGrid(x: Int, y: Int, frameId: String? = null): RegionMapInfo? {
+        val fid = frameId ?: activeManifoldFrameId
+        val key = makeCacheKey(x, y, fid)
+        
         // Return cached if available
         regions[key]?.let { return it }
-
+        regions["$x-$y"]?.let { return it }
         // Query region info via capability if available
         return withContext(Dispatchers.IO) {
             try {
@@ -318,7 +339,8 @@ class WorldMap(
                         gridY = y,
                         regionHandle = regionHandle,
                         access = DEFAULT_ACCESS_LEVEL,
-                        mapImageId = null
+                        mapImageId = null,
+                        manifoldFrameId = fid
                     )
                     regions[key] = info
                     info
@@ -374,9 +396,10 @@ class WorldMap(
      * `TeleportEvent.Completed` can ship the real region name when the
      * MapBlockReply / EQG cap has already cached one for that grid square.
      */
-    fun getCachedRegionName(regionHandle: Long): String? {
+    fun getCachedRegionName(regionHandle: Long, frameId: String? = null): String? {
         val (gridX, gridY) = getGridFromHandle(regionHandle)
-        return regions["$gridX-$gridY"]?.name?.takeIf { it.isNotEmpty() }
+        val fid = frameId ?: activeManifoldFrameId
+        return (regions[makeCacheKey(gridX, gridY, fid)] ?: regions["$gridX-$gridY"])?.name?.takeIf { it.isNotEmpty() }
     }
 
     /**
@@ -502,7 +525,8 @@ data class RegionMapInfo(
     val gridY: Int,
     val regionHandle: Long,
     val access: Int,
-    val mapImageId: UUID?
+    val mapImageId: UUID?,
+    val manifoldFrameId: String = "flat-2d"
 )
 
 data class RegionSearchResult(

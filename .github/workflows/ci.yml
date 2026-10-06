@@ -91,6 +91,18 @@ jobs:
       - name: Run unit tests and lint
         run: ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace
 
+      - name: Run Paparazzi snapshot tests
+        run: ./gradlew paparazziDebugCheck
+
+      - name: Upload Paparazzi snapshot reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paparazzi-reports
+          path: |
+            Linkpoint/ui-components/build/reports/paparazzi/
+            Linkpoint/ui-components/src/test/snapshots/
+
       - name: Assemble Debug build
         run: ./gradlew :Linkpoint:assembleDebug --stacktrace
 
@@ -147,6 +159,19 @@ jobs:
           name: web-coverage
           path: coverage/lcov.info
           if-no-files-found: ignore
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
+      - name: Run Playwright visual tests
+        run: npm run test:playwright
+
+      - name: Upload Playwright test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: packages/design-system/test-results/
 
   rust:
     name: Task 4 - Rust Core Workspace Checks
@@ -216,10 +241,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+
+      - name: Build native protocol shared library
+        run: cargo build -p linkpoint-protocol --release
 
       - name: Run Dart / Flutter tests
         run: |

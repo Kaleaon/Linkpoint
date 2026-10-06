@@ -246,6 +246,36 @@ class TestInventoryCache(unittest.TestCase):
 
         self.assertEqual(len(errors), 0, f"Thread safety errors encountered: {errors}")
 
+    def test_cascading_deletes_and_deduplication(self):
+        full_data = {
+            "folders": [
+                {"folder_id": "f_root", "parent_id": None, "name": "Root Folder"},
+                {"folder_id": "f_sub", "parent_id": "f_root", "name": "Sub Folder"}
+            ],
+            "items": [
+                {"item_id": "i_1", "folder_id": "f_sub", "name": "Item 1", "asset_id": "a1"},
+                {"item_id": "i_2", "folder_id": "f_sub", "name": "Item 2", "asset_id": "a2"}
+            ]
+        }
+        self.cache.reload_full_inventory(full_data, new_token="token_v1")
+        self.assertEqual(len(self.cache.get_folder_items("f_sub")), 2)
+
+        # Move item i_1 from f_sub to f_root
+        delta_move = {
+            "items_to_add_or_update": [{"item_id": "i_1", "folder_id": "f_root", "name": "Item 1", "asset_id": "a1"}]
+        }
+        self.cache.apply_delta_update(delta_move, new_token="token_v2")
+        self.assertEqual(len(self.cache.get_folder_items("f_sub")), 1)
+        self.assertEqual(len(self.cache.get_folder_items("f_root")), 1)
+
+        # Cascading delete of folder f_sub
+        delta_delete = {
+            "folders_to_remove": ["f_sub"]
+        }
+        self.cache.apply_delta_update(delta_delete, new_token="token_v3")
+        self.assertIsNone(self.cache.get_item("i_2"))  # Cascaded deletion
+        self.assertIsNotNone(self.cache.get_item("i_1"))  # Preserved in f_root
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -187,6 +187,8 @@ export class SQLiteInventoryStore {
   private runMigrations(): void {
     if (!this.db) return;
 
+    this.db.exec('PRAGMA foreign_keys = ON;');
+
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS schema_migrations (
         version INTEGER PRIMARY KEY,
@@ -228,7 +230,8 @@ export class SQLiteInventoryStore {
           description TEXT DEFAULT '',
           permissions TEXT DEFAULT '{}',
           created_at INTEGER NOT NULL DEFAULT 0,
-          updated_at INTEGER NOT NULL
+          updated_at INTEGER NOT NULL,
+          FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS sync_state (

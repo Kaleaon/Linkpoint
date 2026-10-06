@@ -447,9 +447,17 @@ object MessageParser {
     /**
      * Parse ImprovedTerseObjectUpdate (fast position updates)
      */
-    fun parseTerseObjectUpdate(data: ByteArray): List<TerseUpdateData> = ObjectMessageParsers.parseTerseObjectUpdate(data)
+    fun parseTerseObjectUpdate(
+        data: ByteArray,
+        regionSizeX: Float = 256f,
+        regionSizeY: Float = regionSizeX
+    ): List<TerseUpdateData> = ObjectMessageParsers.parseTerseObjectUpdate(data, regionSizeX, regionSizeY)
 
-    private fun parseTerseBlock(data: ByteArray): TerseUpdateData? {
+    private fun parseTerseBlock(
+        data: ByteArray,
+        regionSizeX: Float = 256f,
+        regionSizeY: Float = regionSizeX
+    ): TerseUpdateData? {
         if (data.size < 30) return null
 
         val bb = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
@@ -464,20 +472,20 @@ object MessageParser {
             floatArrayOf(bb.float, bb.float, bb.float, bb.float)
         } else null
 
-        val position = LLVector3.fromTerse(data, bb.position(), 256f)
+        val position = LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         bb.position(bb.position() + 6)
 
-        val velocity = LLVector3.fromTerse(data, bb.position(), 256f)
+        val velocity = LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         bb.position(bb.position() + 6)
 
-        val acceleration = LLVector3.fromTerse(data, bb.position(), 256f)
+        val acceleration = LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         bb.position(bb.position() + 6)
 
         val rotation = LLQuaternion.fromTerse(data, bb.position())
         bb.position(bb.position() + 8)
 
         val angularVelocity = if (bb.remaining() >= 6) {
-            LLVector3.fromTerse(data, bb.position(), 256f)
+            LLVector3.fromTerse(data, bb.position(), regionSizeX, regionSizeY)
         } else LLVector3.zero()
 
         return TerseUpdateData(
@@ -752,20 +760,20 @@ data class ObjectUpdateData(
         return LLVector3d(getGlobalX(), getGlobalY(), position.z.toDouble())
     }
 
+    data class SculptInfo(
+        val sculptId: UUID,
+        val sculptType: Int
+    )
+
     /**
-     * Extract mesh/sculpt asset ID from extra params.
-     * Sculpt/mesh data is stored in extra param type 0x30.
-     * Format: [type:2bytes][size:4bytes][data:size bytes]
-     * Sculpt data format: [sculptUUID:16bytes][sculptType:1byte]
-     * Mesh has sculptType = 5
+     * Extract sculpt or mesh asset info from extra params.
+     * Type 0x30 contains [sculptUUID:16bytes][sculptType:1byte].
      */
-    fun getMeshAssetId(): UUID? {
+    fun getSculptInfo(): SculptInfo? {
         if (extraParams.isEmpty()) return null
 
         try {
             val buffer = java.nio.ByteBuffer.wrap(extraParams).order(java.nio.ByteOrder.LITTLE_ENDIAN)
-
-            // Parse extra params - format: count:1byte, then [type:2bytes][size:4bytes][data]...
             val paramCount = buffer.get().toInt() and 0xFF
 
             for (i in 0 until paramCount) {
@@ -776,38 +784,36 @@ data class ObjectUpdateData(
 
                 if (buffer.remaining() < paramSize) break
 
-                // Type 0x30 (48) = Sculpt/Mesh data
                 if (paramType == 0x30 && paramSize >= 17) {
                     val uuidBytes = ByteArray(16)
                     buffer.get(uuidBytes)
                     val sculptType = buffer.get().toInt() and 0xFF
-
-                    // Sculpt type 5 = mesh
-                    if (sculptType == 5) {
-                        // Parse UUID (big-endian)
-                        val uuidBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
-                        val mostSigBits = uuidBuffer.long
-                        val leastSigBits = uuidBuffer.long
-                        return UUID(mostSigBits, leastSigBits)
-                    }
-
-                    // Skip remaining bytes of this param
-                    val remaining = paramSize - 17
-                    if (remaining > 0 && buffer.remaining() >= remaining) {
-                        buffer.position(buffer.position() + remaining)
-                    }
+                    val uuidBuffer = java.nio.ByteBuffer.wrap(uuidBytes).order(java.nio.ByteOrder.BIG_ENDIAN)
+                    val uuid = UUID(uuidBuffer.long, uuidBuffer.long)
+                    return SculptInfo(uuid, sculptType)
                 } else {
-                    // Skip this param
                     if (buffer.remaining() >= paramSize) {
                         buffer.position(buffer.position() + paramSize)
                     }
                 }
             }
         } catch (e: Exception) {
-            // Silently fail - extraParams may be malformed
+            // Silently fail
         }
 
         return null
+    }
+
+    /**
+     * Extract mesh/sculpt asset ID from extra params.
+     * Sculpt/mesh data is stored in extra param type 0x30.
+     * Format: [type:2bytes][size:4bytes][data:size bytes]
+     * Sculpt data format: [sculptUUID:16bytes][sculptType:1byte]
+     * Mesh has sculptType = 5
+     */
+    fun getMeshAssetId(): UUID? {
+        val info = getSculptInfo()
+        return if (info?.sculptType == 5) info.sculptId else null
     }
 }
 

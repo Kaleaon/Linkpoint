@@ -170,4 +170,23 @@ function serializeFriend(friend, rights = {}) {
   };
 }
 
-module.exports = { finite, vector, serializableValue, serializeEnvironment, serializeTerrain, primAppearance, serializeObject, serializeFriend };
+function serializeParcel(parcel) {
+  if (!parcel) return null;
+  const ownerIdStr = parcel.OwnerID?.toString?.() || parcel.ownerId?.toString?.() || parcel.ownerID?.toString?.() || null;
+  const groupIdStr = parcel.GroupID?.toString?.() || parcel.groupId?.toString?.() || parcel.groupID?.toString?.() || null;
+  return {
+    id: parcel.LocalID ?? parcel.id ?? parcel.LocalId ?? null,
+    name: parcel.Name || parcel.name || '',
+    description: parcel.Desc || parcel.description || parcel.desc || '',
+    area: finite(parcel.Area ?? parcel.area),
+    ownerId: ownerIdStr && ownerIdStr !== '00000000-0000-0000-0000-000000000000' ? ownerIdStr : null,
+    groupId: groupIdStr && groupIdStr !== '00000000-0000-0000-0000-000000000000' ? groupIdStr : null,
+    maxPrims: finite(parcel.MaxPrims ?? parcel.maxPrims),
+    totalPrims: finite(parcel.TotalPrims ?? parcel.totalPrims),
+    musicUrl: parcel.MusicURL || parcel.musicUrl || '',
+    mediaUrl: parcel.MediaURL || parcel.mediaUrl || '',
+    parcelFlags: finite(parcel.ParcelFlags ?? parcel.parcelFlags ?? parcel.Flags ?? parcel.flags),
+  };
+}
+
+module.exports = { finite, vector, serializableValue, serializeEnvironment, serializeTerrain, primAppearance, serializeObject, serializeFriend, serializeParcel };

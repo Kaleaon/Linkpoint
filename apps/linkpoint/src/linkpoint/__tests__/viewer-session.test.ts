@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
-const { serializeEnvironment, serializeObject, serializeTerrain, serializeFriend } = require('../../../core/viewer-session.cjs');
+const { serializeEnvironment, serializeObject, serializeTerrain, serializeFriend, serializeParcel } = require('../../../core/viewer-session.cjs');
 
 describe('desktop simulator object bridge', () => {
   it('serializes native friends for the renderer process', () => {
@@ -395,5 +395,82 @@ describe('desktop session avatar movement', () => {
     expect(sent[0][0]).toBe('sun-hour-update');
     expect(sent[0][1].sunHour).toBeCloseTo(0.5, 6);
     expect(sent[0][1].sunPhase).toBeCloseTo(Math.PI / 2, 6);
+  });
+
+  it('serializes parcel properties events with complete fields including parcelFlags', () => {
+    const rawParcel = {
+      LocalID: 42,
+      Name: 'Linden Park',
+      Desc: 'Public garden and rest area',
+      Area: 4096,
+      OwnerID: { toString: () => '11111111-2222-3333-4444-555555555555' },
+      GroupID: { toString: () => '00000000-0000-0000-0000-000000000000' },
+      MaxPrims: 1875,
+      TotalPrims: 1240,
+      MusicURL: 'https://stream.example/live.mp3',
+      MediaURL: 'https://media.example/board',
+      ParcelFlags: 1029, // 1024 (Voice) + 4 (Build) + 1 (Fly)
+    };
+
+    const serialized = serializeParcel(rawParcel);
+
+    expect(serialized).toEqual({
+      id: 42,
+      name: 'Linden Park',
+      description: 'Public garden and rest area',
+      area: 4096,
+      ownerId: '11111111-2222-3333-4444-555555555555',
+      groupId: null,
+      maxPrims: 1875,
+      totalPrims: 1240,
+      musicUrl: 'https://stream.example/live.mp3',
+      mediaUrl: 'https://media.example/board',
+      parcelFlags: 1029,
+    });
+    expect(() => structuredClone(serialized)).not.toThrow();
+  });
+
+  it('subscribes to onParcelPropertiesEvent and emits parcel-properties over IPC', () => {
+    const { Subject } = require('rxjs');
+    const sent: Array<[string, any]> = [];
+    const session = new ViewerSession((type: string, data: any) => sent.push([type, data]));
+    const parcelSubject = new Subject();
+    const events = {
+      onNewObjectEvent: new Subject(),
+      onObjectUpdatedEvent: new Subject(),
+      onObjectUpdatedTerseEvent: new Subject(),
+      onObjectKilledEvent: new Subject(),
+      onNearbyChat: new Subject(),
+      onInstantMessage: new Subject(),
+      onParcelPropertiesEvent: parcelSubject,
+      onAvatarEnteredRegion: new Subject(),
+      onFriendOnline: new Subject(),
+      onFriendRequest: new Subject(),
+      onFriendResponse: new Subject(),
+      onFriendRemoved: new Subject(),
+      onDisconnected: new Subject(),
+      onSimulatorViewerTimeMessage: new Subject(),
+    };
+    session.subscribeEvents(events);
+
+    parcelSubject.next({
+      LocalID: 10,
+      Name: 'Club Haven',
+      Desc: 'Nightclub stream',
+      Area: 2048,
+      MaxPrims: 937,
+      TotalPrims: 500,
+      MusicURL: 'https://club.example/stream',
+      ParcelFlags: 1025,
+    });
+
+    expect(sent).toHaveLength(1);
+    expect(sent[0][0]).toBe('parcel-properties');
+    expect(sent[0][1]).toMatchObject({
+      id: 10,
+      name: 'Club Haven',
+      musicUrl: 'https://club.example/stream',
+      parcelFlags: 1025,
+    });
   });
 });

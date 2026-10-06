@@ -37,7 +37,8 @@ class KotlinEmitter(BaseEmitter):
         out.append(f'    const val TEMPLATE_VERSION = "{ast.version}"')
         out.append("    val REGISTERED_MESSAGES = mapOf(")
         for msg in ast.messages:
-            out.append(f'        "{msg.name}" to {msg.message_number},')
+            msg_num = f"{msg.message_number}.toInt()" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
+            out.append(f'        "{msg.name}" to {msg_num},')
         out.append("    )\n")
 
         # Zero-coding decompression helper
@@ -109,9 +110,10 @@ class KotlinEmitter(BaseEmitter):
                 elif prop.data_type == "array":
                     kt_type = "List<String>"
 
-                opt = "?" if not prop.required else ""
-                default_val = " = null" if opt else ""
-                fields_def.append(f"    val {p_name}: {kt_type}{opt}{default_val}")
+                if prop.required:
+                    fields_def.append(f"    val {p_name}: {kt_type}")
+                else:
+                    fields_def.append(f"    val {p_name}: {kt_type}? = null")
             out.append(",\n".join(fields_def))
             out.append(")\n")
 

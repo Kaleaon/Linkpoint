@@ -19,6 +19,9 @@ on:
 permissions:
   contents: read
 
+env:
+  ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -38,7 +41,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
       - name: Configure Git line endings and reset working tree
         run: |
           git config --system core.autocrlf false || true
@@ -54,7 +57,7 @@ jobs:
       - run: bash scripts/check_viewer_contract.sh
         if: matrix.os == 'ubuntu-latest'
       - run: npm run check:web
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-latest'
         with:
           name: linkpoint-web-${{ github.sha }}
@@ -75,7 +78,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
       - name: Configure Git line endings and reset working tree
         run: |
           git config --system core.autocrlf false || true
@@ -83,15 +86,17 @@ jobs:
           git config core.autocrlf false
           git rm --cached -r .
           git reset --hard
-      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
         continue-on-error: true
       - run: cargo test --workspace --locked
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Install wasm-bindgen CLI
+        if: matrix.os == 'ubuntu-latest'
+        uses: taiki-e/install-action@wasm-bindgen-cli
       - name: Verify WebAssembly build and size constraint
         if: matrix.os == 'ubuntu-latest'
         run: bash scripts/build_wasm.sh
@@ -126,7 +131,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
       - name: Report native shell status
         shell: bash
         run: |
