@@ -35,7 +35,11 @@ class KotlinEmitter(BaseEmitter):
         out.append(f'    const val TEMPLATE_VERSION = "{ast.version}"')
         out.append("    val REGISTERED_MESSAGES = mapOf(")
         for msg in ast.messages:
-            msg_num = f"{msg.message_number}.toInt()" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
+            msg_num = (
+                f"{msg.message_number}.toInt()"
+                if msg.message_number > 2147483647 or msg.message_number < -2147483648
+                else str(msg.message_number)
+            )
             out.append(f'        "{msg.name}" to {msg_num},')
         out.append("    )\n")
 
