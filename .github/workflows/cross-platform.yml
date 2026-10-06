@@ -105,6 +105,8 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
+      - uses: taiki-e/install-action@wasm-bindgen-cli
+        if: matrix.os == 'ubuntu-latest'
       - uses: Swatinem/rust-cache@v2
         continue-on-error: true
       - run: cargo test --workspace --locked
