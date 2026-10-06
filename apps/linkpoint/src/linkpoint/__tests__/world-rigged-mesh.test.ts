@@ -67,8 +67,8 @@ describe('rigged mesh in the world', () => {
     // identity inverse bind: joint 0 (mPelvis) is lifted to the pelvis rest height (z = 1.067)
     expect(rig.skin[3]).toBeCloseTo(0, 5);
     expect(rig.skin[11]).toBeCloseTo(1.067, 2);
-    // the mesh uses the avatar's transform, not the attachment offset
-    expect(rig.position).toEqual([10, 20, 30]);
+    // the mesh uses the avatar's feet-anchored root transform, not the attachment offset
+    expect(rig.position).toEqual([10, 20, 29.05]);
     expect(rig.scale).toEqual([1, 1, 1]);
     expect(rig.meshes).toEqual([{ mesh: 'asset:mesh-1:0', materialIndex: 0 }]);
   });
