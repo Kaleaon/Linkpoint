@@ -53,6 +53,10 @@
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="properties">Properties</string>
+    <string name="inventory_item_no_copy_tooltip">You do not have permission to copy this item</string>
+    <string name="inventory_item_no_modify_tooltip">Cannot delete item without modify permission</string>
+    <string name="inventory_item_no_transfer_tooltip">Cannot delete item without transfer permission</string>
+    <string name="inventory_item_no_modify_no_transfer_tooltip">Cannot delete item without modify and transfer permissions</string>
     <string name="item_properties">Item Properties</string>
     <string name="asset_id">Asset ID</string>
     <string name="item_id">Item ID</string>
