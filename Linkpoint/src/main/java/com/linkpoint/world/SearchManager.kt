@@ -47,8 +47,8 @@ class SearchManager(
                 // Use avatar picker capability if available
                 val capName = if (capabilityManager.hasCapability(CapabilityManager.CAP_AVATAR_PICKER)) {
                     CapabilityManager.CAP_AVATAR_PICKER
-                } else if (capabilityManager.hasCapability("search_directory")) {
-                    "search_directory"
+                } else if (capabilityManager.hasCapability(CapabilityManager.CAP_SEARCH_DIRECTORY)) {
+                    CapabilityManager.CAP_SEARCH_DIRECTORY
                 } else null
 
                 if (capName != null) {
