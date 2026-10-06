@@ -52,6 +52,7 @@ class DrawablePrimStore {
         val id: Long,
         val modelMatrix: FloatArray = FloatArray(16).also { Matrix.setIdentityM(it, 0) },
         var shapeKey: PrimShapeKey = PrimShapeKey.defaultFor(PrimShape.BOX),
+        var shape: ShapeKind = ShapeKind.BOX,
         var hollow: Boolean = false,
         var scaleX: Float = 1f, var scaleY: Float = 1f, var scaleZ: Float = 1f,
         val faces: MutableList<FaceMaterial> = mutableListOf(FaceMaterial()),
@@ -59,17 +60,7 @@ class DrawablePrimStore {
         var aabbHalfX: Float = 0.5f,
         var aabbHalfY: Float = 0.5f,
         var aabbHalfZ: Float = 0.5f
-    ) {
-        val shape: ShapeKind get() = when (shapeKey.kind) {
-            PrimShape.BOX -> ShapeKind.BOX
-            PrimShape.SPHERE -> ShapeKind.SPHERE
-            PrimShape.CYLINDER -> ShapeKind.CYLINDER
-            PrimShape.TORUS -> ShapeKind.TORUS
-            PrimShape.PRISM -> ShapeKind.PRISM
-            PrimShape.RING -> ShapeKind.RING
-            PrimShape.TUBE -> ShapeKind.BOX
-        }
-    }
+    )
 
     companion object {
         private val NULL_UUID = UUID(0L, 0L)
@@ -80,6 +71,74 @@ class DrawablePrimStore {
         private const val MAX_FACES_PER_PRIM = 16
     }
 
+    /** Key for grouping identical face material properties for instanced batching. */
+    data class MaterialBatchKey(
+        val textureHandle: Int,
+        val normalHandle: Int,
+        val metallicRoughnessHandle: Int,
+        val emissiveHandle: Int,
+        val occlusionHandle: Int,
+        val colorR: Float,
+        val colorG: Float,
+        val colorB: Float,
+        val colorA: Float,
+        val scaleS: Float,
+        val scaleT: Float,
+        val offsetS: Float,
+        val offsetT: Float,
+        val rotation: Float,
+        val metallicFactor: Float,
+        val roughnessFactor: Float,
+        val glow: Float
+    )
+
+    data class InstancedBatchKey(
+        val shape: ShapeKind,
+        val material: MaterialBatchKey
+    )
+
+    /**
+     * Reusable pre-allocated dynamic VBO pool for streaming instance transform matrices
+     * with zero per-frame runtime allocations.
+     */
+    class InstanceVboPool(private var resourceManager: com.linkpoint.render.lumiya.glres.GLResourceManager? = null) {
+        private var vboHandle: Int = 0
+        private var capacityInstances: Int = 1024
+        var floatBuffer: java.nio.FloatBuffer = java.nio.ByteBuffer.allocateDirect(capacityInstances * 16 * 4)
+            .order(java.nio.ByteOrder.nativeOrder())
+            .asFloatBuffer()
+            private set
+
+        fun setResourceManager(rm: com.linkpoint.render.lumiya.glres.GLResourceManager) {
+            this.resourceManager = rm
+        }
+
+        fun getVboHandle(): Int {
+            val rm = resourceManager
+            if (vboHandle == 0 && rm != null) {
+                vboHandle = rm.createBuffer()
+            }
+            return vboHandle
+        }
+
+        fun ensureCapacity(requiredInstances: Int) {
+            if (requiredInstances > capacityInstances) {
+                capacityInstances = (requiredInstances * 1.5).toInt().coerceAtLeast(1024)
+                floatBuffer = java.nio.ByteBuffer.allocateDirect(capacityInstances * 16 * 4)
+                    .order(java.nio.ByteOrder.nativeOrder())
+                    .asFloatBuffer()
+            }
+        }
+
+        fun destroy() {
+            if (vboHandle != 0) {
+                resourceManager?.deleteBuffer(vboHandle)
+                vboHandle = 0
+            }
+        }
+    }
+
+    private val instanceVboPool = InstanceVboPool()
     // Thread-safe map of primId -> integer slot handle
     @JvmField
     internal val prims = ConcurrentHashMap<Long, Int>()
@@ -144,8 +203,15 @@ class DrawablePrimStore {
     private var emissiveBuckets = Array(6) { IntArray(capacity) }
     private var emissiveCounts = IntArray(6)
 
-    // Shared shape VAOs cached by PrimShapeKey
-    private val shapeVAOs = ConcurrentHashMap<PrimShapeKey, GLBufferManager.MeshVAO>()
+    private var transparentSlots = IntArray(capacity)
+    private var transparentDepths = FloatArray(capacity)
+    private var transparentCount = 0
+
+    // Scratch matrices for zero-allocation GL matrix uniforms
+    private val scratchTexMatrix = FloatArray(16)
+
+    // Shared shape VAOs
+    private var shapeVAOs: Map<ShapeKind, GLBufferManager.MeshVAO>? = null
     private var bufferManager: GLBufferManager? = null
 
     // ── Slot Allocation & Capacity Management ────────────────────────────
@@ -280,17 +346,11 @@ class DrawablePrimStore {
     // ── Mutation ─────────────────────────────────────────────────────────
 
     fun addPrim(id: Long, posX: Float, posY: Float, posZ: Float) {
-        val existing = prims[id]
-        if (existing != null) {
-            Matrix.setIdentityM(existing.modelMatrix, 0)
-            Matrix.translateM(existing.modelMatrix, 0, posX, posY, posZ)
-            Matrix.scaleM(existing.modelMatrix, 0, existing.scaleX, existing.scaleY, existing.scaleZ)
-            return
-        }
-        val instance = PrimInstance(id = id)
-        Matrix.setIdentityM(instance.modelMatrix, 0)
-        Matrix.translateM(instance.modelMatrix, 0, posX, posY, posZ)
-        prims[id] = instance
+        val slot = getOrAllocateSlot(id)
+        val offset = slot * 16
+        Matrix.setIdentityM(slotModelMatrices, offset)
+        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
+        Matrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
     }
 
     /**
@@ -304,12 +364,13 @@ class DrawablePrimStore {
         shapeParams: PrimShapeParams = PrimShapeParams.DEFAULT,
         textureEntry: ByteArray? = null
     ) {
-        val instance = prims.getOrPut(id) { PrimInstance(id = id) }
-        instance.shapeKey = PrimShapeKey.from(shapeParams)
-        instance.hollow = shapeParams.profileHollow > 0f
-        instance.scaleX = scaleX
-        instance.scaleY = scaleY
-        instance.scaleZ = scaleZ
+        val slot = getOrAllocateSlot(id)
+        val shape = shapeFromParams(shapeParams)
+        slotShape[slot] = shape.ordinal
+        slotHollow[slot] = shapeParams.profileHollow > 0f
+        slotScaleX[slot] = scaleX
+        slotScaleY[slot] = scaleY
+        slotScaleZ[slot] = scaleZ
 
         val localHalfX = scaleX * 0.5f
         val localHalfY = scaleY * 0.5f
@@ -375,17 +436,7 @@ class DrawablePrimStore {
         return UUID(faceTextureIdMsb[fIdx], faceTextureIdLsb[fIdx])
     }
 
-    /**
-     * Patch every face whose texture ID matches [textureId]
-     * to point at [textureHandle] for the specified [semantic]. Lets a single texture upload cover
-     * all faces sharing that UUID, even when per-face overrides differ.
-     */
-    fun bindTextureToMatchingFaces(
-        id: Long,
-        textureId: UUID,
-        textureHandle: Int,
-        semantic: com.linkpoint.assets.TextureFormatPolicy.TextureSemantic = com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.ALBEDO
-    ) {
+    fun bindTextureToMatchingFaces(id: Long, textureId: UUID, textureHandle: Int) {
         val slot = prims[id] ?: return
         val msb = textureId.mostSignificantBits
         val lsb = textureId.leastSignificantBits
@@ -394,13 +445,7 @@ class DrawablePrimStore {
         for (i in 0 until count) {
             val fIdx = base + i
             if (faceTextureIdMsb[fIdx] == msb && faceTextureIdLsb[fIdx] == lsb) {
-                when (semantic) {
-                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.NORMAL -> faceNormalHandle[fIdx] = textureHandle
-                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.METALLIC_ROUGHNESS -> faceMetallicRoughnessHandle[fIdx] = textureHandle
-                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.EMISSIVE -> faceEmissiveHandle[fIdx] = textureHandle
-                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.OCCLUSION -> faceOcclusionHandle[fIdx] = textureHandle
-                    else -> faceTextureHandle[fIdx] = textureHandle
-                }
+                faceTextureHandle[fIdx] = textureHandle
                 updateFaceMaterial(slot, i)
             }
         }
@@ -420,7 +465,57 @@ class DrawablePrimStore {
 
     fun primCount(): Int = prims.size
 
-    fun snapshot(): Collection<PrimInstance> = prims.values
+    /** Snapshot of all live prims (for picking + culling queries outside render loop). */
+    fun snapshot(): Collection<PrimInstance> {
+        val list = ArrayList<PrimInstance>(prims.size)
+        for ((id, slot) in prims) {
+            if (!slotActive[slot]) continue
+            val shape = ShapeKind.values()[slotShape[slot]]
+            val instance = PrimInstance(
+                id = id,
+                shape = shape,
+                hollow = slotHollow[slot],
+                scaleX = slotScaleX[slot],
+                scaleY = slotScaleY[slot],
+                scaleZ = slotScaleZ[slot],
+                isTransparent = slotIsTransparent[slot],
+                aabbHalfX = slotAabbHalfX[slot],
+                aabbHalfY = slotAabbHalfY[slot],
+                aabbHalfZ = slotAabbHalfZ[slot]
+            )
+            System.arraycopy(slotModelMatrices, slot * 16, instance.modelMatrix, 0, 16)
+            val faceCount = slotFaceCount[slot]
+            instance.faces.clear()
+            val base = slot * MAX_FACES_PER_PRIM
+            for (f in 0 until faceCount) {
+                val fIdx = base + f
+                val face = FaceMaterial(
+                    textureId = UUID(faceTextureIdMsb[fIdx], faceTextureIdLsb[fIdx]),
+                    textureHandle = faceTextureHandle[fIdx],
+                    normalHandle = faceNormalHandle[fIdx],
+                    metallicRoughnessHandle = faceMetallicRoughnessHandle[fIdx],
+                    emissiveHandle = faceEmissiveHandle[fIdx],
+                    occlusionHandle = faceOcclusionHandle[fIdx],
+                    colorR = faceColorR[fIdx],
+                    colorG = faceColorG[fIdx],
+                    colorB = faceColorB[fIdx],
+                    colorA = faceColorA[fIdx],
+                    scaleS = faceScaleS[fIdx],
+                    scaleT = faceScaleT[fIdx],
+                    offsetS = faceOffsetS[fIdx],
+                    offsetT = faceOffsetT[fIdx],
+                    rotation = faceRotation[fIdx],
+                    metallicFactor = faceMetallicFactor[fIdx],
+                    roughnessFactor = faceRoughnessFactor[fIdx],
+                    descriptor = faceDescriptors[fIdx],
+                    glow = faceGlow[fIdx]
+                )
+                instance.faces.add(face)
+            }
+            list.add(instance)
+        }
+        return list
+    }
 
     fun clear() {
         prims.clear()
@@ -432,18 +527,46 @@ class DrawablePrimStore {
     }
 
     fun destroy() {
-        prims.clear()
-        shapeVAOs.values.forEach { bufferManager?.destroyVAO(it) }
-        shapeVAOs.clear()
+        clear()
+        shapeVAOs?.values?.forEach { bufferManager?.destroyVAO(it) }
+        shapeVAOs = null
+        instanceVboPool.destroy()
     }
 
     // ── Draw Passes ──────────────────────────────────────────────────────
+
+    private fun getMaterialBatchKey(slot: Int, faceIndex: Int = 0): MaterialBatchKey {
+        val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
+        return MaterialBatchKey(
+            faceTextureHandle[fIdx],
+            faceNormalHandle[fIdx],
+            faceMetallicRoughnessHandle[fIdx],
+            faceEmissiveHandle[fIdx],
+            faceOcclusionHandle[fIdx],
+            faceColorR[fIdx],
+            faceColorG[fIdx],
+            faceColorB[fIdx],
+            faceColorA[fIdx],
+            faceScaleS[fIdx],
+            faceScaleT[fIdx],
+            faceOffsetS[fIdx],
+            faceOffsetT[fIdx],
+            faceRotation[fIdx],
+            faceMetallicFactor[fIdx],
+            faceRoughnessFactor[fIdx],
+            faceGlow[fIdx]
+        )
+    }
 
     fun drawOpaque(
         ctx: LumiyaRenderContext,
         occlusion: com.linkpoint.render.lumiya.spatial.OcclusionQuerySet? = null
     ) {
+        ensureShapes(ctx)
         val program = ctx.primProgram ?: return
+        val bm = bufferManager ?: GLBufferManager(ctx.resourceManager).also { bufferManager = it }
+        instanceVboPool.setResourceManager(ctx.resourceManager)
+
         program.use()
         program.setLighting(
             ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
@@ -451,160 +574,140 @@ class DrawablePrimStore {
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
 
-        val byShape = prims.values
-            .filter { !it.isTransparent && primInFrustum(ctx, it) }
-            .groupBy { it.shapeKey }
-        for ((shapeKey, list) in byShape) {
-            val vao = getOrCreateVAO(ctx, shapeKey)
+        opaqueCounts.fill(0)
+        for (s in 0 until allocatedSlotCount) {
+            if (!slotActive[s] || slotIsTransparent[s] || !primInFrustum(ctx, s)) continue
+            val id = slotIds[s]
+            if (occlusion != null && !occlusion.shouldDraw(id)) continue
+            val shape = slotShape[s]
+            val count = opaqueCounts[shape]
+            if (count >= opaqueBuckets[shape].size) {
+                opaqueBuckets[shape] = opaqueBuckets[shape].copyOf(opaqueBuckets[shape].size * 2)
+            }
+            opaqueBuckets[shape][count] = s
+            opaqueCounts[shape] = count + 1
+        }
+
+        for (shape in 0 until 6) {
+            val count = opaqueCounts[shape]
+            if (count == 0) continue
+            val shapeKind = ShapeKind.values()[shape]
+            val vao = shapeVAOs?.get(shapeKind) ?: continue
             GLES32.glBindVertexArray(vao.vao)
             val bucket = opaqueBuckets[shape]
-            for (i in 0 until count) {
-                val slot = bucket[i]
-                val id = slotIds[slot]
-                occlusion?.beginQuery(id)
-                drawPrimFaces(program, slot, vao.indexCount)
-                occlusion?.endQuery()
+            val grouped = (0 until count).groupBy { i ->
+                val s = bucket[i]
+                getMaterialBatchKey(s, 0)
+            }
+
+            for ((_, indices) in grouped) {
+                if (indices.size == 1) {
+                    program.setUseInstancing(false)
+                    val s = bucket[indices[0]]
+                    val id = slotIds[s]
+                    if (occlusion != null) occlusion.beginQuery(id)
+                    drawPrimFaces(program, s, vao.indexCount)
+                    if (occlusion != null) occlusion.endQuery()
+                } else {
+                    program.setUseInstancing(true)
+                    val firstSlot = bucket[indices[0]]
+                    val firstFaceIdx = firstSlot * MAX_FACES_PER_PRIM
+
+                    val desc = faceDescriptors[firstFaceIdx] ?: buildFaceDescriptor(firstSlot, 0)
+                    buildTexMatrix(firstSlot, 0, scratchTexMatrix)
+                    program.setTexMatrix(scratchTexMatrix)
+                    GlesMaterialTranslator.apply(program, desc, faceTextureBindings[firstFaceIdx])
+
+                    val groupSize = indices.size
+                    instanceVboPool.ensureCapacity(groupSize)
+                    val floatBuffer = instanceVboPool.floatBuffer
+                    floatBuffer.clear()
+                    for (idx in indices) {
+                        val s = bucket[idx]
+                        val id = slotIds[s]
+                        if (occlusion != null) occlusion.beginQuery(id)
+                        floatBuffer.put(slotModelMatrices, s * 16, 16)
+                        if (occlusion != null) occlusion.endQuery()
+                    }
+                    floatBuffer.flip()
+
+                    val instanceVbo = instanceVboPool.getVboHandle()
+                    GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, instanceVbo)
+                    GLES32.glBufferData(
+                        GLES32.GL_ARRAY_BUFFER,
+                        groupSize * 16 * 4,
+                        floatBuffer,
+                        GLES32.GL_DYNAMIC_DRAW
+                    )
+
+                    bm.setupInstanceMatrixAttributes(instanceVbo, baseLocation = 3, divisor = 1)
+
+                    GLES32.glDrawElementsInstanced(
+                        GLES32.GL_TRIANGLES,
+                        vao.indexCount,
+                        GLES32.GL_UNSIGNED_SHORT,
+                        0,
+                        groupSize
+                    )
+
+                    bm.setupInstanceMatrixAttributes(instanceVbo, baseLocation = 3, divisor = 0)
+                }
             }
         }
         GLES32.glBindVertexArray(0)
+        program.setUseInstancing(false)
     }
 
     fun drawTransparent(ctx: LumiyaRenderContext) {
+        ensureShapes(ctx)
         val program = ctx.primProgram ?: return
         program.use()
+        program.setUseInstancing(false)
         program.setLighting(
             ctx.sunDirectionX, ctx.sunDirectionY, ctx.sunDirectionZ,
             ctx.sunColorR, ctx.sunColorG, ctx.sunColorB,
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
 
-        val sorted = prims.values
-            .filter { it.isTransparent && primInFrustum(ctx, it) }
-            .sortedByDescending { distanceToCamera(ctx, it) }
-
-        var lastShapeKey: PrimShapeKey? = null
-        var lastVao: GLBufferManager.MeshVAO? = null
-        for (prim in sorted) {
-            if (prim.shapeKey != lastShapeKey) {
-                lastVao = getOrCreateVAO(ctx, prim.shapeKey)
-                lastShapeKey = prim.shapeKey
-                GLES32.glBindVertexArray(lastVao.vao)
+        transparentCount = 0
+        for (s in 0 until allocatedSlotCount) {
+            if (!slotActive[s] || !slotIsTransparent[s] || !primInFrustum(ctx, s)) continue
+            if (transparentCount >= transparentSlots.size) {
+                val newCap = transparentSlots.size * 2
+                transparentSlots = transparentSlots.copyOf(newCap)
+                transparentDepths = transparentDepths.copyOf(newCap)
             }
             transparentSlots[transparentCount] = s
             transparentDepths[transparentCount] = distanceToCamera(ctx, s)
             transparentCount++
         }
-        GLES32.glBindVertexArray(0)
-    }
 
-    private fun getOrCreateVAO(ctx: LumiyaRenderContext, key: PrimShapeKey): GLBufferManager.MeshVAO {
-        return shapeVAOs.getOrPut(key) {
-            val bm = bufferManager ?: GLBufferManager(ctx.resourceManager).also { bufferManager = it }
-            val meshData = PrimMeshGenerator.generateMesh(key)
-            val interleaved = meshData.toInterleavedBuffer()
-            bm.buildVAO(interleaved, meshData.indices, listOf(0 to 3, 1 to 3, 2 to 2))
-        }
-    }
+        if (transparentCount == 0) return
 
-    private fun drawPrimFaces(
-        program: com.linkpoint.render.lumiya.shaders.PrimShaderProgram,
-        prim: PrimInstance,
-        totalIndexCount: Int
-    ) {
-        program.setModelMatrix(prim.modelMatrix)
+        quickSortTransparent(0, transparentCount - 1)
 
-        val face = prim.faces.firstOrNull() ?: return
-        val descriptor = face.toMaterialDescriptor()
-
-        val texMatrix = buildTexMatrix(face)
-        program.setTexMatrix(texMatrix)
-
-        GlesMaterialTranslator.apply(
-            program,
-            descriptor,
-            GlesMaterialTranslator.TextureBindings(
-                baseColorHandle = face.textureHandle,
-                normalHandle = face.normalHandle,
-                metallicRoughnessHandle = face.metallicRoughnessHandle,
-                emissiveHandle = face.emissiveHandle,
-                occlusionHandle = face.occlusionHandle
-            )
-        )
-        GLES32.glDrawElements(GLES32.GL_TRIANGLES, totalIndexCount, GLES32.GL_UNSIGNED_SHORT, 0)
-    }
-
-    // ── Shape selection ──────────────────────────────────────────────────
-
-    /**
-     * Map [PrimShapeParams] to one of our six primitive shapes.
-     * Mirrors LL viewer's `LLVolumeParams::getSculptType`-adjacent logic
-     * for the non-sculpt prim case.
-     */
-    private fun shapeFromParams(p: PrimShapeParams): ShapeKind {
-        val isCircularPath = (p.pathCurve and 0x30) != 0  // CIRCLE or CIRCLE2
-        val profile = p.profileType
-        return when {
-            // PATH_CIRCLE2 + PROFILE_CIRCLE = torus
-            p.pathCurve == PrimShapeParams.PATH_CIRCLE2 && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.TORUS
-            // PATH_CIRCLE + PROFILE_CIRCLE = sphere (default sphere)
-            p.pathCurve == PrimShapeParams.PATH_CIRCLE && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.SPHERE
-            // PATH_CIRCLE + PROFILE_SQUARE/TRI = ring (linear sweep)
-            isCircularPath && profile == PrimShapeParams.PROFILE_SQUARE -> ShapeKind.RING
-            // PATH_LINE + PROFILE_CIRCLE = cylinder
-            p.pathCurve == PrimShapeParams.PATH_LINE && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.CYLINDER
-            // PATH_LINE + PROFILE_EQUAL_TRI = prism
-            p.pathCurve == PrimShapeParams.PATH_LINE && (
-                profile == PrimShapeParams.PROFILE_EQUAL_TRI ||
-                profile == PrimShapeParams.PROFILE_ISO_TRI ||
-                profile == PrimShapeParams.PROFILE_RIGHT_TRI
-            ) -> ShapeKind.PRISM
-            // PATH_LINE + PROFILE_SQUARE = box (the SL default)
-            else -> ShapeKind.BOX
-        }
-    }
-
-    // ── Per-face material assembly ───────────────────────────────────────
-
-    private fun applyTextureEntry(instance: PrimInstance, textureEntry: ByteArray?) {
-        val faceCount = faceCountFor(instance.shapeKey.kind, instance.hollow)
-        while (instance.faces.size < faceCount) instance.faces.add(FaceMaterial())
-        while (instance.faces.size > faceCount) instance.faces.removeAt(instance.faces.lastIndex)
-
-        if (textureEntry == null || textureEntry.isEmpty()) return
-        val parsed = try {
-            TextureEntryParser.parseFull(textureEntry, faceCount)
-        } catch (t: Throwable) {
-            null
-        } ?: return
-
-        for (i in 0 until faceCount) {
-            val src = parsed.getOrNull(i) ?: continue
-            val dst = instance.faces[i]
-            if (dst.textureId != src.textureId) {
-                dst.textureId = src.textureId
-                dst.textureHandle = 0
+        var lastShapeOrdinal = -1
+        for (i in 0 until transparentCount) {
+            val slot = transparentSlots[i]
+            val shapeOrdinal = slotShape[slot]
+            if (shapeOrdinal != lastShapeOrdinal) {
+                val shapeKind = ShapeKind.values()[shapeOrdinal]
+                val vao = shapeVAOs?.get(shapeKind)
+                if (vao != null) {
+                    GLES32.glBindVertexArray(vao.vao)
+                }
+                lastShapeOrdinal = shapeOrdinal
             }
-            dst.colorR = src.colorR
-            dst.colorG = src.colorG
-            dst.colorB = src.colorB
-            dst.colorA = src.colorA
-            dst.scaleS = src.scaleS
-            dst.scaleT = src.scaleT
-            dst.offsetS = src.offsetS
-            dst.offsetT = src.offsetT
-            dst.rotation = src.rotation
-            dst.glow = src.glow
+            val shapeKind = ShapeKind.values()[shapeOrdinal]
+            val vao = shapeVAOs?.get(shapeKind) ?: continue
+            drawPrimFaces(program, slot, vao.indexCount)
         }
-        instance.isTransparent = instance.faces.any { it.colorA < 0.999f }
-    }
-
-    private fun hasEmissive(instance: PrimInstance): Boolean {
-        for (face in instance.faces) {
-            if (face.glow > GLOW_THRESHOLD) return true
-        }
+        GLES32.glBindVertexArray(0)
+        program.setUseInstancing(false)
     }
 
     fun drawEmissive(ctx: LumiyaRenderContext) {
+        ensureShapes(ctx)
         val program = ctx.primProgram ?: return
 
         emissiveCounts.fill(0)
@@ -624,15 +727,18 @@ class DrawablePrimStore {
         if (totalEmissive == 0) return
 
         program.use()
+        program.setUseInstancing(false)
         program.setLighting(0f, 0f, 1f, 0f, 0f, 0f, 1f, 1f, 1f)
 
         GLES32.glEnable(GLES32.GL_BLEND)
         GLES32.glBlendFunc(GLES32.GL_ONE, GLES32.GL_ONE)
         GLES32.glDepthMask(false)
 
-        val byShape = emissivePrims.groupBy { it.shapeKey }
-        for ((shapeKey, list) in byShape) {
-            val vao = getOrCreateVAO(ctx, shapeKey)
+        for (shape in 0 until 6) {
+            val count = emissiveCounts[shape]
+            if (count == 0) continue
+            val shapeKind = ShapeKind.values()[shape]
+            val vao = shapeVAOs?.get(shapeKind) ?: continue
             GLES32.glBindVertexArray(vao.vao)
             val bucket = emissiveBuckets[shape]
             for (i in 0 until count) {
@@ -647,15 +753,37 @@ class DrawablePrimStore {
             GLES32.GL_ZERO, GLES32.GL_ONE_MINUS_SRC_ALPHA
         )
         GLES32.glDepthMask(true)
+        program.setUseInstancing(false)
     }
 
     // ── Internal Helpers ─────────────────────────────────────────────────
+
+    private fun ensureShapes(ctx: LumiyaRenderContext) {
+        if (shapeVAOs != null) return
+        val bm = bufferManager ?: GLBufferManager(ctx.resourceManager).also { bufferManager = it }
+        val map = mutableMapOf<ShapeKind, GLBufferManager.MeshVAO>()
+        for (shape in ShapeKind.values()) {
+            val key = when (shape) {
+                ShapeKind.BOX -> PrimShapeKey.defaultFor(PrimShape.BOX)
+                ShapeKind.SPHERE -> PrimShapeKey.defaultFor(PrimShape.SPHERE)
+                ShapeKind.CYLINDER -> PrimShapeKey.defaultFor(PrimShape.CYLINDER)
+                ShapeKind.TORUS -> PrimShapeKey.defaultFor(PrimShape.TORUS)
+                ShapeKind.PRISM -> PrimShapeKey.defaultFor(PrimShape.PRISM)
+                ShapeKind.RING -> PrimShapeKey.defaultFor(PrimShape.RING)
+            }
+            val meshData = PrimMeshGenerator.generateMesh(key)
+            val interleaved = meshData.toInterleavedBuffer()
+            map[shape] = bm.buildVAO(interleaved, meshData.indices, listOf(0 to 3, 1 to 3, 2 to 2))
+        }
+        shapeVAOs = map
+    }
 
     private fun drawPrimFaces(
         program: com.linkpoint.render.lumiya.shaders.PrimShaderProgram,
         slot: Int,
         totalIndexCount: Int
     ) {
+        program.setUseInstancing(false)
         program.setModelMatrix(slotModelMatrices, slot * 16)
         val faceIdx = slot * MAX_FACES_PER_PRIM
         buildTexMatrix(slot, 0, scratchTexMatrix)
@@ -673,13 +801,21 @@ class DrawablePrimStore {
         slot: Int,
         totalIndexCount: Int
     ) {
-        val face = prim.faces.firstOrNull { it.glow > GLOW_THRESHOLD } ?: return
-        program.setModelMatrix(prim.modelMatrix)
-        program.setTexMatrix(buildTexMatrix(face))
+        program.setUseInstancing(false)
+        program.setModelMatrix(slotModelMatrices, slot * 16)
+        val fIdx = slot * MAX_FACES_PER_PRIM
+        buildTexMatrix(slot, 0, scratchTexMatrix)
+        program.setTexMatrix(scratchTexMatrix)
 
-        val g = face.glow
-        program.setColor(face.colorR * g, face.colorG * g, face.colorB * g, face.colorA * g)
-        if (face.textureHandle != 0) {
+        val g = faceGlow[fIdx]
+        program.setColor(
+            faceColorR[fIdx] * g,
+            faceColorG[fIdx] * g,
+            faceColorB[fIdx] * g,
+            faceColorA[fIdx] * g
+        )
+        val handle = faceTextureHandle[fIdx]
+        if (handle != 0) {
             program.setUseTexture(true)
             GLES32.glActiveTexture(GLES32.GL_TEXTURE0)
             GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, handle)
@@ -690,37 +826,11 @@ class DrawablePrimStore {
         GLES32.glDrawElements(GLES32.GL_TRIANGLES, totalIndexCount, GLES32.GL_UNSIGNED_SHORT, 0)
     }
 
-<<<<<<< HEAD
-    private fun quickSortTransparent(low: Int, high: Int) {
-        if (low >= high) return
-        val pivot = transparentDepths[(low + high) / 2]
-        var i = low
-        var j = high
-        while (i <= j) {
-            while (transparentDepths[i] > pivot) i++
-            while (transparentDepths[j] < pivot) j--
-            if (i <= j) {
-                val tmpDepth = transparentDepths[i]
-                transparentDepths[i] = transparentDepths[j]
-                transparentDepths[j] = tmpDepth
-
-                val tmpSlot = transparentSlots[i]
-                transparentSlots[i] = transparentSlots[j]
-                transparentSlots[j] = tmpSlot
-
-                i++
-                j--
-            }
-        }
-        if (low < j) quickSortTransparent(low, j)
-        if (i < high) quickSortTransparent(i, high)
-    }
-
     private fun shapeFromParams(p: PrimShapeParams): ShapeKind {
         val isCircularPath = (p.pathCurve and 0x30) != 0
         val profile = p.profileType
         return when {
-            p.pathCurve == PrimShapeParams.PATH_CIRCLE2 && (profile == PrimShapeParams.PROFILE_CIRCLE || profile == PrimShapeParams.PROFILE_HALF_CIRCLE) -> ShapeKind.TORUS
+            p.pathCurve == PrimShapeParams.PATH_CIRCLE2 && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.TORUS
             p.pathCurve == PrimShapeParams.PATH_CIRCLE && (profile == PrimShapeParams.PROFILE_CIRCLE || profile == PrimShapeParams.PROFILE_HALF_CIRCLE) -> ShapeKind.SPHERE
             isCircularPath && profile == PrimShapeParams.PROFILE_SQUARE -> ShapeKind.RING
             p.pathCurve == PrimShapeParams.PATH_LINE && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.CYLINDER
@@ -734,56 +844,60 @@ class DrawablePrimStore {
     }
 
     private fun applyTextureEntry(slot: Int, shape: ShapeKind, hollow: Boolean, textureEntry: ByteArray?) {
-        val faceCount = faceCountFor(shape, hollow).coerceAtMost(MAX_FACES_PER_PRIM)
+        val faceCount = faceCountFor(shape, hollow)
         slotFaceCount[slot] = faceCount
 
-        if (textureEntry != null && textureEntry.isNotEmpty()) {
-            val parsed = try {
-                TextureEntryParser.parseFull(textureEntry, faceCount)
-            } catch (t: Throwable) {
-                null
-            }
-            if (parsed != null) {
-                val base = slot * MAX_FACES_PER_PRIM
-                var hasAlpha = false
-                for (i in 0 until faceCount) {
-                    val src = parsed.getOrNull(i) ?: continue
-                    val fIdx = base + i
-                    val msb = src.textureId.mostSignificantBits
-                    val lsb = src.textureId.leastSignificantBits
-                    if (faceTextureIdMsb[fIdx] != msb || faceTextureIdLsb[fIdx] != lsb) {
-                        faceTextureIdMsb[fIdx] = msb
-                        faceTextureIdLsb[fIdx] = lsb
-                        faceTextureHandle[fIdx] = 0
-                    }
-                    faceColorR[fIdx] = src.colorR
-                    faceColorG[fIdx] = src.colorG
-                    faceColorB[fIdx] = src.colorB
-                    faceColorA[fIdx] = src.colorA
-                    faceScaleS[fIdx] = src.scaleS
-                    faceScaleT[fIdx] = src.scaleT
-                    faceOffsetS[fIdx] = src.offsetS
-                    faceOffsetT[fIdx] = src.offsetT
-                    faceRotation[fIdx] = src.rotation
-                    faceGlow[fIdx] = src.glow
+        if (textureEntry == null || textureEntry.isEmpty()) return
+        val parsed = try {
+            TextureEntryParser.parseFull(textureEntry, faceCount)
+        } catch (t: Throwable) {
+            null
+        } ?: return
 
-                    if (src.colorA < 0.999f) hasAlpha = true
-                    updateFaceMaterial(slot, i)
-                }
-                slotIsTransparent[slot] = hasAlpha
-                return
-            }
-        }
-
+        var transparent = false
         val base = slot * MAX_FACES_PER_PRIM
         for (i in 0 until faceCount) {
+            val src = parsed.getOrNull(i) ?: continue
+            val fIdx = base + i
+            val oldMsb = faceTextureIdMsb[fIdx]
+            val oldLsb = faceTextureIdLsb[fIdx]
+            val newMsb = src.textureId.mostSignificantBits
+            val newLsb = src.textureId.leastSignificantBits
+            if (oldMsb != newMsb || oldLsb != newLsb) {
+                faceTextureIdMsb[fIdx] = newMsb
+                faceTextureIdLsb[fIdx] = newLsb
+                faceTextureHandle[fIdx] = 0
+            }
+            faceColorR[fIdx] = src.colorR
+            faceColorG[fIdx] = src.colorG
+            faceColorB[fIdx] = src.colorB
+            faceColorA[fIdx] = src.colorA
+            faceScaleS[fIdx] = src.scaleS
+            faceScaleT[fIdx] = src.scaleT
+            faceOffsetS[fIdx] = src.offsetS
+            faceOffsetT[fIdx] = src.offsetT
+            faceRotation[fIdx] = src.rotation
+            faceGlow[fIdx] = src.glow
+
+            if (src.colorA < 0.999f) transparent = true
             updateFaceMaterial(slot, i)
         }
+        slotIsTransparent[slot] = transparent
+    }
+
+    private fun hasEmissive(slot: Int): Boolean {
+        val count = slotFaceCount[slot]
+        val base = slot * MAX_FACES_PER_PRIM
+        for (i in 0 until count) {
+            if (faceGlow[base + i] > GLOW_THRESHOLD) return true
+        }
+        return false
     }
 
     private fun updateFaceMaterial(slot: Int, faceIndex: Int) {
         val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
-        faceDescriptors[fIdx] = buildFaceDescriptor(slot, faceIndex)
+        val desc = buildFaceDescriptor(slot, faceIndex)
+        faceDescriptors[fIdx] = desc
         faceTextureBindings[fIdx] = GlesMaterialTranslator.TextureBindings(
             baseColorHandle = faceTextureHandle[fIdx],
             normalHandle = faceNormalHandle[fIdx],
@@ -795,9 +909,12 @@ class DrawablePrimStore {
 
     private fun buildFaceDescriptor(slot: Int, faceIndex: Int): MaterialDescriptor {
         val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
-        val handle = faceTextureHandle[fIdx]
-        val texId = UUID(faceTextureIdMsb[fIdx], faceTextureIdLsb[fIdx])
+        val texHandle = faceTextureHandle[fIdx]
+        val msb = faceTextureIdMsb[fIdx]
+        val lsb = faceTextureIdLsb[fIdx]
+        val texUuid = if (msb != 0L || lsb != 0L) UUID(msb, lsb) else NULL_UUID
         val glow = faceGlow[fIdx]
+
         return MaterialDescriptor(
             baseColor = MaterialDescriptor.Float4(
                 faceColorR[fIdx],
@@ -805,10 +922,10 @@ class DrawablePrimStore {
                 faceColorB[fIdx],
                 faceColorA[fIdx]
             ),
-            baseColorTexture = if (handle != 0) {
+            baseColorTexture = if (texHandle != 0 || texUuid != NULL_UUID) {
                 MaterialDescriptor.TextureRef(
-                    texId,
-                    texId,
+                    texUuid,
+                    texUuid,
                     isDownloadable = true
                 )
             } else null,
@@ -825,64 +942,41 @@ class DrawablePrimStore {
         )
     }
 
-    private fun hasEmissive(slot: Int): Boolean {
-        val count = slotFaceCount[slot]
-        val base = slot * MAX_FACES_PER_PRIM
-        for (i in 0 until count) {
-            if (faceGlow[base + i] > GLOW_THRESHOLD) return true
-        }
-        return false
-    }
-
     private fun faceCountFor(shape: ShapeKind, hollow: Boolean): Int {
-=======
-    private fun faceCountFor(shape: PrimShape, hollow: Boolean): Int {
->>>>>>> 4387b98c4 (fix(render): align DrawablePrimStore bindTextureToMatchingFaces for PBR semantics)
         val (sides, caps) = when (shape) {
-            PrimShape.BOX -> 4 to 2
-            PrimShape.SPHERE -> 1 to 0
-            PrimShape.CYLINDER -> 1 to 2
-            PrimShape.PRISM -> 3 to 2
-            PrimShape.TORUS -> 1 to 0
-            PrimShape.RING -> 2 to 1
-            PrimShape.TUBE -> 4 to 2
+            ShapeKind.BOX -> 4 to 2
+            ShapeKind.SPHERE -> 1 to 0
+            ShapeKind.CYLINDER -> 1 to 2
+            ShapeKind.PRISM -> 3 to 2
+            ShapeKind.TORUS -> 1 to 0
+            ShapeKind.RING -> 2 to 1
         }
         val effectiveCaps = if (hollow) caps * 2 else caps
         return sides + effectiveCaps
     }
 
-    private fun buildTexMatrix(face: FaceMaterial): FloatArray {
-        val m = FloatArray(16)
-        Matrix.setIdentityM(m, 0)
-        Matrix.translateM(m, 0, 0.5f + face.offsetS, 0.5f + face.offsetT, 0f)
-        if (face.rotation != 0f) {
-            Matrix.rotateM(m, 0, Math.toDegrees(face.rotation.toDouble()).toFloat(), 0f, 0f, 1f)
+    private fun buildTexMatrix(slot: Int, faceIndex: Int, outMatrix: FloatArray) {
+        val fIdx = slot * MAX_FACES_PER_PRIM + faceIndex
+        val offS = faceOffsetS[fIdx]
+        val offT = faceOffsetT[fIdx]
+        val scS = faceScaleS[fIdx]
+        val scT = faceScaleT[fIdx]
+        val rot = faceRotation[fIdx]
+
+        Matrix.setIdentityM(outMatrix, 0)
+        Matrix.translateM(outMatrix, 0, 0.5f + offS, 0.5f + offT, 0f)
+        if (rot != 0f) {
+            Matrix.rotateM(outMatrix, 0, Math.toDegrees(rot.toDouble()).toFloat(), 0f, 0f, 1f)
         }
         Matrix.scaleM(outMatrix, 0, scS, scT, 1f)
         Matrix.translateM(outMatrix, 0, -0.5f, -0.5f, 0f)
     }
 
-    private fun FaceMaterial.toMaterialDescriptor(): MaterialDescriptor {
-        return descriptor ?: MaterialDescriptor(
-            baseColor = MaterialDescriptor.Float4(colorR, colorG, colorB, colorA),
-            baseColorTexture = if (textureHandle != 0) {
-                MaterialDescriptor.TextureRef(
-                    textureId,
-                    textureId,
-                    isDownloadable = true
-                )
-            } else null,
-            metallicFactor = metallicFactor,
-            roughnessFactor = roughnessFactor,
-            emissiveFactor = if (glow > 0f) MaterialDescriptor.Float3(glow, glow, glow) else MaterialDescriptor.Float3.ZERO,
-            uvTransform = MaterialDescriptor.UvTransform(scaleS, scaleT, offsetS, offsetT, rotation)
-        )
-    }
-
-    private fun distanceToCamera(ctx: LumiyaRenderContext, prim: PrimInstance): Float {
-        val dx = prim.modelMatrix[12] - ctx.cameraPositionX
-        val dy = prim.modelMatrix[13] - ctx.cameraPositionY
-        val dz = prim.modelMatrix[14] - ctx.cameraPositionZ
+    private fun distanceToCamera(ctx: LumiyaRenderContext, slot: Int): Float {
+        val offset = slot * 16
+        val dx = slotModelMatrices[offset + 12] - ctx.cameraPositionX
+        val dy = slotModelMatrices[offset + 13] - ctx.cameraPositionY
+        val dz = slotModelMatrices[offset + 14] - ctx.cameraPositionZ
         return dx * dx + dy * dy + dz * dz
     }
 
@@ -898,5 +992,30 @@ class DrawablePrimStore {
             cx - hx, cy - hy, cz - hz,
             cx + hx, cy + hy, cz + hz
         )
+    }
+
+    private fun quickSortTransparent(low: Int, high: Int) {
+        if (low >= high) return
+        val pivot = transparentDepths[(low + high) ushr 1]
+        var i = low
+        var j = high
+        while (i <= j) {
+            while (transparentDepths[i] > pivot) i++
+            while (transparentDepths[j] < pivot) j--
+            if (i <= j) {
+                val tmpSlot = transparentSlots[i]
+                transparentSlots[i] = transparentSlots[j]
+                transparentSlots[j] = tmpSlot
+
+                val tmpDepth = transparentDepths[i]
+                transparentDepths[i] = transparentDepths[j]
+                transparentDepths[j] = tmpDepth
+
+                i++
+                j--
+            }
+        }
+        if (low < j) quickSortTransparent(low, j)
+        if (i < high) quickSortTransparent(i, high)
     }
 }
