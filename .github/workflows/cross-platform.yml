@@ -41,14 +41,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          autocrlf: false
-      - name: Configure Git line endings
+      - uses: actions/checkout@v4
+      - name: Configure Git line endings and reset working tree
         run: |
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
+          git add --renormalize .
+          git reset
+          git checkout .
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -78,15 +79,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          autocrlf: false
-      - name: Configure Git line endings
+      - uses: actions/checkout@v4
+      - name: Configure Git line endings and reset working tree
         run: |
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
-      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
+          git add --renormalize .
+          git reset
+          git checkout .
+      - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
