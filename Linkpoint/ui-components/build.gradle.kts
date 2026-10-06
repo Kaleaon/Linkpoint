@@ -2,7 +2,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("app.cash.paparazzi") version "1.3.5"
+    id("io.github.takahirom.roborazzi") version "1.32.0"
 }
 
 android {
@@ -30,6 +30,12 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 configurations.all {
@@ -54,13 +60,25 @@ dependencies {
     // Core Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
 
-    // Testing & Paparazzi
+    // Testing & Roborazzi
     testImplementation("junit:junit:4.13.2")
-    testImplementation("app.cash.paparazzi:paparazzi:1.3.5")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.32.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.32.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-junit-rule:1.32.0")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("androidx.test:core-ktx:1.5.0")
+    testImplementation("androidx.test:runner:1.5.2")
+    testImplementation("androidx.test:rules:1.5.0")
 }
 
-tasks.register("paparazziDebugCheck") {
+roborazzi {
+    outputDir.set(file("build/outputs/roborazzi"))
+}
+
+tasks.register("roborazziDebugCheck") {
     group = "verification"
-    description = "Runs Paparazzi verification on debug variant."
-    dependsOn("verifyPaparazziDebug")
+    description = "Runs Roborazzi verification on debug variant."
+    dependsOn("verifyRoborazziDebug")
 }
