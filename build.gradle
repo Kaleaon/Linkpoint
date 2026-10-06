@@ -49,7 +49,8 @@ allprojects {
 
 // Register protocol code generation task
 tasks.register('generateProtocolCode', Exec) {
-    commandLine 'python3', 'tools/protocol_gen/cli.py', 'generate', '--target', 'kotlin,java'
+    def pythonCmd = System.getProperty("os.name").toLowerCase().contains("win") ? 'python' : 'python3'
+    commandLine pythonCmd, 'tools/protocol_gen/cli.py', 'generate', '--target', 'kotlin,java'
 }
 
 // Delegating tasks for root project to included build Linkpoint

@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "generate:protocol": "python3 tools/protocol_gen/cli.py generate --target typescript,dart,python,c,kotlin,rust,java",
+    "generate:protocol": "node scripts/generate_protocol.mjs",
     "check": "npm run generate:protocol && npm run check:contract && npm run check:web && npm run check:rust && npm run check:dart",
     "check:contract": "bash scripts/check_viewer_contract.sh",
     "check:web": "npm run typecheck && npm run test:web && npm run typecheck -w @linkpoint/app && npm run test -w @linkpoint/app && npm run build -w @linkpoint/app",
