@@ -110,7 +110,7 @@ describe('App Root Layout & Z-Index Stack Tokens', () => {
     expect(dialog).not.toBeNull();
 
     // The FocusTrap wrapper around the dialog should be a direct sibling of .viewer-workspace
-    const focusTrapContainer = dialog?.closest('div[style*="position: absolute"]');
+    const focusTrapContainer = dialog?.parentElement as HTMLElement | null;
     expect(focusTrapContainer).not.toBeNull();
     expect(focusTrapContainer?.parentElement?.className).toContain('viewer-app');
 
@@ -119,8 +119,7 @@ describe('App Root Layout & Z-Index Stack Tokens', () => {
     expect(workspace?.contains(focusTrapContainer!)).toBe(false);
 
     // Verify z-index value matches Z_INDEX.SYSTEM_DIALOG (10000)
-    const styleAttr = focusTrapContainer?.getAttribute('style') || '';
-    expect(styleAttr).toContain('z-index: 10000');
+    expect(focusTrapContainer?.style.zIndex).toBe('10000');
 
     await act(async () => root.unmount());
     host.remove();
