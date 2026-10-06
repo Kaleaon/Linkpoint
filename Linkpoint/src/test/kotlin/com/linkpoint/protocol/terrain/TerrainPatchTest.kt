@@ -130,7 +130,7 @@ class TerrainPatchTest {
         fullMessage[2] = ((dataLen shr 8) and 0xFF).toByte()
         System.arraycopy(layerDataBytes, 0, fullMessage, 3, dataLen)
 
-        val result = LayerDataParser.parse(fullMessage)
+        val result = LayerDataParser.parse(fullMessage, 256, 256)
         assertNotNull(result)
         assertEquals(LayerType.LAND, result!!.type)
         assertEquals(2, result.patches.size)
