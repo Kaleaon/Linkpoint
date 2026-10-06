@@ -384,11 +384,22 @@ export class WorldViewer extends Utils.EventEmitter {
     }
   }
 
+  /** Anchor transform calculations to the avatar's feet origin [x, y, z - height / 2]. */
+  private avatarRootTransform(avatar: any): { position: number[]; rotation: number[] } {
+    const transform = this.worldTransform(avatar);
+    const scale = Array.isArray(avatar?.scale) ? avatar.scale : [1, 1, 1];
+    const height = Array.isArray(scale) && scale[2] > 0.5 ? scale[2] : 1.9;
+    return {
+      position: [transform.position[0], transform.position[1], transform.position[2] - height / 2],
+      rotation: transform.rotation,
+    };
+  }
+
   /** Rigged meshes move with their avatar (not with the attachment offset the simulator reports). */
   private riggedTransform(object: any): { position: number[]; rotation: number[] } {
     let current = object;
     for (let depth = 0; depth < 16 && current; depth++) {
-      if (current.avatar) return this.worldTransform(current);
+      if (current.avatar) return this.avatarRootTransform(current);
       const parentId = this.localObjectIds.get(Number(current.parentId));
       current = parentId ? this.sceneObjects.get(parentId) : null;
     }
@@ -1030,7 +1041,7 @@ export class WorldViewer extends Utils.EventEmitter {
     const jointRotation = this.quaternionFromMatrix(matrix);
     const localPosition = Array.isArray(object.position) ? object.position : [0, 0, 0];
     const localRotation = Array.isArray(object.rotation) && object.rotation.length === 4 ? object.rotation : [0, 0, 0, 1];
-    const avatarTransform = this.worldTransform(avatar);
+    const avatarTransform = this.avatarRootTransform(avatar);
     const jointOffset = jointPosition.map((value, axis) => value + this.rotateVector(localPosition, jointRotation)[axis]);
     return {
       position: avatarTransform.position.map((value, axis) => value + this.rotateVector(jointOffset, avatarTransform.rotation)[axis]),

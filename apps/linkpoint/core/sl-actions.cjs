@@ -44,7 +44,12 @@ function attachmentIdFromState(state) {
  */
 function attachmentInfo(object) {
   if (!object || !object.IsAttachment) return { attachmentPoint: 0, attachmentName: null, isHud: false };
-  const candidates = [attachmentIdFromState(object.attachmentPoint), Number(object.State)];
+  const candidates = [
+    attachmentIdFromState(object.attachmentPoint),
+    Number(object.attachmentPoint),
+    Number(object.State),
+    attachmentIdFromState(object.State),
+  ];
   const id = candidates.find((value) => Number.isInteger(value) && ATTACHMENT_NAMES[value]) || 0;
   return { attachmentPoint: id, attachmentName: ATTACHMENT_NAMES[id] || null, isHud: isHudPoint(id) };
 }
