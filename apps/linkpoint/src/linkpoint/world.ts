@@ -136,11 +136,27 @@ export class WorldViewer extends Utils.EventEmitter {
       this.emit('nearby_changed', this.nearbyUsers.map((user) => ({ ...user })));
     });
     this.protocol.on('ParcelProperties', (data: any) => {
-      const parcels = data?.ParcelData || data?.parcelData || [];
-      const parcel = Array.isArray(parcels) ? parcels[0] : parcels;
-      if (!parcel) return;
-      this.region = { ...this.region, parcel: { ...parcel } };
-      this.emit('parcel_changed', { ...parcel });
+      const raw = data?.ParcelData || data?.parcelData || data;
+      const parcel = Array.isArray(raw) ? raw[0] : raw;
+      if (!parcel || typeof parcel !== 'object') return;
+      const ownerId = parcel.ownerId || parcel.OwnerID?.toString?.() || parcel.ownerID?.toString?.() || null;
+      const groupId = parcel.groupId || parcel.GroupID?.toString?.() || parcel.groupID?.toString?.() || null;
+      const normalizedParcel = {
+        id: parcel.id ?? parcel.LocalID ?? parcel.LocalId ?? null,
+        name: parcel.name || parcel.Name || '',
+        description: parcel.description || parcel.Desc || parcel.desc || '',
+        area: Number(parcel.area ?? parcel.Area ?? 0),
+        ownerId: ownerId && ownerId !== '00000000-0000-0000-0000-000000000000' ? ownerId : null,
+        groupId: groupId && groupId !== '00000000-0000-0000-0000-000000000000' ? groupId : null,
+        maxPrims: Number(parcel.maxPrims ?? parcel.MaxPrims ?? 0),
+        totalPrims: Number(parcel.totalPrims ?? parcel.TotalPrims ?? 0),
+        musicUrl: parcel.musicUrl || parcel.MusicURL || '',
+        mediaUrl: parcel.mediaUrl || parcel.MediaURL || '',
+        parcelFlags: Number(parcel.parcelFlags ?? parcel.ParcelFlags ?? parcel.Flags ?? parcel.flags ?? 0),
+        ...parcel,
+      };
+      this.region = { ...this.region, parcel: normalizedParcel };
+      this.emit('parcel_changed', { ...normalizedParcel });
       this.emit('region_changed', { ...this.region });
     });
     this.protocol.on('scene:object-add', (object: any) => {

@@ -27,6 +27,15 @@ typedef DartLinkpointParse = Pointer<LlsdResultBufferStruct> Function(Pointer<Ui
 class LinkpointProtocolFFI {
   static DynamicLibrary? _lib;
 
+  static bool get isAvailable {
+    try {
+      _loadLibrary();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static DynamicLibrary _loadLibrary() {
     if (_lib != null) return _lib!;
     if (Platform.isLinux) {

@@ -241,10 +241,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+
+      - name: Build native protocol shared library
+        run: cargo build -p linkpoint-protocol --release
 
       - name: Run Dart / Flutter tests
         run: |
