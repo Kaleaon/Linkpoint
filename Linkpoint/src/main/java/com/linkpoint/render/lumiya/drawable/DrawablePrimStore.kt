@@ -130,6 +130,9 @@ class DrawablePrimStore {
             System.arraycopy(tmp, 0, instance.modelMatrix, 0, 16)
         }
         Matrix.scaleM(instance.modelMatrix, 0, scaleX, scaleY, scaleZ)
+        instance.modelMatrix[12] = posX
+        instance.modelMatrix[13] = posY
+        instance.modelMatrix[14] = posZ
 
         applyTextureEntry(instance, textureEntry)
     }
