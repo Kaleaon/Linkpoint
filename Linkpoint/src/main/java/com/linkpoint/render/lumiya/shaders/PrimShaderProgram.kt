@@ -324,7 +324,9 @@ class PrimShaderProgram : BaseShaderProgram() {
     // ── Uniform setters ──────────────────────────────────────────────────
 
     fun setModelMatrix(m: FloatArray) = GLES32.glUniformMatrix4fv(uModelMatrix, 1, false, m, 0)
+    fun setModelMatrix(m: FloatArray, offset: Int) = GLES32.glUniformMatrix4fv(uModelMatrix, 1, false, m, offset)
     fun setTexMatrix(m: FloatArray)   = GLES32.glUniformMatrix4fv(uTexMatrix, 1, false, m, 0)
+    fun setTexMatrix(m: FloatArray, offset: Int)   = GLES32.glUniformMatrix4fv(uTexMatrix, 1, false, m, offset)
     fun setColor(r: Float, g: Float, b: Float, a: Float) = GLES32.glUniform4f(uColor, r, g, b, a)
 
     fun setSpecularColor(r: Float, g: Float, b: Float) {}

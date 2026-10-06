@@ -64,6 +64,9 @@ public class SpatialChatView extends FrameLayout {
     public static final int MAX_VISIBLE_AVATAR_LINES = 4;
     public static final float MAX_OVERLAY_HEIGHT_RATIO = 0.20f; // 20% vertical screen height
 
+    public static final int DEFAULT_CHAT_HISTORY_CAPACITY = 200;
+    public static final int DEFAULT_SCRIPT_DRAWER_CAPACITY = 100;
+
     private static boolean nativeLibraryLoaded = false;
 
     static {
@@ -80,9 +83,9 @@ public class SpatialChatView extends FrameLayout {
             float sourceX, float sourceY, float sourceZ
     );
 
-    private final List<ChatMessage> chatHistory = new ArrayList<>();
+    private final BoundedFifoBuffer<ChatMessage> chatHistory;
     private final List<ChatMessage> activeAvatarOverlayMessages = new ArrayList<>();
-    private final List<ChatMessage> scriptDrawerMessages = new ArrayList<>();
+    private final BoundedFifoBuffer<ChatMessage> scriptDrawerMessages;
 
     private boolean isScriptDrawerExpanded = false;
     private int unreadScriptCount = 0;
@@ -92,15 +95,45 @@ public class SpatialChatView extends FrameLayout {
     private float cameraZ = 0.0f;
 
     public SpatialChatView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public SpatialChatView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public SpatialChatView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, DEFAULT_CHAT_HISTORY_CAPACITY, DEFAULT_SCRIPT_DRAWER_CAPACITY);
+    }
+
+    public SpatialChatView(Context context, int chatHistoryCapacity, int scriptDrawerCapacity) {
+        this(context, null, 0, chatHistoryCapacity, scriptDrawerCapacity);
+    }
+
+    public SpatialChatView(Context context, AttributeSet attrs, int defStyleAttr,
+                           int chatHistoryCapacity, int scriptDrawerCapacity) {
         super(context, attrs, defStyleAttr);
+        this.chatHistory = new BoundedFifoBuffer<>(chatHistoryCapacity);
+        this.scriptDrawerMessages = new BoundedFifoBuffer<>(scriptDrawerCapacity);
+    }
+
+    public void setChatHistoryCapacity(int capacity) {
+        chatHistory.setCapacity(capacity);
+    }
+
+    public int getChatHistoryCapacity() {
+        return chatHistory.getCapacity();
+    }
+
+    public void setScriptDrawerCapacity(int capacity) {
+        scriptDrawerMessages.setCapacity(capacity);
+        if (unreadScriptCount > scriptDrawerMessages.size()) {
+            unreadScriptCount = scriptDrawerMessages.size();
+        }
+    }
+
+    public int getScriptDrawerCapacity() {
+        return scriptDrawerMessages.getCapacity();
     }
 
     /**
@@ -177,6 +210,9 @@ public class SpatialChatView extends FrameLayout {
             scriptDrawerMessages.add(message);
             if (!isScriptDrawerExpanded) {
                 unreadScriptCount++;
+                if (unreadScriptCount > scriptDrawerMessages.size()) {
+                    unreadScriptCount = scriptDrawerMessages.size();
+                }
             }
         }
     }

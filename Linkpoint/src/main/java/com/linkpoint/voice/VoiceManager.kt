@@ -49,7 +49,8 @@ class VoiceManager(
     private val parcelManager: com.linkpoint.world.ParcelManager? = null,
     initialGridKind: GridKind = GridKind.SECOND_LIFE,
     initialVoiceConfig: VoiceConfig? = null,
-    adapterFactory: VoiceTransportAdapterFactory? = null
+    adapterFactory: VoiceTransportAdapterFactory? = null,
+    private val parcelManager: com.linkpoint.world.ParcelManager? = null
 ) {
     companion object {
         private const val TAG = "VoiceManager"
@@ -239,27 +240,13 @@ class VoiceManager(
     }
 
     /**
-     * Primary entry point for voice connection.
-     *
-     * Queries region capability status and parcel local ID prior to initiating
-     * WebRTC peer connections. Fails gracefully if voice capability is missing
-     * on the current region.
+     * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
+     * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
+     * servers, then builds a [VoiceSession] configured with the
+     * sim-provided ICE servers (instead of the previous hardcoded
+     * Google STUN). The signaling layer that POSTs SDP to the channel
+     * URI is still pending — see the [VoiceSession] class doc.
      */
-    suspend fun connect(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
-        val hasVoiceCap = capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) ||
-                          capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC) ||
-                          capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE)
-        if (!hasVoiceCap) {
-            Log.w(TAG, "Cannot connect voice: Region lacks voice capabilities (ProvisionVoiceAccountRequest missing)")
-            _lastError.value = "Voice capability is not available in this region"
-            return@withContext false
-        }
-        _lastError.value = null
-
-        val targetParcelId = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
-        joinSpatialVoice(targetParcelId)
-    }
-
     /**
      * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
      * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
@@ -306,6 +293,16 @@ class VoiceManager(
         }
 
         val voiceInfo = requestParcelVoiceInfo() ?: return@withContext false
+        if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
+            !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
+            Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
+            _lastError.value = "Voice capability is not available in this region"
+            return@withContext false
+        }
+        val voiceInfo = requestParcelVoiceInfo() ?: run {
+            _lastError.value = "Failed to retrieve parcel voice info"
+            return@withContext false
+        }
         val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
 
         Log.i(TAG, "Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
@@ -345,6 +342,11 @@ class VoiceManager(
     }
 
     /**
+     * Connect to spatial voice channel. Convenience delegate to [joinSpatialVoice].
+     */
+    suspend fun connect(parcelLocalId: Int? = null): Boolean = joinSpatialVoice(parcelLocalId)
+
+    /**
      * Top-level entry point for spatial voice. Picks the WebRTC flow
      * for WebRTC-enabled regions or OpenSim grids via [VoiceTransportAdapter], and falls back to legacy
      * parcel voice for non-WebRTC regions.
@@ -366,6 +368,13 @@ class VoiceManager(
         }
 
         joinParcelVoice()
+    }
+
+    /**
+     * Connects to spatial voice asynchronously based on current grid capabilities and parcel state.
+     */
+    suspend fun connect(parcelLocalId: Int? = null): Boolean {
+        return joinSpatialVoice(parcelLocalId)
     }
 
     /**
