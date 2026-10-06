@@ -49,6 +49,13 @@ jobs:
           git config core.autocrlf false
           git rm --cached -r .
           git reset --hard
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Set up Rust toolchain
+        if: matrix.os == 'ubuntu-latest'
+        uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -86,6 +93,10 @@ jobs:
           git config core.autocrlf false
           git rm --cached -r .
           git reset --hard
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
