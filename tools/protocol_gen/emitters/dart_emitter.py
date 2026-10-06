@@ -13,7 +13,7 @@ class DartEmitter(BaseEmitter):
         code = self._generate_dart_code(ast)
         out_file = os.path.join(out_dir, "generated.dart")
 
-        with open(out_file, "w", encoding="utf-8") as f:
+        with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
 
         return {out_file: code}

@@ -22,7 +22,7 @@ class JavaEmitter(BaseEmitter):
         }
 
         for path, content in results.items():
-            with open(path, "w", encoding="utf-8") as f:
+            with open(path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(content)
 
         return results
