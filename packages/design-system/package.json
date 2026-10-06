@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate-tokens": "node scripts/generate-tokens.js",
-    "build:tokens": "node scripts/generate-tokens.js",
+    "generate-tokens": "python3 ../../tools/token_gen/cli.py generate",
+    "build:tokens": "python3 ../../tools/token_gen/cli.py generate",
     "test:playwright": "playwright test",
     "test": "playwright test"
   },
