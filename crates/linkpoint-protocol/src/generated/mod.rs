@@ -8258,13 +8258,6 @@ impl GameControlInputPacket {
 
 // Generated LLSD Capability Schemas
 #[derive(Debug, Clone, Default)]
-pub struct CapabilitiesRequestResponseCapabilities {
-    pub capabilities: Vec<String>,
-    pub seed_response: Option<String>,
-    pub fetch_inventory: Option<String>,
-}
-
-#[derive(Debug, Clone, Default)]
 pub struct AgentDomainCapabilitiesCapabilities {
     pub agent_id: Option<String>,
     pub session_id: Option<String>,
@@ -8274,6 +8267,13 @@ pub struct AgentDomainCapabilitiesCapabilities {
     pub hover_height: Option<f64>,
     pub active_group_id: Option<String>,
     pub maturity_rating: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CapabilitiesRequestResponseCapabilities {
+    pub capabilities: Vec<String>,
+    pub seed_response: Option<String>,
+    pub fetch_inventory: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]

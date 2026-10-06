@@ -46,6 +46,9 @@ describe('attachment points (Lumiya SLObjectInfo.attachmentIDFromState)', () => 
     expect(actions.attachmentInfo(raw)).toEqual({ attachmentPoint: 35, attachmentName: 'Center', isHud: true });
     expect(actions.attachmentInfo({ IsAttachment: true, attachmentPoint: 0, State: 35 }).attachmentPoint).toBe(35);
     expect(actions.attachmentInfo({ IsAttachment: true, attachmentPoint: 0x01, State: 16 })).toMatchObject({ attachmentPoint: 16, isHud: false });
+    expect(actions.attachmentInfo({ IsAttachment: true, attachmentPoint: 45, State: 0 })).toEqual({ attachmentPoint: 45, attachmentName: 'Left Wing', isHud: false });
+    expect(actions.attachmentInfo({ IsAttachment: true, attachmentPoint: 46, State: 0 })).toEqual({ attachmentPoint: 46, attachmentName: 'Right Wing', isHud: false });
+    expect(actions.attachmentInfo({ IsAttachment: true, attachmentPoint: 0, State: 0x2D })).toEqual({ attachmentPoint: 45, attachmentName: 'Left Wing', isHud: false });
   });
 
   it('treats non-attachments and nonsense values as not attached', () => {
