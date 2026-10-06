@@ -186,3 +186,7 @@ build_output.txt
 **/coverage/
 *.lcov
 lcov.info
+/test-results/
+/playwright-report/
+**/test-results/
+**/playwright-report/
