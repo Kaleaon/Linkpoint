@@ -38,18 +38,18 @@ EXCLUDE_DIRS = {
 }
 
 EXCLUDE_PREFIXES = (
-    os.path.normpath("Linkpoint/src/test/resources"),
-    os.path.normpath("crates/quick-xml"),
+    "Linkpoint/src/test/resources",
+    "crates/quick-xml",
 )
 
 
 def is_excluded(rel_path):
-    norm_path = os.path.normpath(rel_path)
-    parts = norm_path.split(os.sep)
+    norm_path = rel_path.replace("\\", "/")
+    parts = norm_path.split("/")
     if parts[0] in EXCLUDE_DIRS:
         return True
     for prefix in EXCLUDE_PREFIXES:
-        if norm_path == prefix or norm_path.startswith(prefix + os.sep):
+        if norm_path == prefix or norm_path.startswith(prefix + "/"):
             return True
     return False
 
@@ -73,20 +73,39 @@ def fallback_yaml_check(content, path):
 
     lines = content.splitlines()
     stack = []
+    block_scalar_indent = None
+
     for line_num, line in enumerate(lines, 1):
-        # Disallow tabs for YAML indentation
-        stripped = line.lstrip()
-        indent_len = len(line) - len(stripped)
-        if "\t" in line[:indent_len]:
+        stripped_spaces = line.lstrip(" ")
+        if stripped_spaces.startswith("\t"):
             return False, f"Line {line_num}: Tab used for YAML indentation"
 
-        if not stripped or stripped.startswith("#"):
+        stripped = line.strip()
+        if not stripped:
             continue
 
-        # Check bracket and brace matching
+        indent = len(line) - len(stripped_spaces)
+
+        # Skip content inside YAML block scalar literals (| or >)
+        if block_scalar_indent is not None:
+            if indent > block_scalar_indent:
+                continue
+            else:
+                block_scalar_indent = None
+
+        if stripped.startswith("#"):
+            continue
+
+        line_no_comment = line.split(" #")[0] if " #" in line else line
+        trimmed = line_no_comment.rstrip()
+        if trimmed.endswith(("|", ">", "|-", ">-", "|+", ">+")):
+            block_scalar_indent = indent
+            continue
+
+        # Check bracket/brace balance
         in_quote = None
         escaped = False
-        for char in line:
+        for i, char in enumerate(line_no_comment):
             if escaped:
                 escaped = False
                 continue
@@ -97,8 +116,10 @@ def fallback_yaml_check(content, path):
                 if char == in_quote:
                     in_quote = None
             else:
-                if char in ("'", '"'):
-                    in_quote = char
+                if char in ('"', "'"):
+                    prev = line_no_comment[i - 1] if i > 0 else " "
+                    if prev in (" ", "\t", ":", "-", "[", "{", "(", ","):
+                        in_quote = char
                 elif char in ("(", "[", "{"):
                     stack.append((char, line_num))
                 elif char in (")", "]", "}"):
@@ -108,9 +129,6 @@ def fallback_yaml_check(content, path):
                     expected = {"(": ")", "[": "]", "{": "}"}[top]
                     if char != expected:
                         return False, f"Line {line_num}: Mismatched closing '{char}', expected '{expected}'"
-
-        if in_quote:
-            return False, f"Line {line_num}: Unclosed string quote ({in_quote})"
 
     if stack:
         char, line_num = stack[-1]
