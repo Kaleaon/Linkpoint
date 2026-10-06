@@ -1,6 +1,8 @@
 package com.linkpoint.world
 
 import android.util.Log
+import com.linkpoint.core.SessionManager
+import com.linkpoint.network.core.NetworkSessionManager
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.world.topography.PlanarTopographyProjection
@@ -34,6 +36,8 @@ import java.util.concurrent.ConcurrentHashMap
 class RegionCrossingManager(
     private val udpConnection: UDPConnectionFixed,
     private val capabilityManager: CapabilityManager,
+    private val networkSessionManager: NetworkSessionManager? = null,
+    private val sessionManager: SessionManager? = null,
     var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
 ) {
     companion object {
@@ -86,13 +90,18 @@ class RegionCrossingManager(
     /**
      * Handle region crossing initiated by the simulator.
      *
-     * Called when we receive CrossedRegion or TeleportFinish from the sim.
+     * Executes a two-phase handoff protocol:
+     * 1. Preserves origin circuit snapshot and capability state before modifying endpoints.
+     * 2. Reconfigures socket and attempts destination UDP handshake + capability initialization.
+     * 3. Performs automatic origin rollback on destination failure, or invokes central network
+     *    session recovery on unrecoverable dual-circuit failure.
      *
      * @param newSimIP New simulator IP address
      * @param newSimPort New simulator port
      * @param newCircuitCode New circuit code for the connection
      * @param seedCapability Seed capability URL for the new region
      * @param regionHandle Handle of the new region (unique identifier)
+     * @param regionName Name of the new region
      */
     suspend fun handleRegionCrossing(
         newSimIP: String,
@@ -113,28 +122,62 @@ class RegionCrossingManager(
         Log.i(TAG, "║ To: $regionName ($newSimIP:$newSimPort)                           ║")
         Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
 
-        scope.launch { _crossingEvents.emit(RegionCrossingEvent.Started(regionName)) }
+        _crossingEvents.emit(RegionCrossingEvent.Started(regionName))
+
+        val oldRegion = _currentRegion.value
+
+        // Requirement 1: Record origin circuit state before mutating socket endpoints
+        val originSnapshot = CircuitSnapshot(
+            simIP = udpConnection.getSimIP(),
+            simPort = udpConnection.getSimPort(),
+            circuitCode = udpConnection.getCircuitCode(),
+            seedCapability = capabilityManager.getSeedCapability(),
+            capabilities = capabilityManager.getCapabilitiesSnapshot(),
+            regionInfo = oldRegion
+        )
 
         return try {
-            val oldRegion = _currentRegion.value
-
-            // 1. Establish connection to new region
-            Log.d(TAG, "Step 1: Connecting to new region...")
+            // Phase 1: Reconfigure UDP socket endpoint to destination
+            Log.d(TAG, "Phase 1: Reconfiguring endpoint to destination $newSimIP:$newSimPort (circuit=$newCircuitCode)...")
             udpConnection.configure(newSimIP, newSimPort, newCircuitCode)
 
-            if (!udpConnection.connect()) {
-                throw Exception("Failed to connect to new region")
+            // Phase 2: Verify UDP connection handshake to destination
+            Log.d(TAG, "Phase 2: Connecting to destination region...")
+            val destinationUdpConnected = try {
+                udpConnection.connect()
+            } catch (e: Exception) {
+                Log.w(TAG, "Destination UDP connection threw exception: ${e.message}")
+                false
             }
-            Log.d(TAG, "✓ Connected to new region")
 
-            // 2. Initialize capabilities from new seed
-            Log.d(TAG, "Step 2: Initializing capabilities...")
-            if (!capabilityManager.initialize(seedCapability)) {
-                throw Exception("Failed to initialize capabilities")
+            if (!destinationUdpConnected) {
+                Log.w(TAG, "Destination UDP handshake failed; initiating origin circuit rollback...")
+                return rollbackToOriginOrRecover(
+                    originSnapshot,
+                    "Failed to connect to destination UDP endpoint $newSimIP:$newSimPort"
+                )
             }
-            Log.d(TAG, "✓ Capabilities initialized")
+            Log.d(TAG, "✓ Destination UDP handshake verified")
 
-            // 3. Update current region info
+            // Phase 2: Initialize destination capabilities
+            Log.d(TAG, "Initializing destination capabilities...")
+            val destinationCapsInitialized = try {
+                capabilityManager.initialize(seedCapability)
+            } catch (e: Exception) {
+                Log.w(TAG, "Destination capability initialization threw exception: ${e.message}")
+                false
+            }
+
+            if (!destinationCapsInitialized) {
+                Log.w(TAG, "Destination capability initialization failed; initiating origin circuit rollback...")
+                return rollbackToOriginOrRecover(
+                    originSnapshot,
+                    "Failed to initialize destination capabilities"
+                )
+            }
+            Log.d(TAG, "✓ Destination capabilities initialized")
+
+            // Two-phase handoff verified successfully! Update current region info
             val newRegion = RegionInfo(
                 handle = regionHandle,
                 name = regionName,
@@ -144,30 +187,93 @@ class RegionCrossingManager(
             )
             _currentRegion.value = newRegion
 
-            // 4. Convert old region to child connection (if needed)
             if (oldRegion != null && oldRegion.handle != regionHandle) {
-                Log.d(TAG, "Step 4: Converting old region to child agent...")
-                // In practice, the simulator handles this, but we track it
-                // Old region connection is automatically closed when we reconfigure
+                Log.d(TAG, "Converting old region connection state...")
             }
 
-            // 5. Start agent updates in new region
-            Log.d(TAG, "Step 5: Starting agent updates...")
+            Log.d(TAG, "Starting agent updates in new region...")
             udpConnection.startAgentUpdates()
 
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
             Log.i(TAG, "║ REGION CROSSING COMPLETE                                          ║")
             Log.i(TAG, "═══════════════════════════════════════════════════════════════════")
 
-            scope.launch { _crossingEvents.emit(RegionCrossingEvent.Completed(newRegion)) }
+            _crossingEvents.emit(RegionCrossingEvent.Completed(newRegion))
             true
 
         } catch (e: Exception) {
-            Log.e(TAG, "Region crossing failed", e)
-            scope.launch { _crossingEvents.emit(RegionCrossingEvent.Failed(e.message ?: "Unknown error")) }
-            false
+            Log.e(TAG, "Unexpected exception during region crossing", e)
+            rollbackToOriginOrRecover(originSnapshot, e.message ?: "Unknown error during region crossing")
         } finally {
+            // Guardrail: Snapshot state stays in memory only during crossing attempt.
+            // Clearing isCrossing guarantees reset across success, rollback, and recovery paths.
             isCrossing = false
+        }
+    }
+
+    /**
+     * Requirement 3 & 4: Automatic circuit rollback to origin parameters if destination fails.
+     * If origin circuit rollback also fails (dual-circuit failure), trigger rapid session recovery.
+     */
+    private suspend fun rollbackToOriginOrRecover(
+        originSnapshot: CircuitSnapshot,
+        failureReason: String
+    ): Boolean {
+        Log.w(
+            TAG,
+            "Attempting circuit rollback to origin sim ${originSnapshot.simIP}:${originSnapshot.simPort} " +
+                "(circuit=${originSnapshot.circuitCode})..."
+        )
+
+        // 1. Reconfigure UDP socket back to origin parameters
+        udpConnection.configure(originSnapshot.simIP, originSnapshot.simPort, originSnapshot.circuitCode)
+
+        var originReconnected = try {
+            udpConnection.connect()
+        } catch (e: Exception) {
+            Log.e(TAG, "Origin UDP reconnect exception: ${e.message}")
+            false
+        }
+
+        var originCapRestored = false
+        if (originReconnected) {
+            if (!originSnapshot.seedCapability.isNullOrEmpty()) {
+                originCapRestored = try {
+                    capabilityManager.initialize(originSnapshot.seedCapability)
+                } catch (e: Exception) {
+                    Log.w(
+                        TAG,
+                        "Origin capability re-initialization threw exception, falling back to snapshot restore: ${e.message}"
+                    )
+                    false
+                }
+                if (!originCapRestored) {
+                    capabilityManager.restoreCapabilities(originSnapshot.seedCapability, originSnapshot.capabilities)
+                    originCapRestored = true
+                }
+            } else {
+                originCapRestored = true
+            }
+        }
+
+        return if (originReconnected && originCapRestored) {
+            // Requirement 3: Successful Rollback to Origin
+            Log.i(TAG, "✓ Origin circuit rollback successful for region ${originSnapshot.regionInfo?.name ?: "origin"}")
+            _currentRegion.value = originSnapshot.regionInfo
+            udpConnection.startAgentUpdates()
+
+            val errorMessage = "Region crossing failed: $failureReason. Safely rolled back to origin region."
+            _crossingEvents.emit(RegionCrossingEvent.Failed(errorMessage))
+            false
+        } else {
+            // Requirement 4: Unrecoverable dual-circuit failure - invoke network session recovery via central session manager
+            Log.e(TAG, "❌ Dual-circuit failure! Origin rollback failed. Invoking network session recovery...")
+
+            networkSessionManager?.triggerConnectionRecovery()
+
+            val fatalMessage = "Unrecoverable dual-circuit failure during region crossing: $failureReason. Invoked session recovery."
+            _crossingEvents.emit(RegionCrossingEvent.Failed(fatalMessage))
+            false
         }
     }
 
@@ -298,6 +404,15 @@ class RegionCrossingManager(
 /**
  * Information about a region.
  */
+data class CircuitSnapshot(
+    val simIP: String,
+    val simPort: Int,
+    val circuitCode: Int,
+    val seedCapability: String?,
+    val capabilities: Map<String, String>?,
+    val regionInfo: RegionInfo?
+)
+
 data class RegionInfo(
     val handle: Long,
     val name: String,
