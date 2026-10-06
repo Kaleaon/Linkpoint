@@ -24,6 +24,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -104,7 +118,7 @@ jobs:
             Linkpoint/ui-components/src/test/snapshots/
 
       - name: Assemble Debug build
-        run: ./gradlew :Linkpoint:assembleDebug --stacktrace
+        run: ./gradlew :Linkpoint:assembleStableDebug --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4

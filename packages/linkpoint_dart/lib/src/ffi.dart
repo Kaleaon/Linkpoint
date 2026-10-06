@@ -39,10 +39,12 @@ class LinkpointProtocolFFI {
   static DynamicLibrary _loadLibrary() {
     if (_lib != null) return _lib!;
     if (Platform.isLinux) {
+      final ghWorkspace = Platform.environment['GITHUB_WORKSPACE'];
       final searchPaths = [
         'liblinkpoint_protocol.so',
         '../../target/release/liblinkpoint_protocol.so',
         'target/release/liblinkpoint_protocol.so',
+        if (ghWorkspace != null) '$ghWorkspace/target/release/liblinkpoint_protocol.so',
         '/app/Linkpoint/target/release/liblinkpoint_protocol.so',
       ];
       for (final p in searchPaths) {

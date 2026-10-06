@@ -8,22 +8,24 @@ void main() {
     late List<dynamic> testVectors;
 
     setUpAll(() {
-      final candidatePaths = [
+      final ghWorkspace = Platform.environment['GITHUB_WORKSPACE'];
+      final candidates = [
         '../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
+        '../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
         'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
+        if (ghWorkspace != null) '$ghWorkspace/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
         '/app/Linkpoint/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
       ];
       File? fixtureFile;
-      for (final path in candidatePaths) {
-        final f = File(path);
+      for (final p in candidates) {
+        final f = File(p);
         if (f.existsSync()) {
           fixtureFile = f;
           break;
         }
       }
       if (fixtureFile == null) {
-        testVectors = [];
-        return;
+        throw Exception('Test vectors fixture file not found');
       }
       final jsonContent = fixtureFile.readAsStringSync();
       testVectors = jsonDecode(jsonContent);
