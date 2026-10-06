@@ -24,8 +24,13 @@ export function getSceneBounds(entities: readonly SceneEntity[]): SceneBounds {
   return { center, radius };
 }
 
+let cachedPlaceholderUri: string | null = null;
+
 /** Generates a 16x16 grid 50% opacity neutral gray placeholder texture data URI. */
 export function getPlaceholderTextureUri(): string {
+  if (cachedPlaceholderUri) {
+    return cachedPlaceholderUri;
+  }
   if (
     typeof window !== "undefined" &&
     typeof window.CanvasRenderingContext2D !== "undefined" &&
@@ -43,14 +48,19 @@ export function getPlaceholderTextureUri(): string {
         ctx.strokeStyle = "rgba(102, 102, 102, 0.5)";
         ctx.lineWidth = 1;
         ctx.strokeRect(0, 0, 16, 16);
-        return canvas.toDataURL("image/png");
+        const dataUrl = canvas.toDataURL("image/png");
+        if (dataUrl && dataUrl.startsWith("data:image/png;base64,")) {
+          cachedPlaceholderUri = dataUrl;
+          return dataUrl;
+        }
       }
     } catch {
       // Fallback to static base64 if canvas context is unavailable
     }
   }
   // Static 16x16 neutral gray 50% opacity placeholder data URI fallback
-  return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAFUlEQVR42mNk+M9QzwAEjAxgVC1AAn90A4K06180AAAAAElFTkSuQmCC";
+  cachedPlaceholderUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAFUlEQVR42mNk+M9QzwAEjAxgVC1AAn90A4K06180AAAAAElFTkSuQmCC";
+  return cachedPlaceholderUri;
 }
 
 interface EntityRecord {
@@ -215,35 +225,41 @@ export async function createBabylonRenderer(canvas: HTMLCanvasElement): Promise<
       }
 
       const createSafeTexture = (uri: string) => {
+        let hasFalledBack = false;
+        const fallbackToPlaceholder = () => {
+          if (hasFalledBack) return;
+          hasFalledBack = true;
+          const placeholderUri = getPlaceholderTextureUri();
+          try {
+            if (tex.url !== placeholderUri) {
+              tex.updateURL(placeholderUri);
+            }
+          } catch {
+            // Ignore secondary fallback errors to prevent infinite loops
+          }
+        };
+
+        let tex: InstanceType<typeof Texture>;
         try {
-          const tex = new Texture(
+          tex = new Texture(
             uri,
             scene,
             undefined,
             undefined,
             undefined,
             undefined,
-            () => {
-              const placeholderUri = getPlaceholderTextureUri();
-              if (tex.url !== placeholderUri) {
-                tex.updateURL(placeholderUri);
-              }
-            }
+            fallbackToPlaceholder
           );
           if ((tex as any).onErrorObservable) {
-            (tex as any).onErrorObservable.add(() => {
-              const placeholderUri = getPlaceholderTextureUri();
-              if (tex.url !== placeholderUri) {
-                tex.updateURL(placeholderUri);
-              }
-            });
+            (tex as any).onErrorObservable.add(fallbackToPlaceholder);
           }
           applyTextureTransform(tex, materialAttr.textureTransform);
           record.textures.push(tex);
           return tex;
         } catch {
+          hasFalledBack = true;
           const placeholderUri = getPlaceholderTextureUri();
-          const tex = new Texture(placeholderUri, scene);
+          tex = new Texture(placeholderUri, scene);
           applyTextureTransform(tex, materialAttr.textureTransform);
           record.textures.push(tex);
           return tex;
