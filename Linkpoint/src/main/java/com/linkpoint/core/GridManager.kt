@@ -67,11 +67,6 @@ class GridManager(
         grids
     }
 
-    @Deprecated("Use getAvailableGridsAsync or getAvailableGridsFlow instead to avoid main-thread blocking.")
-    fun getAvailableGrids(): List<GridInfo> {
-        return BUILTIN_GRIDS
-    }
-
     /**
      * Flow of available grids from local SQLite database for reactive UI binding.
      */
@@ -98,14 +93,6 @@ class GridManager(
         val grid = getAvailableGridsAsync().find { it.id == gridId } ?: resolveGridAsync(gridId)
         selectedGrid = grid
         Log.i(TAG, "Selected grid: ${grid.name} (${grid.loginUri})")
-    }
-
-    @Deprecated("Use selectGridAsync instead.")
-    fun selectGrid(gridId: String) {
-        val builtin = BUILTIN_GRIDS.find { it.id == gridId }
-        if (builtin != null) {
-            selectedGrid = builtin
-        }
     }
 
     fun updateSelectedGrid(grid: GridInfo) {
@@ -145,19 +132,6 @@ class GridManager(
         try { dao.insertGrid(profile) } catch (e: Exception) { Log.w(TAG, "Failed to cache probed grid: ${e.message}") }
 
         profile.toGridInfo()
-    }
-
-    @Deprecated("Use resolveGridAsync instead.")
-    fun resolveGrid(gridIdOrUri: String): GridInfo {
-        val builtin = BUILTIN_GRIDS.find { it.id == gridIdOrUri || it.loginUri == gridIdOrUri }
-        if (builtin != null) return builtin
-        return GridInfo(
-            id = "custom_" + Math.abs(gridIdOrUri.hashCode()),
-            name = gridIdOrUri,
-            loginUri = if (gridIdOrUri.startsWith("http")) gridIdOrUri else "http://$gridIdOrUri/",
-            gridNick = gridIdOrUri,
-            isCustom = true
-        )
     }
 
     fun addCustomGrid(grid: GridInfo) {
