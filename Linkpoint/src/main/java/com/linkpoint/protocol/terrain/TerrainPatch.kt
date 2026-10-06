@@ -95,8 +95,9 @@ class TerrainPatch(
         /**
          * Decompress a terrain patch from the bit buffer.
          * Returns null if end-of-patches marker is found.
+         * @param maxPatches Maximum number of patches per side (e.g. 16 for 256m, 32 for 512m, 128 for 2048m).
          */
-        fun decompressPatch(buffer: BitBuffer, patchSize: Int): TerrainPatch? {
+        fun decompressPatch(buffer: BitBuffer, patchSize: Int, maxPatches: Int = 32): TerrainPatch? {
             val quantWBits = buffer.getBits(8)
 
             if (quantWBits == END_OF_PATCHES) {
@@ -105,7 +106,8 @@ class TerrainPatch(
 
             val dcOffset = buffer.getFloat()
             val range = buffer.getBits(16)
-            val patchIds = buffer.getBits(10)
+            val patchBits = if (maxPatches > 32) 14 else 10
+            val patchIds = buffer.getBits(patchBits)
             val wordBits = (quantWBits and 15) + 2
 
             val patches = IntArray(patchSize * patchSize)
@@ -163,8 +165,10 @@ class TerrainPatch(
                 output[j] = block[j] * mult + addval
             }
 
-            val patchX = patchIds shr 5
-            val patchY = patchIds and 31
+            val bitsPerAxis = patchBits / 2
+            val mask = (1 shl bitsPerAxis) - 1
+            val patchX = patchIds shr bitsPerAxis
+            val patchY = patchIds and mask
 
             return TerrainPatch(patchX, patchY, output)
         }

@@ -32,11 +32,16 @@ class TerrainRenderer(
         const val PATCHES_PER_SIDE = 16
     }
 
-    // Heightmap data (256x256 floats)
+    var regionWidth: Float = REGION_WIDTH
+        private set
+    var regionHeight: Float = REGION_HEIGHT
+        private set
+
+    // Heightmap data ((width+1) x (height+1) floats)
     private var heightmap = FloatArray(257 * 257)
 
     // Terrain patches for LOD
-    private val patches = Array(PATCHES_PER_SIDE * PATCHES_PER_SIDE) { TerrainPatch() }
+    private var patches = Array(PATCHES_PER_SIDE * PATCHES_PER_SIDE) { TerrainPatch() }
 
     // Filament entities
     private var terrainEntity: Int = 0
@@ -56,6 +61,27 @@ class TerrainRenderer(
     private var detailUVScale = 16f // meters per detail texture tile
 
     /**
+     * Configure active region dimensions and re-allocate buffers matching active size.
+     */
+    fun setRegionSize(width: Float, height: Float) {
+        val newW = width.coerceIn(256f, 2048f)
+        val newH = height.coerceIn(256f, 2048f)
+        if (regionWidth != newW || regionHeight != newH) {
+            regionWidth = newW
+            regionHeight = newH
+            val resX = regionWidth.toInt() + 1
+            val resY = regionHeight.toInt() + 1
+            heightmap = FloatArray(resX * resY)
+            val patchesX = regionWidth.toInt() / PATCH_SIZE
+            val patchesY = regionHeight.toInt() / PATCH_SIZE
+            patches = Array(patchesX * patchesY) { TerrainPatch() }
+            if (materialInstance != null) {
+                createTerrainMesh()
+            }
+        }
+    }
+
+    /**
      * Initialize terrain renderer
      */
     fun initialize(material: Material) {
@@ -67,7 +93,7 @@ class TerrainRenderer(
         // Add to scene
         scene.addEntity(terrainEntity)
 
-        Log.i(TAG, "Terrain renderer initialized")
+        Log.i(TAG, "Terrain renderer initialized (${regionWidth.toInt()}x${regionHeight.toInt()})")
     }
 
     /**
@@ -76,30 +102,40 @@ class TerrainRenderer(
     fun updateHeightmap(patchX: Int, patchY: Int, heights: FloatArray) {
         if (heights.size != PATCH_SIZE * PATCH_SIZE) return
 
+        val resX = regionWidth.toInt() + 1
+        val resY = regionHeight.toInt() + 1
+        val patchesPerSideX = regionWidth.toInt() / PATCH_SIZE
+
         // Copy heights to main heightmap
         for (y in 0 until PATCH_SIZE) {
             for (x in 0 until PATCH_SIZE) {
                 val globalX = patchX * PATCH_SIZE + x
                 val globalY = patchY * PATCH_SIZE + y
-                if (globalX <= 256 && globalY <= 256) {
-                    heightmap[globalY * 257 + globalX] = heights[y * PATCH_SIZE + x]
+                if (globalX <= regionWidth.toInt() && globalY <= regionHeight.toInt()) {
+                    heightmap[globalY * resX + globalX] = heights[y * PATCH_SIZE + x]
                 }
             }
         }
 
         // Mark patch as dirty
-        val patchIndex = patchY * PATCHES_PER_SIDE + patchX
+        val patchIndex = patchY * patchesPerSideX + patchX
         if (patchIndex < patches.size) {
             patches[patchIndex].dirty = true
         }
     }
 
     /**
-     * Set full heightmap
+     * Set full heightmap with optional dimension parameters.
      */
-    fun setHeightmap(heights: FloatArray) {
-        if (heights.size >= 257 * 257) {
-            heights.copyInto(heightmap)
+    fun setHeightmap(heights: FloatArray, width: Int = regionWidth.toInt(), height: Int = regionHeight.toInt()) {
+        if (width.toFloat() != regionWidth || height.toFloat() != regionHeight) {
+            setRegionSize(width.toFloat(), height.toFloat())
+        }
+        val resX = regionWidth.toInt() + 1
+        val resY = regionHeight.toInt() + 1
+        val expectedSize = resX * resY
+        if (heights.size >= expectedSize) {
+            System.arraycopy(heights, 0, heightmap, 0, expectedSize)
             patches.forEach { it.dirty = true }
             rebuildMesh()
         }
@@ -154,20 +190,23 @@ class TerrainRenderer(
      * Get height at position
      */
     fun getHeightAt(x: Float, y: Float): Float {
-        val clampedX = x.coerceIn(0f, REGION_WIDTH)
-        val clampedY = y.coerceIn(0f, REGION_HEIGHT)
+        val clampedX = x.coerceIn(0f, regionWidth)
+        val clampedY = y.coerceIn(0f, regionHeight)
 
-        val ix = floor(clampedX).toInt().coerceIn(0, 255)
-        val iy = floor(clampedY).toInt().coerceIn(0, 255)
+        val resX = regionWidth.toInt() + 1
+        val resY = regionHeight.toInt() + 1
+
+        val ix = floor(clampedX).toInt().coerceIn(0, resX - 2)
+        val iy = floor(clampedY).toInt().coerceIn(0, resY - 2)
 
         val fx = clampedX - ix
         val fy = clampedY - iy
 
         // Bilinear interpolation
-        val h00 = heightmap[iy * 257 + ix]
-        val h10 = heightmap[iy * 257 + ix + 1]
-        val h01 = heightmap[(iy + 1) * 257 + ix]
-        val h11 = heightmap[(iy + 1) * 257 + ix + 1]
+        val h00 = heightmap[iy * resX + ix]
+        val h10 = heightmap[iy * resX + ix + 1]
+        val h01 = heightmap[(iy + 1) * resX + ix]
+        val h11 = heightmap[(iy + 1) * resX + ix + 1]
 
         val h0 = h00 + (h10 - h00) * fx
         val h1 = h01 + (h11 - h01) * fx
@@ -191,22 +230,28 @@ class TerrainRenderer(
     }
 
     private fun createTerrainMesh() {
-        val resolution = 257 // Vertices per side
-        val vertexCount = resolution * resolution
-        val indexCount = (resolution - 1) * (resolution - 1) * 6
+        if (terrainEntity != 0) {
+            scene.removeEntity(terrainEntity)
+            engine.destroyEntity(terrainEntity)
+            terrainEntity = 0
+        }
+        vertexBuffer?.let { engine.destroyVertexBuffer(it); vertexBuffer = null }
+        indexBuffer?.let { engine.destroyIndexBuffer(it); indexBuffer = null }
 
-        // Position + Normal + UV0 (world XY normalised) + UV1 (world Z, padding).
-        // UV1 is what the splatting material reads to pick the elevation
-        // blend zone per fragment.
+        val resX = regionWidth.toInt() + 1
+        val resY = regionHeight.toInt() + 1
+        val vertexCount = resX * resY
+        val indexCount = (resX - 1) * (resY - 1) * 6
+
         val stride = (3 + 3 + 2 + 2) * 4
         val vertexData = ByteBuffer.allocateDirect(vertexCount * stride)
             .order(ByteOrder.nativeOrder())
 
-        for (y in 0 until resolution) {
-            for (x in 0 until resolution) {
+        for (y in 0 until resY) {
+            for (x in 0 until resX) {
                 val px = x.toFloat()
                 val py = y.toFloat()
-                val pz = heightmap[y * resolution + x]
+                val pz = heightmap[y * resX + x]
 
                 vertexData.putFloat(px)
                 vertexData.putFloat(py)
@@ -217,37 +262,29 @@ class TerrainRenderer(
                 vertexData.putFloat(normal.y)
                 vertexData.putFloat(normal.z)
 
-                // UV0: normalised region position; the terrain material uses
-                // this both as the splat tile coordinate and as the bilinear
-                // weight for the four corner-elevation params.
-                vertexData.putFloat(px / REGION_WIDTH)
-                vertexData.putFloat(py / REGION_HEIGHT)
+                vertexData.putFloat(px / regionWidth)
+                vertexData.putFloat(py / regionHeight)
 
-                // UV1: x = world Z (height). y is unused but kept for
-                // alignment with the lit material's UV1 expectation.
                 vertexData.putFloat(pz)
                 vertexData.putFloat(0f)
             }
         }
         vertexData.flip()
 
-        // Generate indices
         val indexData = ByteBuffer.allocateDirect(indexCount * 2)
             .order(ByteOrder.nativeOrder())
 
-        for (y in 0 until resolution - 1) {
-            for (x in 0 until resolution - 1) {
-                val i00 = y * resolution + x
-                val i10 = y * resolution + x + 1
-                val i01 = (y + 1) * resolution + x
-                val i11 = (y + 1) * resolution + x + 1
+        for (y in 0 until resY - 1) {
+            for (x in 0 until resX - 1) {
+                val i00 = y * resX + x
+                val i10 = y * resX + x + 1
+                val i01 = (y + 1) * resX + x
+                val i11 = (y + 1) * resX + x + 1
 
-                // Triangle 1
                 indexData.putShort(i00.toShort())
                 indexData.putShort(i10.toShort())
                 indexData.putShort(i01.toShort())
 
-                // Triangle 2
                 indexData.putShort(i10.toShort())
                 indexData.putShort(i11.toShort())
                 indexData.putShort(i01.toShort())
@@ -255,7 +292,6 @@ class TerrainRenderer(
         }
         indexData.flip()
 
-        // Create Filament buffers
         vertexBuffer = VertexBuffer.Builder()
             .vertexCount(vertexCount)
             .bufferCount(1)
@@ -274,33 +310,31 @@ class TerrainRenderer(
 
         indexBuffer?.setBuffer(engine, indexData)
 
-        // Create renderable
         terrainEntity = EntityManager.get().create()
 
-        // Validate required components
         val vb = vertexBuffer ?: throw IllegalStateException("Vertex buffer not initialized")
         val ib = indexBuffer ?: throw IllegalStateException("Index buffer not initialized")
         val mat = materialInstance ?: throw IllegalStateException("Material instance not initialized")
 
         RenderableManager.Builder(1)
-            .boundingBox(Box(0f, 0f, 0f, 256f, 256f, 100f))
+            .boundingBox(Box(0f, 0f, 0f, regionWidth, regionHeight, 1000f))
             .geometry(0, RenderableManager.PrimitiveType.TRIANGLES, vb, ib)
             .material(0, mat)
             .build(engine, terrainEntity)
     }
 
     private fun rebuildMesh() {
-        // Re-tessellate vertex positions/normals/UVs from the latest heightmap.
-        val resolution = 257
+        val resX = regionWidth.toInt() + 1
+        val resY = regionHeight.toInt() + 1
         val stride = (3 + 3 + 2 + 2) * 4
-        val vertexData = ByteBuffer.allocateDirect(resolution * resolution * stride)
+        val vertexData = ByteBuffer.allocateDirect(resX * resY * stride)
             .order(ByteOrder.nativeOrder())
 
-        for (y in 0 until resolution) {
-            for (x in 0 until resolution) {
+        for (y in 0 until resY) {
+            for (x in 0 until resX) {
                 val px = x.toFloat()
                 val py = y.toFloat()
-                val pz = heightmap[y * resolution + x]
+                val pz = heightmap[y * resX + x]
 
                 vertexData.putFloat(px)
                 vertexData.putFloat(py)
@@ -311,8 +345,8 @@ class TerrainRenderer(
                 vertexData.putFloat(normal.y)
                 vertexData.putFloat(normal.z)
 
-                vertexData.putFloat(px / REGION_WIDTH)
-                vertexData.putFloat(py / REGION_HEIGHT)
+                vertexData.putFloat(px / regionWidth)
+                vertexData.putFloat(py / regionHeight)
 
                 vertexData.putFloat(pz)
                 vertexData.putFloat(0f)
@@ -325,10 +359,6 @@ class TerrainRenderer(
 
     private fun updateMaterial() {
         val mat = materialInstance ?: return
-        // Detail samplers — only set those we actually have textures for.
-        // Filament tolerates unset samplers as long as we don't sample them
-        // (the shader does sample all four, so we register a 1x1 fallback
-        // texture once any are missing).
         val sampler = TextureSampler(
             TextureSampler.MinFilter.LINEAR_MIPMAP_LINEAR,
             TextureSampler.MagFilter.LINEAR,
@@ -337,8 +367,6 @@ class TerrainRenderer(
         detailTextures.forEachIndexed { index, texture ->
             texture?.let { mat.setParameter("detail$index", it, sampler) }
         }
-        // Per-corner elevation blend bounds; pack into float4 the way the
-        // shader expects.
         try {
             mat.setParameter(
                 "startHeights",
@@ -350,8 +378,6 @@ class TerrainRenderer(
             )
             mat.setParameter("detailScale", detailUVScale)
         } catch (e: Exception) {
-            // The lit fallback material doesn't declare these params, so a
-            // silent miss here is expected; surface it at TRACE only.
             Log.v(TAG, "Terrain material params not applied: ${e.message}")
         }
     }
@@ -368,7 +394,9 @@ class TerrainRenderer(
 
     fun getDiagnostics(): Diagnostics {
         val dirty = patches.count { it.dirty }
-        val visible = if (terrainEntity != 0) PATCHES_PER_SIDE * PATCHES_PER_SIDE else 0
+        val patchesX = regionWidth.toInt() / PATCH_SIZE
+        val patchesY = regionHeight.toInt() / PATCH_SIZE
+        val visible = if (terrainEntity != 0) patchesX * patchesY else 0
         return Diagnostics(
             visiblePatchCount = visible,
             dirtyPatchCount = dirty

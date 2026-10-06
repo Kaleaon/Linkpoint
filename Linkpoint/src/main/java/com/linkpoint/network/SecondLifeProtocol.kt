@@ -19,6 +19,8 @@ import com.linkpoint.protocol.llsd.LLSDReal
 import com.linkpoint.protocol.llsd.LLSDString
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.world.manifold.ManifoldFrame
+import com.linkpoint.world.manifold.TopologyType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlinx.coroutines.Dispatchers
@@ -905,9 +907,17 @@ class SecondLifeProtocol(private val context: Context) {
     /**
      * Request teleport to location
      */
-    suspend fun teleport(regionName: String, x: Float, y: Float, z: Float): TeleportResult {
+    suspend fun teleport(
+        regionName: String,
+        x: Float,
+        y: Float,
+        z: Float,
+        manifoldFrame: ManifoldFrame? = null
+    ): TeleportResult {
         Log.d(TAG, "Requesting teleport to $regionName ($x, $y, $z)")
         val app = LinkpointApp.getInstance()
+
+        val activeFrame = manifoldFrame ?: app.regionCrossingManager.activeManifoldFrame
 
         // 1. Try Capability (Preferred for named regions)
         val caps = app.capabilityManager
@@ -925,12 +935,20 @@ class SecondLifeProtocol(private val context: Context) {
                         add(LLSDReal(0.0))
                         add(LLSDReal(0.0))
                     }
+                    if (activeFrame.topologyType != TopologyType.FLAT_2D) {
+                        this["manifold_frame"] = activeFrame.toLLSD()
+                    }
                 }
 
                 val response = caps.request("TeleportLocation", request)
                 if (response is LLSDMap) {
                     val success = response.getBoolean("success") ?: false
                     if (success) {
+                        // Extract returned manifold frame if present in capability response
+                        val responseFrame = response["manifold_frame"]?.let { ManifoldFrame.fromLLSD(it) }
+                        if (responseFrame != null && responseFrame.topologyType != TopologyType.FLAT_2D) {
+                            app.regionCrossingManager.setManifoldFrame(responseFrame)
+                        }
                         return TeleportResult.Success(regionName)
                     }
                     val msg = response.getString("message") ?: "Unknown capability error"
