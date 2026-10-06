@@ -1,4 +1,10 @@
-const sharp = require('sharp');
+let sharpInstance;
+function getSharp() {
+  if (!sharpInstance) {
+    sharpInstance = require('sharp');
+  }
+  return sharpInstance;
+}
 const { JpxImage } = require('jpeg2000');
 const { LLMesh, LLGLTFMaterial } = require('@caspertech/node-metaverse');
 
@@ -179,7 +185,7 @@ async function decodePixels(buffer) {
 
   // Fast direct native C / sharp pipeline without thread-blocking single-pixel JS array loops
   try {
-    const result = await sharp(buffer, { failOn: 'error' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const result = await getSharp()(buffer, { failOn: 'error' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     return { data: result.data, width: result.info.width, height: result.info.height, channels: result.info.channels };
   } catch {
     const image = new JpxImage();
