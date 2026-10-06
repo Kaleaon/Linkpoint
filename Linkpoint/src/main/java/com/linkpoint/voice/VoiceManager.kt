@@ -368,6 +368,7 @@ class VoiceManager(
         joinParcelVoice()
     }
 
+
     /**
      * `voice_server_type == "webrtc"` from `SimulatorFeatures` is the
      * authoritative signal. `null`/missing means the sim hasn't been
