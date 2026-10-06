@@ -8,7 +8,7 @@ import { invertMat4, rayFromNDC } from './ray-pick';
 
 export class Camera3D extends Utils.EventEmitter {
   public position: number[] = [128, 128, 25];
-  public rotation: number[] = [0, 0, 0]; // pitch, yaw, roll
+  public rotation: number[] = [-0.28, -Math.PI / 2, 0]; // pitch, yaw, roll
   public target: number[] = [128, 128, 0];
 
   // Projection
@@ -165,8 +165,8 @@ export class Camera3D extends Utils.EventEmitter {
       this.position[2] += 1.65;
     } else {
       this.mode = preset === 'free' ? 'first-person' : 'orbit';
-      if (preset === 'rear') this.rotation = [-0.28, Math.PI, 0];
-      if (preset === 'front') this.rotation = [-0.18, 0, 0];
+      if (preset === 'rear') this.rotation = [-0.28, -Math.PI / 2, 0];
+      if (preset === 'front') this.rotation = [-0.18, Math.PI / 2, 0];
       if (preset !== 'free') this.orbitDistance = 7.5;
     }
     this.updateMatrices();
@@ -179,7 +179,7 @@ export class Camera3D extends Utils.EventEmitter {
     }
     this.mode = 'orbit';
     this.preset = 'rear';
-    this.rotation = [-0.28, Math.PI, 0];
+    this.rotation = [-0.28, -Math.PI / 2, 0];
     this.orbitDistance = 7.5;
     this.fov = 60;
     this.updateMatrices();

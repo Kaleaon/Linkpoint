@@ -13,8 +13,10 @@ describe('Camera3D viewer controls', () => {
     expect(camera.position).not.toEqual(camera.orbitTarget);
   });
 
-  it('provides rear, front, mouselook, and free camera setups', () => {
+  it('provides rear, front, mouselook, and free camera setups with aligned orientations', () => {
     const camera = new Camera3D();
+    expect(camera.rotation[1]).toBeCloseTo(-Math.PI / 2, 5);
+
     camera.setOrbitTarget(4, 5, 6);
 
     camera.setPreset('first-person');
@@ -24,6 +26,13 @@ describe('Camera3D viewer controls', () => {
     camera.setPreset('front');
     expect(camera.mode).toBe('orbit');
     expect(camera.orbitDistance).toBe(7.5);
+    expect(camera.rotation[1]).toBeCloseTo(Math.PI / 2, 5);
+
+    camera.setPreset('rear');
+    expect(camera.rotation[1]).toBeCloseTo(-Math.PI / 2, 5);
+
+    camera.reset();
+    expect(camera.rotation[1]).toBeCloseTo(-Math.PI / 2, 5);
   });
 
   it('pans the orbit target without changing its distance', () => {

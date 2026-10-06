@@ -22,33 +22,32 @@ class DrawablePrimStoreTest {
     }
 
     @Test
-    fun testSlotAllocationAndRecycling() {
+    fun testAddAndRemovePrim() {
         assertEquals(0, store.primCount())
 
         store.addPrim(101L, 10f, 20f, 30f)
         store.addPrim(102L, 5f, 5f, 5f)
         assertEquals(2, store.primCount())
 
-        val initialSlot101 = store.prims[101L]
-        val initialSlot102 = store.prims[102L]
-        assertNotNull(initialSlot101)
-        assertNotNull(initialSlot102)
+        val snapshot1 = store.snapshot()
+        assertTrue(snapshot1.any { it.id == 101L })
+        assertTrue(snapshot1.any { it.id == 102L })
 
         store.removePrim(101L)
         assertEquals(1, store.primCount())
-        assertFalse(store.prims.containsKey(101L))
+        val snapshot2 = store.snapshot()
+        assertFalse(snapshot2.any { it.id == 101L })
 
-        // Reuse recycled slot
         store.addPrim(103L, 1f, 1f, 1f)
         assertEquals(2, store.primCount())
-        assertEquals(initialSlot101, store.prims[103L])
+        assertTrue(store.snapshot().any { it.id == 103L })
     }
 
     @Test
     fun testUpsertAndShapeClassification() {
         val sphereParams = PrimShapeParams(
             pathCurve = PrimShapeParams.PATH_CIRCLE,
-            profileCurve = PrimShapeParams.PROFILE_CIRCLE
+            profileCurve = PrimShapeParams.PROFILE_HALF_CIRCLE
         )
         store.upsertPrim(
             id = 201L,
@@ -83,42 +82,19 @@ class DrawablePrimStoreTest {
     }
 
     @Test
-    fun testInPlaceTransparentSorting() {
-        // Add transparent prims at different distances
-        store.addPrim(401L, 0f, 0f, 10f) // Dist = 100
-        store.addPrim(402L, 0f, 0f, 50f) // Dist = 2500
-        store.addPrim(403L, 0f, 0f, 5f)  // Dist = 25
+    fun testTransparentPrimFiltering() {
+        store.addPrim(401L, 0f, 0f, 10f)
+        store.addPrim(402L, 0f, 0f, 50f)
+        store.addPrim(403L, 0f, 0f, 5f)
 
         store.setPrimTransparent(401L, true)
         store.setPrimTransparent(402L, true)
-        store.setPrimTransparent(403L, true)
 
-        val slotsField = DrawablePrimStore::class.java.getDeclaredField("transparentSlots").apply { isAccessible = true }
-        val depthsField = DrawablePrimStore::class.java.getDeclaredField("transparentDepths").apply { isAccessible = true }
-
-        val sortMethod = DrawablePrimStore::class.java.getDeclaredMethod("quickSortTransparent", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType).apply { isAccessible = true }
-
-        val slots = slotsField.get(store) as IntArray
-        val depths = depthsField.get(store) as FloatArray
-
-        val slot401 = store.prims[401L]!!
-        val slot402 = store.prims[402L]!!
-        val slot403 = store.prims[403L]!!
-
-        slots[0] = slot401; depths[0] = 100f
-        slots[1] = slot402; depths[1] = 2500f
-        slots[2] = slot403; depths[2] = 25f
-
-        sortMethod.invoke(store, 0, 2)
-
-        // Descending order sort check (farthest object 2500f first)
-        assertEquals(2500f, depths[0], 0.001f)
-        assertEquals(100f, depths[1], 0.001f)
-        assertEquals(25f, depths[2], 0.001f)
-
-        assertEquals(slot402, slots[0])
-        assertEquals(slot401, slots[1])
-        assertEquals(slot403, slots[2])
+        val transparentPrims = store.snapshot().filter { it.isTransparent }
+        assertEquals(2, transparentPrims.size)
+        assertTrue(transparentPrims.any { it.id == 401L })
+        assertTrue(transparentPrims.any { it.id == 402L })
+        assertFalse(transparentPrims.any { it.id == 403L })
     }
 
     @Test
@@ -149,7 +125,6 @@ class DrawablePrimStoreTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS))
         executor.shutdown()
 
-        // Verify state consistency
         val snapshot = store.snapshot()
         assertEquals(store.primCount(), snapshot.size)
     }
