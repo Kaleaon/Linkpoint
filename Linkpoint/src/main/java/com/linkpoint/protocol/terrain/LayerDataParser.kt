@@ -41,9 +41,11 @@ object LayerDataParser {
      * Parse a LayerData message payload.
      *
      * @param data Raw message payload (after message ID)
+     * @param regionSizeX Active region width in meters (defaults to 2048 for full patch extraction)
+     * @param regionSizeY Active region height in meters (defaults to 2048 for full patch extraction)
      * @return Parsed layer data result, or null if parsing fails
      */
-    fun parse(data: ByteArray): LayerDataResult? {
+    fun parse(data: ByteArray, regionSizeX: Int = 2048, regionSizeY: Int = 2048): LayerDataResult? {
         if (data.isEmpty()) {
             Log.w(TAG, "Empty LayerData payload")
             return null
@@ -75,7 +77,7 @@ object LayerDataParser {
                 return LayerDataResult(type, emptyList())
             }
 
-            val patches = decompressPatches(layerData)
+            val patches = decompressPatches(layerData, regionSizeX, regionSizeY)
             if (patches.isEmpty()) {
                 Log.w(TAG, "No patches decompressed from terrain payload; supplying default region heightmap fallback")
                 return LayerDataResult(type, createDefaultPatches())
@@ -93,7 +95,11 @@ object LayerDataParser {
     /**
      * Decompress terrain patches from compressed data.
      */
-    private fun decompressPatches(data: ByteArray): List<TerrainPatch> {
+    private fun decompressPatches(
+        data: ByteArray,
+        regionSizeX: Int = 2048,
+        regionSizeY: Int = 2048
+    ): List<TerrainPatch> {
         val patches = mutableListOf<TerrainPatch>()
 
         try {
@@ -105,11 +111,16 @@ object LayerDataParser {
             val layerType = buffer.getBits(8)  // Layer type
 
             Log.d(TAG, "Terrain header: stride=0x${stride.toString(16)}, patchSize=$patchSize, type=$layerType")
-            // Decompress patches until end marker (supporting Varregions up to 4096m)
-            while (!buffer.isEOF()) {
-                val patch = TerrainPatch.decompressPatch(buffer, patchSize) ?: break
 
-                if (patch.x >= 0 && patch.y >= 0 && patch.x < 256 && patch.y < 256) {
+            val maxPatchesX = (regionSizeX / TerrainPatch.PATCH_SIZE).coerceIn(16, 128)
+            val maxPatchesY = (regionSizeY / TerrainPatch.PATCH_SIZE).coerceIn(16, 128)
+            val maxPatches = maxOf(maxPatchesX, maxPatchesY)
+
+            // Decompress patches until end marker (supporting Varregions up to 2048m)
+            while (!buffer.isEOF()) {
+                val patch = TerrainPatch.decompressPatch(buffer, patchSize, maxPatches) ?: break
+
+                if (patch.x >= 0 && patch.y >= 0 && patch.x < maxPatchesX && patch.y < maxPatchesY) {
                     patches.add(patch)
                 }
             }

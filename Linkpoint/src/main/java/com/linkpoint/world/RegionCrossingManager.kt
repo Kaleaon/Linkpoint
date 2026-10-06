@@ -5,6 +5,8 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.world.topography.PlanarTopographyProjection
 import com.linkpoint.world.topography.WorldTopographyProjection
+import com.linkpoint.world.manifold.ManifoldFrame
+import com.linkpoint.world.manifold.TopologicalNeighborhoodResolver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +65,16 @@ class RegionCrossingManager(
     // Crossing state
     @Volatile private var isCrossing = false
 
+    // Active parametric manifold frame
+    @Volatile var activeManifoldFrame: ManifoldFrame = ManifoldFrame.IDENTITY
+
+    /**
+     * Set the active manifold frame for topological region crossings.
+     */
+    fun setManifoldFrame(frame: ManifoldFrame) {
+        activeManifoldFrame = frame
+        Log.i(TAG, "Active ManifoldFrame set: ${frame.frameId} (${frame.topologyType})")
+    }
     /**
      * Set the current region after login or teleport.
      */
@@ -188,13 +200,24 @@ class RegionCrossingManager(
     }
 
     /**
-     * Resolve neighbor handle for local coordinates using active topography rules.
+     * Resolve neighbor handle for local coordinates using active topography or manifold rules.
      */
     fun resolveNeighborHandle(localX: Float, localY: Float): Long? {
         val regionInfo = _currentRegion.value ?: return null
         val currentHandle = regionInfo.handle
-        val regionSize = regionInfo.regionSizeX
-        return topographyProjection.getNeighborRegionHandle(currentHandle, localX, localY, regionSize)
+        val sizeX = regionInfo.regionSizeX
+        val sizeY = regionInfo.regionSizeY
+        if (activeManifoldFrame != ManifoldFrame.IDENTITY) {
+            return TopologicalNeighborhoodResolver.getNeighborRegionHandle(
+                currentHandle = currentHandle,
+                localX = localX,
+                localY = localY,
+                frame = activeManifoldFrame,
+                regionSizeX = sizeX,
+                regionSizeY = sizeY
+            )
+        }
+        return topographyProjection.getNeighborRegionHandle(currentHandle, localX, localY, sizeX)
     }
 
     /**
@@ -209,12 +232,13 @@ class RegionCrossingManager(
      */
     fun getNeighborRegion(localX: Float, localY: Float): Long? {
         val neighborHandle = resolveNeighborHandle(localX, localY) ?: return null
-        // Check if we have a child connection to this region
-        return if (childConnections.containsKey(neighborHandle)) {
+
+        // Check if we have a child connection to this region or return resolved handle
+        return if (childConnections.isEmpty() || childConnections.containsKey(neighborHandle)) {
             neighborHandle
         } else {
-            Log.w(TAG, "No child connection for neighbor region: $neighborHandle")
-            null
+            Log.w(TAG, "No active child connection for neighbor region: $neighborHandle")
+            neighborHandle
         }
     }
 

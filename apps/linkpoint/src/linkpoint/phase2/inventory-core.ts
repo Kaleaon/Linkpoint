@@ -25,15 +25,24 @@ export class InventoryCore {
       throw new Error('Valid folder data required');
     }
 
+    const existingFolder = this.folders.get(folderId);
+    if (existingFolder && existingFolder.parentId) {
+      const oldParent = this.folders.get(existingFolder.parentId);
+      if (oldParent && Array.isArray(oldParent.children)) {
+        oldParent.children = oldParent.children.filter((id: string) => id !== folderId);
+      }
+    }
+
+    const parentId = folderData.parentId || this.rootFolderId;
     const folder = {
       id: folderId,
       name: folderData.name || 'New Folder',
-      parentId: folderData.parentId || this.rootFolderId,
+      parentId: parentId,
       type: folderData.type || 'normal',
-      children: [],
-      items: [],
+      children: existingFolder && Array.isArray(existingFolder.children) ? Array.from(new Set(existingFolder.children)) : [],
+      items: existingFolder && Array.isArray(existingFolder.items) ? Array.from(new Set(existingFolder.items)) : [],
       version: folderData.version || 1,
-      created: Date.now()
+      created: existingFolder?.created || Date.now()
     };
 
     this.folders.set(folderId, folder);
@@ -42,7 +51,12 @@ export class InventoryCore {
     if (folder.parentId) {
       const parent = this.folders.get(folder.parentId);
       if (parent) {
-        parent.children.push(folderId);
+        if (!Array.isArray(parent.children)) {
+          parent.children = [];
+        }
+        if (!parent.children.includes(folderId)) {
+          parent.children.push(folderId);
+        }
       }
     }
 
@@ -64,8 +78,8 @@ export class InventoryCore {
     }
 
     return {
-      folders: folder.children.map((id: string) => this.folders.get(id)).filter(Boolean),
-      items: folder.items.map((id: string) => this.items.get(id)).filter(Boolean)
+      folders: Array.from(new Set(folder.children || [])).map((id: string) => this.folders.get(id)).filter(Boolean),
+      items: Array.from(new Set(folder.items || [])).map((id: string) => this.items.get(id)).filter(Boolean)
     };
   }
 
@@ -81,15 +95,25 @@ export class InventoryCore {
       throw new Error('Valid item data required');
     }
 
+    const existingItem = this.items.get(itemId);
+    const targetFolderId = itemData.folderId;
+
+    // Detach from prior folder if present
+    this.folders.forEach((f) => {
+      if (Array.isArray(f.items) && f.items.includes(itemId)) {
+        f.items = f.items.filter((id: string) => id !== itemId);
+      }
+    });
+
     const item = {
       id: itemId,
       name: itemData.name || 'New Item',
       assetType: itemData.assetType || 'unknown',
       inventoryType: itemData.inventoryType || 'object',
-      folderId: itemData.folderId,
+      folderId: targetFolderId,
       description: itemData.description || '',
       permissions: itemData.permissions || {},
-      created: Date.now()
+      created: existingItem?.created || Date.now()
     };
 
     this.items.set(itemId, item);
@@ -98,7 +122,12 @@ export class InventoryCore {
     if (item.folderId) {
       const folder = this.folders.get(item.folderId);
       if (folder) {
-        folder.items.push(itemId);
+        if (!Array.isArray(folder.items)) {
+          folder.items = [];
+        }
+        if (!folder.items.includes(itemId)) {
+          folder.items.push(itemId);
+        }
       }
     }
 
@@ -148,21 +177,24 @@ export class InventoryCore {
       throw new Error(`Item not found: ${itemId}`);
     }
 
-    // Remove from old folder
-    if (item.folderId) {
-      const oldFolder = this.folders.get(item.folderId);
-      if (oldFolder) {
-        oldFolder.items = oldFolder.items.filter((id: string) => id !== itemId);
-      }
-    }
-
-    // Add to new folder
     const newFolder = this.folders.get(targetFolderId);
     if (!newFolder) {
       throw new Error(`Target folder not found: ${targetFolderId}`);
     }
 
-    newFolder.items.push(itemId);
+    // Remove from all folders to ensure atomic detachment
+    this.folders.forEach((folder) => {
+      if (Array.isArray(folder.items)) {
+        folder.items = folder.items.filter((id: string) => id !== itemId);
+      }
+    });
+
+    if (!Array.isArray(newFolder.items)) {
+      newFolder.items = [];
+    }
+    if (!newFolder.items.includes(itemId)) {
+      newFolder.items.push(itemId);
+    }
     item.folderId = targetFolderId;
 
     console.log(`[Inventory] Moved item ${itemId} to folder ${targetFolderId}`);

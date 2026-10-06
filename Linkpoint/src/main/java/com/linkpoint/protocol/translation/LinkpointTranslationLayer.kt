@@ -1,6 +1,9 @@
 package com.linkpoint.protocol.translation
 
 import android.util.Log
+import com.linkpoint.protocol.llsd.LLSDValue
+import com.linkpoint.world.manifold.ManifoldFrame
+import com.linkpoint.world.manifold.TopologyType
 import java.net.URL
 
 /**
@@ -81,6 +84,47 @@ object LinkpointTranslationLayer {
         }
     }
 
+    /**
+     * Detect grid topography capabilities from seed capabilities response or login parameters.
+     * Falls back to standard FLAT_2D identity manifold frame if PMFM capabilities are absent.
+     */
+    fun detectManifoldCapabilities(
+        loginParams: Map<String, Any>? = null,
+        capabilities: Map<String, Any>? = null
+    ): ManifoldFrame {
+        if (capabilities != null && capabilities.containsKey("manifold_frame")) {
+            val frameData = capabilities["manifold_frame"]
+            if (frameData is LLSDValue) {
+                return ManifoldFrame.fromLLSD(frameData)
+            }
+        }
+        if (loginParams != null && loginParams.containsKey("manifold_frame")) {
+            val frameData = loginParams["manifold_frame"]
+            if (frameData is LLSDValue) {
+                return ManifoldFrame.fromLLSD(frameData)
+            }
+        }
+        return ManifoldFrame.IDENTITY
+    }
+
+    /**
+     * Apply coordinate translation across parametric manifold frame.
+     * Executes in under 1ms with identity pass-through for FLAT_2D grids.
+     */
+    fun transformCoordinate(
+        x: Double,
+        y: Double,
+        z: Double,
+        manifoldFrame: ManifoldFrame = ManifoldFrame.IDENTITY
+    ): Triple<Double, Double, Double> {
+        if (manifoldFrame.topologyType == TopologyType.FLAT_2D) {
+            return Triple(x, y, z)
+        }
+        val rx = x - manifoldFrame.originX
+        val ry = y - manifoldFrame.originY
+        val rz = z - manifoldFrame.originZ
+        return Triple(rx, ry, rz)
+    }
     /**
      * Check if the given login URL is for the Agni (main SL) grid.
      *

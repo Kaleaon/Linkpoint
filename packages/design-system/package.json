@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "generate-tokens": "node scripts/generate-tokens.js",
-    "build:tokens": "node scripts/generate-tokens.js"
+    "build:tokens": "node scripts/generate-tokens.js",
+    "test:playwright": "playwright test",
+    "test": "playwright test"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -27,6 +29,7 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/react": "^18.0.0 || ^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

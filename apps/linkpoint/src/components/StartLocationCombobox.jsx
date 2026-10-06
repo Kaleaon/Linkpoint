@@ -357,4 +357,3 @@ export default function StartLocationCombobox({
     </div>
   );
 }
-

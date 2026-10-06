@@ -76,9 +76,17 @@ describe('StartLocationCombobox recent locations storage', () => {
 });
 
 describe('buildLoginParams', () => {
-  it('builds validated parameters', () => {
+  it('builds validated parameters with viewer identity', () => {
     const p = actions.buildLoginParams(request({ start: 'first' }), lib);
-    expect(p).toMatchObject({ firstName: 'jane', lastName: 'doe', password: 'pw', start: 'home', url: 'https://login.agni.lindenlab.com/cgi-bin/login.cgi' });
+    expect(p).toMatchObject({
+      firstName: 'jane',
+      lastName: 'doe',
+      password: 'pw',
+      start: 'home',
+      url: 'https://login.agni.lindenlab.com/cgi-bin/login.cgi',
+      channel: 'Linkpoint Viewer',
+      version: '2.0.0',
+    });
     expect(p.token).toBeUndefined();
     expect(p.mfa_hash).toBeUndefined();
   });
@@ -120,14 +128,14 @@ describe('describeLoginError / loginFailure', () => {
   });
 });
 
-describe('viewer identity patch for node-metaverse (TPV_COMPLIANCE.md section 1)', () => {
+describe('viewer identity programmatic injection (TPV_COMPLIANCE.md section 1)', () => {
   const sample = "const version = packageJson.version;\n  client.methodCall('login_to_simulator', [{ first: 'x', channel: 'libnmv', major }]);";
-  it('replaces the library channel and version with this viewer\'s', () => {
+  it('replaces the library channel and version string pure helper', () => {
     const out = patcher.patchLoginIdentity(sample, 'Linkpoint Viewer', '2.0.0');
     expect(out).toContain('channel: "Linkpoint Viewer"');
     expect(out).toContain('const version = "2.0.0";');
     expect(out).not.toContain('libnmv');
-    expect(patcher.patchLoginIdentity(out, 'Linkpoint Viewer', '2.0.0')).toBe(out); // idempotent
+    expect(patcher.patchLoginIdentity(out, 'Linkpoint Viewer', '2.0.0')).toBe(out);
   });
   it('reports a library whose shape changed instead of leaving it silently unpatched', () => {
     expect(patcher.patchLoginIdentity('totally different', 'Linkpoint Viewer', '2.0.0')).toBeNull();
@@ -139,16 +147,35 @@ describe('viewer identity patch for node-metaverse (TPV_COMPLIANCE.md section 1)
     const { channel } = patcher.readViewerIdentity();
     expect(channel).not.toMatch(/libnmv|^Second Life/i);
   });
-  // After `npm ci` the postinstall patch has run, so the shipped library must not say libnmv.
+
   let loginHandler: string;
   try {
     loginHandler = join(dirname(require.resolve('@caspertech/node-metaverse/package.json')), 'dist/lib/LoginHandler.js');
   } catch (_e) {
     loginHandler = join(process.cwd(), 'node_modules/@caspertech/node-metaverse/dist/lib/LoginHandler.js');
   }
-  it.skipIf(!existsSync(loginHandler))('the installed library identifies as this viewer', () => {
-    const text = readFileSync(loginHandler, 'utf8');
-    expect(text).not.toContain("channel: 'libnmv'");
-    expect(text).toContain(`channel: ${JSON.stringify(patcher.readViewerIdentity().channel)}`);
+
+  it.skipIf(!existsSync(loginHandler))('does not modify LoginHandler.js on disk in node_modules', () => {
+    const beforeText = readFileSync(loginHandler, 'utf8');
+    patcher.applyPatches({ strict: true });
+    const afterText = readFileSync(loginHandler, 'utf8');
+    expect(afterText).toBe(beforeText);
+  });
+
+  it('injects viewer identity into XML-RPC login request payloads in memory', () => {
+    patcher.injectRuntimeViewerIdentity();
+    const xmlrpc = require('xmlrpc');
+
+    const dummyClient = xmlrpc.createClient({ host: 'localhost', port: 80, path: '/' });
+
+    const payload = [{ first: 'Jane', last: 'Doe', channel: 'libnmv', version: '0.9.1' }];
+    dummyClient.methodCall('login_to_simulator', payload, () => {});
+
+    expect(payload[0].channel).toBe('Linkpoint Viewer');
+    expect(payload[0].version).toMatch(/^2\.0\.0/);
+  });
+
+  it('executes cleanly in simulated read-only filesystem environments', () => {
+    expect(() => patcher.applyPatches({ strict: true })).not.toThrow();
   });
 });

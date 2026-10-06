@@ -9,25 +9,31 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.linkpoint.ui.components.state.EmptyState
-import com.linkpoint.ui.components.state.ErrorState
-import com.linkpoint.ui.components.state.LoadingState
-import com.linkpoint.ui.components.state.LowBandwidthOverlay
-import com.linkpoint.ui.components.state.ReconnectingBanner
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-@Ignore(
-    "Paparazzi's resource bootstrap collides with the conscrypt-android AAR's " +
-        "signed `org.conscrypt.R` class on the test classpath. Snapshots are " +
-        "covered by the AndroidJUnit4 instrumented suite for now; re-enable " +
-        "once upstream Paparazzi exposes a per-package R class filter."
-)
-class StateComponentsSnapshotTest {
+@RunWith(Parameterized::class)
+class StateComponentsSnapshotTest(
+    private val deviceConfig: DeviceConfig,
+    private val deviceName: String
+) {
+    companion object {
+        val NEXUS_9: DeviceConfig = DeviceConfig.NEXUS_10.copy(screenWidth = 1536, screenHeight = 2048)
+        val FOLDABLE: DeviceConfig = DeviceConfig.PIXEL_5.copy(screenWidth = 1768, screenHeight = 2208)
+
+        @JvmStatic
+        @Parameterized.Parameters(name = "{1}")
+        fun params(): Collection<Array<Any>> = listOf(
+            arrayOf(DeviceConfig.PIXEL_5, "pixel_5"),
+            arrayOf(NEXUS_9, "nexus_9"),
+            arrayOf(FOLDABLE, "foldable")
+        )
+    }
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_5)
+    val paparazzi = Paparazzi(deviceConfig = deviceConfig)
 
     @Test
     fun loadingState_light() = snapshot("loading_light", dark = false) {
@@ -104,7 +110,7 @@ class StateComponentsSnapshotTest {
     }
 
     private fun snapshot(name: String, dark: Boolean, content: @Composable () -> Unit) {
-        paparazzi.snapshot(name = name) {
+        paparazzi.snapshot(name = "${name}_$deviceName") {
             MaterialTheme(
                 colorScheme = if (dark) darkColorScheme() else lightColorScheme()
             ) {
