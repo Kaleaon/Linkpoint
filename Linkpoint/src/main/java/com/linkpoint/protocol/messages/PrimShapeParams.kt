@@ -50,7 +50,12 @@ data class PrimShapeParams(
     /** Profile end in the 0..1 range. */
     val profileEnd: Float = 1f,
     /** Profile hollow in the 0..1 range. 0 = no hollow. */
-    val profileHollow: Float = 0f
+    val profileHollow: Float = 0f,
+
+    /** Sculpt type (0 = none, 1 = sphere, 2 = torus, 3 = plane, 4 = cylinder, 5 = mesh). */
+    val sculptType: Int = 0,
+    /** Sculpt texture UUID / asset UUID if present. */
+    val sculptId: java.util.UUID? = null
 ) {
     /** Profile shape category from the low 4 bits of profileCurve. */
     val profileType: Int get() = profileCurve and 0x0F
