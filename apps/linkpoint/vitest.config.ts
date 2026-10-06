@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   root: __dirname,
   test: {
+    name: '@linkpoint/app',
     environment: 'jsdom',
     globals: true,
     silent: true,
