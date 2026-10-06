@@ -51,7 +51,7 @@ val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-navigation",
         packagePrefixes = setOf("com.linkpoint.ui.navigation"),
-        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2")
+        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2", "adaptive", "overlay")
     ),
     UiBoundaryRule(
         moduleName = "ui/chat",
@@ -408,6 +408,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
