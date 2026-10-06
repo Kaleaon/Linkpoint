@@ -335,6 +335,7 @@ version = "0.1.0"
 dependencies = [
  "base64",
  "linkpoint-core",
+ "linkpoint-scene",
  "serde",
  "serde-llsd-benthic",
  "serde_json",

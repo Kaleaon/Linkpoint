@@ -56,6 +56,11 @@ pub fn wasm_serialize_notation(json_str: &str) -> Result<String, String> {
     String::from_utf8(bytes).map_err(|e| format!("UTF-8 error: {}", e))
 }
 
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
+pub fn wasm_generate_volume(params_json: &str, detail: f32) -> String {
+    linkpoint_scene::wasm::wasm_generate_volume(params_json, detail)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

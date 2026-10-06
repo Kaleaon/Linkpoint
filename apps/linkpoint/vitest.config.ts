@@ -9,6 +9,7 @@ export default defineConfig({
     name: '@linkpoint/app',
     environment: 'jsdom',
     globals: true,
+    silent: true,
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     setupFiles: [path.resolve(__dirname, './vitest.setup.ts')],
     coverage: {

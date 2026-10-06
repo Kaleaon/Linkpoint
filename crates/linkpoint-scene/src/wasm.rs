@@ -71,7 +71,6 @@ impl WasmMatrix4 {
     }
 }
 
-#[wasm_bindgen]
 pub fn wasm_generate_volume(params_json: &str, detail: f32) -> String {
     let params: VolumeParams = serde_json::from_str(params_json).unwrap_or_default();
     let faces = generate_volume(&params, detail);

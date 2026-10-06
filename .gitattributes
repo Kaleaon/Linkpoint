@@ -1,1 +1,22 @@
 * text=auto eol=lf
+*.wasm binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.so binary
+*.dylib binary
+*.dll binary
+*.bin binary
+*.jar binary
+*.aar binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.sqlite binary
+*.db binary
+*.dat binary
+

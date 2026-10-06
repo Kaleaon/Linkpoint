@@ -9,6 +9,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
 linkpoint-core = { path = "../linkpoint-core" }
+linkpoint-scene = { path = "../linkpoint-scene" }
 base64 = "0.21"
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 serde-llsd-benthic = { version = "0.3.3", default-features = false }
