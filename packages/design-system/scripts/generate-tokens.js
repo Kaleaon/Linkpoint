@@ -6,12 +6,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "../../..");
 
+function getPythonCommand() {
+  for (const cmd of ["python3", "python", "py"]) {
+    try {
+      execSync(`${cmd} --version`, { stdio: "ignore" });
+      return cmd;
+    } catch {
+      // try next
+    }
+  }
+  return "python3";
+}
+
 export function generateTokens() {
   console.warn(
     "[DEPRECATED] packages/design-system/scripts/generate-tokens.js is deprecated. " +
       "Delegating to Python CLI at tools/token_gen/cli.py."
   );
-  execSync("python3 tools/token_gen/cli.py generate", {
+  const pyCmd = getPythonCommand();
+  execSync(`${pyCmd} tools/token_gen/cli.py generate`, {
     cwd: projectRoot,
     stdio: "inherit",
   });

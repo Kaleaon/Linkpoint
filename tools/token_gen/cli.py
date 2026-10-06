@@ -176,7 +176,7 @@ def cmd_generate(args):
         content = render_target(target, tokens_data, env)
         out_path = get_out_path(target, args.output_dir)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(out_path, "w", encoding="utf-8") as f:
+        with open(out_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(content)
         print(f"[{target.upper()}] Generated {out_path.relative_to(PROJECT_ROOT) if out_path.is_relative_to(PROJECT_ROOT) else out_path}")
         generated_count += 1
@@ -196,7 +196,7 @@ def cmd_check(args):
         if not out_path.exists():
             mismatches.append(f"[{target.upper()}] Missing output file: {out_path}")
             continue
-        with open(out_path, "r", encoding="utf-8") as f:
+        with open(out_path, "r", encoding="utf-8", newline="") as f:
             on_disk = f.read()
         if on_disk != rendered:
             mismatches.append(f"[{target.upper()}] File out of sync: {out_path}")
