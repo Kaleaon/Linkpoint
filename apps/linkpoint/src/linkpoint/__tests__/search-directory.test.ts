@@ -1,11 +1,17 @@
 import { createRequire } from 'node:module';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { slBridge } from '../sl-bridge';
 
 const { METHODS, callViewer } = createRequire(import.meta.url)('../../../core/viewer-api.cjs');
 const { ViewerSession } = createRequire(import.meta.url)('../../../core/viewer-session.cjs');
 
 describe('searchDir RPC and ViewerSession directory search', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    (slBridge as any).connected = false;
+    (slBridge as any).sessionId = null;
+  });
+
   it('registers searchDir in viewer-api allowed METHODS', () => {
     expect(METHODS.has('searchDir')).toBe(true);
   });
@@ -62,7 +68,7 @@ describe('searchDir RPC and ViewerSession directory search', () => {
 
   it('calls searchDir on slBridge when connected', async () => {
     const spy = vi.spyOn(slBridge, 'call').mockResolvedValueOnce({ results: [{ id: '1', name: 'Place 1', type: 'place' }], hasMore: false });
-    slBridge.connected = true;
+    vi.spyOn(slBridge, 'connected', 'get').mockReturnValue(true);
     slBridge.sessionId = 'test-session';
 
     const params = { category: 'places', query: 'Island', maturity: 3 };
@@ -70,7 +76,5 @@ describe('searchDir RPC and ViewerSession directory search', () => {
 
     expect(spy).toHaveBeenCalledWith('searchDir', params);
     expect(res.results[0].name).toBe('Place 1');
-
-    spy.mockRestore();
   });
 });

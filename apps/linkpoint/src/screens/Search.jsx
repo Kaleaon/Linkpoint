@@ -337,7 +337,7 @@ export default function Search() {
           );
         }
       });
-      emptyText = debouncedQuery ? `> no grid results found for “${debouncedQuery}”` : "> type a query to search grid directory";
+      emptyText = debouncedQuery ? `> no grid results found for "${debouncedQuery}"` : "> type a query to search grid directory";
     }
   }
 
