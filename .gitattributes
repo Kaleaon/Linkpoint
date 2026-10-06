@@ -1,1 +1,8 @@
 * text=auto eol=lf
+*.wasm binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.so binary
+*.dylib binary
+*.dll binary

@@ -92,12 +92,14 @@ fn rotate_axis(v: P3, axis: char, angle: f32) -> P3 {
 }
 
 fn cull_degenerate_triangles(vertices: &[f32], indices: &[u32]) -> Vec<u32> {
+    let num_verts = vertices.len() / 3;
     let mut clean = Vec::with_capacity(indices.len());
     for chunk in indices.chunks_exact(3) {
         let i0 = chunk[0] as usize;
         let i1 = chunk[1] as usize;
         let i2 = chunk[2] as usize;
-        if i0 == i1 || i1 == i2 || i0 == i2 {
+        if i0 >= num_verts || i1 >= num_verts || i2 >= num_verts || i0 == i1 || i1 == i2 || i0 == i2
+        {
             continue;
         }
         let a = [vertices[i0 * 3], vertices[i0 * 3 + 1], vertices[i0 * 3 + 2]];
@@ -740,14 +742,23 @@ fn build_cap(
 ) -> (Vec<f32>, Vec<f32>, Vec<f32>, Vec<u32>) {
     let top = pf.kind == "top";
     let size_t = path.points.len();
+    if size_t < 2 || size_s == 0 {
+        return (Vec::new(), Vec::new(), Vec::new(), Vec::new());
+    }
     let offset = if top { (size_t - 1) * size_s } else { 0 };
     let count = profile.total.min(size_s);
+    if count == 0 {
+        return (Vec::new(), Vec::new(), Vec::new(), Vec::new());
+    }
 
     let mut vertices = Vec::new();
     let mut tex_coords = Vec::new();
     let mut pos = Vec::new();
 
     for i in 0..count {
+        if offset + i >= mesh.len() || i >= profile.points.len() {
+            break;
+        }
         let m = mesh[offset + i];
         let p = profile.points[i];
         pos.push(m);
@@ -803,10 +814,10 @@ fn build_cap(
             for i in 0..count {
                 indices.push(center);
                 indices.push(i as u32);
-                indices.push(((i + 1) % count) as u32);
+                indices.push(((i + 1) % count.max(1)) as u32);
             }
         } else {
-            let center = (count - 1) as u32;
+            let center = count.saturating_sub(1) as u32;
             for i in 0..(count.saturating_sub(2)) {
                 indices.push(center);
                 indices.push(i as u32);
@@ -828,11 +839,17 @@ fn build_cap(
 
     let mid = |row: usize| -> P3 {
         let mut c = [0.0f32; 3];
+        if size_s == 0 {
+            return c;
+        }
         for s in 0..size_s {
-            let m = mesh[row * size_s + s];
-            c[0] += m[0];
-            c[1] += m[1];
-            c[2] += m[2];
+            let idx = row * size_s + s;
+            if idx < mesh.len() {
+                let m = mesh[idx];
+                c[0] += m[0];
+                c[1] += m[1];
+                c[2] += m[2];
+            }
         }
         [
             c[0] / size_s as f32,
@@ -842,9 +859,14 @@ fn build_cap(
     };
 
     let want = sub(mid(end_row), mid(neighbour));
+    let num_verts = vertices.len() / 3;
     let get_v = |idx: u32| -> P3 {
         let i = idx as usize;
-        [vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]]
+        if i < num_verts {
+            [vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]]
+        } else {
+            [0.0, 0.0, 0.0]
+        }
     };
 
     let mut n = [0.0f32; 3];
@@ -895,7 +917,8 @@ fn build_side(
     let num_cols = if dup { pf.count } else { num_s };
 
     let begin_s_tex = if !profile.points.is_empty() {
-        profile.points[begin_s.min(profile.points.len() - 1)][2].floor()
+        let idx = begin_s.min(profile.points.len() - 1);
+        profile.points[idx][2].floor()
     } else {
         0.0
     };
@@ -924,6 +947,9 @@ fn build_side(
             } else {
                 t * size_s + index
             };
+            if source >= mesh.len() {
+                continue;
+            }
             let m = mesh[source];
             vertices.extend_from_slice(&m);
             tex_coords.push(ss);
@@ -938,12 +964,25 @@ fn build_side(
             }
         }
         if dup {
-            let s = if profile.open { num_cols - 1 } else { 0 };
-            let m = mesh[t * size_s + begin_s + s];
-            vertices.extend_from_slice(&m);
-            tex_coords.push(profile.points[begin_s + s][2] - begin_s_tex);
-            tex_coords.push(tt);
-            col_count += 1;
+            let s = if profile.open {
+                num_cols.saturating_sub(1)
+            } else {
+                0
+            };
+            let src_idx = t * size_s + begin_s + s;
+            if src_idx < mesh.len() {
+                let m = mesh[src_idx];
+                vertices.extend_from_slice(&m);
+                let prof_idx = begin_s + s;
+                let ss = if prof_idx < profile.points.len() {
+                    profile.points[prof_idx][2] - begin_s_tex
+                } else {
+                    0.0
+                };
+                tex_coords.push(ss);
+                tex_coords.push(tt);
+                col_count += 1;
+            }
         }
         cols = col_count;
     }
@@ -966,7 +1005,9 @@ fn build_side(
     let mut weld = Vec::new();
     if !flat && !profile.open && !is_end && num_s == profile.total {
         for t in 0..size_t {
-            weld.push((t * cols, t * cols + cols - 1));
+            if cols > 0 {
+                weld.push((t * cols, t * cols + cols - 1));
+            }
         }
     }
     if !path.open && size_t > 2 {
@@ -989,6 +1030,9 @@ fn smooth_normals(vertices: &[f32], indices: &[u32], weld: &[(usize, usize)]) ->
         let i0 = chunk[0] as usize;
         let i1 = chunk[1] as usize;
         let i2 = chunk[2] as usize;
+        if i0 >= num_verts || i1 >= num_verts || i2 >= num_verts {
+            continue;
+        }
         let a = [vertices[i0 * 3], vertices[i0 * 3 + 1], vertices[i0 * 3 + 2]];
         let b = [vertices[i1 * 3], vertices[i1 * 3 + 1], vertices[i1 * 3 + 2]];
         let c = [vertices[i2 * 3], vertices[i2 * 3 + 1], vertices[i2 * 3 + 2]];
