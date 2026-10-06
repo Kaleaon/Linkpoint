@@ -192,16 +192,15 @@ class WorldMap(
                 }
 
                 if (data == null) {
-                    val diskFile = getDiskTileFile(key) ?: getDiskTileFile("$zoom-$x-$y")
-                    val fileToRead = if (diskFile != null && diskFile.exists()) diskFile else {
-                        val legacyFile = getDiskTileFile("$zoom-$x-$y")
-                        if (legacyFile != null && legacyFile.exists()) legacyFile else null
+                    var diskFile = getDiskTileFile(key)
+                    if (diskFile == null || !diskFile.exists()) {
+                        diskFile = getDiskTileFile("$zoom-$x-$y")
                     }
-                    if (fileToRead != null) {
+                    if (diskFile != null && diskFile.exists()) {
                         try {
-                            data = fileToRead.readBytes()
+                            data = diskFile.readBytes()
                         } catch (e: Exception) {
-                            Log.w(TAG, "Failed to read cached tile from disk: ${fileToRead.name}", e)
+                            Log.w(TAG, "Failed to read cached tile from disk: ${diskFile.name}", e)
                         }
                     }
                 }
@@ -238,6 +237,7 @@ class WorldMap(
 
                 if (bitmap != null) {
                     mapTiles.put(key, bitmap)
+                    mapTiles.put("$zoom-$x-$y", bitmap)
                 }
 
                 bitmap
