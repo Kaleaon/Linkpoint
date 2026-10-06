@@ -192,6 +192,8 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertEqual(progress_events[-1].progress, 100.0)
 
     def test_native_vs_python_equivalence(self):
+        if _get_native_lib() is None:
+            self.skipTest("Native C library not compiled or available in environment")
         sizes = [16 * 16 * 4, 64 * 64 * 4, 256 * 256 * 4]
         for buf_size in sizes:
             for seed in [0, 42, 128, 254]:

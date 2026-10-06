@@ -26,7 +26,12 @@ export function getSceneBounds(entities: readonly SceneEntity[]): SceneBounds {
 
 /** Generates a 16x16 grid 50% opacity neutral gray placeholder texture data URI. */
 export function getPlaceholderTextureUri(): string {
-  if (typeof document !== "undefined" && typeof document.createElement === "function") {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.CanvasRenderingContext2D !== "undefined" &&
+    typeof document !== "undefined" &&
+    typeof document.createElement === "function"
+  ) {
     try {
       const canvas = document.createElement("canvas");
       canvas.width = 16;
