@@ -323,6 +323,9 @@ class DrawablePrimStore {
             System.arraycopy(tmp, 0, slotModelMatrices, offset, 16)
         }
         Matrix.scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
+        slotModelMatrices[offset + 12] = posX
+        slotModelMatrices[offset + 13] = posY
+        slotModelMatrices[offset + 14] = posZ
 
         applyTextureEntry(slot, shape, slotHollow[slot], textureEntry)
     }
