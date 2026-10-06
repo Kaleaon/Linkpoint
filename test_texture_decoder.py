@@ -192,6 +192,8 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertEqual(progress_events[-1].progress, 100.0)
 
     def test_native_vs_python_equivalence(self):
+        if _get_native_lib() is None:
+            self.skipTest("Native C library not compiled or available in environment")
         sizes = [16 * 16 * 4, 64 * 64 * 4, 256 * 256 * 4]
         for buf_size in sizes:
             for seed in [0, 42, 128, 254]:
@@ -261,6 +263,67 @@ class TestTextureDecoder(unittest.TestCase):
         completed = done_event.wait(timeout=5.0)
         self.assertTrue(completed, f"Only {received_count}/{num_requests} concurrent requests completed")
         self.assertEqual(received_count, num_requests)
+
+    def test_stream_truncation_fixtures(self):
+        # Truncated JP2 signature (< 12 bytes)
+        trunc_sig = b"\x00\x00\x00\x0c\x6a\x50"
+        dec_sig = decode_jpeg2000_buffer("tex_trunc_sig", trunc_sig)
+        self.assertEqual(dec_sig.status, "fallback")
+
+        # Truncated ihdr box
+        trunc_ihdr = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00"
+        dec_ihdr = decode_jpeg2000_buffer("tex_trunc_ihdr", trunc_ihdr)
+        self.assertEqual(dec_ihdr.status, "fallback")
+
+        # Truncated box boundary length
+        trunc_box = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x00\x00\x27\x10" + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        dec_box = decode_jpeg2000_buffer("tex_trunc_box", trunc_box)
+        self.assertEqual(dec_box.status, "fallback")
+
+        # Truncated J2K SIZ marker
+        trunc_siz = b"\xff\x4f\xff\x51\x00\x04"
+        dec_siz = decode_jpeg2000_buffer("tex_trunc_siz", trunc_siz)
+        self.assertEqual(dec_siz.status, "fallback")
+
+    def test_non_power_of_two_mipmap_dimensions(self):
+        # 100x100 Non-power-of-two JP2 header
+        npot_jp2 = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x64\x00\x00\x00\x64" + b"\x00" * 32
+        dec_npot = decode_jpeg2000_buffer("tex_npot", npot_jp2)
+        self.assertEqual(dec_npot.status, "fallback")
+
+        # 128x128 Power-of-two JP2 header
+        pot_jp2 = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x80\x00\x00\x00\x80" + b"\x00" * 32
+        dec_pot = decode_jpeg2000_buffer("tex_pot", pot_jp2)
+        self.assertEqual(dec_pot.status, "success")
+        self.assertEqual(dec_pot.width, 128)
+        self.assertEqual(dec_pot.height, 128)
+
+    def test_network_error_and_malformed_fixtures(self):
+        # Empty stream
+        dec_empty = decode_jpeg2000_buffer("tex_empty", b"")
+        self.assertEqual(dec_empty.status, "fallback")
+
+        # Random garbage bytes
+        dec_garbage = decode_jpeg2000_buffer("tex_garbage", b"\x12\x34\x56\x78\x9a\xbc\xde\xf0" * 10)
+        self.assertEqual(dec_garbage.status, "fallback")
+
+    def test_native_decoder_memory_guardrails(self):
+        # Invalid buffer size (odd length)
+        odd_buf = populate_rgba_buffer_native(15, 0)
+        self.assertIsNone(odd_buf)
+
+        # Oversized buffer request (> 256MB)
+        oversized = populate_rgba_buffer_native(300 * 1024 * 1024, 0)
+        self.assertIsNone(oversized)
+
+    def test_fallback_overhead_under_5ms(self):
+        corrupt_bytes = b"TRUNCATED_OR_INVALID_STREAM_PAYLOAD_TEST"
+        t0 = time.perf_counter()
+        dec = decode_jpeg2000_buffer("tex_timing", corrupt_bytes)
+        elapsed_ms = (time.perf_counter() - t0) * 1000.0
+
+        self.assertEqual(dec.status, "fallback")
+        self.assertLess(elapsed_ms, 5.0, f"Fallback processing took {elapsed_ms:.3f}ms, expected < 5.0ms")
 
 
 

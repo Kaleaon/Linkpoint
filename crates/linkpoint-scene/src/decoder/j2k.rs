@@ -8,6 +8,11 @@ pub struct J2KHeaderInfo {
     pub components: u32,
 }
 
+#[inline]
+pub fn is_power_of_two(dim: u32) -> bool {
+    dim > 0 && dim <= 8192 && (dim & (dim - 1)) == 0
+}
+
 pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
     if data.len() < 12 {
         return None;
@@ -31,6 +36,15 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
             let box_type =
                 u32::from_be_bytes([data[pos + 4], data[pos + 5], data[pos + 6], data[pos + 7]]);
 
+            if box_len < 8 {
+                break;
+            }
+
+            let next_pos = match pos.checked_add(box_len) {
+                Some(p) if p <= data.len() => p,
+                _ => break, // Truncated or overflowed payload boundary
+            };
+
             if box_type == 0x69686472 && pos + 16 <= data.len() {
                 // 'ihdr'
                 let height = u32::from_be_bytes([
@@ -50,7 +64,7 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
                 } else {
                     4
                 };
-                if width > 0 && height > 0 {
+                if is_power_of_two(width) && is_power_of_two(height) {
                     return Some(J2KHeaderInfo {
                         width,
                         height,
@@ -59,10 +73,7 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
                 }
             }
 
-            if box_len < 8 {
-                break;
-            }
-            pos += box_len;
+            pos = next_pos;
         }
     }
 
@@ -103,7 +114,7 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
                 } else {
                     4
                 };
-                if width > 0 && height > 0 {
+                if is_power_of_two(width) && is_power_of_two(height) {
                     return Some(J2KHeaderInfo {
                         width,
                         height,
@@ -147,12 +158,12 @@ pub fn generate_placeholder_rgba(width: u32, height: u32) -> Vec<u8> {
                 pixels[offset] = 0x66;
                 pixels[offset + 1] = 0x66;
                 pixels[offset + 2] = 0x66;
-                pixels[offset + 3] = 0xFF;
+                pixels[offset + 3] = 0x80;
             } else {
                 pixels[offset] = 0x80;
                 pixels[offset + 1] = 0x80;
                 pixels[offset + 2] = 0x80;
-                pixels[offset + 3] = 0xFF;
+                pixels[offset + 3] = 0x80;
             }
         }
     }
@@ -174,11 +185,54 @@ mod tests {
     fn test_generate_placeholder_rgba() {
         let pixels = generate_placeholder_rgba(16, 16);
         assert_eq!(pixels.len(), 16 * 16 * 4);
+        assert_eq!(pixels[3], 0x80); // 50% opacity
     }
 
     #[test]
     fn test_parse_j2k_header_invalid() {
         assert!(parse_j2k_header(&[]).is_none());
         assert!(parse_j2k_header(&[0; 10]).is_none());
+    }
+
+    #[test]
+    fn test_power_of_two_validation() {
+        assert!(is_power_of_two(16));
+        assert!(is_power_of_two(64));
+        assert!(is_power_of_two(1024));
+        assert!(!is_power_of_two(0));
+        assert!(!is_power_of_two(100));
+        assert!(!is_power_of_two(500));
+        assert!(!is_power_of_two(16384));
+    }
+
+    #[test]
+    fn test_non_power_of_two_j2k_header_rejected() {
+        // Construct JP2 header with non-power-of-two dimensions (100x100)
+        let mut jp2_bytes = vec![
+            0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A, 0x00, 0x00,
+            0x00, 0x18, 0x69, 0x68, 0x64, 0x72, 0x00, 0x00, 0x00, 0x64, // height = 100
+            0x00, 0x00, 0x00, 0x64, // width = 100
+            0x00, 0x04, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00,
+        ];
+        assert!(parse_j2k_header(&jp2_bytes).is_none());
+
+        // Update dimensions to 64x64 (power of two)
+        jp2_bytes[23] = 0x40; // height = 64
+        jp2_bytes[27] = 0x40; // width = 64
+        let header = parse_j2k_header(&jp2_bytes);
+        assert!(header.is_some());
+        let info = header.unwrap();
+        assert_eq!(info.width, 64);
+        assert_eq!(info.height, 64);
+    }
+
+    #[test]
+    fn test_truncated_jp2_box_header_rejected() {
+        // JP2 signature box claiming length 10000 bytes on 20-byte payload
+        let jp2_truncated = vec![
+            0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x00, 0x00, 0x27, 0x10, 0x69, 0x68,
+            0x64, 0x72, 0x00, 0x00, 0x00, 0x40,
+        ];
+        assert!(parse_j2k_header(&jp2_truncated).is_none());
     }
 }

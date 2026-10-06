@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import type { SceneEntity } from "../../viewer-types/src/index";
-import { createBabylonRenderer, getSceneBounds } from "./index";
+import { createBabylonRenderer, getPlaceholderTextureUri, getSceneBounds } from "./index";
 
 describe("getSceneBounds", () => {
   it("provides a useful default for an empty region", () => {
@@ -87,6 +87,31 @@ describe("createBabylonRenderer", () => {
     renderer.applySnapshot([]);
 
     // Execute disposal
+    renderer.dispose();
+  });
+
+  it("handles missing or corrupted texture URIs gracefully using dynamic placeholder materials", async () => {
+    const canvas = document.createElement("canvas");
+    const renderer = await createBabylonRenderer(canvas);
+
+    const corruptEntity: SceneEntity = {
+      id: "entity-corrupt-texture",
+      position: [0, 0, 0],
+      material: {
+        baseColorTextureUri: "http://invalid-domain-404.example/missing.png",
+        normalMapUri: "invalid-scheme://corrupted-texture-data",
+        metallicRoughnessTextureUri: "data:image/png;base64,invalidbase64",
+        emissiveTextureUri: "http://invalid-domain-404.example/emissive.png",
+      },
+    };
+
+    expect(() => {
+      renderer.upsert(corruptEntity);
+    }).not.toThrow();
+
+    const placeholderUri = getPlaceholderTextureUri();
+    expect(placeholderUri).toContain("data:image/png;base64,");
+
     renderer.dispose();
   });
 });

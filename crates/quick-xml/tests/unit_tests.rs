@@ -260,10 +260,6 @@ fn test_writer_indent() -> Result<()> {
     let result = writer.into_inner().into_inner();
     // println!("{:?}", String::from_utf8_lossy(&result));
 
-    #[cfg(windows)]
-    assert!(result.into_iter().eq(txt.bytes().filter(|b| *b != 13)));
-
-    #[cfg(not(windows))]
     assert_eq!(result, txt.as_bytes());
 
     Ok(())
@@ -287,10 +283,6 @@ fn test_writer_indent_cdata() -> Result<()> {
 
     let result = writer.into_inner().into_inner();
 
-    #[cfg(windows)]
-    assert!(result.into_iter().eq(txt.bytes().filter(|b| *b != 13)));
-
-    #[cfg(not(windows))]
     assert_eq!(result, txt.as_bytes());
 
     Ok(())
