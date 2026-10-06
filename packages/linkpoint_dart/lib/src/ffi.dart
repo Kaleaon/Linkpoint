@@ -36,8 +36,6 @@ class LinkpointProtocolFFI {
     }
   }
 
-  static bool isAvailable() => isAvailable;
-
   static DynamicLibrary _loadLibrary() {
     if (_lib != null) return _lib!;
     if (Platform.isLinux) {

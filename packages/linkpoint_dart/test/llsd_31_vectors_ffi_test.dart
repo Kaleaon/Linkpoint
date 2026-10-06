@@ -18,7 +18,7 @@ File? _findFixtureFile() {
 }
 
 void main() {
-  final ffiAvailable = LinkpointProtocolFFI.isAvailable();
+  final ffiAvailable = LinkpointProtocolFFI.isAvailable;
   final fixtureFile = _findFixtureFile();
   final skipReason = !ffiAvailable
       ? 'FFI native library liblinkpoint_protocol is not available'
