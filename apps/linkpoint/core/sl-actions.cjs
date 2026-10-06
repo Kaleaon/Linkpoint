@@ -78,11 +78,39 @@ function parseDestination(text) {
 
   let path = raw;
   let scheme = '';
-  const urlMatch = raw.match(/^(secondlife:\/\/(?:\/app\/teleport\/)?|https?:\/\/maps\.secondlife\.com\/secondlife\/|https?:\/\/)(.+)$/i);
+  let queryStr = '';
+
+  const queryIdx = raw.indexOf('?');
+  if (queryIdx !== -1) {
+    queryStr = raw.substring(queryIdx + 1);
+    path = raw.substring(0, queryIdx);
+  }
+
+  const urlMatch = path.match(/^(secondlife:\/\/(?:\/app\/teleport\/)?|https?:\/\/maps\.secondlife\.com\/secondlife\/|https?:\/\/)(.+)$/i);
   if (urlMatch) {
     scheme = urlMatch[1].toLowerCase();
     path = urlMatch[2];
   }
+
+  const parseQueryParams = (qs) => {
+    if (!qs) return null;
+    const params = new URLSearchParams(qs);
+    const frameId = params.get('manifold_frame_id') || params.get('frame_id');
+    if (!frameId && !params.get('topology_type')) return null;
+    return {
+      frameId: frameId || 'flat-2d',
+      topologyType: (params.get('topology_type') || 'FLAT_2D').toUpperCase(),
+      radius: Number(params.get('radius')) || 0,
+      curvature: Number(params.get('curvature')) || 0,
+      originX: Number(params.get('origin_x')) || 0,
+      originY: Number(params.get('origin_y')) || 0,
+      originZ: Number(params.get('origin_z')) || 0,
+      sizeX: Number(params.get('size_x') || params.get('circumference')) || 262144,
+      sizeY: Number(params.get('size_y')) || 262144,
+    };
+  };
+
+  const manifoldFrame = parseQueryParams(queryStr);
 
   const hgColonMatch = path.match(/^([a-zA-Z0-9.-]+:\d+):([^/]+)(?:\/(.*))?$/);
   const hgSlashMatch = path.match(/^([a-zA-Z0-9.-]+:\d+)\/?(.*)$/);
@@ -113,6 +141,7 @@ function parseDestination(text) {
       gatekeeperUrl,
       region: regionName || 'Home',
       ...coords,
+      ...(manifoldFrame ? { manifoldFrame } : {}),
     };
   } else if (hgSlashMatch && hgSlashMatch[1].includes(':')) {
     const hostPort = hgSlashMatch[1];
@@ -137,6 +166,7 @@ function parseDestination(text) {
       gatekeeperUrl,
       region: regionName,
       ...coords,
+      ...(manifoldFrame ? { manifoldFrame } : {}),
     };
   }
 

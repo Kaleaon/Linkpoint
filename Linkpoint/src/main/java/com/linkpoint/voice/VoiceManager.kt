@@ -96,6 +96,9 @@ class VoiceManager(
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected
 
+    private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> = _lastError
+
     private val _speakingParticipants = MutableStateFlow<Set<UUID>>(emptySet())
     val speakingParticipants: StateFlow<Set<UUID>> = _speakingParticipants
 
@@ -236,6 +239,14 @@ class VoiceManager(
         return out
     }
 
+    /**
+     * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
+     * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
+     * servers, then builds a [VoiceSession] configured with the
+     * sim-provided ICE servers (instead of the previous hardcoded
+     * Google STUN). The signaling layer that POSTs SDP to the channel
+     * URI is still pending — see the [VoiceSession] class doc.
+     */
     /**
      * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
      * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
@@ -396,25 +407,6 @@ class VoiceManager(
 
     private suspend fun joinSpatialVoiceWebRtc(parcelLocalId: Int?): Boolean {
         return activeAdapter.connectSpatialVoice(parcelLocalId, currentVoiceConfig)
-    }
-
-    /**
-     * Support updating ICE server configuration on active peer connections
-     * when provided in voice provisioning responses.
-     */
-    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
-        var updated = false
-        currentWebRtcSession?.let { session ->
-            if (session.updateIceServers(iceServers)) {
-                updated = true
-            }
-        }
-        for (session in activeSessions.values) {
-            if (session.updateIceServers(iceServers)) {
-                updated = true
-            }
-        }
-        return updated
     }
 
     /**

@@ -461,6 +461,8 @@ class LinkpointApp : Application() {
 
     // Protocol layer
     lateinit var capabilityManager: CapabilityManager
+    lateinit var regionCrossingManager: com.linkpoint.world.RegionCrossingManager
+        private set
     /**
      * Per-region SimulatorFeatures snapshot. Populated after the seed cap
      * is fetched and re-fetched on region change. Renderer / inventory /
@@ -1287,6 +1289,9 @@ class LinkpointApp : Application() {
         // Modern features: Animesh and Bakes on Mesh
         animeshManager = AnimeshManager(meshManager, animationManager)
         bomManager = BakesOnMeshManager(capabilityManager, textureManager)
+
+        // Region crossing manager
+        regionCrossingManager = com.linkpoint.world.RegionCrossingManager(udpConnection, capabilityManager)
 
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
