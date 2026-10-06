@@ -2,7 +2,12 @@ use std::process::Command;
 
 fn get_python_command() -> &'static str {
     for cmd in &["python3", "python", "py"] {
-        if Command::new(cmd).arg("--version").output().is_ok() {
+        if Command::new(cmd)
+            .arg("--version")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+        {
             return cmd;
         }
     }
