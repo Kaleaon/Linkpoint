@@ -128,7 +128,14 @@ class WorldMap(
         val dir = tileCacheDir ?: cacheManager?.let { File(it.getPublicCacheDirectory(), "map_tiles") }
         if (dir != null) {
             if (!dir.exists()) dir.mkdirs()
-            return File(dir, "tile_$key.jpg")
+            val file = File(dir, "tile_$key.jpg")
+            if (file.exists()) return file
+            val parts = key.split("-")
+            if (parts.size >= 4) {
+                val legacyFile = File(dir, "tile_${parts[0]}-${parts[2]}-${parts[3]}.jpg")
+                if (legacyFile.exists()) return legacyFile
+            }
+            return file
         }
         return null
     }
@@ -238,6 +245,7 @@ class WorldMap(
 
                 if (bitmap != null) {
                     mapTiles.put(key, bitmap)
+                    mapTiles.put("$zoom-$x-$y", bitmap)
                 }
 
                 bitmap

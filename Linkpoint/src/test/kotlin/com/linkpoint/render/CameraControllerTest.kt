@@ -66,9 +66,9 @@ class CameraControllerTest {
         val viewAfter = FloatArray(6)
         controller.computeView(viewAfter)
 
-        // View before and after applying and resetting pan offset should match
+        // View after resetting pan offset should match default view
         for (i in 0 until 6) {
-            assertEquals(viewAfter[i], viewBefore[i], 0.01f)
+            assertEquals(viewBefore[i], viewAfter[i], 0.01f)
         }
     }
 
