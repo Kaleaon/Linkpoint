@@ -2,7 +2,10 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ["packages/**/*.test.ts", "apps/linkpoint/src/lib/llsd.test.ts"],
+    projects: [
+      "packages/*",
+      "apps/*",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "json-summary", "json"],

@@ -70,4 +70,6 @@ class LLSDSchemaParser:
                     full_path = os.path.join(root, file_name)
                     self.parse_file(full_path, ast)
 
+        ast.llsd_schemas.sort(key=lambda s: (s.title, s.id))
+
         return ast

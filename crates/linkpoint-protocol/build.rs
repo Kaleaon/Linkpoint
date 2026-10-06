@@ -1,8 +1,15 @@
+use std::env;
+use std::path::PathBuf;
 use std::process::Command;
 
 fn get_python_command() -> &'static str {
     for cmd in &["python3", "python", "py"] {
-        if Command::new(cmd).arg("--version").output().is_ok() {
+        if Command::new(cmd)
+            .arg("--version")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+        {
             return cmd;
         }
     }
@@ -13,16 +20,27 @@ fn main() {
     println!("cargo:rerun-if-changed=../../schemas/protocol/message_template.msg");
     println!("cargo:rerun-if-changed=../../schemas/protocol/llsd");
 
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("."));
+    let repo_root = manifest_dir
+        .parent()
+        .and_then(|p| p.parent())
+        .map(|p| p.to_path_buf())
+        .unwrap_or_else(|| PathBuf::from("../../"));
+
+    let cli_path = repo_root.join("tools/protocol_gen/cli.py");
+
     let py_cmd = get_python_command();
 
     let status = Command::new(py_cmd)
+        .arg(&cli_path)
         .args([
-            "tools/protocol_gen/cli.py",
             "generate",
             "--target",
             "rust,c",
         ])
-        .current_dir("../../")
+        .current_dir(&repo_root)
         .status();
 
     if let Ok(st) = status {

@@ -47,9 +47,17 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
+<<<<<<< HEAD
           git add --renormalize .
           git reset
           git checkout .
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Set up Rust toolchain
+        if: matrix.os == 'ubuntu-latest'
+        uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -85,9 +93,14 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
+<<<<<<< HEAD
           git add --renormalize .
           git reset
           git checkout .
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
