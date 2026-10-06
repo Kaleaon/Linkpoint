@@ -41,6 +41,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Configure Git line endings
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - name: Configure Git line endings and reset working tree
         run: |
@@ -79,6 +81,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Configure Git line endings
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - name: Configure Git line endings and reset working tree
         run: |
