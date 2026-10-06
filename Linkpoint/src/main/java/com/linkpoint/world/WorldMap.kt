@@ -483,8 +483,10 @@ class WorldMap(
     /**
      * Get bitmap from memory LRU cache directly without network or disk I/O
      */
-    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
-        val bitmap = mapTiles.get("$zoom-$x-$y")
+    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION, frameId: String? = null): Bitmap? {
+        val fid = frameId ?: activeManifoldFrameId
+        val key = makeTileCacheKey(zoom, x, y, fid)
+        val bitmap = mapTiles.get(key) ?: mapTiles.get("$zoom-$x-$y")
         return if (bitmap != null && !bitmap.isRecycled) bitmap else null
     }
 
