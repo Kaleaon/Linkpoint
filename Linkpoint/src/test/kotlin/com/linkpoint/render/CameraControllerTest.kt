@@ -26,9 +26,9 @@ class CameraControllerTest {
 
     @Test
     fun `applyOrbit updates yaw and pitch within clamped bounds`() {
-        controller.applyOrbit(10f, 60f)
+        controller.applyOrbit(10f, 20f)
         assertEquals(-2.5f, controller.yawDeg, 0.001f)
-        assertEquals(0f, controller.pitchDeg, 0.001f) // -15 + 60*0.25 = 0
+        assertEquals(-10f, controller.pitchDeg, 0.001f) // -15 + 20*0.25 = -10
 
         // Test pitch clamping
         controller.applyOrbit(0f, 1000f)
@@ -51,8 +51,8 @@ class CameraControllerTest {
         assertTrue(controller.togglePanMode())
         assertTrue(controller.panMode)
 
-        val viewBefore = FloatArray(6)
-        controller.computeView(viewBefore)
+        val viewInitial = FloatArray(6)
+        controller.computeView(viewInitial)
 
         controller.applyPan(10f, -20f)
         // dx=10 -> -10 * 0.015 = -0.15, dy=-20 -> -20 * 0.015 = -0.30
@@ -68,7 +68,7 @@ class CameraControllerTest {
 
         // View before and after applying and resetting pan offset should match
         for (i in 0 until 6) {
-            assertEquals(viewAfter[i], viewBefore[i], 0.01f)
+            assertEquals(viewInitial[i], viewAfter[i], 0.01f)
         }
     }
 

@@ -317,16 +317,12 @@ class WorldMap(
                 }
 
                 if (data == null) {
-                    val diskFile = getDiskTileFile(key) ?: getDiskTileFile("$zoom-$x-$y")
-                    val fileToRead = if (diskFile != null && diskFile.exists()) diskFile else {
-                        val legacyFile = getDiskTileFile("$zoom-$x-$y")
-                        if (legacyFile != null && legacyFile.exists()) legacyFile else null
-                    }
-                    if (fileToRead != null) {
+                    val diskFile = getDiskTileFile(key)
+                    if (diskFile != null && diskFile.exists()) {
                         try {
-                            data = fileToRead.readBytes()
+                            data = diskFile.readBytes()
                         } catch (e: Exception) {
-                            Log.w(TAG, "Failed to read cached tile from disk: ${fileToRead.name}", e)
+                            Log.w(TAG, "Failed to read cached tile from disk: $key", e)
                         }
                     }
                 }
@@ -363,6 +359,7 @@ class WorldMap(
 
                 if (bitmap != null) {
                     mapTiles.put(key, bitmap)
+                    mapTiles.put("$zoom-$x-$y", bitmap)
                 }
 
                 bitmap
@@ -625,20 +622,15 @@ class WorldMap(
     /**
      * Get bitmap from memory LRU cache directly without network or disk I/O
      */
-    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION, frameId: String? = null): Bitmap? {
-        val fid = frameId ?: activeManifoldFrameId
-        val key = makeTileCacheKey(zoom, x, y, fid)
-        val bitmap = mapTiles.get(key) ?: mapTiles.get("$zoom-$x-$y")
+    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
+        val bitmap = mapTiles.get("$zoom-$x-$y")
         return if (bitmap != null && !bitmap.isRecycled) bitmap else null
     }
 
     /**
      * Store a tile bitmap directly into the memory LRU cache.
      */
-    fun putMemoryCachedTile(x: Int, y: Int, bitmap: Bitmap, zoom: Int = ZOOM_REGION, frameId: String? = null) {
-        val fid = frameId ?: activeManifoldFrameId
-        val key = makeTileCacheKey(zoom, x, y, fid)
-        mapTiles.put(key, bitmap)
+    fun putMemoryCachedTile(x: Int, y: Int, bitmap: Bitmap, zoom: Int = ZOOM_REGION) {
         mapTiles.put("$zoom-$x-$y", bitmap)
     }
 

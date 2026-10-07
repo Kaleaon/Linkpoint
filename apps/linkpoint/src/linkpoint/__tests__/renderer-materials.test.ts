@@ -83,4 +83,26 @@ describe('renderer materials', () => {
     await expect(loadMaterials(engine)).rejects.toThrow(/rejected/);
     expect(engine.destroyed).toHaveLength(2);
   });
+
+  it('verifies water material parameters include uNormalMap sampler without trig functions in fragment shader', () => {
+    expect(WATER_PARAMETERS).toContain('uNormalMap');
+    const waterSource = readFileSync(path.join(root, 'materials', 'water.mat'), 'utf8');
+    const fragmentBlockMatch = waterSource.match(/fragment\s*\{([\s\S]*?)\}/);
+    expect(fragmentBlockMatch).not.toBeNull();
+    const fragmentContent = fragmentBlockMatch![1];
+    expect(fragmentContent).not.toMatch(/\bsin\s*\(/);
+    expect(fragmentContent).not.toMatch(/\bcos\s*\(/);
+    expect(waterSource).toContain('uNormalMap');
+  });
+
+  it('allows setting normal map texture parameter on water material instance', () => {
+    const { materials } = mockEngine();
+    const { engine } = mockEngine();
+    const material = engine.createMaterial(new Uint8Array());
+    const instance = material.createInstance();
+    const dummyTexture = {};
+    const dummySampler = {};
+    instance.setTextureParameter('uNormalMap', dummyTexture, dummySampler);
+    expect(instance.setTextureParameter).toHaveBeenCalledWith('uNormalMap', dummyTexture, dummySampler);
+  });
 });

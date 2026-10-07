@@ -40,11 +40,9 @@ material {
 
 vertex {
     void materialVertex(inout MaterialVertexInputs material) {
-        // Animate water surface
+        // Position water plane at world height without per-vertex trigonometric math
         vec3 pos = material.worldPosition.xyz;
-        float wave = sin(pos.x * materialParams.waveScale + materialParams.time) *
-                     cos(pos.y * materialParams.waveScale + materialParams.time);
-        material.worldPosition.z += wave * 0.1;
+        material.worldPosition.z = pos.z;
     }
 }
 
