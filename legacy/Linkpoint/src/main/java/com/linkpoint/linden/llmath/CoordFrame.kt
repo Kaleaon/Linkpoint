@@ -1,5 +1,6 @@
 package com.linkpoint.linden.llmath
 
+import com.linkpoint.scene.math.Matrix4
 import kotlin.math.cos
 import kotlin.math.sin
 
