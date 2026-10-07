@@ -437,6 +437,22 @@ export class SLConnectionFull extends Utils.EventEmitter {
     return slBridge.fetchFriends();
   }
 
+  async requestMuteList(crc: number = 0) {
+    return slBridge.requestMuteList(crc);
+  }
+
+  async updateMuteListEntry(entry: { id: string; name: string; type: number | string; flags: number }) {
+    return slBridge.updateMuteListEntry(entry);
+  }
+
+  async removeMuteListEntry(entry: { id: string; name: string }) {
+    return slBridge.removeMuteListEntry(entry);
+  }
+
+  async fetchXfer(filename: string): Promise<string> {
+    return slBridge.fetchXfer(filename);
+  }
+
   getCapability(name: string) {
     return this.capabilities[name];
   }
