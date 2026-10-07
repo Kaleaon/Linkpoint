@@ -5,6 +5,9 @@ import {
   LAYOUTS,
   PALETTES,
   DEVICES,
+  BREAKPOINTS,
+  MULTI_PANE_SPECS,
+  getBreakpoint,
   themeNames,
   computeThemeTokens,
   ensureMinContrast,
@@ -70,6 +73,19 @@ describe("@linkpoint/design-system subpath exports & functional requirements", (
     expect(PALETTES.ink).toBeDefined();
     expect(DEVICES.ios).toBeDefined();
     expect(themeNames.length).toBeGreaterThan(0);
+
+    // Responsive breakpoints and multi-pane tokens check
+    expect(BREAKPOINTS.compact).toBe(600);
+    expect(BREAKPOINTS.medium).toBe(840);
+    expect(BREAKPOINTS.expanded).toBe(1200);
+
+    expect(MULTI_PANE_SPECS.splitRatio).toBe(0.44);
+    expect(MULTI_PANE_SPECS.minPaneWidth).toBe(320);
+
+    expect(getBreakpoint(500)).toBe("compact");
+    expect(getBreakpoint(700)).toBe("medium");
+    expect(getBreakpoint(900)).toBe("medium");
+    expect(getBreakpoint(1280)).toBe("expanded");
 
     // WCAG contrast enforcement check
     const bg = "#0A1112";
