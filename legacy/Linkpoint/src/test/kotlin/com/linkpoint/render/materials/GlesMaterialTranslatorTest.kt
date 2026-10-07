@@ -1,12 +1,18 @@
 package com.linkpoint.render.materials
 
+import com.linkpoint.render.lumiya.shaders.PrimShaderProgram
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 
+@RunWith(RobolectricTestRunner::class)
 class GlesMaterialTranslatorTest {
 
     @Test
@@ -61,5 +67,40 @@ class GlesMaterialTranslatorTest {
         assertEquals(0.3f, desc.roughnessFactor, 0.001f)
         assertEquals(0.9f, desc.occlusionFactor, 0.001f)
         assertEquals(1.2f, desc.normalScale, 0.001f)
+    }
+
+    @Test
+    fun testApplyGles30ModeBindsMetallicRoughnessMap() {
+        val dummyUuid = UUID.randomUUID()
+        val desc = MaterialDescriptor(
+            metallicRoughnessTexture = MaterialDescriptor.TextureRef(dummyUuid, dummyUuid),
+            metallicFactor = 0.8f,
+            roughnessFactor = 0.4f
+        )
+        val bindings = GlesMaterialTranslator.TextureBindings(metallicRoughnessHandle = 103)
+        val mockProgram = mock<PrimShaderProgram>()
+
+        GlesMaterialTranslator.apply(mockProgram, desc, bindings, isGles20Fallback = false)
+
+        verify(mockProgram).setHasMetallicRoughnessMap(true)
+        verify(mockProgram).setMetallicRoughnessMapSampler(2)
+        verify(mockProgram).setIsGles20Fallback(false)
+    }
+
+    @Test
+    fun testApplyGles20FallbackSuppressesMetallicRoughnessMap() {
+        val dummyUuid = UUID.randomUUID()
+        val desc = MaterialDescriptor(
+            metallicRoughnessTexture = MaterialDescriptor.TextureRef(dummyUuid, dummyUuid),
+            metallicFactor = 0.8f,
+            roughnessFactor = 0.4f
+        )
+        val bindings = GlesMaterialTranslator.TextureBindings(metallicRoughnessHandle = 103)
+        val mockProgram = mock<PrimShaderProgram>()
+
+        GlesMaterialTranslator.apply(mockProgram, desc, bindings, isGles20Fallback = true)
+
+        verify(mockProgram).setHasMetallicRoughnessMap(false)
+        verify(mockProgram).setIsGles20Fallback(true)
     }
 }
