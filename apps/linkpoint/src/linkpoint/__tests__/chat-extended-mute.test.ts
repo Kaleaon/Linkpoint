@@ -175,4 +175,76 @@ describe('ChatExtended Mute List Synchronization & Persistence', () => {
 
     delete (globalThis as any).app;
   });
+
+  it('handles corrupt storage data gracefully by falling back to empty state', () => {
+    Utils.storage.set('linkpoint_mute_entries_v2', 'corrupt_string_data_not_array');
+    Utils.storage.set('linkpoint_mute_crc32', 'invalid_crc_string');
+
+    const chatExt = new ChatExtended();
+    expect(chatExt.getMutedUsers()).toHaveLength(0);
+    expect(chatExt.getMutedObjects()).toHaveLength(0);
+    expect(chatExt.getStats().cachedCRC).toBe(0);
+  });
+
+  it('handles empty Xfer response file data gracefully', async () => {
+    const fetchXfer = vi.fn().mockResolvedValue('');
+    const mockProtocol = { fetchXfer, on: vi.fn() };
+
+    const chatExt = new ChatExtended(mockProtocol);
+    chatExt.muteUser('prev-uuid', 'OldMutedUser');
+    expect(chatExt.isUserMuted('prev-uuid')).toBe(true);
+
+    await chatExt.handleMuteListUpdate('mute_file_123.txt');
+
+    expect(fetchXfer).toHaveBeenCalledWith('mute_file_123.txt');
+    expect(chatExt.isUserMuted('prev-uuid')).toBe(false);
+    expect(chatExt.getStats().cachedCRC).toBe(0);
+  });
+
+  it('muting and unmuting objects transmits UpdateMuteListEntry and RemoveMuteListEntry packets', async () => {
+    const updateMuteListEntry = vi.fn().mockResolvedValue(undefined);
+    const removeMuteListEntry = vi.fn().mockResolvedValue(undefined);
+    const mockProtocol = { updateMuteListEntry, removeMuteListEntry, on: vi.fn() };
+
+    const chatExt = new ChatExtended(mockProtocol);
+    chatExt.muteObject('noisy-prim-uuid', 'Spam Emitter');
+
+    expect(chatExt.isObjectMuted('Spam Emitter')).toBe(true);
+    expect(updateMuteListEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'noisy-prim-uuid',
+        name: 'Spam Emitter',
+        type: MuteType.OBJECT,
+      })
+    );
+
+    chatExt.unmuteObject('noisy-prim-uuid');
+    expect(chatExt.isObjectMuted('Spam Emitter')).toBe(false);
+    expect(removeMuteListEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Spam Emitter',
+      })
+    );
+  });
+
+  it('automatically requests mute list on protocol connected and login_success events', () => {
+    const callbacks: Record<string, Function> = {};
+    const requestMuteList = vi.fn().mockResolvedValue(undefined);
+    const mockProtocol = {
+      on: vi.fn((event, cb) => {
+        callbacks[event] = cb;
+      }),
+      requestMuteList,
+    };
+
+    const chatExt = new ChatExtended(mockProtocol);
+    expect(callbacks['connected']).toBeDefined();
+    expect(callbacks['login_success']).toBeDefined();
+
+    callbacks['connected']();
+    expect(requestMuteList).toHaveBeenCalledTimes(1);
+
+    callbacks['login_success']();
+    expect(requestMuteList).toHaveBeenCalledTimes(2);
+  });
 });

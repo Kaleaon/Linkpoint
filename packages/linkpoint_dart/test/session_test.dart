@@ -24,7 +24,8 @@ void main() {
       await Future.delayed(Duration.zero);
 
       expect(session.isConnected, false);
-      expect(events.length, 4); // Connecting, Connected, ChatReceived, Disconnected
+      expect(events.length,
+          4); // Connecting, Connected, ChatReceived, Disconnected
     });
   });
 }

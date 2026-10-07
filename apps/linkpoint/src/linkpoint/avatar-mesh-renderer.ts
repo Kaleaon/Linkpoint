@@ -152,11 +152,10 @@ export class AvatarMeshRenderer {
     const result: RenderSubmeshPartition[] = [];
     for (const [paletteIndex, indicesList] of partitionsMap.entries()) {
       const remappedBones = new Float32Array(mesh.boneIndices.length);
-      const minPaletteJoint = paletteIndex * maxPaletteJoints;
 
       for (let i = 0; i < mesh.boneIndices.length; i++) {
         const rawJoint = mesh.boneIndices[i];
-        remappedBones[i] = rawJoint >= minPaletteJoint ? rawJoint - minPaletteJoint : 0;
+        remappedBones[i] = Math.floor(rawJoint % maxPaletteJoints);
       }
 
       const IndexArrayType = mesh.indices instanceof Uint32Array ? Uint32Array : Uint16Array;

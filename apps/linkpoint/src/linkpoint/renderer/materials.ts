@@ -57,7 +57,7 @@ export const SKY_PARAMETERS = [
 export const WATER_PARAMETERS = [
   ...ATMOSPHERE_PARAMETERS, 'uCameraPos', 'uFogColor', 'uFogDensity', 'uFresnelScale', 'uFresnelOffset',
   'uLightDir', 'uLightColor', 'uSurfaceAmbient', 'uTime', 'uPixelAngle', 'uNormalScale', 'uWaterHeight',
-  'uFrequency', 'uPhase', 'uAmplitude', 'uDirection01', 'uDirection23',
+  'uFrequency', 'uPhase', 'uAmplitude', 'uDirection01', 'uDirection23', 'uNormalMap',
 ] as const;
 
 export const TERRAIN_PARAMETERS = [

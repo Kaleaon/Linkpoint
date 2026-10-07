@@ -1,6 +1,9 @@
 package com.linkpoint.ui.linkpoint2
 
 import android.Manifest
+import android.util.Log
+import java.util.UUID
+import kotlinx.coroutines.launch
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -228,7 +231,14 @@ fun Linkpoint2RouteHost(
                         isMe = false,
                         onNavigateBack = { selectedFriend = null },
                         onSendIM = { navController.navigateTo(Routes.CHAT) },
-                        onTeleportToMe = {},
+                        onTeleportToMe = {
+                            if (app != null && app.isTeleportManagerInitialized()) {
+                                app.applicationScope.launch {
+                                    app.teleportManager.sendTeleportLure(friend.id, "Join me!")
+                                }
+                                Log.i("Linkpoint2NavGraph", "Teleport lure triggered for friend ${friend.id}")
+                            }
+                        },
                         onEditMyProfile = {},
                         modifier = modifier,
                     )
@@ -382,7 +392,19 @@ fun Linkpoint2RouteHost(
                 isMe = userId == "me" || route == Routes.MY_PROFILE,
                 onNavigateBack = back,
                 onSendIM = { navController.navigateTo(Routes.CHAT) },
-                onTeleportToMe = { /* requires friend-tracking; not yet wired here */ },
+                onTeleportToMe = {
+                    val targetId = if (userId == "me" || route == Routes.MY_PROFILE) {
+                        app?.sessionManager?.getAgentId()
+                    } else {
+                        runCatching { UUID.fromString(userId) }.getOrNull()
+                    }
+                    if (app != null && app.isTeleportManagerInitialized() && targetId != null) {
+                        app.applicationScope.launch {
+                            app.teleportManager.sendTeleportLure(targetId, "Join me!")
+                        }
+                        Log.i("Linkpoint2NavGraph", "Teleport lure triggered for target $targetId")
+                    }
+                },
                 onEditMyProfile = { navController.navigateTo(Routes.MY_AVATAR) },
                 modifier = modifier,
             )

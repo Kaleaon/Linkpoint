@@ -50,6 +50,7 @@ class PrimShaderProgram : BaseShaderProgram() {
     private var uEmissiveFactor = -1
     private var uOcclusionFactor = -1
     private var uNormalScale = -1
+    private var uUseInstancing = -1
 
     override val vertexSource = """
         #version 320 es
@@ -67,6 +68,9 @@ class PrimShaderProgram : BaseShaderProgram() {
         layout(location = 1) in vec3 aNormal;
         layout(location = 2) in vec2 aTexCoord;
 
+        layout(location = 3) in mat4 aInstanceModelMatrix;
+
+        uniform bool uUseInstancing;
         uniform mat4 uModelMatrix;
         uniform mat4 uTexMatrix;
 
@@ -76,9 +80,10 @@ class PrimShaderProgram : BaseShaderProgram() {
         out float vFogFactor;
 
         void main() {
-            vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
+            mat4 modelMat = uUseInstancing ? aInstanceModelMatrix : uModelMatrix;
+            vec4 worldPos = modelMat * vec4(aPosition, 1.0);
             vWorldPos = worldPos.xyz;
-            vNormal = normalize(mat3(uModelMatrix) * aNormal);
+            vNormal = normalize(mat3(modelMat) * aNormal);
             vTexCoord = (uTexMatrix * vec4(aTexCoord, 0.0, 1.0)).xy;
 
             float dist = length(uCameraPos.xyz - worldPos.xyz);
@@ -313,6 +318,7 @@ class PrimShaderProgram : BaseShaderProgram() {
         uEmissiveFactor = loc("uEmissiveFactor")
         uOcclusionFactor = loc("uOcclusionFactor")
         uNormalScale = loc("uNormalScale")
+        uUseInstancing = loc("uUseInstancing")
 
         // Bind the GlobalData UBO to binding point 0
         val idx = uboIndex("GlobalData")
@@ -362,6 +368,7 @@ class PrimShaderProgram : BaseShaderProgram() {
     fun setEmissiveFactor(r: Float, g: Float, b: Float) = GLES32.glUniform3f(uEmissiveFactor, r, g, b)
     fun setOcclusionFactor(factor: Float) = GLES32.glUniform1f(uOcclusionFactor, factor)
     fun setNormalScale(scale: Float) = GLES32.glUniform1f(uNormalScale, scale)
+    fun setUseInstancing(use: Boolean) = GLES32.glUniform1i(uUseInstancing, if (use) 1 else 0)
 
     fun setLighting(
         dirX: Float, dirY: Float, dirZ: Float,

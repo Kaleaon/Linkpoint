@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'generated_tokens.dart';
 import 'session.dart';
 
 /// Flutter Widget rendering Second Life Grid Status Banner.
@@ -16,7 +17,7 @@ class GridStatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: isConnected ? Colors.green.shade800 : Colors.grey.shade900,
+      color: isConnected ? GeneratedTokens.color.status.online : GeneratedTokens.color.status.offline,
       child: Row(
         children: [
           Icon(
@@ -27,7 +28,8 @@ class GridStatusBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             isConnected ? 'Connected: $regionName' : 'Offline',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -54,7 +56,8 @@ class ChatFeedWidget extends StatelessWidget {
               children: [
                 TextSpan(
                   text: '${msg.fromName}: ',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigoAccent),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.indigoAccent),
                 ),
                 TextSpan(
                   text: msg.body,
@@ -90,7 +93,8 @@ class _LinkpointViewerWidgetState extends State<LinkpointViewerWidget> {
         setState(() {
           _messages.add(event.message);
         });
-      } else if (event is SessionConnectedEvent || event is SessionDisconnectedEvent) {
+      } else if (event is SessionConnectedEvent ||
+          event is SessionDisconnectedEvent) {
         setState(() {});
       }
     });

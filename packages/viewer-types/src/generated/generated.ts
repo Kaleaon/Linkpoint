@@ -3914,13 +3914,13 @@ export interface AgentDomainCapabilitiesCapabilities {
   maturity_rating?: string;
 }
 
+export interface EventQueueGetCapabilities {
+  ack?: number;
+  events: string[];
+}
+
 export interface CapabilitiesRequestResponseCapabilities {
   capabilities: string[];
   seed_response?: string;
   fetch_inventory?: string;
-}
-
-export interface EventQueueGetCapabilities {
-  ack?: number;
-  events: string[];
 }

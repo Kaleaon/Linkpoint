@@ -10,6 +10,8 @@ import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.teleport.TeleportLure
+import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.push.PushEvent
 import com.linkpoint.push.PushEventBus
 import com.linkpoint.push.PushEventType
@@ -97,6 +99,9 @@ class IMManager(
 
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
 
+    @Volatile
+    var teleportManager: TeleportManager? = null
+
     // Active IM sessions
     private val sessions = ConcurrentHashMap<UUID, IMSession>()
 
@@ -123,9 +128,15 @@ class IMManager(
     private val pendingSyncSessions = MutableStateFlow<Set<UUID>>(emptySet())
     val syncNeededSessions: StateFlow<Set<UUID>> = pendingSyncSessions
 
-    private val startedGroupSessions = ConcurrentHashMap.newKeySet<UUID>()
-
-    private val pendingGroupMessages = ConcurrentHashMap<UUID, MutableList<String>>()
+    val chatProtocolAdapter = ChatProtocolAdapter(
+        sendSessionStartHandler = { groupId ->
+            sendGroupSessionStart(groupId)
+            true
+        },
+        sendGroupMessageHandler = { groupId, sessionUuid, message ->
+            sendGroupChatDialog17(sessionUuid, message)
+        }
+    )
 
     private fun outboundIdentity(): AgentIdentity = AgentIdentity(
         agentId = agentId,
@@ -285,6 +296,8 @@ class IMManager(
         val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { return }
         val success = body.getInt("success") == 1
 
+        chatProtocolAdapter.onSessionStartReply(sessionId, sessionId, success)
+
         if (success) {
             val session = sessions[sessionId]
             if (session != null) {
@@ -294,19 +307,10 @@ class IMManager(
                 }
                 logDebug(TAG, "Session $sessionId started successfully")
             }
-            if (startedGroupSessions.add(sessionId)) {
-                val queued = pendingGroupMessages.remove(sessionId)
-                if (queued != null && queued.isNotEmpty()) {
-                    logDebug(TAG, "Draining ${queued.size} pending group messages for $sessionId")
-                    queued.forEach { sendGroupChatDialog17(sessionId, it) }
-                }
-            }
             updateSessionList()
         } else {
             val error = body.getString("error") ?: "Unknown error"
             logError(TAG, "Failed to start session $sessionId: $error")
-            pendingGroupMessages.remove(sessionId)
-            startedGroupSessions.remove(sessionId)
             sessions.remove(sessionId)
             lastMessageBySession.remove(sessionId)
             scope.launch {
@@ -591,6 +595,22 @@ class IMManager(
             reliable = true
         )
         logDebug(TAG, "Teleport lure response (dialog=$dialog) sent to ${event.fromAgentId}")
+
+        if (accept) {
+            teleportManager?.let { tm ->
+                scope.launch {
+                    val lure = TeleportLure(
+                        lureId = event.lureId,
+                        senderId = event.fromAgentId,
+                        senderName = event.fromName,
+                        regionName = event.regionName,
+                        message = event.message,
+                        timestamp = event.timestamp
+                    )
+                    tm.acceptTeleportLure(lure)
+                }
+            }
+        }
     }
 
     fun respondToInventoryOffer(event: SLChatEvent.InventoryOffer, accept: Boolean) {
@@ -645,13 +665,9 @@ class IMManager(
 
     private fun sendSessionChat(session: IMSession, message: String): Boolean {
         val sessionId = session.sessionId
-        if (session.type == SessionType.GROUP && sessionId !in startedGroupSessions) {
-            pendingGroupMessages
-                .computeIfAbsent(sessionId) { mutableListOf() }
-                .add(message)
-            sendGroupSessionStart(sessionId)
-            logDebug(TAG, "Group chat queued for $sessionId (waiting for session-start reply)")
-            return true
+        if (session.type == SessionType.GROUP) {
+            val result = chatProtocolAdapter.sendGroupMessage(sessionId, message)
+            return result != GroupMessageResult.FAILED
         }
         return sendGroupChatDialog17(sessionId, message)
     }
@@ -854,6 +870,7 @@ class IMManager(
     }
 
     fun shutdown() {
+        chatProtocolAdapter.onDisconnected()
         scope.cancel()
     }
 }

@@ -61,7 +61,8 @@ data class GraphicsState(
     val lod: Float = 0.6f,
     val textures: Float = 0.7f,
     val particles: Float = 0.5f,
-    val shadows: Boolean = false,
+    val shadows: Boolean = true,
+    val shadowTierOverride: String = "Auto",
 )
 
 /**
@@ -161,6 +162,25 @@ fun GraphicsSettingsScreen(
                         )
                     },
                 )
+            }
+            if (state.shadows) {
+                item {
+                    L2SectionHeader("Shadow Hardware Tier")
+                }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("Auto", "Tier 1", "Tier 2", "Tier 3").forEach { tier ->
+                            L2Chip(
+                                label = tier,
+                                variant = if (tier == state.shadowTierOverride) L2ChipVariant.Primary else L2ChipVariant.Neutral,
+                                onClick = {
+                                    state = state.copy(shadowTierOverride = tier)
+                                    onChange(state)
+                                },
+                            )
+                        }
+                    }
+                }
             }
         }
     }

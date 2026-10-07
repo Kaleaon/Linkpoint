@@ -6,7 +6,7 @@ import android.util.Log
  * JNI audio bridge passing decoded raw PCM audio packets from Java AudioTrack sinks /
  * WebRTC audio receivers into SpatialAudioEngine for 3D spatial matrix calculations.
  */
-class SpatialAudioBridge(
+open class SpatialAudioBridge(
     sampleRate: Int = 48000,
     maxRingBufferFrames: Int = 1440 // ~30ms at 48kHz
 ) {
@@ -75,7 +75,7 @@ class SpatialAudioBridge(
         return copyLength
     }
 
-    fun updateListener(
+    open fun updateListener(
         x: Float, y: Float, z: Float,
         lookX: Float = 0f, lookY: Float = 1f, lookZ: Float = 0f,
         upX: Float = 0f, upY: Float = 0f, upZ: Float = 1f
@@ -89,7 +89,7 @@ class SpatialAudioBridge(
         }
     }
 
-    fun updateSource(x: Float, y: Float, z: Float) {
+    open fun updateSource(x: Float, y: Float, z: Float) {
         if (nativeHandle != 0L && isLibraryLoaded) {
             try {
                 nativeUpdateSourcePosition(nativeHandle, x, y, z)

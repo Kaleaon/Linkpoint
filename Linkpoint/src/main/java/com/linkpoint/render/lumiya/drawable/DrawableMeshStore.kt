@@ -35,7 +35,7 @@ class DrawableMeshStore {
 
     companion object {
         private const val TAG = "DrawableMeshStore"
-        private val IDENTITY_MATRIX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+        private val IDENTITY_MATRIX = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
         private val BONE_NAME_TO_INDEX_MAP: Map<String, Int> by lazy {
             AvatarSkeleton.BONE_NAMES.withIndex().associate { it.value to it.index }
         }
@@ -49,7 +49,7 @@ class DrawableMeshStore {
     )
 
     /** Per-face per-prim material data. */
-    data class FaceMaterial(
+    class FaceMaterial(
         var textureId: UUID = UUID(0L, 0L),
         var textureHandle: Int = 0,
         var normalHandle: Int = 0,
@@ -60,15 +60,82 @@ class DrawableMeshStore {
         var colorG: Float = 1f,
         var colorB: Float = 1f,
         var colorA: Float = 1f,
-        var scaleS: Float = 1f,
-        var scaleT: Float = 1f,
-        var offsetS: Float = 0f,
-        var offsetT: Float = 0f,
-        var rotation: Float = 0f,
+        scaleS: Float = 1f,
+        scaleT: Float = 1f,
+        offsetS: Float = 0f,
+        offsetT: Float = 0f,
+        rotation: Float = 0f,
         var metallicFactor: Float = 1f,
         var roughnessFactor: Float = 1f,
         var descriptor: MaterialDescriptor? = null
-    )
+    ) {
+        @Volatile
+        var isDirty: Boolean = true
+            private set
+
+        var scaleS: Float = scaleS
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var scaleT: Float = scaleT
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var offsetS: Float = offsetS
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var offsetT: Float = offsetT
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var rotation: Float = rotation
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        private val matrixBuffer = FloatArray(16)
+        @Volatile
+        private var cachedMatrix: FloatArray = IDENTITY_MATRIX
+
+        fun getMatrix(): FloatArray {
+            if (isDirty) {
+                synchronized(matrixBuffer) {
+                    if (isDirty) {
+                        if (scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f) {
+                            cachedMatrix = IDENTITY_MATRIX
+                        } else {
+                            MaterialDescriptor.UvTransform.computeMatrix(
+                                scaleS, scaleT, offsetS, offsetT, rotation, matrixBuffer
+                            )
+                            cachedMatrix = matrixBuffer
+                        }
+                        isDirty = false
+                    }
+                }
+            }
+            return cachedMatrix
+        }
+    }
 
     data class MeshInstance(
         val id: Long,
@@ -397,7 +464,7 @@ class DrawableMeshStore {
                 baseColorTexture = if (face.textureHandle != 0) MaterialDescriptor.TextureRef(face.textureId, face.textureId) else null,
                 metallicFactor = face.metallicFactor,
                 roughnessFactor = face.roughnessFactor,
-                uvTransform = MaterialDescriptor.UvTransform(face.scaleS, face.scaleT, face.offsetS, face.offsetT, face.rotation)
+                uvTransform = MaterialDescriptor.UvTransform(face.scaleS, face.scaleT, face.offsetS, face.offsetT, face.rotation, precomputedMatrix = face.getMatrix())
             )
             val bindings = GlesMaterialTranslator.TextureBindings(
                 baseColorHandle = face.textureHandle,
@@ -489,14 +556,6 @@ class DrawableMeshStore {
     }
 
     private fun buildTexMatrix(face: FaceMaterial): FloatArray {
-        val m = FloatArray(16)
-        Matrix.setIdentityM(m, 0)
-        Matrix.translateM(m, 0, 0.5f + face.offsetS, 0.5f + face.offsetT, 0f)
-        if (face.rotation != 0f) {
-            Matrix.rotateM(m, 0, Math.toDegrees(face.rotation.toDouble()).toFloat(), 0f, 0f, 1f)
-        }
-        Matrix.scaleM(m, 0, face.scaleS, face.scaleT, 1f)
-        Matrix.translateM(m, 0, -0.5f, -0.5f, 0f)
-        return m
+        return face.getMatrix()
     }
 }

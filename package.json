@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "generate:protocol": "python3 tools/protocol_gen/cli.py generate --target typescript,dart,python,c,kotlin,rust,java",
+    "generate:protocol": "node scripts/generate_protocol.mjs",
     "check": "npm run generate:protocol && npm run check:contract && npm run check:web && npm run check:rust && npm run check:dart",
     "check:contract": "bash scripts/check_viewer_contract.sh",
     "check:web": "npm run typecheck && npm run test:web && npm run typecheck -w @linkpoint/app && npm run build -w @linkpoint/app",
@@ -16,8 +16,8 @@
     "check:dart": "cd packages/linkpoint_dart && /opt/flutter/bin/flutter test",
     "dev": "npm run dev -w @linkpoint/app",
     "build": "npm run build -w @linkpoint/app",
-    "build:tokens": "npm run build:tokens -w @linkpoint/design-system",
-    "generate-tokens": "npm run generate-tokens -w @linkpoint/design-system",
+    "build:tokens": "node packages/design-system/scripts/generate-tokens.js",
+    "generate-tokens": "node packages/design-system/scripts/generate-tokens.js",
     "test": "npm run test:web",
     "test:coverage": "vitest run --coverage",
     "test:playwright": "playwright test --config packages/design-system/playwright.config.ts && playwright test --config apps/linkpoint/playwright.config.ts",

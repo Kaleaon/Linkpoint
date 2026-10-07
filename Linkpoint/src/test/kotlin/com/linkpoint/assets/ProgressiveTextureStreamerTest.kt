@@ -24,6 +24,7 @@ class ProgressiveTextureStreamerTest {
         ProgressiveTextureStreamer.reset()
         // Warm up class loading and Robolectric shadow initialization
         val dummy = createDummyJ2kBytes()
+        JPEG2000Decoder.decodePlaceholder64(dummy)
         ProgressiveTextureStreamer.submit(
             id = UUID.randomUUID(),
             data = dummy,

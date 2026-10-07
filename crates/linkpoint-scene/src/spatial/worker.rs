@@ -62,10 +62,13 @@ impl SpatialWorkerPool {
                             query_bounds_chunk,
                             reply,
                         } => {
-                            let grid = grid_ref.lock().unwrap();
                             let mut batch_results = Vec::with_capacity(query_bounds_chunk.len());
-                            for query in &query_bounds_chunk {
-                                batch_results.push(grid.query_aabb(query));
+                            if let Ok(grid) = grid_ref.lock() {
+                                for query in &query_bounds_chunk {
+                                    batch_results.push(grid.query_aabb(query));
+                                }
+                            } else {
+                                batch_results.resize_with(query_bounds_chunk.len(), Vec::new);
                             }
                             let _ = reply.send(batch_results);
                         }

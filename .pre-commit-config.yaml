@@ -16,12 +16,36 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
 
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        name: ruff check
+        files: '^(scripts/|tools/|.*\.py$)'
+      - id: ruff-format
+        name: ruff format
+        files: '^(scripts/|tools/|.*\.py$)'
+
   - repo: local
     hooks:
       - id: parity-snapshot-guard
         name: parity snapshot scripts enforce clean tree
         entry: bash scripts/check_parity_snapshot_guards.sh
         language: system
+        pass_filenames: false
+
+      - id: dart-format
+        name: dart format (packages/linkpoint_dart)
+        entry: bash -c 'cd packages/linkpoint_dart && dart format --output=none --set-exit-if-changed .'
+        language: system
+        files: '^packages/linkpoint_dart/'
+        pass_filenames: false
+
+      - id: flutter-analyze
+        name: flutter analyze (packages/linkpoint_dart)
+        entry: bash -c 'cd packages/linkpoint_dart && flutter analyze'
+        language: system
+        files: '^packages/linkpoint_dart/'
         pass_filenames: false
 
       - id: cargo-fmt

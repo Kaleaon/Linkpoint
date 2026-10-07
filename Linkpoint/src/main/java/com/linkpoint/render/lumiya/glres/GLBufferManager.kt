@@ -215,6 +215,41 @@ class GLBufferManager(private val resourceManager: GLResourceManager) {
         return MeshVAO(vao, vbo, ebo, indexData.size, useIntIndices = true)
     }
 
+    /**
+     * Configure instance model matrix attributes (4x4 float matrix occupying 4 attribute locations).
+     *
+     * @param instanceVbo  GL VBO handle containing column-major 4x4 transform matrices.
+     * @param baseLocation Starting attribute location (default 3, using locations 3, 4, 5, 6).
+     * @param divisor      Attribute divisor (1 for instanced rendering, 0 to reset).
+     */
+    fun setupInstanceMatrixAttributes(
+        instanceVbo: Int,
+        baseLocation: Int = 3,
+        divisor: Int = 1
+    ) {
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, instanceVbo)
+        val matrixStride = 16 * 4 // 64 bytes per 4x4 matrix
+        for (i in 0 until 4) {
+            val loc = baseLocation + i
+            if (divisor > 0) {
+                GLES32.glEnableVertexAttribArray(loc)
+                GLES32.glVertexAttribPointer(
+                    loc,
+                    4,
+                    GLES32.GL_FLOAT,
+                    false,
+                    matrixStride,
+                    i * 16
+                )
+                GLES32.glVertexAttribDivisor(loc, divisor)
+            } else {
+                GLES32.glVertexAttribDivisor(loc, 0)
+                GLES32.glDisableVertexAttribArray(loc)
+            }
+        }
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0)
+    }
+
     // ── Cleanup ──────────────────────────────────────────────────────────
 
     fun destroyVAO(mesh: MeshVAO) {

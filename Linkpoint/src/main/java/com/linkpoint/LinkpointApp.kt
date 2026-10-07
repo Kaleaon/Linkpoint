@@ -1008,6 +1008,14 @@ class LinkpointApp : Application() {
         // NEW: User Profile Manager
         userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
 
+        // Register UDP and OpenSim REST Profile Strategies
+        val udpStrategy = com.linkpoint.world.profile.UdpProfileStrategy(udpConnection, agentId)
+        val selectedGrid = if (::gridManager.isInitialized) gridManager.getSelectedGrid() else null
+        val restUrl = selectedGrid?.website ?: selectedGrid?.helperUri
+        val restStrategy = com.linkpoint.world.profile.OpenSimRestProfileStrategy(restUrl)
+        profileManager.registerStrategy(udpStrategy)
+        profileManager.registerStrategy(restStrategy)
+
         // NEW: Initialize connection keep-alive with credentials
         connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
 
@@ -1204,6 +1212,9 @@ class LinkpointApp : Application() {
 
         // IM manager
         imManager = IMManager(udpConnection, capabilityManager, agentId)
+        if (::teleportManager.isInitialized) {
+            imManager.teleportManager = teleportManager
+        }
 
         // Wire IMManager into GroupsManager so `sendGroupChat` routes
         // through the IM session state machine (Dialog=15 bring-up +
@@ -1295,6 +1306,9 @@ class LinkpointApp : Application() {
 
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        if (::imManager.isInitialized) {
+            imManager.teleportManager = teleportManager
+        }
         if (::notificationManager.isInitialized) {
             notificationManager.teleportManager = teleportManager
         }
@@ -2784,7 +2798,9 @@ class LinkpointApp : Application() {
                     val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseAvatarPropertiesReply(payload)
                     if (data != null) {
                         Log.d(TAG, "👤 AvatarPropertiesReply: ${data.avatarID}")
-                        // Cache profile data for later use
+                        com.linkpoint.eventbus.AppEventBus.publish(
+                            com.linkpoint.eventbus.events.AvatarPropertiesReplyEvent(data)
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -2949,7 +2965,13 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
-                    Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                    val replyData = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseMapItemReply(payload)
+                    if (replyData != null && ::worldMap.isInitialized) {
+                        worldMap.handleMapItemReply(replyData)
+                        Log.d(TAG, "🗺️ MapItemReply received: itemType=${replyData.itemType}, items=${replyData.items.size}")
+                    } else {
+                        Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling MapItemReply", e)
@@ -4765,7 +4787,18 @@ class LinkpointApp : Application() {
         }
 
         udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PROPERTIES_UPDATE) { _, rawPacket ->
-            Log.d(TAG, "👤 AvatarPropertiesUpdate received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val event = com.linkpoint.eventbus.events.AvatarPropertiesUpdateEvent.fromPayload(payload)
+                    if (event != null) {
+                        Log.d(TAG, "👤 AvatarPropertiesUpdate received for ${event.agentId}")
+                        com.linkpoint.eventbus.AppEventBus.publish(event)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AvatarPropertiesUpdate", e)
+            }
         }
 
         // --- Velocity Interpolation Messages ---
@@ -5776,6 +5809,7 @@ class LinkpointApp : Application() {
         worldMap.shutdown()
         searchManager.shutdown()
         profileManager.shutdown()
+        com.linkpoint.eventbus.AppEventBus.clear()
         parcelManager.shutdown()
 
         soundManager.shutdown()

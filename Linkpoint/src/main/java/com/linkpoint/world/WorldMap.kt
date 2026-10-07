@@ -128,7 +128,14 @@ class WorldMap(
         val dir = tileCacheDir ?: cacheManager?.let { File(it.getPublicCacheDirectory(), "map_tiles") }
         if (dir != null) {
             if (!dir.exists()) dir.mkdirs()
-            return File(dir, "tile_$key.jpg")
+            val file = File(dir, "tile_$key.jpg")
+            if (file.exists()) return file
+            val parts = key.split("-")
+            if (parts.size >= 4) {
+                val legacyFile = File(dir, "tile_${parts[0]}-${parts[2]}-${parts[3]}.jpg")
+                if (legacyFile.exists()) return legacyFile
+            }
+            return file
         }
         return null
     }
@@ -168,6 +175,131 @@ class WorldMap(
     }
 
     /**
+     * Get effective region search URL for the active grid.
+     */
+    fun getEffectiveRegionSearchUrl(query: String): String? {
+        try {
+            val app = com.linkpoint.LinkpointApp.getInstance()
+            val grid = app.gridManager.getSelectedGrid()
+            val activeSearchUri = app.sessionManager.getSearchUri() ?: grid.searchUri
+            if (!activeSearchUri.isNullOrBlank()) {
+                val trimmed = activeSearchUri.trim()
+                if (trimmed.contains("{query}")) {
+                    return trimmed.replace("{query}", query.encodeUrl())
+                }
+                val joinChar = if (trimmed.contains("?")) "&" else "?"
+                if (trimmed.contains("regions")) {
+                    return "$trimmed${joinChar}q=${query.encodeUrl()}"
+                }
+                val base = trimmed.trimEnd('/')
+                return "$base/regions?q=${query.encodeUrl()}"
+            }
+            val loginUri = app.sessionManager.getLoginUri()
+            if (com.linkpoint.network.grid.GridInfoResolver.isSecondLifeUri(loginUri) ||
+                com.linkpoint.network.grid.GridInfoResolver.isSecondLifeUri(grid.loginUri)) {
+                return "https://search.secondlife.com/regions?q=${query.encodeUrl()}"
+            }
+        } catch (e: Exception) {
+            return "https://search.secondlife.com/regions?q=${query.encodeUrl()}"
+        }
+        return null
+    }
+
+    // Map item markers cached by itemType
+    private val mapItemMarkers = ConcurrentHashMap<Int, MutableList<com.linkpoint.protocol.messages.AdditionalMessageParsers.MapItemData>>()
+
+    fun handleMapItemReply(reply: com.linkpoint.protocol.messages.AdditionalMessageParsers.MapItemReplyData) {
+        val list = mapItemMarkers.getOrPut(reply.itemType) { java.util.Collections.synchronizedList(mutableListOf()) }
+        synchronized(list) {
+            val newIds = reply.items.map { it.id }.toSet()
+            list.removeAll { it.id in newIds }
+            list.addAll(reply.items)
+        }
+        Log.d(TAG, "Updated map item markers for itemType ${reply.itemType}: ${reply.items.size} items stored")
+    }
+
+    fun getMapItems(itemType: Int): List<com.linkpoint.protocol.messages.AdditionalMessageParsers.MapItemData> {
+        return mapItemMarkers[itemType]?.toList() ?: emptyList()
+    }
+
+    fun clearMapItems() {
+        mapItemMarkers.clear()
+    }
+
+    /**
+     * Send UDP MapBlockRequest packet to query region blocks for a coordinate range.
+     */
+    fun requestMapBlock(minX: Int, maxX: Int, minY: Int, maxY: Int) {
+        try {
+            val app = com.linkpoint.LinkpointApp.getInstance()
+            val udpConnection = app.udpConnection
+            val agentId = app.sessionManager.getAgentId() ?: return
+            val sessionIdStr = app.sessionManager.getSessionId() ?: return
+            val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { UUID.randomUUID() }
+
+            val buffer = java.nio.ByteBuffer.allocate(45).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            buffer.putUUID(agentId)
+            buffer.putUUID(sessionId)
+            buffer.putInt(0) // Flags
+            buffer.putInt(0) // EstateID
+            buffer.put(0.toByte()) // Godlike
+
+            buffer.putShort(minX.toShort())
+            buffer.putShort(maxX.toShort())
+            buffer.putShort(minY.toShort())
+            buffer.putShort(maxY.toShort())
+
+            udpConnection.sendPacket(
+                com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_BLOCK_REQUEST,
+                buffer.array(),
+                reliable = true
+            )
+            Log.d(TAG, "Sent UDP MapBlockRequest for region range ($minX, $minY) to ($maxX, $maxY)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send MapBlockRequest UDP packet", e)
+        }
+    }
+
+    /**
+     * Send UDP MapItemRequest packet to query map item overlays.
+     */
+    fun requestMapItem(itemType: Int, regionHandle: Long) {
+        try {
+            val app = com.linkpoint.LinkpointApp.getInstance()
+            val udpConnection = app.udpConnection
+            val agentId = app.sessionManager.getAgentId() ?: return
+            val sessionIdStr = app.sessionManager.getSessionId() ?: return
+            val sessionId = try { UUID.fromString(sessionIdStr) } catch (e: Exception) { UUID.randomUUID() }
+
+            val buffer = java.nio.ByteBuffer.allocate(49).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            buffer.putUUID(agentId)
+            buffer.putUUID(sessionId)
+            buffer.putInt(0) // Flags
+            buffer.putInt(0) // EstateID
+            buffer.put(0.toByte()) // Godlike
+
+            buffer.putInt(itemType)
+            buffer.putLong(regionHandle)
+
+            udpConnection.sendPacket(
+                com.linkpoint.protocol.messages.ids.MessageIdRegistry.MAP_ITEM_REQUEST,
+                buffer.array(),
+                reliable = true
+            )
+            Log.d(TAG, "Sent UDP MapItemRequest for itemType $itemType on handle $regionHandle")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send MapItemRequest UDP packet", e)
+        }
+    }
+
+    private fun java.nio.ByteBuffer.putUUID(uuid: UUID) {
+        val temp = java.nio.ByteBuffer.allocate(16).order(java.nio.ByteOrder.BIG_ENDIAN)
+        temp.putLong(uuid.mostSignificantBits)
+        temp.putLong(uuid.leastSignificantBits)
+        this.put(temp.array())
+    }
+
+    /**
      * Get map tile using frame-aware cache key.
      */
     suspend fun getMapTile(x: Int, y: Int, zoom: Int = ZOOM_REGION, frameId: String? = null): Bitmap? {
@@ -192,16 +324,12 @@ class WorldMap(
                 }
 
                 if (data == null) {
-                    val diskFile = getDiskTileFile(key) ?: getDiskTileFile("$zoom-$x-$y")
-                    val fileToRead = if (diskFile != null && diskFile.exists()) diskFile else {
-                        val legacyFile = getDiskTileFile("$zoom-$x-$y")
-                        if (legacyFile != null && legacyFile.exists()) legacyFile else null
-                    }
-                    if (fileToRead != null) {
+                    val diskFile = getDiskTileFile(key)
+                    if (diskFile != null && diskFile.exists()) {
                         try {
-                            data = fileToRead.readBytes()
+                            data = diskFile.readBytes()
                         } catch (e: Exception) {
-                            Log.w(TAG, "Failed to read cached tile from disk: ${fileToRead.name}", e)
+                            Log.w(TAG, "Failed to read cached tile from disk: $key", e)
                         }
                     }
                 }
@@ -238,6 +366,7 @@ class WorldMap(
 
                 if (bitmap != null) {
                     mapTiles.put(key, bitmap)
+                    mapTiles.put("$zoom-$x-$y", bitmap)
                 }
 
                 bitmap
@@ -254,7 +383,8 @@ class WorldMap(
     suspend fun searchRegions(query: String): List<RegionSearchResult> {
         return withContext(Dispatchers.IO) {
             try {
-                val url = "https://search.secondlife.com/regions?q=${query.encodeUrl()}"
+                val url = getEffectiveRegionSearchUrl(query)
+                    ?: return@withContext emptyList()
                 val request = Request.Builder().url(url).build()
                 val response = httpClient.newCall(request).execute()
 
@@ -329,13 +459,25 @@ class WorldMap(
                     .replace("{x}", x.toString())
                     .replace("{y}", y.toString())
 
-                val request = Request.Builder()
-                    .url(mapUrl)
-                    .head() // Just check if it exists
-                    .build()
+                var exists = false
+                try {
+                    val request = Request.Builder()
+                        .url(mapUrl)
+                        .head() // Just check if it exists
+                        .build()
 
-                val response = httpClient.newCall(request).execute()
-                if (response.isSuccessful) {
+                    val response = httpClient.newCall(request).execute()
+                    exists = response.isSuccessful
+                } catch (e: Exception) {
+                    Log.d(TAG, "HTTP tile head request failed for ($x, $y), falling back to UDP MapBlockRequest: ${e.message}")
+                }
+
+                if (!exists) {
+                    // Fallback to UDP MapBlockRequest when HTTP tile endpoints are unavailable
+                    requestMapBlock(x, x, y, y)
+                }
+
+                if (exists) {
                     // Region exists, create info from coordinates
                     val info = RegionMapInfo(
                         name = "Region ($x, $y)",
@@ -349,7 +491,7 @@ class WorldMap(
                     regions[key] = info
                     info
                 } else {
-                    null
+                    regions[key]
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to query region info at $x, $y: ${e.message}")
@@ -487,28 +629,24 @@ class WorldMap(
     /**
      * Get bitmap from memory LRU cache directly without network or disk I/O
      */
-    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION, frameId: String? = null): Bitmap? {
-        val fid = frameId ?: activeManifoldFrameId
-        val key = makeTileCacheKey(zoom, x, y, fid)
-        val bitmap = mapTiles.get(key) ?: mapTiles.get("$zoom-$x-$y")
+    fun getMemoryCachedTile(x: Int, y: Int, zoom: Int = ZOOM_REGION): Bitmap? {
+        val bitmap = mapTiles.get("$zoom-$x-$y")
         return if (bitmap != null && !bitmap.isRecycled) bitmap else null
     }
 
     /**
      * Store a tile bitmap directly into the memory LRU cache.
      */
-    fun putMemoryCachedTile(x: Int, y: Int, bitmap: Bitmap, zoom: Int = ZOOM_REGION, frameId: String? = null) {
-        val fid = frameId ?: activeManifoldFrameId
-        val key = makeTileCacheKey(zoom, x, y, fid)
-        mapTiles.put(key, bitmap)
+    fun putMemoryCachedTile(x: Int, y: Int, bitmap: Bitmap, zoom: Int = ZOOM_REGION) {
         mapTiles.put("$zoom-$x-$y", bitmap)
     }
 
     /**
-     * Clear cached tiles
+     * Clear cached tiles and overlay markers
      */
     fun clearCache() {
         mapTiles.evictAll()
+        clearMapItems()
     }
 
     fun shutdown() {

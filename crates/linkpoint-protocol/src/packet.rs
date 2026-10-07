@@ -58,12 +58,9 @@ pub fn split_appended_acks(bytes: &[u8]) -> Result<(&[u8], Vec<u32>), PacketPars
         .checked_sub(trailer)
         .ok_or(PacketParseError::InvalidAcks)?;
     let mut acks = Vec::with_capacity(count);
-    for chunk in bytes[payload_len..bytes.len() - 1].chunks_exact(4) {
-        acks.push(u32::from_be_bytes(
-            chunk
-                .try_into()
-                .map_err(|_| PacketParseError::InvalidAcks)?,
-        ));
+    let (chunks, _) = bytes[payload_len..bytes.len() - 1].as_chunks::<4>();
+    for chunk in chunks {
+        acks.push(u32::from_be_bytes(*chunk));
     }
     Ok((&bytes[..payload_len], acks))
 }

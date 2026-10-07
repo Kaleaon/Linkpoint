@@ -3,6 +3,11 @@ from typing import Dict
 from tools.protocol_gen.proto_ast.models import ProtocolAST
 from tools.protocol_gen.emitters.base import BaseEmitter
 
+def _format_kt_int(num: int) -> str:
+    if num > 2147483647:
+        return str(num - 4294967296)
+    return str(num)
+
 class KotlinEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("Kotlin", ".kt")
@@ -37,8 +42,7 @@ class KotlinEmitter(BaseEmitter):
         out.append(f'    const val TEMPLATE_VERSION = "{ast.version}"')
         out.append("    val REGISTERED_MESSAGES = mapOf(")
         for msg in ast.messages:
-            msg_num = f"{msg.message_number}.toInt()" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
-            out.append(f'        "{msg.name}" to {msg_num},')
+            out.append(f'        "{msg.name}" to {_format_kt_int(msg.message_number)},')
         out.append("    )\n")
 
         # Zero-coding decompression helper
@@ -73,17 +77,17 @@ class KotlinEmitter(BaseEmitter):
 
         # Message data classes
         for msg in ast.messages:
-            num_val = f"{msg.message_number}.toInt()" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
+            msg_num_str = _format_kt_int(msg.message_number)
             out.append(f"// Message: {msg.name} ({msg.frequency} {msg.message_number})")
             out.append(f"data class {msg.name}Packet(")
             out.append(f'    val messageName: String = "{msg.name}",')
-            out.append(f"    val messageNumber: Int = {num_val},")
+            out.append(f"    val messageNumber: Int = {msg_num_str},")
             out.append(f'    val frequency: String = "{msg.frequency}",')
             out.append(f'    val isZerocoded: Boolean = {"true" if msg.encoding == "Zerocoded" else "false"}')
             out.append(") {\n")
             out.append("    fun serialize(): ByteArray {")
             out.append("        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)")
-            out.append(f"        buffer.putInt({num_val})")
+            out.append(f"        buffer.putInt({msg_num_str})")
             out.append("        return buffer.array().copyOf(buffer.position())")
             out.append("    }\n")
             out.append("}\n")

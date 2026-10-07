@@ -64,9 +64,9 @@ class SLPacketCodec {
     }
     final flags = packetBytes[0];
     final seq = (packetBytes[1] << 24) |
-                (packetBytes[2] << 16) |
-                (packetBytes[3] << 8) |
-                (packetBytes[4] ?? 0);
+        (packetBytes[2] << 16) |
+        (packetBytes[3] << 8) |
+        (packetBytes.length > 4 ? packetBytes[4] : 0);
     final msgId = packetBytes.length > 5 ? packetBytes[5] : 0;
 
     final acks = <int>[];

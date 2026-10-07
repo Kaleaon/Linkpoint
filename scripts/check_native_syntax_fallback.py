@@ -6,12 +6,12 @@ Used when Python pre-commit CLI is not installed.
 
 import json
 import os
-import re
 import subprocess
 import sys
 
 try:
     import yaml
+
     HAS_PYYAML = True
 except ImportError:
     HAS_PYYAML = False
@@ -128,7 +128,10 @@ def fallback_yaml_check(content, path):
                     top, _ = stack.pop()
                     expected = {"(": ")", "[": "]", "{": "}"}[top]
                     if char != expected:
-                        return False, f"Line {line_num}: Mismatched closing '{char}', expected '{expected}'"
+                        return (
+                            False,
+                            f"Line {line_num}: Mismatched closing '{char}', expected '{expected}'",
+                        )
 
     if stack:
         char, line_num = stack[-1]

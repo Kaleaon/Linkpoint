@@ -162,6 +162,13 @@ lumiya_decompiled/
 !tools/protocol_gen/**/*.py
 !tools/protocol_gen/**/*.json
 tools/protocol_gen/**/__pycache__/
+!tools/token_gen/
+!tools/token_gen/**
+!tools/token_gen/*.py
+!tools/token_gen/**/*.py
+!tools/token_gen/**/*.json
+!tools/token_gen/**/*.j2
+tools/token_gen/**/__pycache__/
 !Linkpoint/tools/
 !Linkpoint/tools/**
 !Linkpoint/tools/protocol/
