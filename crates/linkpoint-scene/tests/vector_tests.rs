@@ -227,8 +227,14 @@ fn test_llmesh_vectors() {
         );
 
         let gltf_json = linkpoint_scene::decoder::convert_llmesh_to_gltf_json(&parsed);
-        assert!(gltf_json.contains("\"asset\""), "Valid GLTF JSON asset section");
-        assert!(gltf_json.contains("\"POSITION\""), "Valid GLTF JSON POSITION accessor");
+        assert!(
+            gltf_json.contains("\"asset\""),
+            "Valid GLTF JSON asset section"
+        );
+        assert!(
+            gltf_json.contains("\"POSITION\""),
+            "Valid GLTF JSON POSITION accessor"
+        );
     }
 }
 
@@ -248,7 +254,11 @@ fn test_j2k_vectors() {
             assert!(case.expected.height > 0, "{}: height", case.name);
 
             let decoded = linkpoint_scene::decoder::decode_j2k_to_rgba(&bytes);
-            assert!(decoded.is_some(), "{}: decode_j2k_to_rgba success", case.name);
+            assert!(
+                decoded.is_some(),
+                "{}: decode_j2k_to_rgba success",
+                case.name
+            );
             let (w, h, rgba) = decoded.unwrap();
             assert_eq!(w, case.expected.width as u32);
             assert_eq!(h, case.expected.height as u32);
@@ -263,7 +273,11 @@ fn test_j2k_vectors() {
                 );
             }
             let decoded = linkpoint_scene::decoder::decode_j2k_to_rgba(&bytes);
-            assert!(decoded.is_none(), "{}: decode corrupt J2K returns None", case.name);
+            assert!(
+                decoded.is_none(),
+                "{}: decode corrupt J2K returns None",
+                case.name
+            );
         }
     }
 }
