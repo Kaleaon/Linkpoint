@@ -45,7 +45,8 @@ object LoginResponseParser {
         val inventoryRoot: UUID?,
         val agentAccessMax: String?,
         val homeRegion: String?,
-        val lookAt: List<Float>?
+        val lookAt: List<Float>?,
+        val groupServerUri: String? = null
     )
 
     /**
@@ -55,7 +56,7 @@ object LoginResponseParser {
      * @return Parsed login data including buddy list and inventory skeleton
      */
     fun parse(responseXml: String): ParsedLoginData {
-        Log.d(TAG, "Parsing login response (${responseXml.length} bytes)")
+        try { Log.d(TAG, "Parsing login response (${responseXml.length} bytes)") } catch (_: Throwable) {}
 
         val buddyList = parseBuddyList(responseXml)
         val inventorySkeleton = parseInventorySkeleton(responseXml)
@@ -63,8 +64,9 @@ object LoginResponseParser {
         val agentAccessMax = extractXmlValue(responseXml, "agent_access_max")
         val homeRegion = extractXmlValue(responseXml, "home")
         val lookAt = parseLookAt(responseXml)
+        val groupServerUri = parseGroupServerUri(responseXml)
 
-        Log.i(TAG, "Parsed login response: ${buddyList.size} friends, ${inventorySkeleton.size} inventory folders")
+        try { Log.i(TAG, "Parsed login response: ${buddyList.size} friends, ${inventorySkeleton.size} inventory folders, groupServerUri=$groupServerUri") } catch (_: Throwable) {}
 
         return ParsedLoginData(
             buddyList = buddyList,
@@ -72,8 +74,19 @@ object LoginResponseParser {
             inventoryRoot = inventoryRoot,
             agentAccessMax = agentAccessMax,
             homeRegion = homeRegion,
-            lookAt = lookAt
+            lookAt = lookAt,
+            groupServerUri = groupServerUri
         )
+    }
+
+    /**
+     * Parse group_server_uri / GroupServerURI from login response.
+     */
+    private fun parseGroupServerUri(xml: String): String? {
+        return extractXmlValue(xml, "group_server_uri")
+            ?: extractXmlValue(xml, "group_proxy_url")
+            ?: extractXmlValue(xml, "GroupServerURI")
+            ?: extractXmlValue(xml, "group_server_url")
     }
 
     /**

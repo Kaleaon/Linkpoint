@@ -2,6 +2,7 @@ package com.linkpoint.groups
 
 import android.os.Parcelable
 import android.util.Log
+import com.linkpoint.groups.provider.*
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
@@ -33,10 +34,38 @@ import java.util.concurrent.ConcurrentHashMap
 class GroupsManager(
     private val udpConnection: UDPConnectionFixed,
     private val capabilityManager: CapabilityManager,
-    private val agentId: UUID
+    private val agentId: UUID,
+    initialGroupServerUri: String? = null,
+    initialProvider: GroupServiceProvider? = null
 ) : EventHandler {
 
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
+
+    var groupServerUri: String? = initialGroupServerUri
+        private set
+
+    var groupServiceProvider: GroupServiceProvider = initialProvider
+        ?: GroupServiceProviderFactory.createProvider(
+            groupServerUri = initialGroupServerUri,
+            agentId = agentId,
+            sessionId = udpConnection.getSessionId()
+        )
+        private set
+
+    fun setGroupServerUri(uri: String?) {
+        this.groupServerUri = uri
+        this.groupServiceProvider = GroupServiceProviderFactory.createProvider(
+            groupServerUri = uri,
+            agentId = agentId,
+            sessionId = udpConnection.getSessionId()
+        )
+        try { Log.d(TAG, "GroupServerURI updated: $uri (Provider: ${groupServiceProvider.providerType})") } catch (_: Throwable) {}
+    }
+
+    fun setGroupServiceProvider(provider: GroupServiceProvider) {
+        this.groupServiceProvider = provider
+        try { Log.d(TAG, "GroupServiceProvider updated: ${provider.providerType}") } catch (_: Throwable) {}
+    }
 
     // Groups the agent is a member of
     private val groups = ConcurrentHashMap<UUID, Group>()
@@ -349,12 +378,8 @@ class GroupsManager(
         withContext(Dispatchers.IO) {
             try {
                 val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
-
-                // AgentData - UUIDs use big-endian per SL protocol
                 payload.putUUID(agentId)
                 payload.putUUID(udpConnection.getSessionId())
-
-                // GroupData
                 payload.putUUID(groupId)
 
                 udpConnection.sendPacket(MessageIdRegistry.GROUP_PROFILE_REQUEST, payload.array().copyOf(payload.position()), reliable = true)
@@ -363,6 +388,131 @@ class GroupsManager(
                 Log.e(TAG, "Failed to request group info", e)
             }
         }
+    }
+
+    /**
+     * Request group members roster using active provider with UDP fallback.
+     */
+    suspend fun requestGroupMembers(groupId: UUID): Result<List<GroupMemberRecord>> = withContext(Dispatchers.IO) {
+        if (groupServiceProvider.isAvailable) {
+            val result = groupServiceProvider.getGroupMembers(groupId)
+            if (result.isSuccess) {
+                return@withContext result
+            }
+            try { Log.w(TAG, "GroupServiceProvider ${groupServiceProvider.providerType} failed for members, falling back to UDP") } catch (_: Throwable) {}
+        }
+
+        try {
+            sendGroupMembersRequestUdp(groupId)
+            Result.success(emptyList())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Request group roles using active provider with UDP fallback.
+     */
+    suspend fun requestGroupRolesRemote(groupId: UUID): Result<List<GroupRole>> = withContext(Dispatchers.IO) {
+        if (groupServiceProvider.isAvailable) {
+            val result = groupServiceProvider.getGroupRoles(groupId)
+            if (result.isSuccess) {
+                val roles = result.getOrNull().orEmpty()
+                if (roles.isNotEmpty()) {
+                    groupRoles[groupId] = roles
+                    _groupEvents.emit(GroupEvent.RolesUpdated(groupId, roles))
+                }
+                return@withContext result
+            }
+            try { Log.w(TAG, "GroupServiceProvider ${groupServiceProvider.providerType} failed for roles, falling back to UDP") } catch (_: Throwable) {}
+        }
+
+        try {
+            sendGroupRoleDataRequestUdp(groupId)
+            Result.success(getGroupRoles(groupId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Request group titles using active provider with UDP fallback.
+     */
+    suspend fun requestGroupTitlesRemote(groupId: UUID): Result<List<GroupTitle>> = withContext(Dispatchers.IO) {
+        if (groupServiceProvider.isAvailable) {
+            val result = groupServiceProvider.getGroupTitles(groupId)
+            if (result.isSuccess) {
+                val titles = result.getOrNull().orEmpty()
+                if (titles.isNotEmpty()) {
+                    groupTitles[groupId] = titles
+                    _groupEvents.emit(GroupEvent.TitlesUpdated(groupId, titles))
+                }
+                return@withContext result
+            }
+            try { Log.w(TAG, "GroupServiceProvider ${groupServiceProvider.providerType} failed for titles, falling back to UDP") } catch (_: Throwable) {}
+        }
+
+        try {
+            sendGroupTitlesRequestUdp(groupId)
+            Result.success(getGroupTitles(groupId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Request group notices using active provider with UDP fallback.
+     */
+    suspend fun requestGroupNoticesRemote(groupId: UUID): Result<List<GroupNotice>> = withContext(Dispatchers.IO) {
+        if (groupServiceProvider.isAvailable) {
+            val result = groupServiceProvider.getGroupNotices(groupId)
+            if (result.isSuccess) {
+                return@withContext result
+            }
+            try { Log.w(TAG, "GroupServiceProvider ${groupServiceProvider.providerType} failed for notices, falling back to UDP") } catch (_: Throwable) {}
+        }
+
+        try {
+            sendGroupNoticesListRequestUdp(groupId)
+            Result.success(emptyList())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun sendGroupMembersRequestUdp(groupId: UUID) {
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(agentId)
+        payload.putUUID(udpConnection.getSessionId())
+        payload.putUUID(groupId)
+        payload.putUUID(UUID.randomUUID()) // RequestID
+        udpConnection.sendPacket(MessageIdRegistry.GROUP_MEMBERS_REQUEST, payload.array(), reliable = true)
+    }
+
+    private fun sendGroupRoleDataRequestUdp(groupId: UUID) {
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(agentId)
+        payload.putUUID(udpConnection.getSessionId())
+        payload.putUUID(groupId)
+        payload.putUUID(UUID.randomUUID()) // RequestID
+        udpConnection.sendPacket(MessageIdRegistry.GROUP_ROLE_DATA_REQUEST, payload.array(), reliable = true)
+    }
+
+    private fun sendGroupTitlesRequestUdp(groupId: UUID) {
+        val payload = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(agentId)
+        payload.putUUID(udpConnection.getSessionId())
+        payload.putUUID(groupId)
+        payload.putUUID(UUID.randomUUID()) // RequestID
+        udpConnection.sendPacket(MessageIdRegistry.GROUP_TITLES_REQUEST, payload.array(), reliable = true)
+    }
+
+    private fun sendGroupNoticesListRequestUdp(groupId: UUID) {
+        val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
+        payload.putUUID(agentId)
+        payload.putUUID(udpConnection.getSessionId())
+        payload.putUUID(groupId)
+        udpConnection.sendPacket(MessageIdRegistry.GROUP_NOTICES_LIST_REQUEST, payload.array(), reliable = true)
     }
 
     fun shutdown() {

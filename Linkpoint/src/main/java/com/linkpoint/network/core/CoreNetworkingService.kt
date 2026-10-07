@@ -130,7 +130,9 @@ class CoreNetworkingService(private val context: Context) {
             /** Region name from login response */
             val regionName: String? = null,
             /** Circuit code for UDP connection */
-            val circuitCode: Int? = null
+            val circuitCode: Int? = null,
+            /** Group Server URI for OpenSim / custom group services */
+            val groupServerUri: String? = null
         ) : LoginResult()
 
         /**
@@ -842,6 +844,10 @@ class CoreNetworkingService(private val context: Context) {
                 val seedCapability = llsd.getString("seed_capability")
                 val regionName = llsd.getString("region_name")
                 val circuitCode = llsd.getInt("circuit_code")
+                val groupServerUri = llsd.getString("group_server_uri")
+                    ?: llsd.getString("group_proxy_url")
+                    ?: llsd.getString("GroupServerURI")
+                    ?: llsd.getString("group_server_url")
 
                 Log.i(TAG, "LLSD Login successful:")
                 Log.i(TAG, "  Agent ID: $agentId")
@@ -888,7 +894,8 @@ class CoreNetworkingService(private val context: Context) {
                     mfaHash = mfaHash,
                     seedCapability = seedCapability,
                     regionName = regionName,
-                    circuitCode = circuitCode
+                    circuitCode = circuitCode,
+                    groupServerUri = groupServerUri
                 ))
             }
 
@@ -982,6 +989,10 @@ class CoreNetworkingService(private val context: Context) {
                 val seedCapability = extractXmlValue(xml, "seed_capability")
                 val regionName = extractXmlValue(xml, "region_name")
                 val circuitCode = extractXmlIntValue(xml, "circuit_code").let { if (it == 0) null else it }
+                val groupServerUri = extractXmlValue(xml, "group_server_uri")
+                    ?: extractXmlValue(xml, "group_proxy_url")
+                    ?: extractXmlValue(xml, "GroupServerURI")
+                    ?: extractXmlValue(xml, "group_server_url")
 
                 Log.d(TAG, "XML-RPC Login successful: session=${hideCredential(sessionId)}, agent=$agentId")
                 if (seedCapability != null) {
@@ -1000,7 +1011,8 @@ class CoreNetworkingService(private val context: Context) {
                     mfaHash = mfaHash,
                     seedCapability = seedCapability,
                     regionName = regionName,
-                    circuitCode = circuitCode
+                    circuitCode = circuitCode,
+                    groupServerUri = groupServerUri
                 ))
             }
 

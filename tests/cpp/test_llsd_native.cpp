@@ -224,9 +224,21 @@ void test_packet_framing() {
 void test_conformance_vectors() {
     std::cout << "[Test] Loading Conformance Vectors..." << std::endl;
 
-    fs::path vectors_dir = "/app/Linkpoint/Linkpoint/src/test/resources/llsd-conformance/vectors";
-    if (!fs::exists(vectors_dir)) {
-        std::cout << "  Notice: Conformance vector directory not found at " << vectors_dir << std::endl;
+    std::vector<fs::path> candidate_dirs = {
+        "Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "../Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "../../Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "/app/Linkpoint/Linkpoint/src/test/resources/llsd-conformance/vectors"
+    };
+    fs::path vectors_dir;
+    for (const auto& candidate : candidate_dirs) {
+        if (fs::exists(candidate)) {
+            vectors_dir = candidate;
+            break;
+        }
+    }
+    if (vectors_dir.empty() || !fs::exists(vectors_dir)) {
+        std::cout << "  Notice: Conformance vector directory not found" << std::endl;
         return;
     }
 
