@@ -98,7 +98,7 @@ class VoiceManager(
         private set
 
     // Voice sessions
-    private val activeSessions = ConcurrentHashMap<String, VoiceSession>()
+    private val activeSessions = ConcurrentHashMap<String, InternalVoiceSession>()
     private var currentParcelSession: VoiceSession? = null
 
     // State
@@ -740,7 +740,7 @@ class VoiceManager(
     private fun createSession(
         channelUri: String,
         iceServerSpecs: List<IceServerSpec> = emptyList()
-    ): VoiceSession {
+    ): InternalVoiceSession {
         // Build the WebRTC IceServer list from the simulator-provided
         // specs, falling back to a public STUN if the sim returned none
         // (legacy Vivox flow or older OpenSim). Hardcoded fallback should
@@ -759,7 +759,7 @@ class VoiceManager(
             sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
         }
 
-        val session = VoiceSession(
+        val session = InternalVoiceSession(
             channelUri = channelUri,
             peerConnection = null,
             dispatcher = voiceDispatcher
@@ -808,7 +808,7 @@ class VoiceManager(
  * were silently dropped — voice could not have established even if SDP
  * had worked.
  */
-private class SessionObserver(private val session: VoiceSession) : PeerConnection.Observer {
+private class SessionObserver(private val session: InternalVoiceSession) : PeerConnection.Observer {
     override fun onSignalingChange(state: PeerConnection.SignalingState) {
         session.onSignalingState(state)
     }
@@ -847,16 +847,16 @@ private class SessionObserver(private val session: VoiceSession) : PeerConnectio
  * and remote ICE ingest/polling) is delegated to a dedicated layer so
  * transport + REST parsing remain separate from peer-connection state.
  */
-internal class VoiceSession(
-    val channelUri: String,
+internal class InternalVoiceSession(
+    override val channelUri: String,
     @Volatile private var peerConnection: PeerConnection?,
     private val dispatcher: CoroutineDispatcher,
     private val signalingOrchestrator: VoiceSignalingOrchestrator = VoiceSignalingOrchestrator(
         transport = HttpVoiceSignalingTransport(),
         codec = JsonVoiceSignalingPayloadCodec()
     )
-) {
-    private var isConnected = false
+) : VoiceSession {
+    private var isConnectedState = false
     private var outputGain = 1.0f
     private var localAudioTrack: org.webrtc.AudioTrack? = null
 
@@ -878,6 +878,19 @@ internal class VoiceSession(
     private val sessionScope = CoroutineScope(dispatcher + SupervisorJob())
     @Volatile private var signalingJob: Job? = null
 
+    override suspend fun connect(iceServers: List<PeerConnection.IceServer>): Boolean {
+        return isConnectedState
+    }
+
+    override fun sendJoin(primary: Boolean) {}
+
+    override fun sendPositionUpdate(
+        x: Float, y: Float, z: Float,
+        lookX: Float, lookY: Float, lookZ: Float
+    ) {}
+
+    override fun close() { disconnect() }
+
     fun attachPeerConnection(pc: PeerConnection?) {
         peerConnection = pc
     }
@@ -887,7 +900,7 @@ internal class VoiceSession(
     }
     internal fun onIceConnectionState(state: PeerConnection.IceConnectionState) {
         _iceConnectionState.value = state
-        isConnected = state == PeerConnection.IceConnectionState.CONNECTED ||
+        isConnectedState = state == PeerConnection.IceConnectionState.CONNECTED ||
             state == PeerConnection.IceConnectionState.COMPLETED
     }
     internal fun onLocalIceCandidate(candidate: IceCandidate) {
@@ -922,23 +935,23 @@ internal class VoiceSession(
         signalingJob?.cancel()
         signalingJob = sessionScope.launch {
             try {
-                signalingOrchestrator.connect(this@VoiceSession, uri, credentials, localIceCandidates)
-                isConnected = true
+                signalingOrchestrator.connect(this@InternalVoiceSession, uri, credentials, localIceCandidates)
+                isConnectedState = true
                 android.util.Log.i("VoiceSession", "Voice signaling complete for $uri")
             } catch (e: Exception) {
                 android.util.Log.e("VoiceSession", "Failed to connect to voice channel", e)
-                isConnected = false
+                isConnectedState = false
             }
         }
     }
 
-    fun disconnect() {
+    override fun disconnect() {
         try {
             signalingJob?.cancel()
             signalingJob = null
             localAudioTrack?.setEnabled(false)
             peerConnection?.close()
-            isConnected = false
+            isConnectedState = false
             android.util.Log.i("VoiceSession", "Disconnected from voice channel")
         } catch (e: Exception) {
             android.util.Log.e("VoiceSession", "Error during disconnect", e)
@@ -1006,7 +1019,7 @@ internal class VoiceSession(
      * Set output audio gain (volume)
      * @param gain Volume multiplier (0.0 = muted, 1.0 = normal, >1.0 = amplified)
      */
-    fun setOutputGain(gain: Float) {
+    override fun setOutputGain(gain: Float) {
         outputGain = gain.coerceIn(0f, 2f)
 
         // Apply gain to received audio tracks via AudioTrack or mixer
@@ -1022,7 +1035,7 @@ internal class VoiceSession(
         android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Set output gain to $outputGain")
     }
 
-    fun isConnected(): Boolean = isConnected
+    override fun isConnected(): Boolean = isConnectedState
 }
 
 data class VoiceInfo(

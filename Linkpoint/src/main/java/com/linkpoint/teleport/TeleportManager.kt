@@ -12,6 +12,7 @@ import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.linden.llmessage.IMType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -348,7 +349,7 @@ class TeleportManager(
                 identity = AgentIdentity(agentId, sessionId),
                 fromGroup = false,
                 toAgentId = lure.senderId,
-                dialog = 24, // IM_LURE_DECLINED
+                dialog = IMType.LURE_DECLINED,
                 id = lure.lureId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
                 fromAgentName = "You",
