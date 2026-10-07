@@ -11,6 +11,9 @@ import {
   type PaletteKey,
 } from './tokens';
 import { inkOn } from './contrast';
+import { Z_INDEX } from './dialogs';
+
+export { Z_INDEX };
 
 const STORAGE_KEY = 'linkpoint_theme';
 
@@ -34,6 +37,8 @@ export interface Theme {
   nav: NavMode;
   /** Pick the most legible ink for a background out of this palette. */
   ink: (background: string, extra?: (string | undefined)[]) => string;
+  Z_INDEX: typeof Z_INDEX;
+  zIndex: typeof Z_INDEX;
 }
 
 export interface ThemeState {
@@ -128,6 +133,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       pad,
       nav: resolveNav(state.layout, state.device),
       ink: (background, extra = []) => inkOn(background, [...extra, v.ink, v.onpri, v.ink2, v.bg]),
+      Z_INDEX,
+      zIndex: Z_INDEX,
     };
   }, [state.layout, state.palette, state.device, state.dense]);
 
