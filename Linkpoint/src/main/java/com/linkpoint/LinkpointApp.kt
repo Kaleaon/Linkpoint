@@ -2959,7 +2959,13 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
-                    Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                    val replyData = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseMapItemReply(payload)
+                    if (replyData != null && ::worldMap.isInitialized) {
+                        worldMap.handleMapItemReply(replyData)
+                        Log.d(TAG, "🗺️ MapItemReply received: itemType=${replyData.itemType}, items=${replyData.items.size}")
+                    } else {
+                        Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling MapItemReply", e)

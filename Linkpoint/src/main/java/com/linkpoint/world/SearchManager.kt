@@ -44,37 +44,51 @@ class SearchManager(
     suspend fun searchPeople(query: String, start: Int = 0, count: Int = 100): SearchResults<PersonResult> {
         return withContext(Dispatchers.IO) {
             try {
-                // Use avatar picker capability
-                val request = LLSDMap().apply {
-                    this["query"] = LLSDString(query)
-                    this["start"] = LLSDInteger(start)
-                    this["count"] = LLSDInteger(count)
-                }
+                // Use avatar picker capability if available
+                val capName = if (capabilityManager.hasCapability(CapabilityManager.CAP_AVATAR_PICKER)) {
+                    CapabilityManager.CAP_AVATAR_PICKER
+                } else if (capabilityManager.hasCapability(CapabilityManager.CAP_SEARCH_DIRECTORY)) {
+                    CapabilityManager.CAP_SEARCH_DIRECTORY
+                } else null
 
-                val response = capabilityManager.request(
-                    CapabilityManager.CAP_AVATAR_PICKER,
-                    request
-                )
-
-                if (response is LLSDMap) {
-                    val results = mutableListOf<PersonResult>()
-                    val agents = response.getArray("agents")
-
-                    agents?.value?.forEach { agent ->
-                        if (agent is LLSDMap) {
-                            results.add(PersonResult(
-                                agentId = UUID.fromString(agent.getString("id") ?: return@forEach),
-                                displayName = agent.getString("display_name") ?: "",
-                                userName = agent.getString("username") ?: agent.getString("legacy_name") ?: "",
-                                isOnline = agent.getInt("online") == 1
-                            ))
-                        }
+                if (capName != null) {
+                    val request = LLSDMap().apply {
+                        this["query"] = LLSDString(query)
+                        this["start"] = LLSDInteger(start)
+                        this["count"] = LLSDInteger(count)
                     }
 
-                    SearchResults(results, results.size, start)
-                } else {
-                    SearchResults(emptyList(), 0, 0)
+                    val response = capabilityManager.request(capName, request)
+
+                    if (response is LLSDMap) {
+                        val results = mutableListOf<PersonResult>()
+                        val agents = response.getArray("agents")
+
+                        agents?.value?.forEach { agent ->
+                            if (agent is LLSDMap) {
+                                results.add(PersonResult(
+                                    agentId = UUID.fromString(agent.getString("id") ?: return@forEach),
+                                    displayName = agent.getString("display_name") ?: "",
+                                    userName = agent.getString("username") ?: agent.getString("legacy_name") ?: "",
+                                    isOnline = agent.getInt("online") == 1
+                                ))
+                            }
+                        }
+
+                        return@withContext SearchResults(results, results.size, start)
+                    }
                 }
+
+                // Web search fallback if search URL is available
+                val url = buildSearchUrl(CATEGORY_PEOPLE, query, "", start, count)
+                    ?: return@withContext SearchResults(emptyList(), 0, 0)
+                val request = Request.Builder().url(url).build()
+                val response = httpCallFactory.newCall(request).await()
+
+                if (!response.isSuccessful) return@withContext SearchResults(emptyList(), 0, 0)
+
+                val body = response.body?.string() ?: return@withContext SearchResults(emptyList(), 0, 0)
+                SearchResults(emptyList(), 0, start)
             } catch (e: Exception) {
                 Log.e(TAG, "People search failed", e)
                 SearchResults(emptyList(), 0, 0)
@@ -95,6 +109,7 @@ class SearchManager(
             try {
                 // Web search API
                 val url = buildSearchUrl(CATEGORY_PLACES, query, category, start, count)
+                    ?: return@withContext SearchResults(emptyList(), 0, 0)
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
 
@@ -120,6 +135,7 @@ class SearchManager(
         return withContext(Dispatchers.IO) {
             try {
                 val url = buildSearchUrl(CATEGORY_GROUPS, query, "", start, count)
+                    ?: return@withContext SearchResults(emptyList(), 0, 0)
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
 
@@ -146,6 +162,7 @@ class SearchManager(
         return withContext(Dispatchers.IO) {
             try {
                 val url = buildSearchUrl(CATEGORY_EVENTS, query, category, start, count)
+                    ?: return@withContext SearchResults(emptyList(), 0, 0)
                 val request = Request.Builder().url(url).build()
                 val response = httpCallFactory.newCall(request).await()
 
@@ -281,14 +298,38 @@ class SearchManager(
         }
     }
 
+    fun getEffectiveSearchBaseUrl(): String? {
+        try {
+            val app = com.linkpoint.LinkpointApp.getInstance()
+            val grid = app.gridManager.getSelectedGrid()
+            val activeSearchUri = app.sessionManager.getSearchUri() ?: grid.searchUri
+            if (!activeSearchUri.isNullOrBlank()) {
+                val trimmed = activeSearchUri.trim()
+                if (trimmed.contains("client_search") || trimmed.contains("query.php")) {
+                    return trimmed
+                }
+                val base = trimmed.trimEnd('/')
+                return "$base/client_search"
+            }
+            val loginUri = app.sessionManager.getLoginUri()
+            if (com.linkpoint.network.grid.GridInfoResolver.isSecondLifeUri(loginUri) ||
+                com.linkpoint.network.grid.GridInfoResolver.isSecondLifeUri(grid.loginUri)) {
+                return "https://search.secondlife.com/client_search"
+            }
+        } catch (e: Exception) {
+            return "https://search.secondlife.com/client_search"
+        }
+        return null
+    }
+
     private fun buildSearchUrl(
         category: String,
         query: String,
         subCategory: String,
         start: Int,
         count: Int
-    ): String {
-        val baseUrl = "https://search.secondlife.com/client_search"
+    ): String? {
+        val baseUrl = getEffectiveSearchBaseUrl() ?: return null
         val params = mutableListOf(
             "q=${query.encodeUrl()}",
             "type=$category",
@@ -300,7 +341,8 @@ class SearchManager(
             params.add("category=${subCategory.encodeUrl()}")
         }
 
-        return "$baseUrl?${params.joinToString("&")}"
+        val joinChar = if (baseUrl.contains("?")) "&" else "?"
+        return "$baseUrl$joinChar${params.joinToString("&")}"
     }
 
     private fun parsePlaceResults(json: String, start: Int): SearchResults<PlaceResult> {

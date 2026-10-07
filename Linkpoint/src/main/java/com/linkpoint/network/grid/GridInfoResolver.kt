@@ -202,7 +202,7 @@ object GridInfoResolver {
 
         if (result.isEmpty()) {
             // XML or key-value regex parsing
-            val xmlTags = listOf("loginuri", "gridname", "gridnick", "welcome", "helperuri", "economy", "map", "platform", "currency", "currency_symbol", "zero_currency")
+            val xmlTags = listOf("loginuri", "gridname", "gridnick", "welcome", "helperuri", "economy", "map", "search", "search_uri", "searchuri", "directory", "platform", "currency", "currency_symbol", "zero_currency")
             for (tag in xmlTags) {
                 // Pattern 1: <tag>value</tag> or <tag_name>value</tag_name>
                 val tagPattern = Pattern.compile("<$tag>([^<]+)</$tag>", Pattern.CASE_INSENSITIVE)
@@ -273,6 +273,9 @@ object GridInfoResolver {
         val rawMapUri = parsedMap["map"] ?: parsedMap["map_uri"] ?: parsedMap["mapuri"]
         val mapUri = if (isValidHttpUrl(rawMapUri)) rawMapUri else initialGrid?.mapUri
 
+        val rawSearchUri = parsedMap["search"] ?: parsedMap["search_uri"] ?: parsedMap["searchuri"] ?: parsedMap["directory"]
+        val searchUri = if (isValidHttpUrl(rawSearchUri)) rawSearchUri else initialGrid?.searchUri
+
         val rawWelcomeUri = parsedMap["welcome"] ?: parsedMap["welcome_page"]
         val welcomeUri = if (isValidHttpUrl(rawWelcomeUri)) rawWelcomeUri else initialGrid?.welcomeUri
 
@@ -293,6 +296,7 @@ object GridInfoResolver {
             currencySymbol = currencySymbol,
             isZeroCurrency = isZeroCurrency,
             mapUri = mapUri,
+            searchUri = searchUri,
             welcomeUri = welcomeUri,
             isResolved = true
         )

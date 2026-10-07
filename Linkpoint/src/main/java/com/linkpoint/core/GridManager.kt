@@ -248,6 +248,7 @@ data class GridInfo(
     val currencySymbol: String = "L$",
     val isZeroCurrency: Boolean = false,
     val mapUri: String? = null,
+    val searchUri: String? = null,
     val welcomeUri: String? = null,
     val logoUrl: String? = null,
     val status: String = "online",
