@@ -202,7 +202,7 @@ export class SLConnectionFull extends Utils.EventEmitter {
 
   async fetchCapabilities() {
     try {
-      const capsToRequest = ['EventQueueGet', 'FetchInventoryDescendents2', 'ChatSessionRequest', 'GetDisplayNames', 'AgentInventoryService', 'AgentInventoryService3'];
+      const capsToRequest = ['EventQueueGet', 'FetchInventoryDescendents2', 'ChatSessionRequest', 'GetDisplayNames', 'AgentInventoryService', 'AgentInventoryService3', 'NewFileAgentInventory'];
       const response = await corsHandler.makeRequest(this.seedCapability!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/llsd+xml' },

@@ -10,15 +10,28 @@ import os
 import sqlite3
 import threading
 import time
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 
 CURRENT_SCHEMA_VERSION = 1
+
+
+class _NullLock:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+_NULL_LOCK = _NullLock()
 
 
 class InventoryCache:
     def __init__(self, db_path: str = ":memory:"):
         self.db_path = db_path
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
+        self._local = threading.local()
+        self._all_connections = set()
         self._is_corrupted = False
         self._init_db()
 
@@ -29,6 +42,16 @@ class InventoryCache:
                 self._memory_conn.execute("PRAGMA foreign_keys = ON;")
                 self._memory_conn.row_factory = sqlite3.Row
             return self._memory_conn
+
+        conn = getattr(self._local, "conn", None)
+        if conn is not None:
+            try:
+                _ = conn.total_changes
+                return conn
+            except (sqlite3.ProgrammingError, sqlite3.OperationalError):
+                conn = None
+                self._local.conn = None
+
         conn = sqlite3.connect(self.db_path, check_same_thread=False)
         conn.execute("PRAGMA journal_mode = WAL;")
         conn.execute("PRAGMA synchronous = NORMAL;")
@@ -37,11 +60,31 @@ class InventoryCache:
         conn.execute("PRAGMA cache_size = -64000;")
         conn.execute("PRAGMA temp_store = MEMORY;")
         conn.row_factory = sqlite3.Row
+
+        self._local.conn = conn
+        with self._lock:
+            self._all_connections.add(conn)
         return conn
 
     def _close_connection(self, conn: sqlite3.Connection):
-        if self.db_path != ":memory:":
-            conn.close()
+        pass
+
+    def _close_all_connections(self):
+        with self._lock:
+            if hasattr(self, "_memory_conn") and self._memory_conn:
+                try:
+                    self._memory_conn.close()
+                except Exception:
+                    pass
+                self._memory_conn = None
+
+            for conn in list(self._all_connections):
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            self._all_connections.clear()
+            self._local = threading.local()
 
     def _cleanup_sidecars(self):
         if self.db_path != ":memory:":
@@ -54,14 +97,8 @@ class InventoryCache:
 
     def close(self):
         with self._lock:
-            if self.db_path == ":memory:":
-                if hasattr(self, "_memory_conn") and self._memory_conn:
-                    try:
-                        self._memory_conn.close()
-                    except Exception:
-                        pass
-                    self._memory_conn = None
-            else:
+            self._close_all_connections()
+            if self.db_path != ":memory:":
                 self._cleanup_sidecars()
 
     def _init_db(self):
@@ -92,18 +129,18 @@ class InventoryCache:
 
     def _create_tables(self, conn: sqlite3.Connection):
         cursor = conn.cursor()
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS schema_version (
                 version INTEGER PRIMARY KEY
             );
-            """
-        )
+            """)
         cursor.execute("DELETE FROM schema_version;")
-        cursor.execute("INSERT INTO schema_version (version) VALUES (?);", (CURRENT_SCHEMA_VERSION,))
-
         cursor.execute(
-            """
+            "INSERT INTO schema_version (version) VALUES (?);",
+            (CURRENT_SCHEMA_VERSION,),
+        )
+
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS folders (
                 folder_id TEXT PRIMARY KEY,
                 parent_id TEXT,
@@ -112,11 +149,9 @@ class InventoryCache:
                 version INTEGER DEFAULT 0,
                 update_token TEXT
             );
-            """
-        )
+            """)
 
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS items (
                 item_id TEXT PRIMARY KEY,
                 folder_id TEXT NOT NULL,
@@ -129,21 +164,22 @@ class InventoryCache:
                 updated_at REAL NOT NULL,
                 FOREIGN KEY (folder_id) REFERENCES folders(folder_id) ON DELETE CASCADE
             );
-            """
-        )
+            """)
 
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS update_tokens (
                 token_id TEXT PRIMARY KEY,
                 token_value TEXT NOT NULL,
                 last_synced REAL NOT NULL
             );
-            """
-        )
+            """)
 
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_folders_parent ON folders(parent_id);")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_items_folder ON items(folder_id);")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_folders_parent ON folders(parent_id);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_items_folder ON items(folder_id);"
+        )
 
     def _wipe_and_recreate(self, conn: sqlite3.Connection):
         cursor = conn.cursor()
@@ -154,14 +190,9 @@ class InventoryCache:
         self._create_tables(conn)
 
     def _reset_and_recreate_db(self):
+        self._close_all_connections()
         if self.db_path != ":memory:":
             self._cleanup_sidecars()
-        elif hasattr(self, "_memory_conn") and self._memory_conn:
-            try:
-                self._memory_conn.close()
-            except Exception:
-                pass
-            self._memory_conn = None
         conn = self._get_connection()
         try:
             self._create_tables(conn)
@@ -176,7 +207,7 @@ class InventoryCache:
     def _read_lock_context(self):
         if self.db_path == ":memory:":
             return self._lock
-        return threading.Lock()
+        return _NULL_LOCK
 
     def load_cached_inventory(self) -> Dict[str, Any]:
         """
@@ -193,7 +224,9 @@ class InventoryCache:
                 cursor.execute("SELECT * FROM items;")
                 items = [dict(row) for row in cursor.fetchall()]
 
-                cursor.execute("SELECT token_value FROM update_tokens WHERE token_id='default';")
+                cursor.execute(
+                    "SELECT token_value FROM update_tokens WHERE token_id='default';"
+                )
                 token_row = cursor.fetchone()
                 update_token = token_row["token_value"] if token_row else None
 
@@ -202,11 +235,17 @@ class InventoryCache:
                     "items": items,
                     "update_token": update_token,
                     "folder_count": len(folders),
-                    "item_count": len(items)
+                    "item_count": len(items),
                 }
             except (sqlite3.DatabaseError, sqlite3.OperationalError):
                 self._is_corrupted = True
-                return {"folders": [], "items": [], "update_token": None, "folder_count": 0, "item_count": 0}
+                return {
+                    "folders": [],
+                    "items": [],
+                    "update_token": None,
+                    "folder_count": 0,
+                    "item_count": 0,
+                }
             finally:
                 self._close_connection(conn)
 
@@ -215,7 +254,10 @@ class InventoryCache:
             conn = self._get_connection()
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT token_value FROM update_tokens WHERE token_id=?;", (token_id,))
+                cursor.execute(
+                    "SELECT token_value FROM update_tokens WHERE token_id=?;",
+                    (token_id,),
+                )
                 row = cursor.fetchone()
                 return row["token_value"] if row else None
             except sqlite3.DatabaseError:
@@ -223,7 +265,9 @@ class InventoryCache:
             finally:
                 self._close_connection(conn)
 
-    def apply_delta_update(self, delta_data: Dict[str, Any], new_token: str, token_id: str = "default") -> bool:
+    def apply_delta_update(
+        self, delta_data: Dict[str, Any], new_token: str, token_id: str = "default"
+    ) -> bool:
         """
         Applies HTTP delta updates (added/updated/removed folders and items) to SQLite cache using executemany.
         """
@@ -264,7 +308,9 @@ class InventoryCache:
                     for f_id in delta_data.get("folders_to_remove", [])
                 ]
                 if folders_to_remove:
-                    cursor.executemany("DELETE FROM folders WHERE folder_id=?;", folders_to_remove)
+                    cursor.executemany(
+                        "DELETE FROM folders WHERE folder_id=?;", folders_to_remove
+                    )
 
                 items_to_add = [
                     (
@@ -303,7 +349,9 @@ class InventoryCache:
                     for i_id in delta_data.get("items_to_remove", [])
                 ]
                 if items_to_remove:
-                    cursor.executemany("DELETE FROM items WHERE item_id=?;", items_to_remove)
+                    cursor.executemany(
+                        "DELETE FROM items WHERE item_id=?;", items_to_remove
+                    )
 
                 cursor.execute(
                     """
@@ -318,13 +366,20 @@ class InventoryCache:
 
                 conn.commit()
                 return True
-            except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError, TypeError):
+            except (
+                sqlite3.DatabaseError,
+                sqlite3.OperationalError,
+                KeyError,
+                TypeError,
+            ):
                 conn.rollback()
                 return False
             finally:
                 self._close_connection(conn)
 
-    def reload_full_inventory(self, full_data: Dict[str, Any], new_token: str, token_id: str = "default") -> bool:
+    def reload_full_inventory(
+        self, full_data: Dict[str, Any], new_token: str, token_id: str = "default"
+    ) -> bool:
         """
         Clears existing cache and replaces with full HTTP sync data using batch executemany.
         """
@@ -394,13 +449,22 @@ class InventoryCache:
                     (token_id, new_token, now),
                 )
 
-                cursor.execute("PRAGMA foreign_keys = ON;")
                 conn.commit()
+                cursor.execute("PRAGMA foreign_keys = ON;")
                 return True
-            except (sqlite3.DatabaseError, sqlite3.OperationalError, KeyError, TypeError):
+            except (
+                sqlite3.DatabaseError,
+                sqlite3.OperationalError,
+                KeyError,
+                TypeError,
+            ):
                 conn.rollback()
                 return False
             finally:
+                try:
+                    conn.execute("PRAGMA foreign_keys = ON;")
+                except Exception:
+                    pass
                 self._close_connection(conn)
 
     def get_item(self, item_id: str) -> Optional[Dict[str, Any]]:

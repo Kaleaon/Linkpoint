@@ -16,7 +16,7 @@ import { MockViewerClient } from '@linkpoint/viewer-client';
 
 let currentContainer: { host: HTMLElement; root: Root; ctx: { current: RlvContextValue | null } } | null = null;
 
-async function mountRlv(props: { initialEnabled?: boolean; client?: any; onQueryReply?: any } = {}) {
+async function mountRlv(props: { initialEnabled?: boolean; client?: any; onQueryReply?: any; onNotificationToast?: any; onForceActionExecute?: any } = {}) {
   const host = document.createElement('div');
   document.body.appendChild(host);
   const root = createRoot(host);
@@ -300,6 +300,167 @@ describe('RLV Command Engine & Context', () => {
         const durationPerMessage = (endTime - startTime) / 100;
         expect(durationPerMessage).toBeGreaterThanOrEqual(0);
       });
+    });
+  });
+
+  describe('Hybrid Tiered Permission Model (Tier 1 Toasts & Tier 2 Confirmation Prompts)', () => {
+    it('dispatches a notification event/toast for Tier 1 soft restrictions within 100ms', async () => {
+      const onNotificationToast = vi.fn();
+      const ctx = await mountRlv({ initialEnabled: true, onNotificationToast });
+
+      const startTime = performance.now();
+      await act(async () => {
+        ctx.current!.processCommand('@detach=n', 'collar-123', true, 'Bondage Collar');
+      });
+      const endTime = performance.now();
+
+      expect(endTime - startTime).toBeLessThan(100);
+      expect(onNotificationToast).toHaveBeenCalledTimes(1);
+      expect(onNotificationToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          objectUuid: 'collar-123',
+          objectName: 'Bondage Collar',
+          restriction: 'detach',
+          action: 'added',
+        }),
+      );
+      expect(ctx.current!.toasts).toHaveLength(1);
+      expect(ctx.current!.toasts[0].objectName).toBe('Bondage Collar');
+    });
+
+    it('pauses Tier 2 forced commands and displays interactive confirmation prompt', async () => {
+      const onForceActionExecute = vi.fn();
+      const ctx = await mountRlv({ initialEnabled: true, onForceActionExecute });
+
+      await act(async () => {
+        ctx.current!.processCommand('@sit:force', 'chair-999', true, 'Trap Chair');
+      });
+
+      // Action must be paused (not executed yet)
+      expect(onForceActionExecute).not.toHaveBeenCalled();
+      expect(ctx.current!.pendingPrompts).toHaveLength(1);
+
+      const prompt = ctx.current!.pendingPrompts[0];
+      expect(prompt.objectUuid).toBe('chair-999');
+      expect(prompt.objectName).toBe('Trap Chair');
+      expect(prompt.forcedAction).toBe('sit');
+    });
+
+    it('executes forced action when resident approves Tier 2 prompt', async () => {
+      const onForceActionExecute = vi.fn();
+      const ctx = await mountRlv({ initialEnabled: true, onForceActionExecute });
+
+      await act(async () => {
+        ctx.current!.processCommand('@tpto:force', 'teleporter-1', true, 'Portal');
+      });
+
+      expect(ctx.current!.pendingPrompts).toHaveLength(1);
+      const promptId = ctx.current!.pendingPrompts[0].promptId;
+
+      await act(async () => {
+        ctx.current!.approvePrompt(promptId);
+      });
+
+      expect(onForceActionExecute).toHaveBeenCalledTimes(1);
+      expect(onForceActionExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          objectUuid: 'teleporter-1',
+          forcedAction: 'tpto',
+        }),
+      );
+      expect(ctx.current!.pendingPrompts).toHaveLength(0);
+    });
+
+    it('denies forced action and sends reply message when resident denies Tier 2 prompt', async () => {
+      const onForceActionExecute = vi.fn();
+      const onQueryReply = vi.fn();
+      const ctx = await mountRlv({ initialEnabled: true, onForceActionExecute, onQueryReply });
+
+      await act(async () => {
+        ctx.current!.processCommand('@detach:force', 'cuff-1', true, 'Ankle Cuffs');
+      });
+
+      expect(ctx.current!.pendingPrompts).toHaveLength(1);
+      const promptId = ctx.current!.pendingPrompts[0].promptId;
+
+      await act(async () => {
+        ctx.current!.denyPrompt(promptId);
+      });
+
+      expect(onForceActionExecute).not.toHaveBeenCalled();
+      expect(ctx.current!.pendingPrompts).toHaveLength(0);
+      expect(onQueryReply).toHaveBeenCalledWith(-1812221819, expect.stringContaining('Denied detach:force from Ankle Cuffs'));
+    });
+
+    it('bypasses future prompts when resident selects Always Allow for this Session', async () => {
+      const onForceActionExecute = vi.fn();
+      const ctx = await mountRlv({ initialEnabled: true, onForceActionExecute });
+
+      await act(async () => {
+        ctx.current!.processCommand('@remoutfit:force', 'outfit-changer', true, 'Wardrobe');
+      });
+
+      const promptId = ctx.current!.pendingPrompts[0].promptId;
+
+      await act(async () => {
+        ctx.current!.alwaysAllowPrompt(promptId);
+      });
+
+      expect(onForceActionExecute).toHaveBeenCalledTimes(1);
+      expect(ctx.current!.sessionTrust.has('outfit-changer')).toBe(true);
+
+      // Second force command from same object executes immediately
+      await act(async () => {
+        ctx.current!.processCommand('@remoutfit:force', 'outfit-changer', true, 'Wardrobe');
+      });
+
+      expect(onForceActionExecute).toHaveBeenCalledTimes(2);
+      expect(ctx.current!.pendingPrompts).toHaveLength(0);
+    });
+
+    it('auto-denies Tier 2 prompt and notifies script on reply channel after 30 seconds', async () => {
+      vi.useFakeTimers();
+      const onForceActionExecute = vi.fn();
+      const onQueryReply = vi.fn();
+      const ctx = await mountRlv({ initialEnabled: true, onForceActionExecute, onQueryReply });
+
+      await act(async () => {
+        ctx.current!.processCommand('@sit:force', 'couch-123', true, 'Control Chair');
+      });
+
+      expect(ctx.current!.pendingPrompts).toHaveLength(1);
+
+      // Fast-forward 30 seconds
+      await act(async () => {
+        vi.advanceTimersByTime(30000);
+      });
+
+      expect(onForceActionExecute).not.toHaveBeenCalled();
+      expect(ctx.current!.pendingPrompts).toHaveLength(0);
+      expect(onQueryReply).toHaveBeenCalledWith(-1812221819, expect.stringContaining('Denied sit:force from Control Chair'));
+
+      vi.useRealTimers();
+    });
+
+    it('resets session trust when clearSessionTrust is called (simulating teleport/logout)', async () => {
+      const ctx = await mountRlv({ initialEnabled: true });
+
+      await act(async () => {
+        ctx.current!.processCommand('@sit:force', 'device-1', true, 'Device 1');
+      });
+
+      const promptId = ctx.current!.pendingPrompts[0].promptId;
+      await act(async () => {
+        ctx.current!.alwaysAllowPrompt(promptId);
+      });
+
+      expect(ctx.current!.sessionTrust.has('device-1')).toBe(true);
+
+      await act(async () => {
+        ctx.current!.clearSessionTrust();
+      });
+
+      expect(ctx.current!.sessionTrust.has('device-1')).toBe(false);
     });
   });
 });

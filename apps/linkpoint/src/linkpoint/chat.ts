@@ -22,12 +22,12 @@ export class ChatManager extends Utils.EventEmitter {
   public closedSessions: Set<string> = new Set();
   public rlvHandler: {
     enabled: boolean;
-    processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, channel?: number) => void;
+    processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, channel?: number, objectName?: string) => void;
   } | null = null;
 
   public setRlvHandler(handler: {
     enabled: boolean;
-    processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, channel?: number) => void;
+    processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, channel?: number, objectName?: string) => void;
   } | null) {
     this.rlvHandler = handler;
   }

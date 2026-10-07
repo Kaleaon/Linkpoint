@@ -2,10 +2,12 @@
 import { act } from "react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import DecorativeIcon from "../../components/DecorativeIcon.jsx";
+import Icon from "../../components/Icon.jsx";
 import IconButton from "../../components/IconButton.jsx";
 import AccessibleAvatar from "../../components/AccessibleAvatar.jsx";
 import ContactAvatar from "../../components/ContactAvatar.jsx";
 import Header from "../../components/Header.jsx";
+import RailNav from "../../components/RailNav.jsx";
 import { click, mountScreen, unmount, type Mounted } from "./ui-helpers";
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -23,6 +25,59 @@ afterEach(async () => {
 });
 
 describe("A11y Icon & Avatar Primitives", () => {
+  describe("Icon primitive", () => {
+    it("defaults to aria-hidden='true' when no accessible name is provided", async () => {
+      mounted = await mountScreen(() => <Icon name="user" size={18} />);
+      const svg = mounted.host.querySelector("svg, span");
+      expect(svg).toBeTruthy();
+      expect(svg?.getAttribute("aria-hidden")).toBe("true");
+      expect(svg?.getAttribute("role")).toBeNull();
+    });
+
+    it("sets role='img' and renders <title> element when title prop is provided", async () => {
+      mounted = await mountScreen(() => <Icon name="user" title="User Profile" />);
+      const svg = mounted.host.querySelector("svg");
+      expect(svg).toBeTruthy();
+      expect(svg?.getAttribute("role")).toBe("img");
+      expect(svg?.hasAttribute("aria-hidden")).toBe(false);
+      const titleEl = svg?.querySelector("title");
+      expect(titleEl).toBeTruthy();
+      expect(titleEl?.textContent).toBe("User Profile");
+    });
+
+    it("sets role='img' and aria-label when aria-label prop is provided", async () => {
+      mounted = await mountScreen(() => <Icon name="user" aria-label="User Profile" />);
+      const svg = mounted.host.querySelector("svg");
+      expect(svg).toBeTruthy();
+      expect(svg?.getAttribute("role")).toBe("img");
+      expect(svg?.getAttribute("aria-label")).toBe("User Profile");
+      expect(svg?.hasAttribute("aria-hidden")).toBe(false);
+    });
+
+    it("sets role='img' and aria-labelledby when aria-labelledby prop is provided", async () => {
+      mounted = await mountScreen(() => <Icon name="user" aria-labelledby="icon-label-id" />);
+      const svg = mounted.host.querySelector("svg");
+      expect(svg).toBeTruthy();
+      expect(svg?.getAttribute("role")).toBe("img");
+      expect(svg?.getAttribute("aria-labelledby")).toBe("icon-label-id");
+      expect(svg?.hasAttribute("aria-hidden")).toBe(false);
+    });
+
+    it("allows overriding aria-hidden explicitly even when accessible name is present", async () => {
+      mounted = await mountScreen(() => <Icon name="user" aria-label="User Profile" aria-hidden="true" />);
+      const svg = mounted.host.querySelector("svg");
+      expect(svg).toBeTruthy();
+      expect(svg?.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    it("fallback span defaults to aria-hidden='true' when icon name is missing or unknown", async () => {
+      mounted = await mountScreen(() => <Icon name="nonexistent-icon-xyz" />);
+      const span = mounted.host.querySelector("span");
+      expect(span).toBeTruthy();
+      expect(span?.getAttribute("aria-hidden")).toBe("true");
+    });
+  });
+
   describe("DecorativeIcon", () => {
     it("always renders aria-hidden='true' to prevent exposure to screen readers", async () => {
       mounted = await mountScreen(() => <DecorativeIcon name="user" size={20} className="custom-icon" />);
@@ -110,7 +165,7 @@ describe("A11y Icon & Avatar Primitives", () => {
     });
   });
 
-  describe("Header component migration", () => {
+  describe("Header & RailNav component integration", () => {
     it("renders header action controls using IconButton primitives on Friends screen", async () => {
       mounted = await mountScreen(() => {
         // Render Header inside AppProvider context configured for Friends screen
@@ -127,6 +182,43 @@ describe("A11y Icon & Avatar Primitives", () => {
       iconButtons.forEach((btn) => {
         expect(btn.getAttribute("type")).toBe("button");
         const icon = btn.querySelector("svg, span");
+        expect(icon?.getAttribute("aria-hidden")).toBe("true");
+      });
+    });
+
+    it("ensures Header back and toggle button inner icons default to aria-hidden='true'", async () => {
+      mounted = await mountScreen(() => <Header />);
+
+      await act(async () => {
+        mounted?.ctx.current.actions.setScreen("Settings");
+      });
+
+      const backButton = mounted.host.querySelector("button[title='Back to Chat'], button[title='Back to Login']");
+      expect(backButton).toBeTruthy();
+      const backIcon = backButton?.querySelector("svg, span");
+      expect(backIcon?.getAttribute("aria-hidden")).toBe("true");
+
+      const tilesButton = mounted.host.querySelector("button[title='Toggle Multi-Window Workspace Engine']");
+      expect(tilesButton).toBeTruthy();
+      const tilesIcon = tilesButton?.querySelector("svg, span");
+      expect(tilesIcon?.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    it("ensures RailNav tab inner icons default to aria-hidden='true'", async () => {
+      mounted = await mountScreen(() => <RailNav />);
+
+      await act(async () => {
+        mounted?.ctx.current.actions.setLayout("rules");
+        mounted?.ctx.current.actions.setDevice("tab");
+        mounted?.ctx.current.actions.setScreen("Chat");
+      });
+
+      const tabs = mounted.host.querySelectorAll('[role="tab"]');
+      expect(tabs.length).toBeGreaterThan(0);
+
+      tabs.forEach((tab) => {
+        const icon = tab.querySelector("svg, span");
+        expect(icon).toBeTruthy();
         expect(icon?.getAttribute("aria-hidden")).toBe("true");
       });
     });

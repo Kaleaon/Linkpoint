@@ -42,8 +42,11 @@ class LinkpointProtocolFFI {
       final searchPaths = [
         'liblinkpoint_protocol.so',
         '../../target/release/liblinkpoint_protocol.so',
+        '../../target/debug/liblinkpoint_protocol.so',
         'target/release/liblinkpoint_protocol.so',
+        'target/debug/liblinkpoint_protocol.so',
         '/app/Linkpoint/target/release/liblinkpoint_protocol.so',
+        '/app/Linkpoint/target/debug/liblinkpoint_protocol.so',
       ];
       for (final p in searchPaths) {
         if (File(p).existsSync()) {

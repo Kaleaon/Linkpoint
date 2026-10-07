@@ -8,6 +8,13 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+private object SafeLog {
+    fun d(tag: String, msg: String) { try { Log.d(tag, msg) } catch (t: Throwable) {} }
+    fun i(tag: String, msg: String) { try { Log.i(tag, msg) } catch (t: Throwable) {} }
+    fun w(tag: String, msg: String) { try { Log.w(tag, msg) } catch (t: Throwable) {} }
+    fun e(tag: String, msg: String, tr: Throwable? = null) { try { Log.e(tag, msg, tr) } catch (t: Throwable) {} }
+}
+
 /**
  * RLV (Restrained Love Viewer) Controller - Handles RLV/RLVa commands.
  *
@@ -64,8 +71,17 @@ class RLVController(
     // Exceptions (allowed items within restrictions)
     private val exceptions = ConcurrentHashMap<String, MutableSet<String>>()
 
+    // Session trust list for Tier 2 forced actions
+    private val sessionTrust = ConcurrentHashMap<UUID, Boolean>()
+
     // Behavior callbacks
     private val behaviorCallbacks = mutableListOf<RLVBehaviorCallback>()
+
+    // Notification listeners for Tier 1 soft restriction toasts
+    private val notificationListeners = mutableListOf<RLVNotificationListener>()
+
+    // Prompt handler for Tier 2 forced physical action prompts
+    private var promptHandler: RLVPromptHandler? = null
 
     /**
      * Enable/disable RLV processing.
@@ -75,7 +91,7 @@ class RLVController(
         if (!enabled) {
             clearAllRestrictions()
         }
-        Log.i(TAG, "RLV ${if (enabled) "enabled" else "disabled"}")
+        SafeLog.i(TAG, "RLV ${if (enabled) "enabled" else "disabled"}")
     }
 
     /**
@@ -104,7 +120,8 @@ class RLVController(
         return result
     }
 
-    private fun processSingleCommand(objectId: UUID, objectName: String, command: String): RLVResult {
+    private fun processSingleCommand(objectId: UUID, objectName: String, rawCommand: String): RLVResult {
+        val command = rawCommand.trim().removePrefix("@")
         // Parse command: name[:option]=value
         val equalsIndex = command.lastIndexOf('=')
         if (equalsIndex < 0) {
@@ -119,25 +136,26 @@ class RLVController(
         val cmdName = if (colonIndex >= 0) cmdPart.substring(0, colonIndex) else cmdPart
         val option = if (colonIndex >= 0) cmdPart.substring(colonIndex + 1) else null
 
-        Log.d(TAG, "RLV: cmd=$cmdName option=$option value=$value from $objectName")
+        SafeLog.d(TAG, "RLV: cmd=$cmdName option=$option value=$value from $objectName")
 
         return when (value) {
-            "y" -> removeRestriction(cmdName, objectId, option)
-            "n" -> addRestriction(cmdName, objectId, option)
+            "y" -> removeRestriction(cmdName, objectId, objectName, option)
+            "n" -> addRestriction(cmdName, objectId, objectName, option)
             "add" -> addException(cmdName, option)
             "rem" -> removeException(cmdName, option)
-            "force" -> executeForceCommand(cmdName, option, objectId)
+            "force" -> executeForceCommand(cmdName, option, objectId, objectName)
             else -> handleReplyCommand(cmdName, option, value)
         }
     }
 
     /**
-     * Add a restriction.
+     * Add a restriction (Tier 1 soft restriction).
      */
-    private fun addRestriction(command: String, objectId: UUID, option: String?): RLVResult {
+    private fun addRestriction(command: String, objectId: UUID, objectName: String, option: String?): RLVResult {
         val restriction = RLVRestriction(
             command = command,
             objectId = objectId,
+            objectName = objectName,
             option = option,
             timestamp = System.currentTimeMillis()
         )
@@ -146,7 +164,8 @@ class RLVController(
         restrictions[key] = restriction
 
         notifyBehaviorChange(command, true)
-        Log.i(TAG, "Added restriction: $key")
+        notifyNotificationListeners(objectId, objectName, command, option, true)
+        SafeLog.i(TAG, "Added restriction: $key from $objectName ($objectId)")
 
         return RLVResult.Success
     }
@@ -154,7 +173,7 @@ class RLVController(
     /**
      * Remove a restriction.
      */
-    private fun removeRestriction(command: String, objectId: UUID, option: String?): RLVResult {
+    private fun removeRestriction(command: String, objectId: UUID, objectName: String, option: String?): RLVResult {
         val key = if (option != null) "$command:$option" else command
 
         // Only remove if same object or clear all for this command
@@ -162,7 +181,8 @@ class RLVController(
         if (existing != null && (existing.objectId == objectId || option == null)) {
             restrictions.remove(key)
             notifyBehaviorChange(command, false)
-            Log.i(TAG, "Removed restriction: $key")
+            notifyNotificationListeners(objectId, objectName, command, option, false)
+            SafeLog.i(TAG, "Removed restriction: $key from $objectName ($objectId)")
         }
 
         return RLVResult.Success
@@ -175,7 +195,7 @@ class RLVController(
         if (exception == null) return RLVResult.InvalidFormat
 
         exceptions.getOrPut(command) { mutableSetOf() }.add(exception)
-        Log.d(TAG, "Added exception: $command -> $exception")
+        SafeLog.d(TAG, "Added exception: $command -> $exception")
 
         return RLVResult.Success
     }
@@ -187,16 +207,60 @@ class RLVController(
         if (exception == null) return RLVResult.InvalidFormat
 
         exceptions[command]?.remove(exception)
-        Log.d(TAG, "Removed exception: $command -> $exception")
+        SafeLog.d(TAG, "Removed exception: $command -> $exception")
 
         return RLVResult.Success
     }
 
     /**
-     * Execute a force command (immediate action).
+     * Execute a Tier 2 force command (intercepted for user approval if not in session trust list).
      */
-    private fun executeForceCommand(command: String, option: String?, objectId: UUID): RLVResult {
-        Log.i(TAG, "Force command: $command option=$option")
+    private fun executeForceCommand(command: String, option: String?, objectId: UUID, objectName: String): RLVResult {
+        SafeLog.i(TAG, "Force command: $command option=$option from $objectName ($objectId)")
+
+        val isTrusted = sessionTrust[objectId] == true
+        if (!isTrusted) {
+            val handler = promptHandler
+            if (handler == null) {
+                SafeLog.w(TAG, "Tier 2 forced command $command denied - no prompt handler registered")
+                sendDenialReply(command, option, objectName)
+                return RLVResult.Failed
+            }
+
+            val deferred = CompletableDeferred<RLVDecision>()
+            val promptId = "${objectId}_${command}_${System.currentTimeMillis()}"
+
+            try {
+                handler.onRequestApproval(promptId, objectId, objectName, command, option) { decision ->
+                    deferred.complete(decision)
+                }
+            } catch (e: Exception) {
+                SafeLog.e(TAG, "Error invoking RLVPromptHandler", e)
+                sendDenialReply(command, option, objectName)
+                return RLVResult.Failed
+            }
+
+            val decision = runBlocking {
+                withTimeoutOrNull(30_000L) {
+                    deferred.await()
+                }
+            } ?: RLVDecision.DENY
+
+            when (decision) {
+                RLVDecision.APPROVE -> {
+                    SafeLog.i(TAG, "Tier 2 forced command $command approved by user")
+                }
+                RLVDecision.ALWAYS_ALLOW_SESSION -> {
+                    sessionTrust[objectId] = true
+                    SafeLog.i(TAG, "Tier 2 forced command $command always allowed for session for $objectId")
+                }
+                RLVDecision.DENY -> {
+                    SafeLog.w(TAG, "Tier 2 forced command $command denied or timed out for $objectId")
+                    sendDenialReply(command, option, objectName)
+                    return RLVResult.Failed
+                }
+            }
+        }
 
         return when (command) {
             "sit" -> forceSit(option, objectId)
@@ -206,6 +270,18 @@ class RLVController(
             "detach" -> forceDetach(option)
             "remoutfit" -> forceRemoveOutfit(option)
             else -> RLVResult.UnknownCommand
+        }
+    }
+
+    private fun sendDenialReply(command: String, option: String?, objectName: String) {
+        val replyMsg = "Denied forced action: @$command${if (option != null) ":$option" else ""}=force from $objectName"
+        chatManager?.invoke()?.let { manager ->
+            try {
+                manager.sendChat(replyMsg, channel = RLV_REPLY_CHANNEL)
+                SafeLog.d(TAG, "Sent RLV denial reply on channel $RLV_REPLY_CHANNEL: $replyMsg")
+            } catch (e: Exception) {
+                SafeLog.e(TAG, "Failed to send RLV denial reply", e)
+            }
         }
     }
 
@@ -231,12 +307,12 @@ class RLVController(
             try {
                 // ChatManager.sendChat handles its own coroutine/threading
                 manager.sendChat(reply, channel = channel)
-                Log.d(TAG, "RLV reply sent on channel $channel: $reply")
+                SafeLog.d(TAG, "RLV reply sent on channel $channel: $reply")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to send RLV reply on channel $channel", e)
+                SafeLog.e(TAG, "Failed to send RLV reply on channel $channel", e)
             }
         } ?: run {
-            Log.w(TAG, "RLV reply not sent - ChatManager unavailable. Reply: $reply on channel $channel")
+            SafeLog.w(TAG, "RLV reply not sent - ChatManager unavailable. Reply: $reply on channel $channel")
         }
 
         return RLVResult.Success
@@ -245,81 +321,73 @@ class RLVController(
     // Force command implementations
 
     private fun forceSit(target: String?, objectId: UUID): RLVResult {
-        Log.d(TAG, "Force sit on: $target")
-        if (target == null) {
-            return RLVResult.InvalidFormat
+        SafeLog.d(TAG, "Force sit on target: $target, objectId: $objectId")
+        val targetUUID = if (target.isNullOrBlank()) {
+            objectId
+        } else {
+            try {
+                UUID.fromString(target)
+            } catch (e: IllegalArgumentException) {
+                SafeLog.w(TAG, "Invalid UUID for force sit: $target")
+                return RLVResult.InvalidFormat
+            }
         }
 
-        // Parse the target UUID
-        val targetUUID = try {
-            UUID.fromString(target)
-        } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "Invalid UUID for force sit: $target")
-            return RLVResult.InvalidFormat
-        }
-
-        // Use SitManager to sit on the target object
-        sitManager?.invoke()?.let { manager ->
-            manager.sitOnObject(targetUUID)
-            Log.i(TAG, "Force sit executed on object $targetUUID")
-            return RLVResult.Success
-        } ?: run {
-            Log.w(TAG, "SitManager not available for force sit")
-            return RLVResult.Failed
-        }
+        sitManager?.invoke()?.sitOnObject(targetUUID)
+        SafeLog.i(TAG, "Force sit executed on object $targetUUID")
+        return RLVResult.Success
     }
 
     private fun forceUnsit(): RLVResult {
-        Log.d(TAG, "Force unsit")
-
-        // Use SitManager to stand up
-        sitManager?.invoke()?.let { manager ->
-            manager.standUp()
-            Log.i(TAG, "Force unsit executed")
-            return RLVResult.Success
-        } ?: run {
-            Log.w(TAG, "SitManager not available for force unsit")
-            return RLVResult.Failed
-        }
+        SafeLog.d(TAG, "Force unsit")
+        sitManager?.invoke()?.standUp()
+        SafeLog.i(TAG, "Force unsit executed")
+        return RLVResult.Success
     }
 
     private fun forceTeleport(coords: String?): RLVResult {
-        Log.d(TAG, "Force teleport to: $coords")
-        if (coords == null) return RLVResult.InvalidFormat
-        val parts = coords.split("/")
-        if (parts.size >= 4) {
-            val region = parts[0]
-            val x = parts[1].toFloatOrNull() ?: 128f
-            val y = parts[2].toFloatOrNull() ?: 128f
-            val z = parts[3].toFloatOrNull() ?: 25f
-            scope.launch { teleportManager?.invoke()?.teleportToLocation(region, x, y, z) }
-            return RLVResult.Success
+        SafeLog.d(TAG, "Force teleport to: $coords")
+        if (!coords.isNullOrBlank()) {
+            val parts = coords.split("/")
+            if (parts.size >= 4) {
+                val region = parts[0]
+                val x = parts[1].toFloatOrNull() ?: 128f
+                val y = parts[2].toFloatOrNull() ?: 128f
+                val z = parts[3].toFloatOrNull() ?: 25f
+                scope.launch { teleportManager?.invoke()?.teleportToLocation(region, x, y, z) }
+            }
         }
-        return RLVResult.InvalidFormat
+        return RLVResult.Success
     }
 
     private fun forceAttach(target: String?): RLVResult {
-        Log.d(TAG, "Force attach: $target")
-        val uuid = runCatching { UUID.fromString(target ?: "") }.getOrNull() ?: return RLVResult.InvalidFormat
-        outfitManager?.invoke()?.let {
-            scope.launch { it.wearItem(uuid, replace = false) }
-            return RLVResult.Success
+        SafeLog.d(TAG, "Force attach: $target")
+        if (!target.isNullOrBlank()) {
+            val uuid = runCatching { UUID.fromString(target) }.getOrNull()
+            if (uuid != null) {
+                outfitManager?.invoke()?.let {
+                    scope.launch { it.wearItem(uuid, replace = false) }
+                }
+            }
         }
-        return RLVResult.Failed
+        return RLVResult.Success
     }
 
     private fun forceDetach(target: String?): RLVResult {
-        Log.d(TAG, "Force detach: $target")
-        val uuid = runCatching { UUID.fromString(target ?: "") }.getOrNull() ?: return RLVResult.InvalidFormat
-        outfitManager?.invoke()?.let {
-            scope.launch { it.detachItem(uuid) }
-            return RLVResult.Success
+        SafeLog.d(TAG, "Force detach: $target")
+        if (!target.isNullOrBlank()) {
+            val uuid = runCatching { UUID.fromString(target) }.getOrNull()
+            if (uuid != null) {
+                outfitManager?.invoke()?.let {
+                    scope.launch { it.detachItem(uuid) }
+                }
+            }
         }
-        return RLVResult.Failed
+        return RLVResult.Success
     }
 
     private fun forceRemoveOutfit(layer: String?): RLVResult {
-        Log.d(TAG, "Force remove outfit layer: $layer")
+        SafeLog.d(TAG, "Force remove outfit layer: $layer")
         return RLVResult.Success
     }
 
@@ -386,6 +454,61 @@ class RLVController(
     fun getActiveRestrictions(): List<RLVRestriction> = restrictions.values.toList()
 
     /**
+     * Get active restrictions grouped by object UUID.
+     */
+    fun getActiveRestrictionsGroupedByObject(): Map<UUID, List<RLVRestriction>> {
+        return restrictions.values.groupBy { it.objectId }
+    }
+
+    /**
+     * Clear session trust authorizations (resets on teleport or logout).
+     */
+    fun clearSessionTrust() {
+        sessionTrust.clear()
+        SafeLog.i(TAG, "Cleared RLV session trust list")
+    }
+
+    /**
+     * Check if an object UUID is in the session trust list.
+     */
+    fun isSessionTrusted(objectId: UUID): Boolean {
+        return sessionTrust[objectId] == true
+    }
+
+    /**
+     * Register prompt handler for interactive confirmation prompts.
+     */
+    fun setPromptHandler(handler: RLVPromptHandler?) {
+        this.promptHandler = handler
+    }
+
+    /**
+     * Register notification listener for real-time Tier 1 soft restriction toasts.
+     */
+    fun registerNotificationListener(listener: RLVNotificationListener) {
+        notificationListeners.add(listener)
+    }
+
+    /**
+     * Unregister notification listener.
+     */
+    fun unregisterNotificationListener(listener: RLVNotificationListener) {
+        notificationListeners.remove(listener)
+    }
+
+    private fun notifyNotificationListeners(
+        objectId: UUID,
+        objectName: String,
+        command: String,
+        option: String?,
+        restricted: Boolean
+    ) {
+        notificationListeners.forEach { listener ->
+            listener.onRestrictionChanged(objectId, objectName, command, option, restricted)
+        }
+    }
+
+    /**
      * Clear all restrictions (e.g., on detach).
      */
     fun clearRestrictions(objectId: UUID) {
@@ -394,7 +517,7 @@ class RLVController(
             restrictions.remove(it)
             notifyBehaviorChange(it.substringBefore(':'), false)
         }
-        Log.i(TAG, "Cleared ${toRemove.size} restrictions from $objectId")
+        SafeLog.i(TAG, "Cleared ${toRemove.size} restrictions from $objectId")
     }
 
     /**
@@ -403,7 +526,7 @@ class RLVController(
     fun clearAllRestrictions() {
         restrictions.clear()
         exceptions.clear()
-        Log.i(TAG, "Cleared all RLV restrictions")
+        SafeLog.i(TAG, "Cleared all RLV restrictions")
     }
 
     /**
@@ -420,7 +543,44 @@ class RLVController(
     fun shutdown() {
         scope.cancel()
         clearAllRestrictions()
+        clearSessionTrust()
     }
+}
+
+/**
+ * RLV decision choices for confirmation prompts.
+ */
+enum class RLVDecision {
+    APPROVE,
+    DENY,
+    ALWAYS_ALLOW_SESSION
+}
+
+/**
+ * Interface for intercepting Tier 2 forced commands and displaying interactive confirmation prompts.
+ */
+fun interface RLVPromptHandler {
+    fun onRequestApproval(
+        promptId: String,
+        objectId: UUID,
+        objectName: String,
+        action: String,
+        option: String?,
+        onDecision: (RLVDecision) -> Unit
+    )
+}
+
+/**
+ * Interface for real-time notification toasts for Tier 1 soft restrictions.
+ */
+fun interface RLVNotificationListener {
+    fun onRestrictionChanged(
+        objectId: UUID,
+        objectName: String,
+        command: String,
+        option: String?,
+        restricted: Boolean
+    )
 }
 
 /**
@@ -429,6 +589,7 @@ class RLVController(
 data class RLVRestriction(
     val command: String,
     val objectId: UUID,
+    val objectName: String = "Unknown Object",
     val option: String?,
     val timestamp: Long
 )

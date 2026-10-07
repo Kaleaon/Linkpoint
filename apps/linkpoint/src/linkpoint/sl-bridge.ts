@@ -4,6 +4,7 @@ import { failureFromResponseBody } from './login-failure';
 const READ_ONLY_CALLS = new Set([
   'fetchAnimation', 'getBalance', 'getDiagnostics', 'getFriends', 'getGroups', 'getInventory',
   'getMapBlocks', 'getSceneObjects', 'getSceneSnapshot', 'getTransactionHistory', 'searchDir',
+  'getAvatarProfile', 'getAvatarPicks', 'getAvatarGroups',
 ]);
 
 export interface SLBridgeConnectParams {
@@ -30,6 +31,9 @@ export class SLBridge extends Utils.EventEmitter {
   private eventSource: EventSource | null = null;
   private removeNativeListener: (() => void) | null = null;
   private pendingReads = new Map<string, Promise<any>>();
+  private profileCache = new Map<string, any>();
+  private picksCache = new Map<string, any>();
+  private groupsCache = new Map<string, any>();
 
   private async failure(response: Response, fallback: string) {
     const err = await response.json().catch(() => ({ error: fallback }));
@@ -224,7 +228,37 @@ export class SLBridge extends Utils.EventEmitter {
   }
 
   async fetchFriends() { return this.connected ? this.call<any[]>('getFriends') : []; }
-  async fetchGroups() { return this.connected ? this.call<any[]>('getGroups') : []; }
+  async fetchGroups() { return this.fetchAvatarGroups(); }
+  async getAvatarProfile(avatarId?: string) { return this.fetchAvatarProfile(avatarId); }
+  async getAvatarPicks(avatarId?: string) { return this.fetchAvatarPicks(avatarId); }
+  async getAvatarGroups(avatarId?: string) { return this.fetchAvatarGroups(avatarId); }
+
+  async fetchAvatarProfile(avatarId?: string) {
+    if (!this.connected) throw new Error('Not connected to Second Life');
+    const key = avatarId || 'self';
+    if (this.profileCache.has(key)) return this.profileCache.get(key);
+    const result = await this.call('getAvatarProfile', avatarId ? { avatarId } : {});
+    if (result) this.profileCache.set(key, result);
+    return result;
+  }
+
+  async fetchAvatarPicks(avatarId?: string) {
+    if (!this.connected) return [];
+    const key = avatarId || 'self';
+    if (this.picksCache.has(key)) return this.picksCache.get(key);
+    const result = await this.call<any[]>('getAvatarPicks', avatarId ? { avatarId } : {}).catch(() => []);
+    if (Array.isArray(result)) this.picksCache.set(key, result);
+    return result || [];
+  }
+
+  async fetchAvatarGroups(avatarId?: string) {
+    if (!this.connected) return [];
+    const key = avatarId || 'self';
+    if (this.groupsCache.has(key)) return this.groupsCache.get(key);
+    const result = await this.call<any[]>('getAvatarGroups', avatarId ? { avatarId } : {}).catch(() => []);
+    if (Array.isArray(result)) this.groupsCache.set(key, result);
+    return result || [];
+  }
   async fetchInventory(folderId?: string) {
     return this.connected ? this.call('getInventory', folderId ? { folderId } : {}) : { folders: [], items: [] };
   }
@@ -299,8 +333,8 @@ export class SLBridge extends Utils.EventEmitter {
     }
     return '';
   }
-  /** Directory search capabilities across grid categories ('people', 'groups', 'places'). */
-  async searchDir(params: { category: string; query: string; start?: number }): Promise<{
+  /** Directory search capabilities across grid categories ('places', 'events', 'land', 'groups', 'people'). */
+  async searchDir(params: { category: string; query: string; start?: number; maturity?: number }): Promise<{
     results: Array<{
       id: string;
       name?: string;
@@ -316,6 +350,19 @@ export class SLBridge extends Utils.EventEmitter {
       forSale?: boolean;
       type: string;
       simName?: string;
+      maturity?: string;
+      location?: string;
+      globalX?: number;
+      globalY?: number;
+      localX?: number;
+      localY?: number;
+      localZ?: number;
+      area?: number;
+      price?: number;
+      date?: string;
+      time?: string;
+      duration?: string;
+      cost?: string;
     }>;
     hasMore?: boolean;
   }> {
@@ -347,6 +394,9 @@ export class SLBridge extends Utils.EventEmitter {
     this.sessionId = null;
     this.connected = false;
     this.pendingReads.clear();
+    this.profileCache.clear();
+    this.picksCache.clear();
+    this.groupsCache.clear();
     if (wasConnected) {
       const native = desktop();
       if (native) void native.disconnectViewer().catch(() => {});

@@ -24,7 +24,8 @@ data class AuthReply(
     val regionName: String = "Unknown",
     val lookAt: FloatArray = floatArrayOf(128f, 128f, 20f),
     val seedCapability: String = "",
-    val mfaHash: String? = null
+    val mfaHash: String? = null,
+    val groupServerUri: String = ""
 ) {
     /**
      * Get the region coordinates as a string
@@ -60,7 +61,8 @@ data class AuthReply(
             "regionName" to regionName,
             "regionCoordinates" to getRegionCoordinates(),
             "hasSeedCapability" to seedCapability.isNotBlank(),
-            "hasMfaHash" to (mfaHash != null)
+            "hasMfaHash" to (mfaHash != null),
+            "groupServerUri" to groupServerUri
         )
     }
 
@@ -77,6 +79,7 @@ data class AuthReply(
         if (simPort != other.simPort) return false
         if (seedCapability != other.seedCapability) return false
         if (mfaHash != other.mfaHash) return false
+        if (groupServerUri != other.groupServerUri) return false
 
         return true
     }
@@ -89,6 +92,7 @@ data class AuthReply(
         result = 31 * result + simPort
         result = 31 * result + seedCapability.hashCode()
         result = 31 * result + (mfaHash?.hashCode() ?: 0)
+        result = 31 * result + groupServerUri.hashCode()
         return result
     }
 }

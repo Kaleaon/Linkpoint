@@ -81,6 +81,12 @@ class GridConnection(
         private set
 
     /**
+     * Group Server URI endpoint for OpenSim/REST group calls
+     */
+    val groupServerUri: String
+        get() = authReply?.groupServerUri ?: ""
+
+    /**
      * Agent circuit for primary communication
      */
     var agentCircuit: AgentCircuit? = null
@@ -215,7 +221,8 @@ class GridConnection(
                             simIP = loginResult.simIp,
                             simPort = loginResult.simPort,
                             seedCapability = loginResult.seedCapability ?: "",
-                            mfaHash = loginResult.mfaHash
+                            mfaHash = loginResult.mfaHash,
+                            groupServerUri = loginResult.groupServerUri ?: ""
                         )
                     }
                     is CoreNetworkingService.LoginResult.MFARequired -> {

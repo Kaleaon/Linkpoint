@@ -1,6 +1,7 @@
 import { LAYOUTS, PALETTES, DEVICES, ensureMinContrast } from "@linkpoint/design-system/tokens";
 import { STATES } from "./constants.js";
 import { pickInk } from "./color.js";
+import { Z_INDEX } from "./dialogs.js";
 
 // Ported from the top of renderVals(): resolves the active layout+palette into
 // the token set `V`, the device, the console geometry, and the handful of
@@ -54,5 +55,5 @@ export function computeTheme(state, cf) {
   const immersive = scr === "3D View" && norm;
   const headLook = bare || isFloat ? "none" : nav === "sweep" ? "sweep" : LK.head;
 
-  return { t, d, isSweepDesk, V, pad, C, isConsole, consoleScene, isFloat, bleed, LK, nav, scr, sel, ink, condPack, stateBlockActive, norm, bare, immersive, headLook };
+  return { t, d, isSweepDesk, V, pad, C, isConsole, consoleScene, isFloat, bleed, LK, nav, scr, sel, ink, condPack, stateBlockActive, norm, bare, immersive, headLook, Z_INDEX, zIndex: Z_INDEX };
 }
