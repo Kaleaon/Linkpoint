@@ -1,5 +1,6 @@
 package com.linkpoint.chat
 
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.types.LLVector3
 import java.util.UUID
 
@@ -22,7 +23,7 @@ sealed class SLChatEvent {
     abstract val fromAgentId: UUID
     abstract val fromName: String
     abstract val message: String
-    abstract val dialogType: Int
+    abstract val dialogType: IMType
     abstract val timestamp: Long
     abstract val isOutgoing: Boolean
 
@@ -35,7 +36,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int = IMManager.IM_SESSION_SEND,
+        override val dialogType: IMType = IMType.SESSION_SEND,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false
     ) : SLChatEvent()
@@ -49,7 +50,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int = IMManager.IM_FRIENDSHIP_OFFERED,
+        override val dialogType: IMType = IMType.FRIENDSHIP_OFFERED,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false,
         var actionState: CardActionState = CardActionState.PENDING
@@ -64,7 +65,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int,
+        override val dialogType: IMType,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false,
         val isAccepted: Boolean
@@ -79,7 +80,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int = IMManager.IM_GROUP_INVITATION,
+        override val dialogType: IMType = IMType.GROUP_INVITATION,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false,
         val groupId: UUID,
@@ -96,7 +97,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int = IMManager.IM_LURE_USER,
+        override val dialogType: IMType = IMType.LURE_USER,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false,
         val lureId: UUID,
@@ -114,7 +115,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int = IMManager.IM_INVENTORY_OFFERED,
+        override val dialogType: IMType = IMType.INVENTORY_OFFERED,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false,
         val itemId: UUID = UUID(0L, 0L),
@@ -130,7 +131,7 @@ sealed class SLChatEvent {
         override val fromAgentId: UUID,
         override val fromName: String,
         override val message: String,
-        override val dialogType: Int = IMManager.IM_NOTHING_SPECIAL,
+        override val dialogType: IMType = IMType.NOTHING_SPECIAL,
         override val timestamp: Long,
         override val isOutgoing: Boolean = false
     ) : SLChatEvent()

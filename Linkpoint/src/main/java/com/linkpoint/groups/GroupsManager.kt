@@ -3,6 +3,7 @@ package com.linkpoint.groups
 import android.os.Parcelable
 import android.util.Log
 import com.linkpoint.groups.provider.*
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler

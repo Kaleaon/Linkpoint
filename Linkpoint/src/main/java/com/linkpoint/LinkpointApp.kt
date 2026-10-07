@@ -83,6 +83,7 @@ import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.objects.SitManager
 import com.linkpoint.snapshot.SnapshotManager
@@ -5627,7 +5628,7 @@ class LinkpointApp : Application() {
                         fromName = imData.fromAgentName,
                         message = imData.message,
                         sessionId = imData.sessionId,
-                        dialogType = imData.dialog,
+                        dialogType = IMType.fromValue(imData.dialog),
                         timestamp = imData.timestamp,
                         binaryBucket = imData.binaryBucket
                     )
