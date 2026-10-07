@@ -353,11 +353,11 @@ class RegionCrossingManager(
      * Used to proactively establish child connections.
      */
     fun isNearRegionBorder(localX: Float, localY: Float, threshold: Float = 10f): Boolean {
-        val regionInfo = _currentRegion.value
-        val sizeX = regionInfo?.regionSizeX ?: REGION_SIZE
-        val sizeY = regionInfo?.regionSizeY ?: REGION_SIZE
-        return localX < threshold || localX > (sizeX - threshold) ||
-               localY < threshold || localY > (sizeY - threshold)
+        val activeRegion = _currentRegion.value
+        val regionSizeX = activeRegion?.regionSizeX ?: REGION_SIZE
+        val regionSizeY = activeRegion?.regionSizeY ?: REGION_SIZE
+        return localX < threshold || localX > (regionSizeX - threshold) ||
+               localY < threshold || localY > (regionSizeY - threshold)
     }
 
     /**

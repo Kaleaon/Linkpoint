@@ -19,6 +19,7 @@ class TerrainManager {
         const val PATCH_SIZE = 16
         const val PATCHES_PER_SIDE = 16
         const val DEFAULT_WATER_HEIGHT = 20.0f
+        private const val MAX_REGION_SIZE = 4096
     }
 
     var regionSizeX: Int = REGION_SIZE
@@ -47,8 +48,8 @@ class TerrainManager {
      * Configure active region dimensions and reallocate heightmap.
      */
     fun setRegionSize(width: Int, height: Int) {
-        val clampedW = width.coerceIn(256, 2048)
-        val clampedH = height.coerceIn(256, 2048)
+        val clampedW = width.coerceIn(256, MAX_REGION_SIZE)
+        val clampedH = height.coerceIn(256, MAX_REGION_SIZE)
         if (regionSizeX != clampedW || regionSizeY != clampedH) {
             regionSizeX = clampedW
             regionSizeY = clampedH
@@ -204,7 +205,7 @@ class TerrainManager {
      */
     fun getLoadPercentage(): Float {
         val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
-        if (totalPatches == 0) return 0f
+        if (totalPatches <= 0) return 0f
         return (validPatchCount.toFloat() / totalPatches) * 100f
     }
 
@@ -224,6 +225,6 @@ class TerrainManager {
      */
     fun getDebugInfo(): String {
         val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
-        return "Terrain: ${validPatchCount}/${totalPatches} patches (${getLoadPercentage().toInt()}%), water=$waterHeight"
+        return "Terrain: ${validPatchCount}/${totalPatches} patches (${getLoadPercentage().toInt()}%), size=${regionSizeX}x${regionSizeY}, water=$waterHeight"
     }
 }

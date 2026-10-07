@@ -371,7 +371,13 @@ object LinkpointTranslationLayer {
         val capabilityRetries: Int = 3,
 
         /** Enable legacy message ID handling */
-        val useLegacyMessageIds: Boolean = true
+        val useLegacyMessageIds: Boolean = true,
+
+        /** Support variable OpenSim region sizes (up to 4096m) */
+        val supportsVariableRegionSize: Boolean = true,
+
+        /** Support OpenSim extended land layer data */
+        val supportsExtendedTerrain: Boolean = true
     )
 
     // Default configuration
@@ -387,6 +393,55 @@ object LinkpointTranslationLayer {
         Log.i(TAG, "Compatibility configuration updated: $newConfig")
     }
 
+    /**
+     * Configure translation settings based on target grid type.
+     */
+    fun configureForGrid(gridType: GridType) {
+        val newConfig = when (gridType) {
+            GridType.OPENSIM -> CompatibilityConfig(
+                repairCapabilityUrls = false,
+                useReferenceCapabilityList = true,
+                supportsVariableRegionSize = true,
+                supportsExtendedTerrain = true
+            )
+            GridType.AGNI, GridType.ADITI -> CompatibilityConfig(
+                repairCapabilityUrls = true,
+                useReferenceCapabilityList = true,
+                supportsVariableRegionSize = false,
+                supportsExtendedTerrain = false
+            )
+            GridType.UNKNOWN -> CompatibilityConfig(
+                repairCapabilityUrls = false,
+                useReferenceCapabilityList = true,
+                supportsVariableRegionSize = true,
+                supportsExtendedTerrain = true
+            )
+        }
+        configure(newConfig)
+    }
+
+    /**
+     * Get capability and compatibility flags for specified grid type.
+     */
+    fun getCapabilityFlagsForGrid(gridType: GridType): Map<String, Boolean> {
+        return when (gridType) {
+            GridType.OPENSIM -> mapOf(
+                "OpenSim" to true,
+                "VariableRegionSize" to true,
+                "ExtendedTerrain" to true,
+                "WebFetch" to true
+            )
+            GridType.AGNI, GridType.ADITI -> mapOf(
+                "SecondLife" to true,
+                "LindenS3" to true,
+                "VariableRegionSize" to false
+            )
+            GridType.UNKNOWN -> mapOf(
+                "Hybrid" to true,
+                "VariableRegionSize" to true
+            )
+        }
+    }
     /**
      * Log comprehensive diagnostic information about a capability request.
      */

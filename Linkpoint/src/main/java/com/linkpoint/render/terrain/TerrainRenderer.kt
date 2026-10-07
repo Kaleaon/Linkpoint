@@ -31,7 +31,7 @@ class TerrainRenderer(
         const val PATCH_SIZE = 16
         const val PATCHES_PER_SIDE = 16
     }
-
+    // Dynamic region bounds
     var regionWidth: Float = REGION_WIDTH
         private set
     var regionHeight: Float = REGION_HEIGHT

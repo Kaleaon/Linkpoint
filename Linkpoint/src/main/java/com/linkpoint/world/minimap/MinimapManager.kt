@@ -50,6 +50,34 @@ class MinimapManager(
         val COLOR_PARCEL_BORDER = Color.rgb(255, 0, 0)
     }
 
+    // Configurable region dimensions for Varregions
+    var regionWidth: Float = REGION_SIZE
+        private set
+    var regionHeight: Float = REGION_SIZE
+        private set
+
+    var regionSizeX: Float
+        get() = regionWidth
+        private set(value) { regionWidth = value }
+    var regionSizeY: Float
+        get() = regionHeight
+        private set(value) { regionHeight = value }
+
+    fun configureRegionDimensions(width: Float, height: Float) {
+        val validX = width.coerceAtLeast(256f)
+        val validY = height.coerceAtLeast(256f)
+        if (regionWidth != validX || regionHeight != validY) {
+            regionWidth = validX
+            regionHeight = validY
+            renderMinimap()
+        }
+    }
+
+    /**
+     * Update region dimensions for minimap scaling.
+     */
+    fun setRegionSize(sizeX: Float, sizeY: Float) = configureRegionDimensions(sizeX, sizeY)
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     // Region terrain texture
@@ -64,17 +92,6 @@ class MinimapManager(
     // Current position and rotation
     private var selfPosition = PointF(128f, 128f)
     private var cameraRotation = 0f
-    // Configurable region dimensions for Varregions
-    var regionWidth = REGION_SIZE
-        private set
-    var regionHeight = REGION_SIZE
-        private set
-
-    fun configureRegionDimensions(width: Float, height: Float) {
-        this.regionWidth = maxOf(256f, width)
-        this.regionHeight = maxOf(256f, height)
-        renderMinimap()
-    }
 
     // Rendered minimap
     private val _minimapBitmap = MutableStateFlow<Bitmap?>(null)
@@ -251,7 +268,6 @@ class MinimapManager(
     private fun drawMarker(canvas: Canvas, marker: MinimapMarker, paint: Paint, textPaint: Paint) {
         val x = (marker.x / regionWidth) * MINIMAP_SIZE
         val y = MINIMAP_SIZE - (marker.y / regionHeight) * MINIMAP_SIZE // Flip Y
-
         paint.color = when (marker.type) {
             MARKER_SELF -> COLOR_SELF
             MARKER_FRIEND -> COLOR_FRIEND
