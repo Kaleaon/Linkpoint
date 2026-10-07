@@ -83,8 +83,8 @@ namespace LinkpointAssetPipeline.Tests
 
                     using var image = TextureDecoder.DecodeTexture(bytes);
                     Assert.NotNull(image);
-                    Assert.Equal(header.Width, image.Width);
-                    Assert.Equal(header.Height, image.Height);
+                    Assert.Equal(header.Width, image!.Width);
+                    Assert.Equal(header.Height, image!.Height);
                 }
                 else
                 {
@@ -118,8 +118,8 @@ namespace LinkpointAssetPipeline.Tests
 
                 var parsed = LLMeshToGltfConverter.ParseBinary(bytes);
                 Assert.NotNull(parsed);
-                Assert.Equal(expected.GetProperty("vertex_count").GetInt32(), parsed.VertexCount);
-                Assert.Equal(expected.GetProperty("index_count").GetInt32(), parsed.IndexCount);
+                Assert.Equal(expected.GetProperty("vertex_count").GetInt32(), parsed!.VertexCount);
+                Assert.Equal(expected.GetProperty("index_count").GetInt32(), parsed!.IndexCount);
 
                 string gltfJson = LLMeshToGltfConverter.ConvertToGltfJson(parsed);
                 Assert.Contains("\"asset\"", gltfJson);
