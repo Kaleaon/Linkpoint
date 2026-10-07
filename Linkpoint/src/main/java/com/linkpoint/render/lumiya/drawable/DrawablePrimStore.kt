@@ -820,12 +820,13 @@ class DrawablePrimStore {
 
     private fun faceCountFor(shape: ShapeKind, hollow: Boolean): Int {
         val (sides, caps) = when (shape) {
-            ShapeKind.BOX -> 4 to 2
-            ShapeKind.SPHERE -> 1 to 0
-            ShapeKind.CYLINDER -> 1 to 2
-            ShapeKind.PRISM -> 3 to 2
-            ShapeKind.TORUS -> 1 to 0
-            ShapeKind.RING -> 2 to 1
+            PrimShape.BOX -> 4 to 2
+            PrimShape.SPHERE -> 1 to 0
+            PrimShape.CYLINDER -> 1 to 2
+            PrimShape.PRISM -> 3 to 2
+            PrimShape.TORUS -> 1 to 0
+            PrimShape.RING -> 2 to 1
+            PrimShape.TUBE -> 4 to 2
         }
         val effectiveCaps = if (hollow) caps * 2 else caps
         return sides + effectiveCaps
