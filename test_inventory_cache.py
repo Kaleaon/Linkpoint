@@ -11,7 +11,7 @@ import tempfile
 import threading
 import time
 import unittest
-from inventory_cache import InventoryCache, CURRENT_SCHEMA_VERSION
+from inventory_cache import InventoryCache
 
 
 class TestInventoryCache(unittest.TestCase):
@@ -38,13 +38,35 @@ class TestInventoryCache(unittest.TestCase):
         # Populate full inventory
         full_data = {
             "folders": [
-                {"folder_id": "f1", "parent_id": None, "name": "Objects", "type_default": 6},
-                {"folder_id": "f2", "parent_id": "f1", "name": "Clothing", "type_default": 5}
+                {
+                    "folder_id": "f1",
+                    "parent_id": None,
+                    "name": "Objects",
+                    "type_default": 6,
+                },
+                {
+                    "folder_id": "f2",
+                    "parent_id": "f1",
+                    "name": "Clothing",
+                    "type_default": 5,
+                },
             ],
             "items": [
-                {"item_id": "i1", "folder_id": "f1", "name": "Shirt", "asset_id": "a1", "type": 5},
-                {"item_id": "i2", "folder_id": "f2", "name": "Pants", "asset_id": "a2", "type": 5}
-            ]
+                {
+                    "item_id": "i1",
+                    "folder_id": "f1",
+                    "name": "Shirt",
+                    "asset_id": "a1",
+                    "type": 5,
+                },
+                {
+                    "item_id": "i2",
+                    "folder_id": "f2",
+                    "name": "Pants",
+                    "asset_id": "a2",
+                    "type": 5,
+                },
+            ],
         }
         self.cache.reload_full_inventory(full_data, new_token="token_v1")
 
@@ -63,15 +85,21 @@ class TestInventoryCache(unittest.TestCase):
         # Initial state
         full_data = {
             "folders": [{"folder_id": "f1", "parent_id": None, "name": "Root"}],
-            "items": [{"item_id": "i1", "folder_id": "f1", "name": "Hat", "asset_id": "a1"}]
+            "items": [
+                {"item_id": "i1", "folder_id": "f1", "name": "Hat", "asset_id": "a1"}
+            ],
         }
         self.cache.reload_full_inventory(full_data, new_token="token_v1")
 
         # Apply delta update
         delta = {
-            "folders_to_add_or_update": [{"folder_id": "f2", "parent_id": "f1", "name": "Subfolder"}],
-            "items_to_add_or_update": [{"item_id": "i2", "folder_id": "f2", "name": "Shoes", "asset_id": "a2"}],
-            "items_to_remove": ["i1"]
+            "folders_to_add_or_update": [
+                {"folder_id": "f2", "parent_id": "f1", "name": "Subfolder"}
+            ],
+            "items_to_add_or_update": [
+                {"item_id": "i2", "folder_id": "f2", "name": "Shoes", "asset_id": "a2"}
+            ],
+            "items_to_remove": ["i1"],
         }
         success = self.cache.apply_delta_update(delta, new_token="token_v2")
         self.assertTrue(success)
@@ -118,7 +146,10 @@ class TestInventoryCache(unittest.TestCase):
             self.cache._close_connection(conn)
 
     def test_bulk_synchronization_speed_10k_items(self):
-        folders = [{"folder_id": f"f_{i}", "parent_id": None, "name": f"Folder {i}"} for i in range(100)]
+        folders = [
+            {"folder_id": f"f_{i}", "parent_id": None, "name": f"Folder {i}"}
+            for i in range(100)
+        ]
         items = [
             {
                 "item_id": f"item_{i}",
@@ -140,7 +171,11 @@ class TestInventoryCache(unittest.TestCase):
         elapsed = time.time() - start
 
         self.assertTrue(success)
-        self.assertLess(elapsed, 0.100, f"10k item sync took {elapsed * 1000:.2f}ms, expected under 100ms")
+        self.assertLess(
+            elapsed,
+            0.100,
+            f"10k item sync took {elapsed * 1000:.2f}ms, expected under 100ms",
+        )
 
         loaded = self.cache.load_cached_inventory()
         self.assertEqual(loaded["folder_count"], 100)
@@ -148,7 +183,10 @@ class TestInventoryCache(unittest.TestCase):
         self.assertEqual(loaded["update_token"], "token_10k")
 
     def test_non_blocking_concurrent_readers_during_background_writes(self):
-        folders = [{"folder_id": f"f_{i}", "parent_id": None, "name": f"Folder {i}"} for i in range(100)]
+        folders = [
+            {"folder_id": f"f_{i}", "parent_id": None, "name": f"Folder {i}"}
+            for i in range(100)
+        ]
         items = [
             {
                 "item_id": f"item_bg_{i}",
@@ -190,15 +228,27 @@ class TestInventoryCache(unittest.TestCase):
 
         writer_thread.join()
 
-        self.assertEqual(len(errors), 0, f"Errors during concurrent read/write: {errors}")
-        self.assertGreater(len(reader_durations), 0, "Expected readers to execute during background write")
+        self.assertEqual(
+            len(errors), 0, f"Errors during concurrent read/write: {errors}"
+        )
+        self.assertGreater(
+            len(reader_durations),
+            0,
+            "Expected readers to execute during background write",
+        )
         for dur in reader_durations:
-            self.assertLess(dur, 0.050, f"Reader query took {dur * 1000:.2f}ms, expected under 50ms without write locks")
+            self.assertLess(
+                dur,
+                0.050,
+                f"Reader query took {dur * 1000:.2f}ms, expected under 50ms without write locks",
+            )
 
     def test_wal_sidecar_file_cleanup(self):
         full_data = {
             "folders": [{"folder_id": "f1", "parent_id": None, "name": "Folder 1"}],
-            "items": [{"item_id": "i1", "folder_id": "f1", "name": "Item 1", "asset_id": "a1"}],
+            "items": [
+                {"item_id": "i1", "folder_id": "f1", "name": "Item 1", "asset_id": "a1"}
+            ],
         }
         self.cache.reload_full_inventory(full_data, new_token="tok1")
 
@@ -207,8 +257,12 @@ class TestInventoryCache(unittest.TestCase):
 
         self.cache.close()
 
-        self.assertFalse(os.path.exists(wal_path), "WAL file was not cleaned up after close()")
-        self.assertFalse(os.path.exists(shm_path), "SHM file was not cleaned up after close()")
+        self.assertFalse(
+            os.path.exists(wal_path), "WAL file was not cleaned up after close()"
+        )
+        self.assertFalse(
+            os.path.exists(shm_path), "SHM file was not cleaned up after close()"
+        )
 
     def test_thread_safety(self):
         errors = []
@@ -219,10 +273,25 @@ class TestInventoryCache(unittest.TestCase):
                     folder_id = f"f_{thread_id}_{i}"
                     item_id = f"i_{thread_id}_{i}"
                     delta = {
-                        "folders_to_add_or_update": [{"folder_id": folder_id, "parent_id": None, "name": f"Folder {i}"}],
-                        "items_to_add_or_update": [{"item_id": item_id, "folder_id": folder_id, "name": f"Item {i}", "asset_id": f"asset_{i}"}]
+                        "folders_to_add_or_update": [
+                            {
+                                "folder_id": folder_id,
+                                "parent_id": None,
+                                "name": f"Folder {i}",
+                            }
+                        ],
+                        "items_to_add_or_update": [
+                            {
+                                "item_id": item_id,
+                                "folder_id": folder_id,
+                                "name": f"Item {i}",
+                                "asset_id": f"asset_{i}",
+                            }
+                        ],
                     }
-                    self.cache.apply_delta_update(delta, new_token=f"token_{thread_id}_{i}")
+                    self.cache.apply_delta_update(
+                        delta, new_token=f"token_{thread_id}_{i}"
+                    )
             except Exception as e:
                 errors.append(e)
 
@@ -275,6 +344,64 @@ class TestInventoryCache(unittest.TestCase):
         self.cache.apply_delta_update(delta_delete, new_token="token_v3")
         self.assertIsNone(self.cache.get_item("i_2"))  # Cascaded deletion
         self.assertIsNotNone(self.cache.get_item("i_1"))  # Preserved in f_root
+
+    def test_thread_local_connection_reuse(self):
+        # Repeated connection requests in same thread should yield same object
+        conn1 = self.cache._get_connection()
+        conn2 = self.cache._get_connection()
+        self.assertIs(
+            conn1,
+            conn2,
+            "Expected connection object to be reused within the same thread",
+        )
+
+        # Connection in another thread should be a different object
+        other_conn = []
+
+        def worker():
+            c = self.cache._get_connection()
+            other_conn.append(c)
+
+        t = threading.Thread(target=worker)
+        t.start()
+        t.join()
+
+        self.assertIsNot(
+            conn1,
+            other_conn[0],
+            "Expected different threads to receive distinct connection instances",
+        )
+
+    def test_item_lookup_latency_sub_50_microseconds(self):
+        full_data = {
+            "folders": [{"folder_id": "f1", "parent_id": None, "name": "Folder 1"}],
+            "items": [
+                {
+                    "item_id": f"item_{i}",
+                    "folder_id": "f1",
+                    "name": f"Item {i}",
+                    "asset_id": f"asset_{i}",
+                }
+                for i in range(100)
+            ],
+        }
+        self.cache.reload_full_inventory(full_data, new_token="tok1")
+
+        # Warmup connection
+        self.cache.get_item("item_0")
+
+        iterations = 500
+        t0 = time.perf_counter()
+        for i in range(iterations):
+            self.cache.get_item(f"item_{i % 100}")
+        elapsed = time.perf_counter() - t0
+
+        avg_latency_ms = (elapsed / iterations) * 1000
+        self.assertLess(
+            avg_latency_ms,
+            0.050,
+            f"Average lookup latency was {avg_latency_ms:.4f}ms, expected < 0.05ms",
+        )
 
 
 if __name__ == "__main__":
