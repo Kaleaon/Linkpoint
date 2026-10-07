@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.linkpoint.BuildConfig
 import com.linkpoint.ui.components.linkpoint2.tokens.ProvideLinkpoint2Tokens
@@ -62,6 +63,10 @@ fun LinkpointTheme(
 
     // Create Material 3 color scheme from ThemePack / canonical Ktheme model
     val colorScheme = resolvedThemePack.toMaterial3ColorScheme(darkTheme)
+    val kthemeScheme = remember(resolvedThemePack) { resolvedThemePack.toKthemeTheme().colorScheme }
+    val axisXColor = remember(kthemeScheme) { parseHexColor(kthemeScheme.axisX, Color(0xFFFF6B6B)) }
+    val axisYColor = remember(kthemeScheme) { parseHexColor(kthemeScheme.axisY, Color(0xFF7CFFD8)) }
+    val axisZColor = remember(kthemeScheme) { parseHexColor(kthemeScheme.axisZ, Color(0xFF6DE8FF)) }
 
     if (BuildConfig.DEBUG) {
         LaunchedEffect(resolvedThemePack) {
@@ -84,7 +89,12 @@ fun LinkpointTheme(
             shapes = shapes
         ) {
             com.linkpoint.ui.adaptive.ProvideWindowSizeClass {
-                ProvideLinkpoint2Tokens(content = content)
+                ProvideLinkpoint2Tokens(
+                    axisX = axisXColor,
+                    axisY = axisYColor,
+                    axisZ = axisZColor,
+                    content = content
+                )
             }
         }
     }
