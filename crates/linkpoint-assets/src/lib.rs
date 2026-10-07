@@ -222,11 +222,11 @@ impl AssetScheduler {
                 return b.in_frustum.cmp(&a.in_frustum);
             }
             // 3. Distance (closer first)
-            let dist_diff = a.distance - b.distance;
-            if dist_diff.abs() > 0.001 {
-                return dist_diff
-                    .partial_cmp(&0.0)
-                    .unwrap_or(std::cmp::Ordering::Equal);
+            if (a.distance - b.distance).abs() > 0.001 {
+                match a.distance.partial_cmp(&b.distance) {
+                    Some(std::cmp::Ordering::Equal) | None => {}
+                    Some(ord) => return ord,
+                }
             }
             // 4. Priority (higher u8 priority first)
             b.priority.cmp(&a.priority)
