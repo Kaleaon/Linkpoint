@@ -67,6 +67,23 @@ object TextureEntryParser {
     }
 
     /**
+     * Extract all unique non-zero material UUIDs (materialsId) from a TextureEntry byte array.
+     *
+     * @param data The raw TextureEntry bytes from ObjectUpdate
+     * @return Set of unique material UUIDs found in the entry
+     */
+    fun extractMaterialIds(data: ByteArray): Set<UUID> {
+        if (data.size < 16) return emptySet()
+        val faces = parseFull(data, MAX_FACES) ?: return emptySet()
+        val materialIds = mutableSetOf<UUID>()
+        for (face in faces) {
+            if (!isNullUUID(face.materialsId)) {
+                materialIds.add(face.materialsId)
+            }
+        }
+        return materialIds
+    }
+    /**
      * Per-face TextureEntry properties for [parseFull]. All values are
      * already resolved to per-face: every face starts with the default
      * value, then overrides from the face bitfield blocks are applied.

@@ -14,6 +14,7 @@ import os
 import platform
 import struct
 import threading
+from typing import Optional
 from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
@@ -253,6 +254,7 @@ class DecodedTexture:
     height: int
     format: str = "RGBA"
     status: str = "success"  # "success", "fallback", "cancelled", "error"
+    channel: str = "ALBEDO"  # "ALBEDO", "NORMAL", "METALLIC_ROUGHNESS", "EMISSIVE", "OCCLUSION"
 
 
 @dataclasses.dataclass
@@ -292,6 +294,21 @@ def create_placeholder_texture(
                 buf[offset + 2] = color[2]
                 buf[offset + 3] = color[3] if len(color) > 3 else 128
     return bytes(buf)
+
+
+def detect_compressed_format(raw_bytes: bytes) -> Optional[str]:
+    """Detects compressed texture extensions (KTX2, DDS, BASIS, PNG)."""
+    if not raw_bytes or len(raw_bytes) < 4:
+        return None
+    if raw_bytes.startswith(b"\xabKTX 20\xbb\r\n\x1a\n"):
+        return "KTX2"
+    if raw_bytes.startswith(b"DDS "):
+        return "DDS"
+    if raw_bytes.startswith(b"sB") or raw_bytes.startswith(b"BASIS"):
+        return "BASIS"
+    if raw_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "PNG"
+    return None
 
 
 def parse_jp2_dimensions(raw_bytes: bytes) -> tuple:
@@ -349,13 +366,26 @@ def parse_jp2_dimensions(raw_bytes: bytes) -> tuple:
     raise ValueError("Invalid JPEG2000 header signature")
 
 
-def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
+def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes, channel: str = "ALBEDO") -> DecodedTexture:
     """
-    Decompresses JPEG2000 raw bytes into raw RGBA pixel buffer.
+    Decompresses JPEG2000 raw bytes into raw RGBA pixel buffer or passes through
+    compressed multi-channel texture extensions.
     """
     if not raw_bytes:
-        placeholder = create_placeholder_texture(16, 16, (128, 128, 128, 128))
-        return DecodedTexture(texture_id, placeholder, 16, 16, status="fallback")
+        placeholder = create_placeholder_texture(16, 16, (128, 128, 128, 255))
+        return DecodedTexture(texture_id, placeholder, 16, 16, format="RGBA", status="fallback", channel=channel)
+
+    compressed_fmt = detect_compressed_format(raw_bytes)
+    if compressed_fmt is not None:
+        return DecodedTexture(
+            texture_id=texture_id,
+            buffer=raw_bytes,
+            width=256,
+            height=256,
+            format=compressed_fmt,
+            status="success",
+            channel=channel
+        )
 
     try:
         width, height = parse_jp2_dimensions(raw_bytes)
@@ -376,6 +406,7 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
             height=height,
             format="RGBA",
             status="success",
+            channel=channel
         )
     except Exception as e:
         logger.warning(f"Failed to decode JPEG2000 texture {texture_id}: {e}")
@@ -387,6 +418,7 @@ def decode_jpeg2000_buffer(texture_id: str, raw_bytes: bytes) -> DecodedTexture:
             height=16,
             format="RGBA",
             status="fallback",
+            channel=channel
         )
 
 
@@ -437,14 +469,15 @@ class TextureDecoder:
         raw_bytes: bytes,
         callback: Callable[[DecodedTexture], None] | None = None,
         priority: int = 0,
-        progress_callback: Callable[[DecodeProgressEvent], None] | None = None,
+        progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None,
+        channel: str = "ALBEDO"
     ) -> concurrent.futures.Future:
         """
-        Submits JPEG2000 texture decoding request to background worker pool.
+        Submits JPEG2000 or compressed texture decoding request to background worker pool.
         Invokes callback and surface handlers upon completion.
         """
         future = self._executor.submit(
-            self._worker_decode, texture_id, raw_bytes, callback, progress_callback
+            self._worker_decode, texture_id, raw_bytes, callback, progress_callback, channel
         )
         with self._lock:
             self._active_futures[texture_id] = future
@@ -489,8 +522,9 @@ class TextureDecoder:
         self,
         texture_id: str,
         raw_bytes: bytes,
-        callback: Callable[[DecodedTexture], None] | None,
-        progress_callback: Callable[[DecodeProgressEvent], None] | None = None,
+        callback: Optional[Callable[[DecodedTexture], None]],
+        progress_callback: Optional[Callable[[DecodeProgressEvent], None]] = None,
+        channel: str = "ALBEDO"
     ) -> DecodedTexture:
         total_len = len(raw_bytes) if raw_bytes else 0
         self._emit_progress(
@@ -505,10 +539,8 @@ class TextureDecoder:
 
         if is_cancelled:
             placeholder = create_placeholder_texture(16, 16)
-            result = DecodedTexture(texture_id, placeholder, 16, 16, status="cancelled")
-            self._emit_progress(
-                texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback
-            )
+            result = DecodedTexture(texture_id, placeholder, 16, 16, status="cancelled", channel=channel)
+            self._emit_progress(texture_id, 0.0, "CANCELLED", total_len, 0, progress_callback)
             if callback:
                 try:
                     callback(result)
@@ -518,15 +550,8 @@ class TextureDecoder:
                     )
             return result
 
-        self._emit_progress(
-            texture_id,
-            30.0,
-            "DECOMPRESSING",
-            total_len,
-            total_len // 2,
-            progress_callback,
-        )
-        decoded = decode_jpeg2000_buffer(texture_id, raw_bytes)
+        self._emit_progress(texture_id, 30.0, "DECOMPRESSING", total_len, total_len // 2, progress_callback)
+        decoded = decode_jpeg2000_buffer(texture_id, raw_bytes, channel=channel)
 
         with self._lock:
             if texture_id in self._cancelled_ids:

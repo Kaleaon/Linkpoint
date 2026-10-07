@@ -348,10 +348,23 @@ class DrawableMeshStore {
 
     // ── Mutation ─────────────────────────────────────────────────────────
 
-    fun bindTextureToMatchingFaces(id: Long, textureId: UUID, textureHandle: Int) {
+    fun bindTextureToMatchingFaces(
+        id: Long,
+        textureId: UUID,
+        textureHandle: Int,
+        semantic: com.linkpoint.assets.TextureFormatPolicy.TextureSemantic = com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.ALBEDO
+    ) {
         val instance = instances[id] ?: return
         instance.faces.forEach { f ->
-            if (f.textureId == textureId) f.textureHandle = textureHandle
+            if (f.textureId == textureId) {
+                when (semantic) {
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.NORMAL -> f.normalHandle = textureHandle
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.METALLIC_ROUGHNESS -> f.metallicRoughnessHandle = textureHandle
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.EMISSIVE -> f.emissiveHandle = textureHandle
+                    com.linkpoint.assets.TextureFormatPolicy.TextureSemantic.OCCLUSION -> f.occlusionHandle = textureHandle
+                    else -> f.textureHandle = textureHandle
+                }
+            }
         }
     }
 
