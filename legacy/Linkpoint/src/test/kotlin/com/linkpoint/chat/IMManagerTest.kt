@@ -62,7 +62,7 @@ class IMManagerTest {
             fromAgentId = senderId,
             fromName = "Sender Resident",
             message = "Come join me!",
-            dialogType = IMManager.IM_LURE_USER,
+            dialogType = com.linkpoint.linden.llmessage.IMType.LURE_USER,
             timestamp = System.currentTimeMillis(),
             isOutgoing = false,
             lureId = lureId,
@@ -99,7 +99,7 @@ class IMManagerTest {
         buf.get() // offline
 
         val dialog = buf.get().toInt()
-        assertEquals(IMManager.IM_LURE_ACCEPTED, dialog)
+        assertEquals(com.linkpoint.linden.llmessage.IMType.LURE_ACCEPTED.value, dialog)
 
         val expectedLure = TeleportLure(
             lureId = lureId,
@@ -127,7 +127,7 @@ class IMManagerTest {
             fromAgentId = senderId,
             fromName = "Sender Resident",
             message = "Come join me!",
-            dialogType = IMManager.IM_LURE_USER,
+            dialogType = com.linkpoint.linden.llmessage.IMType.LURE_USER,
             timestamp = System.currentTimeMillis(),
             isOutgoing = false,
             lureId = lureId,
@@ -160,6 +160,6 @@ class IMManagerTest {
         buf.int; buf.getUUID(); buf.float; buf.float; buf.float; buf.get()
 
         val dialog = buf.get().toInt()
-        assertEquals(IMManager.IM_LURE_DECLINED, dialog)
+        assertEquals(com.linkpoint.linden.llmessage.IMType.LURE_DECLINED.value, dialog)
     }
 }
