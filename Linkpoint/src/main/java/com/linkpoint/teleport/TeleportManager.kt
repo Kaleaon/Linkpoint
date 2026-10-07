@@ -6,7 +6,9 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
+import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
@@ -341,7 +343,27 @@ class TeleportManager(
      * Decline a teleport offer.
      */
     fun declineTeleportLure(lure: TeleportLure) {
-        // Just clear the pending lure - no message needed
+        try {
+            val payload = SLMessagePackers.packImprovedInstantMessage(
+                identity = AgentIdentity(agentId, sessionId),
+                fromGroup = false,
+                toAgentId = lure.senderId,
+                dialog = 24, // IM_LURE_DECLINED
+                id = lure.lureId,
+                timestamp = (System.currentTimeMillis() / 1000).toInt(),
+                fromAgentName = "You",
+                message = ""
+            )
+            udpConnection.sendPacket(
+                MessageIdRegistry.IMPROVED_INSTANT_MESSAGE,
+                payload,
+                reliable = true
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send teleport lure decline", e)
+        }
+
+        // Just clear the pending lure
         if (pendingLure?.lureId == lure.lureId) {
             pendingLure = null
         }

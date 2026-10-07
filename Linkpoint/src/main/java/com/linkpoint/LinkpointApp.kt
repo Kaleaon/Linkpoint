@@ -1204,6 +1204,9 @@ class LinkpointApp : Application() {
 
         // IM manager
         imManager = IMManager(udpConnection, capabilityManager, agentId)
+        if (::teleportManager.isInitialized) {
+            imManager.teleportManager = teleportManager
+        }
 
         // Wire IMManager into GroupsManager so `sendGroupChat` routes
         // through the IM session state machine (Dialog=15 bring-up +
@@ -1295,6 +1298,9 @@ class LinkpointApp : Application() {
 
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        if (::imManager.isInitialized) {
+            imManager.teleportManager = teleportManager
+        }
         if (::notificationManager.isInitialized) {
             notificationManager.teleportManager = teleportManager
         }

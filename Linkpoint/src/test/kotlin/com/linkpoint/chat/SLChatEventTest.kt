@@ -4,6 +4,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.MessageEventListener
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
+import com.linkpoint.teleport.TeleportManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -161,6 +162,65 @@ class SLChatEventTest {
 
         val dialogCode = payload[82].toInt() and 0xFF
         assertEquals(36, dialogCode)
+    }
+
+    @Test
+    fun `test respondToTeleportLure accept sends ImprovedInstantMessage dialog 23 and calls acceptTeleportLure`() {
+        runBlocking {
+            val mockTeleportManager = org.mockito.kotlin.mock<TeleportManager>()
+            imManager.teleportManager = mockTeleportManager
+
+            val lureEvent = SLChatEvent.TeleportLure(
+                lureId = UUID.randomUUID(),
+                sessionId = UUID.randomUUID(),
+                fromAgentId = UUID.randomUUID(),
+                fromName = "Lure Sender",
+                regionName = "Lure Region",
+                message = "Teleport to me!",
+                timestamp = System.currentTimeMillis()
+            )
+
+            imManager.respondToTeleportLure(lureEvent, accept = true)
+
+            assertEquals(CardActionState.ACCEPTED, lureEvent.actionState)
+            assertEquals(1, udpConn.sentPackets.size)
+
+            val (msgId, payload) = udpConn.sentPackets[0]
+            assertEquals(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, msgId)
+
+            val dialogCode = payload[82].toInt() and 0xFF
+            assertEquals(23, dialogCode) // IM_LURE_ACCEPTED
+
+            // Give scope.launch time to invoke mockTeleportManager.acceptTeleportLure
+            kotlinx.coroutines.delay(100)
+            org.mockito.kotlin.verify(mockTeleportManager).acceptTeleportLure(org.mockito.kotlin.argThat {
+                lureId == lureEvent.lureId && senderId == lureEvent.fromAgentId && regionName == lureEvent.regionName
+            })
+        }
+    }
+
+    @Test
+    fun `test respondToTeleportLure decline sends ImprovedInstantMessage dialog 24`() {
+        val lureEvent = SLChatEvent.TeleportLure(
+            lureId = UUID.randomUUID(),
+            sessionId = UUID.randomUUID(),
+            fromAgentId = UUID.randomUUID(),
+            fromName = "Lure Sender",
+            regionName = "Lure Region",
+            message = "Teleport to me!",
+            timestamp = System.currentTimeMillis()
+        )
+
+        imManager.respondToTeleportLure(lureEvent, accept = false)
+
+        assertEquals(CardActionState.DECLINED, lureEvent.actionState)
+        assertEquals(1, udpConn.sentPackets.size)
+
+        val (msgId, payload) = udpConn.sentPackets[0]
+        assertEquals(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, msgId)
+
+        val dialogCode = payload[82].toInt() and 0xFF
+        assertEquals(24, dialogCode) // IM_LURE_DECLINED
     }
 
     @Test

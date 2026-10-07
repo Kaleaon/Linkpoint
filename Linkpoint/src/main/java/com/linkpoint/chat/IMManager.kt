@@ -10,6 +10,8 @@ import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLVector3
+import com.linkpoint.teleport.TeleportLure
+import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.push.PushEvent
 import com.linkpoint.push.PushEventBus
 import com.linkpoint.push.PushEventType
@@ -96,6 +98,9 @@ class IMManager(
     }
 
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
+
+    @Volatile
+    var teleportManager: TeleportManager? = null
 
     // Active IM sessions
     private val sessions = ConcurrentHashMap<UUID, IMSession>()
@@ -591,6 +596,22 @@ class IMManager(
             reliable = true
         )
         logDebug(TAG, "Teleport lure response (dialog=$dialog) sent to ${event.fromAgentId}")
+
+        if (accept) {
+            teleportManager?.let { tm ->
+                scope.launch {
+                    val lure = TeleportLure(
+                        lureId = event.lureId,
+                        senderId = event.fromAgentId,
+                        senderName = event.fromName,
+                        regionName = event.regionName,
+                        message = event.message,
+                        timestamp = event.timestamp
+                    )
+                    tm.acceptTeleportLure(lure)
+                }
+            }
+        }
     }
 
     fun respondToInventoryOffer(event: SLChatEvent.InventoryOffer, accept: Boolean) {
