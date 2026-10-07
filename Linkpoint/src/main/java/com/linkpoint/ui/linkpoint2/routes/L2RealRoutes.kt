@@ -906,7 +906,9 @@ fun L2ProfileRoute(
                 scope.launch { app.friendsManager.offerFriendship(targetId) }
             }
         },
-        onTeleportTo = { onTeleportToMe() },
+        onTeleportTo = {
+            onTeleportToMe()
+        },
         onEditProfile = { onEditMyProfile() },
         onOpenWeb = {},
         modifier = modifier,
