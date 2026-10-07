@@ -30,7 +30,7 @@ final class PacketHeaderTests: XCTestCase {
     }
 
     func testHeaderParsingLowFrequencyAndAppendedAcks() throws {
-        var data = Data([
+        let data = Data([
             0x10, // Appended ACKs flag
             0x00, 0x00, 0x00, 0x66, // Sequence = 102
             0x00, // Extra len = 0

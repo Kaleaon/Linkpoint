@@ -152,4 +152,14 @@ public final class VirtualCircuitManager: @unchecked Sendable {
     public func acknowledgePacket(sequenceNumber: UInt32) {
         unackedPackets.removeValue(forKey: sequenceNumber)
     }
+
+    public func pendingAckCount() -> Int {
+        pendingAcks.count
+    }
+
+    public func popPendingAcks() -> [UInt32] {
+        let acks = Array(pendingAcks)
+        pendingAcks.removeAll()
+        return acks
+    }
 }

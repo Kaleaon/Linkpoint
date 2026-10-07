@@ -1,6 +1,6 @@
 import Foundation
 
-public struct PacketHeaderFlags: OptionSet {
+public struct PacketHeaderFlags: OptionSet, Sendable {
     public let rawValue: UInt8
 
     public init(rawValue: UInt8) {
@@ -14,14 +14,14 @@ public struct PacketHeaderFlags: OptionSet {
     public static let ack          = PacketHeaderFlags(rawValue: 0x10)
 }
 
-public enum PacketFrequency {
+public enum PacketFrequency: Sendable {
     case high
     case medium
     case low
     case fixed
 }
 
-public struct PacketHeader {
+public struct PacketHeader: Sendable {
     public var flags: PacketHeaderFlags
     public var sequenceNumber: UInt32
     public var extraBytesCount: Int
