@@ -44,6 +44,34 @@ namespace LinkpointAssetPipeline.Tests
 
     public class AssetPipelineTests
     {
+        private static string FindVectorFile(string relativeSubpath)
+        {
+            string[] parts = relativeSubpath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            string normalizedSubpath = Path.Combine(parts);
+
+            var searchRoots = new[]
+            {
+                AppContext.BaseDirectory,
+                Directory.GetCurrentDirectory(),
+                "/app/Linkpoint",
+                "C:\\app\\Linkpoint"
+            };
+
+            foreach (var root in searchRoots)
+            {
+                if (string.IsNullOrEmpty(root)) continue;
+                var current = new DirectoryInfo(root);
+                while (current != null)
+                {
+                    string candidate = Path.Combine(current.FullName, "test-vectors", normalizedSubpath);
+                    if (File.Exists(candidate)) return candidate;
+                    current = current.Parent;
+                }
+            }
+
+            throw new FileNotFoundException($"Could not locate test vector file for subpath: {relativeSubpath}");
+        }
+
         private static byte[] HexToBytes(string hex)
         {
             byte[] bytes = new byte[hex.Length / 2];
@@ -57,11 +85,7 @@ namespace LinkpointAssetPipeline.Tests
         [Fact]
         public void TextureDecoder_DecodesJ2KTestVectorsNatively()
         {
-            string vectorPath = "/app/Linkpoint/test-vectors/textures/j2k_texture_decoder_vectors.json";
-            if (!File.Exists(vectorPath))
-            {
-                vectorPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "test-vectors", "textures", "j2k_texture_decoder_vectors.json");
-            }
+            string vectorPath = FindVectorFile("textures/j2k_texture_decoder_vectors.json");
 
             string jsonString = File.ReadAllText(vectorPath);
             using var doc = JsonDocument.Parse(jsonString);
@@ -100,11 +124,7 @@ namespace LinkpointAssetPipeline.Tests
         [Fact]
         public void LLMeshConverter_ConvertsLLMeshToGltfUsingSharpGLTF()
         {
-            string vectorPath = "/app/Linkpoint/test-vectors/mesh/llmesh_decompress_vectors.json";
-            if (!File.Exists(vectorPath))
-            {
-                vectorPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "test-vectors", "mesh", "llmesh_decompress_vectors.json");
-            }
+            string vectorPath = FindVectorFile("mesh/llmesh_decompress_vectors.json");
 
             string jsonString = File.ReadAllText(vectorPath);
             using var doc = JsonDocument.Parse(jsonString);

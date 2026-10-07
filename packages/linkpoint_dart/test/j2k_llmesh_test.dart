@@ -12,13 +12,30 @@ Uint8List hexToBytes(String hex) {
   return result;
 }
 
+String resolveVectorPath(String relativeSubpath) {
+  final candidateRelative = [
+    '../../test-vectors/$relativeSubpath',
+    '../test-vectors/$relativeSubpath',
+    'test-vectors/$relativeSubpath',
+    '/app/Linkpoint/test-vectors/$relativeSubpath',
+    'C:\\app\\Linkpoint\\test-vectors\\$relativeSubpath',
+  ];
+  for (final path in candidateRelative) {
+    if (File(path).existsSync()) return path;
+  }
+  Directory current = Directory.current;
+  while (current.parent.path != current.path) {
+    final candidate = File('${current.path}/test-vectors/$relativeSubpath');
+    if (candidate.existsSync()) return candidate.path;
+    current = current.parent;
+  }
+  throw Exception('Vector file not found: $relativeSubpath');
+}
+
 void main() {
   group('Pure Dart J2K & LLMesh Pipeline Tests', () {
     test('J2K texture decoder decodes test vectors natively without C-FFI', () {
-      final vecFile = File('../../test-vectors/textures/j2k_texture_decoder_vectors.json');
-      final path = vecFile.existsSync()
-          ? vecFile.path
-          : '/app/Linkpoint/test-vectors/textures/j2k_texture_decoder_vectors.json';
+      final path = resolveVectorPath('textures/j2k_texture_decoder_vectors.json');
       final jsonContent = File(path).readAsStringSync();
       final data = json.decode(jsonContent);
 
@@ -45,10 +62,7 @@ void main() {
     });
 
     test('LLMesh converter parses binary mesh and generates GLTF JSON in pure Dart', () {
-      final vecFile = File('../../test-vectors/mesh/llmesh_decompress_vectors.json');
-      final path = vecFile.existsSync()
-          ? vecFile.path
-          : '/app/Linkpoint/test-vectors/mesh/llmesh_decompress_vectors.json';
+      final path = resolveVectorPath('mesh/llmesh_decompress_vectors.json');
       final jsonContent = File(path).readAsStringSync();
       final data = json.decode(jsonContent);
 
