@@ -17,6 +17,7 @@ from texture_decoder import (
     DecodedTexture,
     DecodeProgressEvent,
     TextureDecoder,
+    _get_native_lib,
     decode_jpeg2000_buffer,
     populate_rgba_buffer_native,
     populate_rgba_buffer_python,
