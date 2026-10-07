@@ -2,15 +2,15 @@ import { execSync } from 'node:child_process';
 
 // Known unfixable upstream security advisories (with no available patched release)
 const IGNORED_ADVISORIES = new Set([
-  'GHSA-vfj7-8cjw-p6xm', // braces <= 3.0.3
-  'GHSA-ch52-4w7c-c8xp', // http-cache-semantics <= 4.2.0
+  'GHSA-VFJ7-8CJW-P6XM', // braces <= 3.0.3
+  'GHSA-CH52-4W7C-C8XP', // http-cache-semantics <= 4.2.0
 ]);
 
 let output = '';
 try {
   output = execSync('npm audit --json', { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
 } catch (error) {
-  output = error.stdout || '';
+  output = String(error.stdout || '');
 }
 
 if (!output) {
@@ -26,22 +26,66 @@ try {
   process.exit(1);
 }
 
-const vulnerabilities = auditResult.vulnerabilities || {};
-const unhandledAdvisories = [];
+if (auditResult.error) {
+  console.error('npm audit reported error:', auditResult.error);
+  process.exit(1);
+}
 
-for (const [pkgName, vuln] of Object.entries(vulnerabilities)) {
+const vulnerabilities = auditResult.vulnerabilities || {};
+
+function getAdvisoriesForPackage(pkgName, vulnerabilitiesMap, visited = new Set()) {
+  if (visited.has(pkgName)) return [];
+  visited.add(pkgName);
+
+  const vuln = vulnerabilitiesMap[pkgName];
+  if (!vuln) return [];
+
+  const advisories = [];
   const viaList = Array.isArray(vuln.via) ? vuln.via : [];
+
   for (const item of viaList) {
-    if (typeof item === 'object' && item.url) {
-      const ghsaId = item.url.split('/').pop();
-      const severity = item.severity || vuln.severity;
-      if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
+    if (item && typeof item === 'object') {
+      advisories.push({ ...item, pkgName, vulnSeverity: vuln.severity });
+    } else if (typeof item === 'string') {
+      if (item.match(/^GHSA-[a-zA-Z0-9-]+$/i)) {
+        advisories.push({
+          url: `https://github.com/advisories/${item}`,
+          title: item,
+          severity: vuln.severity,
+          pkgName,
+          vulnSeverity: vuln.severity,
+        });
+      } else {
+        advisories.push(...getAdvisoriesForPackage(item, vulnerabilitiesMap, visited));
+      }
+    }
+  }
+  return advisories;
+}
+
+const unhandledAdvisories = [];
+const seenKeys = new Set();
+
+for (const pkgName of Object.keys(vulnerabilities)) {
+  const advisories = getAdvisoriesForPackage(pkgName, vulnerabilities);
+  for (const item of advisories) {
+    const rawUrl = item.url || (typeof item.source === 'string' ? item.source : '') || item.github_advisory_id || '';
+    let match = typeof rawUrl === 'string' ? rawUrl.match(/GHSA-[a-zA-Z0-9-]+/i) : null;
+    if (!match && typeof item.title === 'string') {
+      match = item.title.match(/GHSA-[a-zA-Z0-9-]+/i);
+    }
+    const ghsaId = match ? match[0].toUpperCase() : (rawUrl ? String(rawUrl).split('/').pop().toUpperCase() : 'UNKNOWN');
+    const severity = String(item.severity || item.vulnSeverity || '').toLowerCase();
+    if ((severity === 'high' || severity === 'critical') && !IGNORED_ADVISORIES.has(ghsaId)) {
+      const key = `${pkgName}:${ghsaId}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
         unhandledAdvisories.push({
           package: pkgName,
           ghsaId,
-          title: item.title,
+          title: item.title || item.name || pkgName,
           severity,
-          url: item.url,
+          url: rawUrl,
         });
       }
     }
