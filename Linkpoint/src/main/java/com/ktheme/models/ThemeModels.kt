@@ -88,3 +88,4 @@ data class Theme(
     val layoutStructure: LayoutStructure = LayoutStructure.MATERIAL3,
     val adaptation: Adaptation? = null
 )
+
