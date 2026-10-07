@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 import { NAV_ALL } from "../data/content.js";
 import Icon from "./Icon.jsx";
 import { navActive } from "../theme/look.js";
+import { useRovingTabindex } from "../hooks/useRovingTabindex.js";
 
 // Ported from the `isRail` <sc-if> block — the left rail (Navy Gold, Rule &
 // Rail packs, or any pack on a split/tablet-width device).
@@ -12,6 +13,14 @@ export default function RailNav() {
   // Navigation stays visible on the 3D View too. Hiding it left no way out of the
   // scene on phones and tablets (the 3D screen has no header or back button).
   if (nav !== "rail") return null;
+
+  const activeIndex = NAV_ALL.findIndex((n) => navActive(state.screen, n.id));
+  const { getTabProps } = useRovingTabindex({
+    count: NAV_ALL.length,
+    activeIndex: activeIndex >= 0 ? activeIndex : 0,
+    onSelect: (idx) => actions.setScreen(NAV_ALL[idx].id),
+    orientation: "vertical",
+  });
 
   return (
     <div
@@ -33,23 +42,18 @@ export default function RailNav() {
         <br />
         POINT
       </div>
-      {NAV_ALL.map((n) => {
+      {NAV_ALL.map((n, index) => {
         const active = navActive(state.screen, n.id);
         const radius = V.rs || V.navr || "4px";
+        const tabProps = getTabProps(index, active);
         return (
           <div
             key={n.id}
+            {...tabProps}
             role="tab"
-            tabIndex={0}
             aria-selected={active}
             aria-label={"Go to " + n.label}
             onClick={() => actions.setScreen(n.id)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                actions.setScreen(n.id);
-              }
-            }}
             style={{
               display: "flex",
               flexDirection: "column",
