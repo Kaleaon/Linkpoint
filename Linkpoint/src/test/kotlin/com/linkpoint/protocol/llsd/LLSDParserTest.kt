@@ -315,4 +315,23 @@ class LLSDParserTest {
         }
         assertEquals(expected, value)
     }
+
+    @Test
+    fun `parseLlsdDate handles offsets sub-milliseconds and malformed strings`() {
+        // Explicit offsets
+        val date1 = LLSDParser.parseLlsdDate("2024-01-02T03:04:05.678+00:00")
+        val date2 = LLSDParser.parseLlsdDate("2024-01-02T03:04:05Z")
+        val date3 = LLSDParser.parseLlsdDate("2024-01-01T22:04:05.678-05:00") // Same instant as date1
+        assertTrue(date1 != null)
+        assertTrue(date2 != null)
+        assertEquals(date1?.time, date3?.time)
+
+        // Sub-millisecond precision
+        val dateMicro = LLSDParser.parseLlsdDate("2024-01-02T03:04:05.678912Z")
+        assertEquals(date1?.time, dateMicro?.time)
+
+        // Malformed string returns null
+        val malformed = LLSDParser.parseLlsdDate("not-a-date")
+        assertEquals(null, malformed)
+    }
 }

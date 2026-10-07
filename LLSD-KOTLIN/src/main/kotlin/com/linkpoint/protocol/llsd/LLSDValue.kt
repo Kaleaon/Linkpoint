@@ -3,6 +3,8 @@ package com.linkpoint.protocol.llsd
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -131,9 +133,7 @@ data class LLSDDate(val value: Date) : LLSDValue() {
     constructor(timestamp: Long) : this(Date(timestamp))
 
     override fun toXML(): String {
-        val iso8601 = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }.format(value)
+        val iso8601 = ISO_8601_FORMATTER.format(value.toInstant())
         return "<date>$iso8601</date>"
     }
 
@@ -152,6 +152,11 @@ data class LLSDDate(val value: Date) : LLSDValue() {
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putDouble(seconds)
         return buffer.array()
+    }
+
+    companion object {
+        private val ISO_8601_FORMATTER: DateTimeFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC)
     }
 }
 
