@@ -62,6 +62,10 @@ fi
 # 4. Enforce valid execution of vector assertion suites
 echo "Executing vector assertion suites..."
 cargo test -p linkpoint-scene --test vector_tests
+if [[ ! -d "node_modules" ]]; then
+  echo "Installing Node dependencies..."
+  npm ci
+fi
 npx vitest run apps/linkpoint/src/linkpoint/__tests__/test-vectors.test.ts
 
 echo "Parity snapshot guard check passed."
