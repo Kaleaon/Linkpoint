@@ -41,12 +41,26 @@ interface WorldTopographyProjection {
     fun getGravityVector(localX: Float, localY: Float, localZ: Float, gravityMagnitude: Float = 9.8f): FloatArray
 
     /**
-     * Adapt bounding box volume bounds based on projected surface coordinates.
+     * Adapt bounding box volume bounds based on local manifold surface coordinates.
      */
     fun getProjectedBounds(
         minX: Float, minY: Float, minZ: Float,
         maxX: Float, maxY: Float, maxZ: Float
     ): SpatialIndex.EntryBounds
+
+    /**
+     * Calculate surface geodesic distance along the manifold floor between two local points.
+     */
+    fun calculateGeodesicDistance(localX1: Float, localY1: Float, localX2: Float, localY2: Float): Float
+
+    /**
+     * Evaluate horizon culling on non-planar surfaces.
+     */
+    fun isBeyondHorizon(
+        camX: Float, camY: Float, camZ: Float,
+        targetX: Float, targetY: Float, targetZ: Float,
+        targetRadius: Float = 0f
+    ): Boolean
 
     /**
      * Query topography map to compute neighbor region handles across non-linear manifold boundaries.
@@ -82,6 +96,18 @@ class PlanarTopographyProjection : WorldTopographyProjection {
         maxX: Float, maxY: Float, maxZ: Float
     ): SpatialIndex.EntryBounds {
         return SpatialIndex.EntryBounds(minX, minY, minZ, maxX, maxY, maxZ)
+    }
+
+    override fun calculateGeodesicDistance(localX1: Float, localY1: Float, localX2: Float, localY2: Float): Float {
+        return hypot(localX2 - localX1, localY2 - localY1)
+    }
+
+    override fun isBeyondHorizon(
+        camX: Float, camY: Float, camZ: Float,
+        targetX: Float, targetY: Float, targetZ: Float,
+        targetRadius: Float
+    ): Boolean {
+        return false
     }
 
     override fun getNeighborRegionHandle(currentHandle: Long, localX: Float, localY: Float, regionSize: Int): Long? {
@@ -165,34 +191,22 @@ class RingworldTopographyProjection(
         minX: Float, minY: Float, minZ: Float,
         maxX: Float, maxY: Float, maxZ: Float
     ): SpatialIndex.EntryBounds {
-        val corners = arrayOf(
-            projectToCartesian(minX, minY, minZ),
-            projectToCartesian(minX, minY, maxZ),
-            projectToCartesian(minX, maxY, minZ),
-            projectToCartesian(minX, maxY, maxZ),
-            projectToCartesian(maxX, minY, minZ),
-            projectToCartesian(maxX, minY, maxZ),
-            projectToCartesian(maxX, maxY, minZ),
-            projectToCartesian(maxX, maxY, maxZ)
-        )
+        return SpatialIndex.EntryBounds(minX, minY, minZ, maxX, maxY, maxZ)
+    }
 
-        var pMinX = Float.MAX_VALUE
-        var pMinY = Float.MAX_VALUE
-        var pMinZ = Float.MAX_VALUE
-        var pMaxX = -Float.MAX_VALUE
-        var pMaxY = -Float.MAX_VALUE
-        var pMaxZ = -Float.MAX_VALUE
+    override fun calculateGeodesicDistance(localX1: Float, localY1: Float, localX2: Float, localY2: Float): Float {
+        val dxRaw = abs(localX2 - localX1)
+        val dx = min(dxRaw, circumference - dxRaw)
+        val dy = localY2 - localY1
+        return hypot(dx, dy)
+    }
 
-        for (pt in corners) {
-            pMinX = minOf(pMinX, pt[0])
-            pMinY = minOf(pMinY, pt[1])
-            pMinZ = minOf(pMinZ, pt[2])
-            pMaxX = maxOf(pMaxX, pt[0])
-            pMaxY = maxOf(pMaxY, pt[1])
-            pMaxZ = maxOf(pMaxZ, pt[2])
-        }
-
-        return SpatialIndex.EntryBounds(pMinX, pMinY, pMinZ, pMaxX, pMaxY, pMaxZ)
+    override fun isBeyondHorizon(
+        camX: Float, camY: Float, camZ: Float,
+        targetX: Float, targetY: Float, targetZ: Float,
+        targetRadius: Float
+    ): Boolean {
+        return false
     }
 
     override fun getNeighborRegionHandle(currentHandle: Long, localX: Float, localY: Float, regionSize: Int): Long? {
@@ -287,34 +301,30 @@ class SphericalTopographyProjection(
         minX: Float, minY: Float, minZ: Float,
         maxX: Float, maxY: Float, maxZ: Float
     ): SpatialIndex.EntryBounds {
-        val corners = arrayOf(
-            projectToCartesian(minX, minY, minZ),
-            projectToCartesian(minX, minY, maxZ),
-            projectToCartesian(minX, maxY, minZ),
-            projectToCartesian(minX, maxY, maxZ),
-            projectToCartesian(maxX, minY, minZ),
-            projectToCartesian(maxX, minY, maxZ),
-            projectToCartesian(maxX, maxY, minZ),
-            projectToCartesian(maxX, maxY, maxZ)
-        )
+        return SpatialIndex.EntryBounds(minX, minY, minZ, maxX, maxY, maxZ)
+    }
 
-        var pMinX = Float.MAX_VALUE
-        var pMinY = Float.MAX_VALUE
-        var pMinZ = Float.MAX_VALUE
-        var pMaxX = -Float.MAX_VALUE
-        var pMaxY = -Float.MAX_VALUE
-        var pMaxZ = -Float.MAX_VALUE
+    override fun calculateGeodesicDistance(localX1: Float, localY1: Float, localX2: Float, localY2: Float): Float {
+        val lambda1 = localX1 / radius
+        val phi1 = (localY1 / radius).coerceIn((-PI / 2.0).toFloat(), (PI / 2.0).toFloat())
+        val lambda2 = localX2 / radius
+        val phi2 = (localY2 / radius).coerceIn((-PI / 2.0).toFloat(), (PI / 2.0).toFloat())
+        val cosSigma = (sin(phi1) * sin(phi2) + cos(phi1) * cos(phi2) * cos(lambda2 - lambda1)).coerceIn(-1f, 1f)
+        return acos(cosSigma) * radius
+    }
 
-        for (pt in corners) {
-            pMinX = minOf(pMinX, pt[0])
-            pMinY = minOf(pMinY, pt[1])
-            pMinZ = minOf(pMinZ, pt[2])
-            pMaxX = maxOf(pMaxX, pt[0])
-            pMaxY = maxOf(pMaxY, pt[1])
-            pMaxZ = maxOf(pMaxZ, pt[2])
-        }
-
-        return SpatialIndex.EntryBounds(pMinX, pMinY, pMinZ, pMaxX, pMaxY, pMaxZ)
+    override fun isBeyondHorizon(
+        camX: Float, camY: Float, camZ: Float,
+        targetX: Float, targetY: Float, targetZ: Float,
+        targetRadius: Float
+    ): Boolean {
+        val camAlt = max(0f, camZ)
+        val cosHorizon = (radius / (radius + camAlt)).coerceIn(0f, 1f)
+        val sigmaHorizon = acos(cosHorizon)
+        val distGeo = calculateGeodesicDistance(camX, camY, targetX, targetY)
+        val deltaSigma = distGeo / radius
+        val angularRadius = if (radius > 0f) targetRadius / radius else 0f
+        return deltaSigma > (sigmaHorizon + angularRadius)
     }
 
     override fun getNeighborRegionHandle(currentHandle: Long, localX: Float, localY: Float, regionSize: Int): Long? {
