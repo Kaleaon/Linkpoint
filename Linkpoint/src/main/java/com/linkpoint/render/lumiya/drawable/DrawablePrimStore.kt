@@ -44,7 +44,36 @@ class DrawablePrimStore {
         var roughnessFactor: Float = 0.5f,
         var descriptor: MaterialDescriptor? = null,
         var glow: Float = 0f
-    )
+    ) {
+        @Volatile
+        var isDirty: Boolean = true
+
+        @Transient
+        private val matrixBuffer = FloatArray(16)
+
+        @Transient
+        @Volatile
+        private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+
+        fun getMatrix(): FloatArray {
+            if (isDirty) {
+                synchronized(matrixBuffer) {
+                    if (isDirty) {
+                        if (scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f) {
+                            cachedMatrix = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+                        } else {
+                            MaterialDescriptor.UvTransform.computeMatrix(
+                                scaleS, scaleT, offsetS, offsetT, rotation, matrixBuffer
+                            )
+                            cachedMatrix = matrixBuffer
+                        }
+                        isDirty = false
+                    }
+                }
+            }
+            return cachedMatrix
+        }
+    }
 
     /** Per-prim instance snapshot data. */
     data class PrimInstance(
