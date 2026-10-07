@@ -47,7 +47,6 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
-<<<<<<< HEAD
           git add --renormalize .
           git reset
           git checkout .
@@ -93,7 +92,6 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
           git config core.autocrlf false
-<<<<<<< HEAD
           git add --renormalize .
           git reset
           git checkout .
