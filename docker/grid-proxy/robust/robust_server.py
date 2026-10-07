@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-import os
-import sys
-import time
 import json
-import xmlrpc.server
+import os
 import xmlrpc.client
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import xmlrpc.server
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
 import pymysql
+
 
 def log(msg):
     print(f"[robust-grid] {msg}", flush=True)
+
 
 class RobustRequestHandler(BaseHTTPRequestHandler):
     def get_db_connection(self):
@@ -19,7 +20,7 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
             user=os.environ.get("MYSQL_USER", "opensim"),
             password=os.environ.get("MYSQL_PASSWORD", "opensimpass"),
             database=os.environ.get("MYSQL_DATABASE", "opensim"),
-            autocommit=True
+            autocommit=True,
         )
 
     def do_GET(self):
@@ -31,12 +32,16 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
             return
 
         # Microservice 1: UserAccount GET
-        if self.path.startswith("/UserAccount/") or self.path.startswith("/useraccounts/"):
+        if self.path.startswith("/UserAccount/") or self.path.startswith(
+            "/useraccounts/"
+        ):
             uuid_param = self.path.split("/")[-1]
             try:
                 conn = self.get_db_connection()
                 with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    cursor.execute("SELECT * FROM useraccounts WHERE PrincipalID=%s", (uuid_param,))
+                    cursor.execute(
+                        "SELECT * FROM useraccounts WHERE PrincipalID=%s", (uuid_param,)
+                    )
                     row = cursor.fetchone()
                 conn.close()
                 if row:
@@ -53,7 +58,10 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
             try:
                 conn = self.get_db_connection()
                 with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    cursor.execute("SELECT id, name, description, assetType FROM assets WHERE id=%s", (asset_id,))
+                    cursor.execute(
+                        "SELECT id, name, description, assetType FROM assets WHERE id=%s",
+                        (asset_id,),
+                    )
                     row = cursor.fetchone()
                 conn.close()
                 if row:
@@ -81,21 +89,36 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
         # Microservice JSON handlers (UserAccount, Auth, Grid, Inventory, Presence, Friends, GridUser)
         path = self.path.lower()
         if "/useraccount" in path:
-            self.send_json_response(200, {"status": "UserAccountService OK", "method": "POST"})
+            self.send_json_response(
+                200, {"status": "UserAccountService OK", "method": "POST"}
+            )
         elif "/auth" in path:
-            self.send_json_response(200, {"status": "AuthenticationService OK", "method": "POST"})
+            self.send_json_response(
+                200, {"status": "AuthenticationService OK", "method": "POST"}
+            )
         elif "/grid" in path:
             self.send_json_response(200, {"status": "GridService OK", "method": "POST"})
         elif "/inventory" in path:
-            self.send_json_response(200, {"status": "InventoryService OK", "method": "POST"})
+            self.send_json_response(
+                200, {"status": "InventoryService OK", "method": "POST"}
+            )
         elif "/presence" in path:
-            self.send_json_response(200, {"status": "PresenceService OK", "method": "POST"})
+            self.send_json_response(
+                200, {"status": "PresenceService OK", "method": "POST"}
+            )
         elif "/friends" in path:
-            self.send_json_response(200, {"status": "FriendsService OK", "method": "POST"})
+            self.send_json_response(
+                200, {"status": "FriendsService OK", "method": "POST"}
+            )
         elif "/griduser" in path:
-            self.send_json_response(200, {"status": "GridUserService OK", "method": "POST"})
+            self.send_json_response(
+                200, {"status": "GridUserService OK", "method": "POST"}
+            )
         else:
-            self.send_json_response(200, {"status": "Robust Microservice Handler Executed", "path": self.path})
+            self.send_json_response(
+                200,
+                {"status": "Robust Microservice Handler Executed", "path": self.path},
+            )
 
     def handle_xmlrpc_login(self, body):
         try:
@@ -110,17 +133,24 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
 
             conn = self.get_db_connection()
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                cursor.execute("SELECT * FROM useraccounts WHERE FirstName=%s AND LastName=%s", (first_name, last_name))
+                cursor.execute(
+                    "SELECT * FROM useraccounts WHERE FirstName=%s AND LastName=%s",
+                    (first_name, last_name),
+                )
                 user = cursor.fetchone()
             conn.close()
 
-            agent_id = user["PrincipalID"] if user else "00000000-0000-0000-0000-000000000001"
+            agent_id = (
+                user["PrincipalID"] if user else "00000000-0000-0000-0000-000000000001"
+            )
             session_id = "11111111-2222-3333-4444-555555555555"
             secure_session_id = "66666666-7777-8888-9999-000000000000"
 
             response_data = {
                 "login": "true",
-                "message": os.environ.get("WELCOME_MESSAGE", "Welcome to OpenSim Container Grid!"),
+                "message": os.environ.get(
+                    "WELCOME_MESSAGE", "Welcome to OpenSim Container Grid!"
+                ),
                 "first_name": first_name,
                 "last_name": last_name,
                 "agent_id": agent_id,
@@ -132,10 +162,16 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
                 "http_port": 8003,
                 "region_x": 1000 * 256,
                 "region_y": 1000 * 256,
-                "seed_capability": os.environ.get("PUBLIC_URI", "https://localhost") + "/CAPS/seed-cap-0000",
+                "seed_capability": os.environ.get("PUBLIC_URI", "https://localhost")
+                + "/CAPS/seed-cap-0000",
                 "inventory-skeleton": [
-                    {"folder_id": "00000000-0000-0000-0000-000000000010", "name": "My Inventory", "type_default": 8, "version": 1}
-                ]
+                    {
+                        "folder_id": "00000000-0000-0000-0000-000000000010",
+                        "name": "My Inventory",
+                        "type_default": 8,
+                        "version": 1,
+                    }
+                ],
             }
 
             xml_response = xmlrpc.client.dumps((response_data,), methodresponse=True)
@@ -146,8 +182,7 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
         except Exception as e:
             log(f"Error handling XML-RPC login: {e}")
             err_response = xmlrpc.client.dumps(
-                xmlrpc.client.Fault(100, f"Login failed: {str(e)}"),
-                methodresponse=True
+                xmlrpc.client.Fault(100, f"Login failed: {str(e)}"), methodresponse=True
             )
             self.send_response(200)
             self.send_header("Content-Type", "text/xml")
@@ -160,12 +195,14 @@ class RobustRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
+
 def run():
     port = int(os.environ.get("ROBUST_PORT", 8002))
     server_address = ("0.0.0.0", port)
     httpd = HTTPServer(server_address, RobustRequestHandler)
     log(f"Robust Server listening on 0.0.0.0:{port}...")
     httpd.serve_forever()
+
 
 if __name__ == "__main__":
     run()

@@ -19,12 +19,28 @@ class TerrainManager {
         const val PATCH_SIZE = 16
         const val PATCHES_PER_SIDE = 16
         const val DEFAULT_WATER_HEIGHT = 20.0f
+        private const val MAX_REGION_SIZE = 4096
+        const val MAX_CACHED_TILES = 16 // Mobile memory safety limit
     }
 
+    // Region dimensions in meters (default 256x256, up to 4096x4096 for varregions)
     var regionSizeX: Int = REGION_SIZE
         private set
     var regionSizeY: Int = REGION_SIZE
         private set
+
+    val regionWidth: Int
+        get() = regionSizeX
+
+    val regionHeight: Int
+        get() = regionSizeY
+
+    // Currently active 256m virtual tile
+    var activeTileIndex: VirtualTileIndex = VirtualTileIndex(0, 0)
+        private set
+
+    // Virtual tile heightmaps cache: VirtualTileIndex -> FloatArray(256x256)
+    private val virtualTileCache = ConcurrentHashMap<VirtualTileIndex, FloatArray>()
 
     // Full heightmap allocated as (RegionSizeX + 1) * (RegionSizeY + 1)
     private var heightMap = FloatArray((REGION_SIZE + 1) * (REGION_SIZE + 1))
@@ -39,7 +55,7 @@ class TerrainManager {
     // Terrain renderer reference (set when rendering is ready)
     private var terrainRenderer: TerrainRenderer? = null
 
-    // Count of valid patches received
+    // Count of valid patches received across active virtual tile/region
     var validPatchCount: Int = 0
         private set
 
@@ -47,16 +63,29 @@ class TerrainManager {
      * Configure active region dimensions and reallocate heightmap.
      */
     fun setRegionSize(width: Int, height: Int) {
-        val clampedW = width.coerceIn(256, 2048)
-        val clampedH = height.coerceIn(256, 2048)
+        val clampedW = width.coerceIn(256, MAX_REGION_SIZE)
+        val clampedH = height.coerceIn(256, MAX_REGION_SIZE)
         if (regionSizeX != clampedW || regionSizeY != clampedH) {
             regionSizeX = clampedW
             regionSizeY = clampedH
             heightMap = FloatArray((regionSizeX + 1) * (regionSizeY + 1))
             validPatches.clear()
+            virtualTileCache.clear()
             validPatchCount = 0
             Log.i(TAG, "Configured region dimensions: ${regionSizeX}x${regionSizeY}")
             terrainRenderer?.setRegionSize(regionSizeX.toFloat(), regionSizeY.toFloat())
+        }
+    }
+
+    /**
+     * Set active virtual 256m tile for rendering and interaction.
+     */
+    fun setActiveTile(tileX: Int, tileY: Int) {
+        val newIndex = VirtualTileIndex(tileX, tileY)
+        if (activeTileIndex != newIndex) {
+            activeTileIndex = newIndex
+            Log.d(TAG, "Active virtual tile changed to (${tileX}, ${tileY})")
+            updateRendererHeightmap()
         }
     }
 
@@ -95,6 +124,30 @@ class TerrainManager {
         val patchesPerSideX = regionSizeX / PATCH_SIZE
         val patchesPerSideY = regionSizeY / PATCH_SIZE
 
+        val virtualTiles = VirtualRegionMapper.splitTerrainPatchesToVirtualTiles(
+            result.patches,
+            regionWidth,
+            regionHeight
+        )
+
+        for ((tileIndex, tilePacket) in virtualTiles) {
+            // Evict LRU/distant tile if cache size exceeds limit
+            if (virtualTileCache.size >= MAX_CACHED_TILES && !virtualTileCache.containsKey(tileIndex)) {
+                val tileToRemove = virtualTileCache.keys.maxByOrNull {
+                    kotlin.math.abs(it.x - activeTileIndex.x) + kotlin.math.abs(it.y - activeTileIndex.y)
+                }
+                if (tileToRemove != null && tileToRemove != activeTileIndex) {
+                    virtualTileCache.remove(tileToRemove)
+                }
+            }
+
+            val tileHeights = virtualTileCache.getOrPut(tileIndex) { FloatArray(REGION_SIZE * REGION_SIZE) }
+
+            for (reindexedPatch in tilePacket.patches) {
+                applyPatchToBuffer(reindexedPatch, tileHeights)
+            }
+        }
+
         var patchesUpdated = 0
 
         for (patch in result.patches) {
@@ -112,7 +165,7 @@ class TerrainManager {
     }
 
     /**
-     * Apply a single patch to the heightmap.
+     * Apply a single patch to the full region heightmap.
      */
     private fun applyPatch(patch: TerrainPatch) {
         val baseX = patch.x * PATCH_SIZE
@@ -173,6 +226,29 @@ class TerrainManager {
     }
 
     /**
+     * Apply a re-indexed patch (0..15 range) to a target 256x256 heightmap buffer.
+     */
+    private fun applyPatchToBuffer(patch: TerrainPatch, buffer: FloatArray) {
+        val baseX = patch.x * PATCH_SIZE
+        val baseY = patch.y * PATCH_SIZE
+
+        for (y in 0 until PATCH_SIZE) {
+            val localY = baseY + y
+            if (localY >= REGION_SIZE) continue
+
+            for (x in 0 until PATCH_SIZE) {
+                val localX = baseX + x
+                if (localX >= REGION_SIZE) continue
+
+                val patchIdx = y * PATCH_SIZE + x
+                val bufferIdx = localY * REGION_SIZE + localX
+
+                buffer[bufferIdx] = patch.heightMap[patchIdx]
+            }
+        }
+    }
+
+    /**
      * Push heightmap to renderer.
      */
     private fun updateRendererHeightmap() {
@@ -204,7 +280,7 @@ class TerrainManager {
      */
     fun getLoadPercentage(): Float {
         val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
-        if (totalPatches == 0) return 0f
+        if (totalPatches <= 0) return 0f
         return (validPatchCount.toFloat() / totalPatches) * 100f
     }
 
@@ -212,8 +288,12 @@ class TerrainManager {
      * Reset terrain data (e.g., when changing regions).
      */
     fun reset() {
-        heightMap.fill(0f)
+        regionSizeX = REGION_SIZE
+        regionSizeY = REGION_SIZE
+        heightMap = FloatArray((REGION_SIZE + 1) * (REGION_SIZE + 1))
         validPatches.clear()
+        virtualTileCache.clear()
+        activeTileIndex = VirtualTileIndex(0, 0)
         validPatchCount = 0
         waterHeight = DEFAULT_WATER_HEIGHT
         Log.i(TAG, "Terrain data reset (${regionSizeX}x${regionSizeY})")
@@ -224,6 +304,6 @@ class TerrainManager {
      */
     fun getDebugInfo(): String {
         val totalPatches = (regionSizeX / PATCH_SIZE) * (regionSizeY / PATCH_SIZE)
-        return "Terrain: ${validPatchCount}/${totalPatches} patches (${getLoadPercentage().toInt()}%), water=$waterHeight"
+        return "Terrain: ${validPatchCount}/${totalPatches} patches (${getLoadPercentage().toInt()}%), size=${regionSizeX}x${regionSizeY}, water=$waterHeight"
     }
 }

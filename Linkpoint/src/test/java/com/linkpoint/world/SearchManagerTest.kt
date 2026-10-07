@@ -11,14 +11,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mockito.mock
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import java.io.IOException
 import java.util.UUID
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@RunWith(JUnit4::class)
 class SearchManagerTest {
 
     @Test
@@ -89,6 +87,15 @@ class SearchManagerTest {
         assertEquals(UUID(0L, 12345L), event.id)
         assertEquals("Live Music", event.name)
         assertEquals("Concert at noon", event.description)
+    }
+
+    @Test
+    fun testGetEffectiveSearchBaseUrl() {
+        val mockCapabilityManager = mock(CapabilityManager::class.java)
+        val searchManager = SearchManager(mockCapabilityManager)
+        val baseUrl = searchManager.getEffectiveSearchBaseUrl()
+        // Default fallback returns Second Life search endpoint
+        assertEquals("https://search.secondlife.com/client_search", baseUrl)
     }
 
     class MockCallFactory(private val responseBody: String) : Call.Factory {

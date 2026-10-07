@@ -17,6 +17,7 @@ import com.linkpoint.render.prims.PrimRenderer
 import com.linkpoint.render.scene.SceneManager
 import com.linkpoint.render.terrain.TerrainRenderer
 import com.linkpoint.protocol.messages.ObjectUpdateData
+import com.linkpoint.render.shadow.*
 import com.linkpoint.xr.XRFrameData
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -58,6 +59,13 @@ class RenderManager(private val context: Context) {
     // Scene management
     private var sceneManager: SceneManager? = null
     private val sceneGraph = SceneGraph()
+
+    // Dynamic Adaptive Shadow Pipeline
+    @Volatile var shadowController: AdaptiveShadowController? = null
+    @Volatile var currentShadowConfig: ShadowConfig = GpuTier.TIER_2.defaultConfig
+    @Volatile private var sunlightEntity: Int = 0
+    @Volatile var currentDriverProfile: com.linkpoint.render.driver.GraphicsDriverProbe.DriverProfile = com.linkpoint.render.driver.GraphicsDriverProbe.DriverProfile.UNKNOWN
+    @Volatile var currentGpuCapabilities: com.linkpoint.render.driver.GpuCapabilities = com.linkpoint.render.driver.GpuCapabilities.EMPTY
 
     // Material and prim rendering
     private var materialLoader: MaterialLoader? = null
@@ -199,6 +207,30 @@ class RenderManager(private val context: Context) {
             engine = createdEngine
             val filamentEngine = engine ?: throw IllegalStateException("Failed to create Filament Engine")
             RenderDiagnostics.filamentEngineCreated("backend=$backendName")
+
+            currentDriverProfile = driverProfile
+            currentGpuCapabilities = com.linkpoint.render.driver.GpuCapabilities(
+                glVersion = if (driverProfile.meetsMinimumGles) 31 else 30,
+                vendor = driverProfile.vendorFamily,
+                rendererString = driverProfile.hardwareName,
+                vendorString = driverProfile.manufacturer,
+                versionString = "GLES ${driverProfile.glesMajorVersion}.${driverProfile.glesMinorVersion}",
+                extensions = emptySet(),
+                maxTextureSize = 8192,
+                maxRenderbufferSize = 8192,
+                maxSamples = 4,
+                maxUniformBlockSize = 65536,
+                maxAnisotropy = 16f
+            )
+
+            val assignedTier = GpuTierClassifier.classifyTier(currentDriverProfile, currentGpuCapabilities)
+            val controller = AdaptiveShadowController(bootTier = assignedTier)
+            shadowController = controller
+            currentShadowConfig = controller.currentConfig
+            controller.onConfigChanged = { newConfig ->
+                dispatcher.post(Runnable { applyShadowConfig(newConfig) })
+            }
+            Log.i(TAG, "AdaptiveShadowController initialized: bootTier=$assignedTier config=$currentShadowConfig")
 
             renderer = filamentEngine.createRenderer()
             scene = filamentEngine.createScene()
@@ -417,31 +449,72 @@ class RenderManager(private val context: Context) {
     }
 
     private fun setupDefaultLighting() {
-        // Create sun light using SL default settings
+        // Create sun light using SL default settings and adaptive shadow config
         val sunDirection = SLDefaultEnvironment.DEFAULT_SUN_DIRECTION
         val sunColor = SLDefaultEnvironment.DEFAULT_SUN_COLOR
 
         val sunlight = EntityManager.get().create()
+        sunlightEntity = sunlight
         val filamentEngine = engine ?: throw IllegalStateException("Filament Engine not initialized")
+
+        val shadowOpts = ScreenSpaceContactShadowPass.createShadowOptions(currentShadowConfig)
 
         LightManager.Builder(LightManager.Type.SUN)
             .color(sunColor.r, sunColor.g, sunColor.b)
             .intensity(SLDefaultEnvironment.DEFAULT_SUN_INTENSITY)
             .direction(sunDirection.x, sunDirection.y, sunDirection.z)
-            .castShadows(true)
+            .castShadows(currentShadowConfig.enableDynamicShadowMaps)
+            .shadowOptions(shadowOpts)
             .sunAngularRadius(0.545f)  // Sun angular radius in degrees
             .sunHaloSize(10.0f)
             .sunHaloFalloff(80.0f)
             .build(filamentEngine, sunlight)
 
         scene?.addEntity(sunlight)
+        view?.setShadowingEnabled(currentShadowConfig.enableDynamicShadowMaps || currentShadowConfig.screenSpaceContactShadows)
 
         // Add ambient/indirect light using SL defaults
         scene?.indirectLight = IndirectLight.Builder()
             .intensity(SLDefaultEnvironment.DEFAULT_AMBIENT_INTENSITY)
             .build(filamentEngine)
 
-        Log.d(TAG, "Default SL lighting applied - Sun: ${SLDefaultEnvironment.DEFAULT_SUN_INTENSITY} lux")
+        Log.d(TAG, "Default SL lighting applied - Sun: ${SLDefaultEnvironment.DEFAULT_SUN_INTENSITY} lux, ShadowConfig: $currentShadowConfig")
+    }
+
+    /**
+     * Apply an updated [ShadowConfig] dynamically to Filament light and view settings.
+     */
+    fun applyShadowConfig(config: ShadowConfig) {
+        currentShadowConfig = config
+        val eng = engine ?: return
+        val light = sunlightEntity
+        if (light != 0) {
+            val shadowOpts = ScreenSpaceContactShadowPass.createShadowOptions(config)
+            val sunColor = SLDefaultEnvironment.DEFAULT_SUN_COLOR
+            val sunDirection = SLDefaultEnvironment.DEFAULT_SUN_DIRECTION
+
+            try {
+                val lm = eng.lightManager
+                val inst = lm.getInstance(light)
+                if (inst != 0) {
+                    lm.destroy(light)
+                }
+                LightManager.Builder(LightManager.Type.SUN)
+                    .color(sunColor.r, sunColor.g, sunColor.b)
+                    .intensity(SLDefaultEnvironment.DEFAULT_SUN_INTENSITY)
+                    .direction(sunDirection.x, sunDirection.y, sunDirection.z)
+                    .castShadows(config.enableDynamicShadowMaps)
+                    .shadowOptions(shadowOpts)
+                    .sunAngularRadius(0.545f)
+                    .sunHaloSize(10.0f)
+                    .sunHaloFalloff(80.0f)
+                    .build(eng, light)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to apply shadow options to sunlight: ${e.message}", e)
+            }
+        }
+        view?.setShadowingEnabled(config.enableDynamicShadowMaps || config.screenSpaceContactShadows)
+        Log.i(TAG, "Applied shadow config: Tier ${config.tier}, mapSize=${config.mapSize}, cascades=${config.cascadeCount}, shadowDistance=${config.shadowDistance}m, enableDynamicMaps=${config.enableDynamicShadowMaps}, contactShadows=${config.screenSpaceContactShadows}")
     }
 
     /**
@@ -965,9 +1038,12 @@ class RenderManager(private val context: Context) {
             val view = this.view ?: return
             val swapChain = ensureSwapChain(engine) ?: return
 
-            if (renderer.beginFrame(swapChain, System.nanoTime())) {
+            val frameStartNanos = System.nanoTime()
+            if (renderer.beginFrame(swapChain, frameStartNanos)) {
                 renderer.render(view)
                 renderer.endFrame()
+                val frameDurationNanos = System.nanoTime() - frameStartNanos
+                shadowController?.recordFrameTime(frameDurationNanos)
                 val count = frameCount.incrementAndGet()
                 lastFrameTime = System.currentTimeMillis()
                 RenderDiagnostics.filamentFrame()

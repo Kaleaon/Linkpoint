@@ -1,33 +1,38 @@
 #!/usr/bin/env python3
+import hashlib
 import os
+import re
 import sys
 import time
-import re
-import hashlib
 import uuid
+
 import pymysql
+
 
 def log(msg):
     print(f"[grid-bootstrap] {msg}", flush=True)
+
 
 def render_template(template_str, context):
     """
     Renders {{ VAR | default('val') }} templates using standard regex matching.
     """
+
     def replacer(match):
         expr = match.group(1).strip()
-        parts = expr.split('|')
+        parts = expr.split("|")
         var_name = parts[0].strip()
         val = os.environ.get(var_name, None)
         if val is not None and val != "":
             return str(val)
-        if len(parts) > 1 and 'default' in parts[1]:
+        if len(parts) > 1 and "default" in parts[1]:
             def_match = re.search(r"default\((['\"]?)(.*?)\1\)", parts[1])
             if def_match:
                 return def_match.group(2)
         return context.get(var_name, "")
 
     return re.sub(r"\{\{\s*(.*?)\s*\}\}", replacer, template_str)
+
 
 def wait_for_db(host, port, user, password, dbname, timeout=60):
     start = time.time()
@@ -40,7 +45,7 @@ def wait_for_db(host, port, user, password, dbname, timeout=60):
                 user=user,
                 password=password,
                 database=dbname,
-                connect_timeout=3
+                connect_timeout=3,
             )
             conn.close()
             log("Database connection successful!")
@@ -51,6 +56,7 @@ def wait_for_db(host, port, user, password, dbname, timeout=60):
     log("Timeout waiting for database!")
     return False
 
+
 def apply_schema(host, port, user, password, dbname, schema_path):
     log(f"Applying schema from {schema_path}...")
     conn = pymysql.connect(
@@ -59,12 +65,16 @@ def apply_schema(host, port, user, password, dbname, schema_path):
         user=user,
         password=password,
         database=dbname,
-        autocommit=True
+        autocommit=True,
     )
     with conn.cursor() as cursor:
         with open(schema_path, "r", encoding="utf-8") as f:
             sql_script = f.read()
-        lines = [line for line in sql_script.splitlines() if not line.strip().startswith("--")]
+        lines = [
+            line
+            for line in sql_script.splitlines()
+            if not line.strip().startswith("--")
+        ]
         clean_sql = "\n".join(lines)
         statements = clean_sql.split(";")
         for stmt in statements:
@@ -73,6 +83,7 @@ def apply_schema(host, port, user, password, dbname, schema_path):
                 cursor.execute(stmt)
     conn.close()
     log("Schema applied successfully!")
+
 
 def seed_admin_user(host, port, user, password, dbname):
     first_name = os.environ.get("ADMIN_FIRST_NAME", "Admin")
@@ -85,10 +96,13 @@ def seed_admin_user(host, port, user, password, dbname):
         user=user,
         password=password,
         database=dbname,
-        autocommit=True
+        autocommit=True,
     )
     with conn.cursor() as cursor:
-        cursor.execute("SELECT PrincipalID FROM useraccounts WHERE FirstName=%s AND LastName=%s", (first_name, last_name))
+        cursor.execute(
+            "SELECT PrincipalID FROM useraccounts WHERE FirstName=%s AND LastName=%s",
+            (first_name, last_name),
+        )
         row = cursor.fetchone()
         if row:
             log(f"Admin user {first_name} {last_name} already exists.")
@@ -100,7 +114,13 @@ def seed_admin_user(host, port, user, password, dbname):
                 """INSERT INTO useraccounts
                    (PrincipalID, ScopeID, FirstName, LastName, Email, Created, UserLevel, UserFlags, UserTitle)
                    VALUES (%s, '00000000-0000-0000-0000-000000000000', %s, %s, %s, %s, 200, 0, 'Grid Admin')""",
-                (user_id, first_name, last_name, f"{first_name.lower()}@grid.local", now)
+                (
+                    user_id,
+                    first_name,
+                    last_name,
+                    f"{first_name.lower()}@grid.local",
+                    now,
+                ),
             )
             # Password salt and hash (MD5 hash of pass:salt)
             salt = hashlib.md5(str(uuid.uuid4()).encode()).hexdigest()[:32]
@@ -108,10 +128,11 @@ def seed_admin_user(host, port, user, password, dbname):
             cursor.execute(
                 """INSERT INTO auth (UUID, passwordHash, passwordSalt, accountType)
                    VALUES (%s, %s, %s, 'UserAccount')""",
-                (user_id, pass_hash, salt)
+                (user_id, pass_hash, salt),
             )
             log("Admin user created successfully.")
     conn.close()
+
 
 def generate_configs(output_dir):
     os.makedirs(output_dir, exist_ok=True)
@@ -122,7 +143,7 @@ def generate_configs(output_dir):
     for filename in os.listdir(template_dir):
         if filename.endswith(".j2"):
             tmpl_path = os.path.join(template_dir, filename)
-            out_filename = filename[:-3] # remove .j2
+            out_filename = filename[:-3]  # remove .j2
             out_path = os.path.join(output_dir, out_filename)
 
             with open(tmpl_path, "r", encoding="utf-8") as f:
@@ -134,6 +155,7 @@ def generate_configs(output_dir):
                 f.write(rendered)
 
             log(f"Generated configuration: {out_path}")
+
 
 def main():
     log("Starting grid-bootstrap...")
@@ -158,6 +180,7 @@ def main():
     with open(sentinel, "w") as f:
         f.write("OK\n")
     log("Grid initialization complete! Sentinel file written.")
+
 
 if __name__ == "__main__":
     main()

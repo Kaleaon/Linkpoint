@@ -3,6 +3,13 @@ package com.linkpoint.protocol.translation
 import android.util.Log
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.protocol.terrain.LayerDataParser
+import com.linkpoint.protocol.terrain.TerrainPatch
+import com.linkpoint.protocol.terrain.VirtualRegionMapper
+import com.linkpoint.protocol.terrain.VirtualTileIndex
+import com.linkpoint.protocol.terrain.VirtualTilePacket
+import com.linkpoint.protocol.terrain.VirtualTilePosition
+import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -77,6 +84,7 @@ class LinkpointProtocolBridge(
     private val capabilities = mutableMapOf<String, String>()
 
     init {
+        LinkpointTranslationLayer.configureForGrid(gridType)
         Log.i(TAG, "╔══════════════════════════════════════════════════════════════════")
         Log.i(TAG, "║ LINKPOINT PROTOCOL BRIDGE INITIALIZED")
         Log.i(TAG, "╠══════════════════════════════════════════════════════════════════")
@@ -84,6 +92,7 @@ class LinkpointProtocolBridge(
         Log.i(TAG, "║ Grid Type: $gridType")
         Log.i(TAG, "║ Is Agni Grid: $isAgniGrid")
         Log.i(TAG, "║ URL Repair: ${LinkpointTranslationLayer.config.repairCapabilityUrls}")
+        Log.i(TAG, "║ Variable Region Support: ${LinkpointTranslationLayer.config.supportsVariableRegionSize}")
         Log.i(TAG, "╚══════════════════════════════════════════════════════════════════")
     }
 
@@ -356,6 +365,55 @@ class LinkpointProtocolBridge(
             Log.e(TAG, "Capability request error: $capabilityName", e)
             null
         }
+    }
+
+    /**
+     * Splits and re-indexes incoming LayerData terrain payload into virtual 256m tile packets.
+     * Patches inside the returned virtual tile packets are re-indexed to standard 0 to 15 coordinate ranges.
+     */
+    fun processTerrainLayerData(
+        payload: ByteArray,
+        regionWidth: Int = VirtualRegionMapper.STANDARD_TILE_SIZE,
+        regionHeight: Int = VirtualRegionMapper.STANDARD_TILE_SIZE
+    ): Map<VirtualTileIndex, VirtualTilePacket> {
+        return LayerDataParser.parseVirtualTiles(payload, regionWidth, regionHeight)
+    }
+
+    /**
+     * Converts a raw list of terrain patches across an extended region (up to 4096m x 4096m)
+     * into virtual 256m tile indices and re-indexed patches in standard 0..15 coordinate ranges.
+     */
+    fun convertTerrainPatchesToVirtualTiles(
+        patches: List<TerrainPatch>,
+        regionWidth: Int = VirtualRegionMapper.STANDARD_TILE_SIZE,
+        regionHeight: Int = VirtualRegionMapper.STANDARD_TILE_SIZE
+    ): Map<VirtualTileIndex, VirtualTilePacket> {
+        return VirtualRegionMapper.splitTerrainPatchesToVirtualTiles(patches, regionWidth, regionHeight)
+    }
+
+    /**
+     * Translates global OpenSim region 3D coordinates to virtual 256m tile space coordinates.
+     */
+    fun translateGlobalToVirtualTile(
+        globalX: Float,
+        globalY: Float,
+        globalZ: Float,
+        regionWidth: Int = VirtualRegionMapper.STANDARD_TILE_SIZE,
+        regionHeight: Int = VirtualRegionMapper.STANDARD_TILE_SIZE
+    ): VirtualTilePosition {
+        return VirtualRegionMapper.globalToVirtualTile(globalX, globalY, globalZ, regionWidth, regionHeight)
+    }
+
+    /**
+     * Translates tile-local virtual coordinates back to global OpenSim region 3D coordinates.
+     */
+    fun translateVirtualTileToGlobal(
+        tileIndex: VirtualTileIndex,
+        localX: Float,
+        localY: Float,
+        localZ: Float
+    ): LLVector3 {
+        return VirtualRegionMapper.virtualTileToGlobal(tileIndex, localX, localY, localZ)
     }
 
     /**

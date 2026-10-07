@@ -11,7 +11,10 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
+import com.linkpoint.network.MeteredAssetGate
 import com.linkpoint.protocol.caps.CapEventQueue
+import com.linkpoint.protocol.textures.SLTextureFetcher
+import com.linkpoint.protocol.textures.TextureQueueController
 import com.linkpoint.service.ConnectionKeepAliveManager
 import com.linkpoint.service.LinkpointConnectionService
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +35,8 @@ class NetworkSessionManager(
     private val context: Context,
     private val keepAliveManager: ConnectionKeepAliveManager? = null,
     private val eventQueue: CapEventQueue? = null,
-    private val networkStateManager: NetworkStateManager? = null
+    private val networkStateManager: NetworkStateManager? = null,
+    var textureQueueController: TextureQueueController? = null
 ) {
     companion object {
         private const val TAG = "NetworkSessionManager"
@@ -82,6 +86,10 @@ class NetworkSessionManager(
 
         // Requirement 2: Adjust EventQueue polling & heartbeats
         eventQueue?.setAdaptiveBackgroundMode(true, BACKGROUND_POLL_INTERVAL_MS)
+
+        // Pause texture fetching and release active permits
+        (textureQueueController ?: SLTextureFetcher.shared)?.pauseFetching()
+        MeteredAssetGate.shared.releaseActivePermits()
     }
 
     /**
@@ -91,6 +99,7 @@ class NetworkSessionManager(
         _isInBackground.value = false
         keepAliveManager?.onForeground()
         eventQueue?.setAdaptiveBackgroundMode(false)
+        (textureQueueController ?: SLTextureFetcher.shared)?.resumeFetching()
         Log.i(TAG, "App returned to foreground")
     }
 

@@ -3,6 +3,11 @@ from typing import Dict
 from tools.protocol_gen.proto_ast.models import ProtocolAST
 from tools.protocol_gen.emitters.base import BaseEmitter
 
+def _format_java_int(num: int) -> str:
+    if num > 2147483647:
+        return str(num - 4294967296)
+    return str(num)
+
 class JavaEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("Java", ".java")
@@ -41,8 +46,7 @@ class JavaEmitter(BaseEmitter):
         out.append("    public static final Map<String, Integer> REGISTERED_MESSAGES = new HashMap<>();\n")
         out.append("    static {")
         for msg in ast.messages:
-            num_val = f"(int) {msg.message_number}L" if msg.message_number > 2147483647 or msg.message_number < -2147483648 else str(msg.message_number)
-            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {num_val});')
+            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {_format_java_int(msg.message_number)});')
         out.append("    }\n")
 
         out.append("""    public static byte[] decompressZerocoded(byte[] src) {

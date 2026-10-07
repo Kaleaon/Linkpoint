@@ -377,6 +377,34 @@ export default function WindowManagerEngine({
     focusTile(id);
   }, [floatingRects, focusTile]);
 
+  // Single-pointer step movement for floating tiles
+  const moveFloatingStep = useCallback((id, dx, dy) => {
+    setFloatingRects((rects) => {
+      const initialRect = rects[id] || { x: 50, y: 50, w: 320, h: 240 };
+      const nextX = Math.max(0, initialRect.x + (dx || 0));
+      const nextY = Math.max(0, initialRect.y + (dy || 0));
+      return {
+        ...rects,
+        [id]: { ...initialRect, x: nextX, y: nextY },
+      };
+    });
+    focusTile(id);
+  }, [focusTile]);
+
+  // Single-pointer step resizing for floating tiles
+  const resizeFloatingStep = useCallback((id, dw, dh) => {
+    setFloatingRects((rects) => {
+      const initialRect = rects[id] || { x: 50, y: 50, w: 320, h: 240 };
+      const nextW = Math.max(220, initialRect.w + (dw || 0));
+      const nextH = Math.max(140, initialRect.h + (dh || 0));
+      return {
+        ...rects,
+        [id]: { ...initialRect, w: nextW, h: nextH },
+      };
+    });
+    focusTile(id);
+  }, [focusTile]);
+
   // Render control toolbar for Workspace Viewport Engine
   const renderToolbar = () => (
     <div
@@ -741,6 +769,8 @@ export default function WindowManagerEngine({
                 onToggleDensity={() => cycleTileDensity(id)}
                 onDragStart={(e) => handleDragFloating(id, e)}
                 onResizeStart={(e) => handleResizeFloating(id, e)}
+                onMoveStep={(dx, dy) => moveFloatingStep(id, dx, dy)}
+                onResizeStep={(dw, dh) => resizeFloatingStep(id, dw, dh)}
                 style={{ width: "100%", height: "100%" }}
               >
                 {renderScreenContent(id)}

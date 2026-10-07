@@ -37,7 +37,8 @@ class LLSDBoolean extends LLSDValue {
   const LLSDBoolean(this.value);
 
   @override
-  bool operator ==(Object other) => other is LLSDBoolean && other.value == value;
+  bool operator ==(Object other) =>
+      other is LLSDBoolean && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -51,7 +52,8 @@ class LLSDInteger extends LLSDValue {
   const LLSDInteger(this.value);
 
   @override
-  bool operator ==(Object other) => other is LLSDInteger && other.value == value;
+  bool operator ==(Object other) =>
+      other is LLSDInteger && other.value == value;
 
   @override
   int get hashCode => value.hashCode;
@@ -84,7 +86,8 @@ class LLSDString extends LLSDValue {
 
   @override
   bool operator ==(Object other) =>
-      other is LLSDString && other.value.replaceAll('\r\n', '\n') == value.replaceAll('\r\n', '\n');
+      other is LLSDString &&
+      other.value.replaceAll('\r\n', '\n') == value.replaceAll('\r\n', '\n');
 
   @override
   int get hashCode => value.replaceAll('\r\n', '\n').hashCode;
@@ -114,7 +117,8 @@ class LLSDDate extends LLSDValue {
   @override
   bool operator ==(Object other) =>
       other is LLSDDate &&
-      (other.value.millisecondsSinceEpoch ~/ 1000) == (value.millisecondsSinceEpoch ~/ 1000);
+      (other.value.millisecondsSinceEpoch ~/ 1000) ==
+          (value.millisecondsSinceEpoch ~/ 1000);
 
   @override
   int get hashCode => (value.millisecondsSinceEpoch ~/ 1000).hashCode;
@@ -230,7 +234,8 @@ class LLSD {
     } else if (value is LLSDURI) {
       buffer.write('<uri>${_escapeXml(value.value)}</uri>');
     } else if (value is LLSDBinary) {
-      buffer.write('<binary encoding="base64">${base64.encode(value.value)}</binary>');
+      buffer.write(
+          '<binary encoding="base64">${base64.encode(value.value)}</binary>');
     } else if (value is LLSDArray) {
       buffer.write('<array>');
       for (final item in value.value) {
@@ -406,7 +411,8 @@ class _XmlReader {
       if (tagName == 'string') return const LLSDString('');
       if (tagName == 'uri') return const LLSDURI('');
       if (tagName == 'binary') return LLSDBinary(Uint8List(0));
-      if (tagName == 'date') return LLSDDate(DateTime.fromMillisecondsSinceEpoch(0, isUtc: true));
+      if (tagName == 'date')
+        return LLSDDate(DateTime.fromMillisecondsSinceEpoch(0, isUtc: true));
       return const LLSDUndef();
     }
 
@@ -450,7 +456,9 @@ class _XmlReader {
         return LLSDURI(_unescapeXml(content.trim()));
       case 'binary':
         content = content.trim();
-        return LLSDBinary(content.isEmpty ? Uint8List(0) : base64.decode(content.replaceAll(RegExp(r'\s+'), '')));
+        return LLSDBinary(content.isEmpty
+            ? Uint8List(0)
+            : base64.decode(content.replaceAll(RegExp(r'\s+'), '')));
       default:
         return const LLSDUndef();
     }
@@ -460,7 +468,8 @@ class _XmlReader {
     final map = <String, LLSDValue>{};
     while (pos < source.length) {
       skipWhitespace();
-      if (source.startsWith('</map>', pos) || source.startsWith('</MAP>', pos)) {
+      if (source.startsWith('</map>', pos) ||
+          source.startsWith('</MAP>', pos)) {
         pos += 6;
         break;
       }
@@ -484,7 +493,8 @@ class _XmlReader {
     final list = <LLSDValue>[];
     while (pos < source.length) {
       skipWhitespace();
-      if (source.startsWith('</array>', pos) || source.startsWith('</ARRAY>', pos)) {
+      if (source.startsWith('</array>', pos) ||
+          source.startsWith('</ARRAY>', pos)) {
         pos += 8;
         break;
       }
@@ -504,7 +514,8 @@ class _XmlReader {
   }
 
   static DateTime _parseIsoDate(String dateStr) {
-    if (dateStr.isEmpty) return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+    if (dateStr.isEmpty)
+      return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
     var clean = dateStr.trim();
     if (clean.endsWith('Z') && clean.contains('+00:00')) {
       clean = clean.substring(0, clean.length - 1);
@@ -581,15 +592,16 @@ class _BinaryReader {
         pos += len;
         return LLSDURI(utf8.decode(uriBytes));
       case '{':
-        final count = view.getUint32(pos, Endian.big);
         pos += 4;
         final map = <String, LLSDValue>{};
         while (pos < bytes.length) {
-          if (bytes[pos] == 125) { // '}'
+          if (bytes[pos] == 125) {
+            // '}'
             pos++;
             break;
           }
-          if (bytes[pos] == 107) { // 'k'
+          if (bytes[pos] == 107) {
+            // 'k'
             pos++;
             final keyLen = view.getUint32(pos, Endian.big);
             pos += 4;
@@ -603,11 +615,11 @@ class _BinaryReader {
         }
         return LLSDMap(map);
       case '[':
-        final count = view.getUint32(pos, Endian.big);
         pos += 4;
         final list = <LLSDValue>[];
         while (pos < bytes.length) {
-          if (bytes[pos] == 93) { // ']'
+          if (bytes[pos] == 93) {
+            // ']'
             pos++;
             break;
           }

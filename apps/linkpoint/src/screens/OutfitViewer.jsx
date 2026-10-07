@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 import { useRlvSafe } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
 import Icon from "../components/Icon.jsx";
+import SpatialViewportContainer from "../components/SpatialViewportContainer.jsx";
 
 // Default shape slider values (0-100 scale)
 export const DEFAULT_SHAPE_VALUES = {
@@ -577,7 +578,23 @@ export default function OutfitViewer() {
       {/* Main Content Layout: Viewport (Left) + Selected Control Panel (Right) */}
       <div style={{ display: "flex", gap: 12, flex: 1, minHeight: 420 }}>
         {/* 3D Viewport Panel */}
-        <div style={{ flex: 1.2, display: "flex", flexDirection: "column", background: V.bg, border: `1px solid ${V.outv}`, borderRadius: V.rs, position: "relative", overflow: "hidden" }}>
+        <SpatialViewportContainer
+          ariaLabel="3D Avatar Viewport"
+          yaw={yawAngle}
+          pitch={pitchAngle}
+          zoom={zoomLevel}
+          onRotate={({ yawDelta, pitchDelta }) => {
+            if (yawDelta) setYawAngle((prev) => (prev + yawDelta) % 360);
+            if (pitchDelta) setPitchAngle((prev) => Math.max(-60, Math.min(60, prev + pitchDelta)));
+          }}
+          onZoom={(delta) => {
+            setZoomLevel((prev) => Math.max(0.4, Math.min(3.0, prev + delta)));
+          }}
+          onReset={() => {
+            applyCameraPreset("front");
+          }}
+          style={{ flex: 1.2, display: "flex", flexDirection: "column", background: V.bg, border: `1px solid ${V.outv}`, borderRadius: V.rs, overflow: "hidden" }}
+        >
           {/* Interactive Canvas */}
           <canvas
             ref={canvasRef}
@@ -591,7 +608,7 @@ export default function OutfitViewer() {
           />
 
           {/* Floating Viewport Toolbar */}
-          <div style={{ position: "absolute", bottom: 10, left: 10, right: 10, display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(15, 23, 42, 0.85)", backdropFilter: "blur(6px)", padding: "6px 10px", borderRadius: V.rs, border: `1px solid ${V.outv}` }}>
+          <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 6, alignItems: "center", background: "rgba(15, 23, 42, 0.85)", backdropFilter: "blur(6px)", padding: "6px 10px", borderRadius: V.rs, border: `1px solid ${V.outv}`, zIndex: 5 }}>
             {/* Camera Presets */}
             <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
               <span style={{ fontSize: 10, color: "#94a3b8", fontWeight: 700, marginRight: 4 }}>CAMERA:</span>
@@ -676,7 +693,7 @@ export default function OutfitViewer() {
               </button>
             </div>
           </div>
-        </div>
+        </SpatialViewportContainer>
 
         {/* Right Details / Control Panel */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, background: V.surf, border: `1px solid ${V.outv}`, borderRadius: V.rs, padding: 12, overflowY: "auto" }}>

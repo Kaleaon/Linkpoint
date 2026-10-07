@@ -72,9 +72,11 @@ export class ChatExtended {
     if (!this.protocol) return;
 
     if (typeof this.protocol.on === 'function') {
-      this.protocol.on('connected', () => {
+      const onRequestMute = () => {
         void this.requestMuteList();
-      });
+      };
+      this.protocol.on('connected', onRequestMute);
+      this.protocol.on('login_success', onRequestMute);
 
       this.protocol.on('MuteListUpdate', (data: any) => {
         void this.handleMuteListUpdate(data);
@@ -101,25 +103,42 @@ export class ChatExtended {
     try {
       const savedEntries = Utils.storage.get('linkpoint_mute_entries_v2', null);
       const savedCRC = Utils.storage.get('linkpoint_mute_crc32', 0);
-      if (typeof savedCRC === 'number') {
+      if (typeof savedCRC === 'number' && !isNaN(savedCRC)) {
         this.cachedCRC = savedCRC;
+      } else {
+        this.cachedCRC = 0;
       }
 
-      if (Array.isArray(savedEntries)) {
-        this.entries.clear();
-        this.muteList.clear();
-        this.mutedObjects.clear();
+      this.entries.clear();
+      this.muteList.clear();
+      this.mutedObjects.clear();
 
+      if (Array.isArray(savedEntries)) {
         for (const entry of savedEntries) {
-          if (entry && entry.id && entry.name !== undefined) {
-            const key = this.getEntryKey(entry.id, entry.name, entry.type);
-            this.entries.set(key, entry);
-            this.syncSetsForEntry(entry);
+          if (entry && typeof entry === 'object' && entry.name !== undefined) {
+            const id = typeof entry.id === 'string' ? entry.id : '00000000-0000-0000-0000-000000000000';
+            const name = typeof entry.name === 'string' ? entry.name : '';
+            const type = typeof entry.type === 'number' ? entry.type : MuteType.AGENT;
+            const flags = typeof entry.flags === 'number' ? entry.flags : MuteFlags.MUTE_ALL;
+            const cleanEntry: MuteListEntry = {
+              id,
+              name,
+              type,
+              flags,
+              timestamp: entry.timestamp || Date.now(),
+            };
+            const key = this.getEntryKey(cleanEntry.id, cleanEntry.name, cleanEntry.type);
+            this.entries.set(key, cleanEntry);
+            this.syncSetsForEntry(cleanEntry);
           }
         }
       }
     } catch (err) {
       console.warn('[ChatExtended] Failed to load mute list from storage:', err);
+      this.entries.clear();
+      this.muteList.clear();
+      this.mutedObjects.clear();
+      this.cachedCRC = 0;
     }
   }
 
@@ -197,7 +216,7 @@ export class ChatExtended {
       content = await slBridge.fetchXfer(filename);
     }
 
-    if (content) {
+    if (typeof content === 'string') {
       this.parseMuteListData(content);
     }
   }
@@ -347,6 +366,8 @@ export class ChatExtended {
         (cleanId && entry.name.toLowerCase() === cleanId.toLowerCase())
       ) {
         removedEntry = entry;
+        if (entry.id) this.muteList.delete(entry.id);
+        if (entry.name) this.muteList.delete(entry.name);
         this.entries.delete(key);
       }
     }
@@ -411,11 +432,16 @@ export class ChatExtended {
         (entry.id.toLowerCase() === clean.toLowerCase() || entry.name.toLowerCase() === clean.toLowerCase())
       ) {
         removedEntry = entry;
+        if (entry.id) this.mutedObjects.delete(entry.id);
+        if (entry.name) this.mutedObjects.delete(entry.name);
         this.entries.delete(key);
       }
     }
 
     this.mutedObjects.delete(clean);
+    if (removedEntry?.id) this.mutedObjects.delete(removedEntry.id);
+    if (removedEntry?.name) this.mutedObjects.delete(removedEntry.name);
+
     this.saveToStorage();
 
     console.log(`[ChatExtended] Unmuted object: ${clean}`);

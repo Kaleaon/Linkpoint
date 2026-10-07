@@ -88,8 +88,15 @@ object SessionLogRecorder {
     private var flushJob: Job? = null
 
     // Date formatters
-    private val timestampFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
-    private val fileNameFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+    private val timestampFormat = ThreadLocal.withInitial {
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+    }
+    private val fileNameFormat = ThreadLocal.withInitial {
+        SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+    }
+    private val logTimeFormatter = ThreadLocal.withInitial {
+        SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
+    }
 
     /**
      * Internal event hierarchy processed asynchronously off network threads
@@ -160,7 +167,7 @@ object SessionLogRecorder {
         val stackTrace: String? = null
     ) {
         fun format(): String = buildString {
-            val timeStr = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date(timestamp))
+            val timeStr = logTimeFormatter.get()!!.format(Date(timestamp))
             append("[$timeStr] [${type.name}] [$tag]")
             appendLine()
             append(message)
@@ -242,8 +249,7 @@ object SessionLogRecorder {
                     retentionDays = DiagnosticsLoggingConfig.getRetentionDays(context)
                 )
             }
-
-            val timestamp = fileNameFormat.format(Date())
+            val timestamp = fileNameFormat.get()!!.format(Date())
             currentLogFile = File(logDir, "$SESSION_LOG_PREFIX$timestamp$SESSION_LOG_SUFFIX")
             logWriter = BufferedWriter(FileWriter(currentLogFile, true))
 
@@ -741,7 +747,7 @@ object SessionLogRecorder {
             writer.write("║               LINKPOINT SESSION LOG                               ║\n")
             writer.write("╚══════════════════════════════════════════════════════════════════╝\n")
             writer.write("\n")
-            writer.write("Session Start: ${timestampFormat.format(Date(now))}\n")
+            writer.write("Session Start: ${timestampFormat.get()!!.format(Date(now))}\n")
             writer.write("Device: ${Build.MANUFACTURER} ${Build.MODEL}\n")
             writer.write("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n")
             writer.write("Build: ${Build.ID}\n")
@@ -769,7 +775,7 @@ object SessionLogRecorder {
             writer.write("\n")
             writer.write("═".repeat(70) + "\n")
             writer.write("\n")
-            writer.write("Session End: ${timestampFormat.format(Date(now))}\n")
+            writer.write("Session End: ${timestampFormat.get()!!.format(Date(now))}\n")
             writer.write("Duration: ${formatDuration(duration)}\n")
             writer.write("Total Entries: ${entryCount.get()}\n")
             if (droppedEntriesCount.get() > 0) {

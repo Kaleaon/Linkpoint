@@ -225,6 +225,43 @@ object AdditionalMessageParsers {
         }
     }
 
+    // ==================== AVATAR PROPERTIES UPDATE ====================
+
+    data class AvatarPropertiesUpdateData(
+        val agentID: UUID,
+        val sessionID: UUID,
+        val imageID: UUID,
+        val flImageID: UUID,
+        val aboutText: String,
+        val flAboutText: String,
+        val allowPublish: Boolean,
+        val maturePublish: Boolean,
+        val profileURL: String
+    )
+
+    fun parseAvatarPropertiesUpdate(data: ByteArray): AvatarPropertiesUpdateData? {
+        return try {
+            val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
+            val agentID = buffer.getUUID()
+            val sessionID = buffer.getUUID()
+            val imageID = buffer.getUUID()
+            val flImageID = buffer.getUUID()
+            val aboutText = buffer.readString2()
+            val flAboutText = buffer.readString1()
+            val allowPublish = buffer.get() != 0.toByte()
+            val maturePublish = buffer.get() != 0.toByte()
+            val profileURL = buffer.readString1()
+
+            AvatarPropertiesUpdateData(
+                agentID, sessionID, imageID, flImageID,
+                aboutText, flAboutText, allowPublish, maturePublish, profileURL
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse AvatarPropertiesUpdate", e)
+            null
+        }
+    }
+
     // ==================== GROUP PROFILE REPLY ====================
 
     data class GroupProfileReplyData(
@@ -327,6 +364,54 @@ object AdditionalMessageParsers {
             MapBlockReplyData(agentID, flags, blocks)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse MapBlockReply", e)
+            null
+        }
+    }
+
+    // ==================== MAP ITEM REPLY ====================
+
+    data class MapItemReplyData(
+        val agentID: UUID,
+        val flags: Int,
+        val itemType: Int,
+        val items: List<MapItemData>
+    )
+
+    data class MapItemData(
+        val globalX: Int,
+        val globalY: Int,
+        val id: UUID,
+        val extra: Int,
+        val extra2: Int,
+        val name: String
+    )
+
+    fun parseMapItemReply(data: ByteArray): MapItemReplyData? {
+        return try {
+            val buffer = ByteBuffer.wrap(data).order(MESSAGE_BYTE_ORDER)
+
+            val agentID = buffer.getUUID()
+            val flags = buffer.int
+            val itemType = buffer.int
+
+            val itemCount = buffer.get().toInt() and 0xFF
+            val items = mutableListOf<MapItemData>()
+
+            for (i in 0 until itemCount) {
+                if (buffer.remaining() < 32) break
+                val globalX = buffer.int
+                val globalY = buffer.int
+                val id = buffer.getUUID()
+                val extra = buffer.int
+                val extra2 = buffer.int
+                val name = buffer.readString1()
+
+                items.add(MapItemData(globalX, globalY, id, extra, extra2, name))
+            }
+
+            MapItemReplyData(agentID, flags, itemType, items)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse MapItemReply", e)
             null
         }
     }

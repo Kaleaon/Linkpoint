@@ -50,4 +50,53 @@ class RenderMaterialsManagerTest {
         assertNotNull(cached)
         assertEquals(0.5f, cached?.metallicFactor ?: 0f, 0.001f)
     }
+
+    @Test
+    fun testPrefetchMaterialsAndSubTextures() = runBlocking {
+        val matId = UUID.randomUUID()
+        val baseColorTexId = UUID.randomUUID()
+        val normalTexId = UUID.randomUUID()
+
+        val prefetchedTextures = mutableListOf<UUID>()
+        val fakeRequester = FakeCapabilityRequester().apply {
+            enqueueResponse(CapabilityManager.CAP_RENDER_MATERIALS, LLSDMap().apply {
+                this["materials"] = LLSDArray().apply {
+                    add(LLSDMap().apply {
+                        this["id"] = LLSDString(matId.toString())
+                        this["gltf_json"] = LLSDString("""
+                            {
+                              "materials": [
+                                {
+                                  "pbrMetallicRoughness": {
+                                    "baseColorTexture": { "texture_id": "$baseColorTexId" },
+                                    "metallicFactor": 0.8
+                                  },
+                                  "normalTexture": { "texture_id": "$normalTexId" }
+                                }
+                              ],
+                              "textures": [
+                                { "source": 0 },
+                                { "source": 1 }
+                              ],
+                              "images": [
+                                { "uri": "$baseColorTexId" },
+                                { "uri": "$normalTexId" }
+                              ]
+                            }
+                        """.trimIndent())
+                    })
+                }
+            })
+        }
+
+        val manager = RenderMaterialsManager(fakeRequester).apply {
+            setTexturePrefetcher { ids -> prefetchedTextures.addAll(ids) }
+        }
+
+        val results = manager.prefetchMaterials(listOf(matId))
+        assertNotNull(results[matId])
+        assertEquals(2, prefetchedTextures.size)
+        org.junit.Assert.assertTrue(prefetchedTextures.contains(baseColorTexId))
+        org.junit.Assert.assertTrue(prefetchedTextures.contains(normalTexId))
+    }
 }

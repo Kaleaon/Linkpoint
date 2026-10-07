@@ -237,7 +237,7 @@ class WorldMapBenchmark {
             bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, bos)
             val jpegBytes = bos.toByteArray()
 
-            val key = "3-1000-1000"
+            val key = "3-flat-2d-1000-1000"
             val diskFile = java.io.File(tempDir, "tile_$key.jpg")
             diskFile.writeBytes(jpegBytes)
 

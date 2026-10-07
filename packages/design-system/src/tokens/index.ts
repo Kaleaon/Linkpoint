@@ -515,6 +515,471 @@ export const PALETTES: Record<string, PalettePack> = {
       ok: "#4FAEEA", err: "#BA1A1A", warn: "#F2C46C",
       sky1: "#acdec0", sky2: "#f7fdf8", gnd: "#f8fefa", gnd2: "#F2FBF4"
     }
+  },
+  "art-deco": {
+    name: "Art Deco",
+    note: "art-deco, Geometric symmetry, stepped motifs, and premium gold-black-ivory contrast",
+    light: false,
+    c: {
+      bg: "#0B0A0A", surf: "#141314", surf2: "#232124",
+      ink: "#F3E8D0", ink2: "#C9BDA2",
+      pri: "#D4AF37", onpri: "#0B0A0A", priC: "#8F7121", onpriC: "#FFF2C6",
+      sec: "#F4E7CF", onsec: "#0B0A0A", sec2: "#B8A17A",
+      bdg: "#F4E7CF", onbdg: "#0B0A0A",
+      info: "#0F0F11", outv: "#4B4332",
+      ok: "#D4AF37", err: "#FFB4AB", warn: "#0F0F11",
+      sky1: "#232124", sky2: "#141314", gnd: "#141314", gnd2: "#0B0A0A"
+    }
+  },
+  "art-nouveau": {
+    name: "Art Nouveau",
+    note: "art-nouveau, Organic curves, botanical accents, and decorative linework with a warm natural palette",
+    light: true,
+    c: {
+      bg: "#F6F0E6", surf: "#FFF8EE", surf2: "#E7D8C7",
+      ink: "#2C2218", ink2: "#584638",
+      pri: "#7B5737", onpri: "#F6F0E6", priC: "#D9C2A9", onpriC: "#352214",
+      sec: "#769762", onsec: "#2C2218", sec2: "#CFE4BF",
+      bdg: "#769762", onbdg: "#2C2218",
+      info: "#C57C52", outv: "#CBB8A5",
+      ok: "#7B5737", err: "#BA1A1A", warn: "#C57C52",
+      sky1: "#E7D8C7", sky2: "#FFF8EE", gnd: "#FFF8EE", gnd2: "#F6F0E6"
+    }
+  },
+  "aurora-glass-night": {
+    name: "Aurora Glass Night",
+    note: "aurora-glass-night, Night-first glass aesthetic with aurora accents and disciplined blur",
+    light: false,
+    c: {
+      bg: "#0A1224", surf: "#101C33", surf2: "#1D2B4A",
+      ink: "#E7F0FF", ink2: "#B5C7E9",
+      pri: "#6DE8FF", onpri: "#0A1224", priC: "#2A6F85", onpriC: "#D6F7FF",
+      sec: "#8C7CFF", onsec: "#0A1224", sec2: "#4B4299",
+      bdg: "#8C7CFF", onbdg: "#0A1224",
+      info: "#7CFFD8", outv: "#334364",
+      ok: "#6DE8FF", err: "#CF6679", warn: "#7CFFD8",
+      sky1: "#1D2B4A", sky2: "#101C33", gnd: "#101C33", gnd2: "#0A1224"
+    }
+  },
+  "burgundy-rose-gold": {
+    name: "Burgundy Rose Gold",
+    note: "burgundy-rose-gold, Rich burgundy with elegant rose gold metallic accents",
+    light: false,
+    c: {
+      bg: "#2D0F1A", surf: "#3D1525", surf2: "#5C2A3D",
+      ink: "#FFE6ED", ink2: "#E6C0CC",
+      pri: "#B76E79", onpri: "#2D0F1A", priC: "#93575F", onpriC: "#D4969E",
+      sec: "#4D1A2A", onsec: "#FFE6ED", sec2: "#3D1525",
+      bdg: "#4D1A2A", onbdg: "#FFE6ED",
+      info: "#C99BA5", outv: "#6D3F4D",
+      ok: "#B76E79", err: "#FFB4AB", warn: "#C99BA5",
+      sky1: "#5C2A3D", sky2: "#3D1525", gnd: "#3D1525", gnd2: "#2D0F1A"
+    }
+  },
+  "calm-clinical": {
+    name: "Calm Clinical",
+    note: "calm-clinical, Low-stress healthcare/admin palette with clear status readability",
+    light: true,
+    c: {
+      bg: "#F5FAFD", surf: "#FFFFFF", surf2: "#E5EEF4",
+      ink: "#1F394B", ink2: "#445F72",
+      pri: "#38779E", onpri: "#F5FAFD", priC: "#C4DFF2", onpriC: "#17374D",
+      sec: "#61B48B", onsec: "#1F394B", sec2: "#CBEFDF",
+      bdg: "#61B48B", onbdg: "#1F394B",
+      info: "#7D9AB2", outv: "#B5C8D5",
+      ok: "#38779E", err: "#BA1A1A", warn: "#7D9AB2",
+      sky1: "#E5EEF4", sky2: "#FFFFFF", gnd: "#FFFFFF", gnd2: "#F5FAFD"
+    }
+  },
+  "charcoal-champagne": {
+    name: "Charcoal Champagne",
+    note: "charcoal-champagne, Sophisticated charcoal gray with warm champagne accents",
+    light: false,
+    c: {
+      bg: "#1F1F1F", surf: "#2A2A2A", surf2: "#3D3D3D",
+      ink: "#F5F5F5", ink2: "#D0D0D0",
+      pri: "#F7E7CE", onpri: "#1F1F1F", priC: "#C5B8A5", onpriC: "#FFF5E6",
+      sec: "#3D3D3D", onsec: "#F5F5F5", sec2: "#2A2A2A",
+      bdg: "#3D3D3D", onbdg: "#F5F5F5",
+      info: "#D4C4A8", outv: "#4D4D4D",
+      ok: "#F7E7CE", err: "#CF6679", warn: "#D4C4A8",
+      sky1: "#3D3D3D", sky2: "#2A2A2A", gnd: "#2A2A2A", gnd2: "#1F1F1F"
+    }
+  },
+  "cleverferret-gold": {
+    name: "CleverFerret Gold",
+    note: "cleverferret_gold, Elegant gold accents on dark background - from CleverFerret",
+    light: false,
+    c: {
+      bg: "#1E1E1E", surf: "#2A2A2A", surf2: "#2A2A2A",
+      ink: "#E6E1E5", ink2: "#CAC4D0",
+      pri: "#E5A00D", onpri: "#1E1E1E", priC: "#E5A00D", onpriC: "#E6E1E5",
+      sec: "#B8860B", onsec: "#1E1E1E", sec2: "#B8860B",
+      bdg: "#B8860B", onbdg: "#1E1E1E",
+      info: "#B8860B", outv: "#2A2A2A",
+      ok: "#E5A00D", err: "#CF6679", warn: "#E5A00D",
+      sky1: "#2A2A2A", sky2: "#2A2A2A", gnd: "#2A2A2A", gnd2: "#1E1E1E"
+    }
+  },
+  "deep-purple-platinum": {
+    name: "Deep Purple Platinum",
+    note: "deep-purple-platinum, Deep purple background with luxurious platinum metallic accents",
+    light: false,
+    c: {
+      bg: "#1A0F2E", surf: "#24153D", surf2: "#3D2A5C",
+      ink: "#F0EBFF", ink2: "#D0C0E6",
+      pri: "#E5E4E2", onpri: "#1A0F2E", priC: "#B8B7B5", onpriC: "#F5F4F2",
+      sec: "#2E1A50", onsec: "#F0EBFF", sec2: "#24153D",
+      bdg: "#2E1A50", onbdg: "#F0EBFF",
+      info: "#C8BFE0", outv: "#4D3F6D",
+      ok: "#E5E4E2", err: "#CF6679", warn: "#C8BFE0",
+      sky1: "#3D2A5C", sky2: "#24153D", gnd: "#24153D", gnd2: "#1A0F2E"
+    }
+  },
+  "emerald-silver": {
+    name: "Emerald Silver",
+    note: "emerald-silver, Rich emerald green with elegant silver metallic accents",
+    light: false,
+    c: {
+      bg: "#0D3B2E", surf: "#1A5544", surf2: "#2A6554",
+      ink: "#E8F5E8", ink2: "#C9E4D9",
+      pri: "#C0C0C0", onpri: "#0D3B2E", priC: "#505050", onpriC: "#F5F5F5",
+      sec: "#50C878", onsec: "#0D3B2E", sec2: "#2E7D5A",
+      bdg: "#50C878", onbdg: "#0D3B2E",
+      info: "#8BA888", outv: "#3E4E44",
+      ok: "#C0C0C0", err: "#CF6679", warn: "#8BA888",
+      sky1: "#2A6554", sky2: "#1A5544", gnd: "#1A5544", gnd2: "#0D3B2E"
+    }
+  },
+  "firestorm": {
+    name: "Firestorm Viewer",
+    note: "firestorm, Firestorm third-party viewer look - fire orange on near-black",
+    light: false,
+    c: {
+      bg: "#121212", surf: "#1E1E1E", surf2: "#1E1E1E",
+      ink: "#F5F5F5", ink2: "#BDBDBD",
+      pri: "#E85D00", onpri: "#1A0E00", priC: "#E85D00", onpriC: "#F5F5F5",
+      sec: "#FFB366", onsec: "#1A0E00", sec2: "#FFB366",
+      bdg: "#FFB366", onbdg: "#1A0E00",
+      info: "#FFB366", outv: "#1E1E1E",
+      ok: "#E85D00", err: "#CF6679", warn: "#E85D00",
+      sky1: "#1E1E1E", sky2: "#1E1E1E", gnd: "#1E1E1E", gnd2: "#121212"
+    }
+  },
+  "forest-copper": {
+    name: "Forest Copper",
+    note: "forest-copper, Deep forest green with warm copper metallic accents",
+    light: false,
+    c: {
+      bg: "#0D1F0D", surf: "#152915", surf2: "#2A4D2A",
+      ink: "#E8F5E8", ink2: "#B8D9B8",
+      pri: "#B87333", onpri: "#0D1F0D", priC: "#935E29", onpriC: "#D4965A",
+      sec: "#1A3D1A", onsec: "#E8F5E8", sec2: "#152915",
+      bdg: "#1A3D1A", onbdg: "#E8F5E8",
+      info: "#8FA886", outv: "#3D5A3D",
+      ok: "#B87333", err: "#CF6679", warn: "#8FA886",
+      sky1: "#2A4D2A", sky2: "#152915", gnd: "#152915", gnd2: "#0D1F0D"
+    }
+  },
+  "frutiger-aero": {
+    name: "Frutiger Aero",
+    note: "frutiger-aero, Glossy glassy sky-and-nature palette inspired by late 90s/early 2000s UI",
+    light: true,
+    c: {
+      bg: "#EAF7FF", surf: "#F7FCFF", surf2: "#DDF1FF",
+      ink: "#173A52", ink2: "#34566E",
+      pri: "#39B6F0", onpri: "#173A52", priC: "#A9E6FF", onpriC: "#00314D",
+      sec: "#79D87E", onsec: "#173A52", sec2: "#C6F4CC",
+      bdg: "#79D87E", onbdg: "#173A52",
+      info: "#B9DBFF", outv: "#A9C7DA",
+      ok: "#39B6F0", err: "#BA1A1A", warn: "#B9DBFF",
+      sky1: "#DDF1FF", sky2: "#F7FCFF", gnd: "#F7FCFF", gnd2: "#EAF7FF"
+    }
+  },
+  "ink-terminal-modern": {
+    name: "Ink Terminal Modern",
+    note: "ink-terminal-modern, Retro-terminal inspired interface with modern accessibility contrast",
+    light: false,
+    c: {
+      bg: "#0A1112", surf: "#101A1C", surf2: "#1B2A2D",
+      ink: "#D7F5E6", ink2: "#A7C8BC",
+      pri: "#6CFF9A", onpri: "#0A1112", priC: "#1F6640", onpriC: "#D7FFE4",
+      sec: "#3E4E5E", onsec: "#D7F5E6", sec2: "#2A3644",
+      bdg: "#3E4E5E", onbdg: "#D7F5E6",
+      info: "#8AD0B0", outv: "#365047",
+      ok: "#6CFF9A", err: "#CF6679", warn: "#8AD0B0",
+      sky1: "#1B2A2D", sky2: "#101A1C", gnd: "#101A1C", gnd2: "#0A1112"
+    }
+  },
+  "linkpoint-default": {
+    name: "Linkpoint Blue",
+    note: "linkpoint_default, The default Linkpoint theme with blue accents",
+    light: false,
+    c: {
+      bg: "#1A1A1A", surf: "#2D2D2D", surf2: "#2D2D2D",
+      ink: "#FFFFFF", ink2: "#B0B0B0",
+      pri: "#1976D2", onpri: "#FFFFFF", priC: "#1976D2", onpriC: "#FFFFFF",
+      sec: "#00BCD4", onsec: "#000000", sec2: "#00BCD4",
+      bdg: "#00BCD4", onbdg: "#000000",
+      info: "#00BCD4", outv: "#2D2D2D",
+      ok: "#1976D2", err: "#CF6679", warn: "#1976D2",
+      sky1: "#2D2D2D", sky2: "#2D2D2D", gnd: "#2D2D2D", gnd2: "#1A1A1A"
+    }
+  },
+  "midnight-amber": {
+    name: "Midnight Amber",
+    note: "midnight-amber, Sophisticated midnight blue with warm amber metallic accents",
+    light: false,
+    c: {
+      bg: "#0C1824", surf: "#15202E", surf2: "#253447",
+      ink: "#E8EEF5", ink2: "#B8C5D6",
+      pri: "#FFBF00", onpri: "#0C1824", priC: "#CC9900", onpriC: "#FFD14D",
+      sec: "#D4A76A", onsec: "#0C1824", sec2: "#15202E",
+      bdg: "#D4A76A", onbdg: "#0C1824",
+      info: "#D4A76A", outv: "#3D4854",
+      ok: "#FFBF00", err: "#CF6679", warn: "#D4A76A",
+      sky1: "#253447", sky2: "#15202E", gnd: "#15202E", gnd2: "#0C1824"
+    }
+  },
+  "navy-gold": {
+    name: "Navy Gold",
+    note: "navy-gold, Elegant navy background with luxurious gold metallic accents",
+    light: false,
+    c: {
+      bg: "#0A1630", surf: "#1A2645", surf2: "#2A3655",
+      ink: "#E8E3D8", ink2: "#C9C4B9",
+      pri: "#D4AF37", onpri: "#0A1630", priC: "#856D34", onpriC: "#FFF8DC",
+      sec: "#4A90E2", onsec: "#0A1630", sec2: "#2C5F9E",
+      bdg: "#4A90E2", onbdg: "#0A1630",
+      info: "#9C8970", outv: "#44483E",
+      ok: "#D4AF37", err: "#CF6679", warn: "#9C8970",
+      sky1: "#2A3655", sky2: "#1A2645", gnd: "#1A2645", gnd2: "#0A1630"
+    }
+  },
+  "neo-noir-neon": {
+    name: "Neo-Noir Neon",
+    note: "neo-noir-neon, Dark cinematic palette with constrained neon accents for control surfaces",
+    light: false,
+    c: {
+      bg: "#090A10", surf: "#111420", surf2: "#1C2130",
+      ink: "#E7EAF7", ink2: "#B9C0D8",
+      pri: "#AA43FF", onpri: "#090A10", priC: "#4B1D73", onpriC: "#E7CBFF",
+      sec: "#00D1FF", onsec: "#090A10", sec2: "#005E73",
+      bdg: "#00D1FF", onbdg: "#090A10",
+      info: "#FF3D9E", outv: "#363D52",
+      ok: "#AA43FF", err: "#FF6B6B", warn: "#FF3D9E",
+      sky1: "#1C2130", sky2: "#111420", gnd: "#111420", gnd2: "#090A10"
+    }
+  },
+  "obsidian-crimson": {
+    name: "Obsidian Crimson",
+    note: "obsidian-crimson, Bold dramatic obsidian black with vibrant crimson accents",
+    light: false,
+    c: {
+      bg: "#0A0A0A", surf: "#141414", surf2: "#2D2D2D",
+      ink: "#F5F5F5", ink2: "#D0D0D0",
+      pri: "#DC143C", onpri: "#F5F5F5", priC: "#B00F30", onpriC: "#E5395F",
+      sec: "#A8505A", onsec: "#F5F5F5", sec2: "#141414",
+      bdg: "#A8505A", onbdg: "#F5F5F5",
+      info: "#A8505A", outv: "#3D3D3D",
+      ok: "#DC143C", err: "#FF6B6B", warn: "#A8505A",
+      sky1: "#2D2D2D", sky2: "#141414", gnd: "#141414", gnd2: "#0A0A0A"
+    }
+  },
+  "paper-ink": {
+    name: "Paper & Ink",
+    note: "paper-ink, Minimalist light theme for comfortable reading",
+    light: true,
+    c: {
+      bg: "#F0F0EB", surf: "#FAF9F6", surf2: "#EBEAE4",
+      ink: "#2C2C2C", ink2: "#454545",
+      pri: "#2C2C2C", onpri: "#F0F0EB", priC: "#454545", onpriC: "#FAF9F6",
+      sec: "#595959", onsec: "#F0F0EB", sec2: "#737373",
+      bdg: "#595959", onbdg: "#F0F0EB",
+      info: "#6B6B6B", outv: "#C9C9C9",
+      ok: "#2C2C2C", err: "#BA1A1A", warn: "#6B6B6B",
+      sky1: "#EBEAE4", sky2: "#FAF9F6", gnd: "#FAF9F6", gnd2: "#F0F0EB"
+    }
+  },
+  "rose-gold": {
+    name: "Rose Gold",
+    note: "rose-gold, Warm and elegant rose gold with burgundy undertones",
+    light: false,
+    c: {
+      bg: "#3D1F2B", surf: "#4D2F3B", surf2: "#5D3F4B",
+      ink: "#F5E5E8", ink2: "#E5D5D8",
+      pri: "#C1818B", onpri: "#3D1F2B", priC: "#7D4A52", onpriC: "#F5D5D8",
+      sec: "#D4A5A5", onsec: "#3D1F2B", sec2: "#8C6969",
+      bdg: "#D4A5A5", onbdg: "#3D1F2B",
+      info: "#C9A9A9", outv: "#4E3A3E",
+      ok: "#C1818B", err: "#FFB4AB", warn: "#C9A9A9",
+      sky1: "#5D3F4B", sky2: "#4D2F3B", gnd: "#4D2F3B", gnd2: "#3D1F2B"
+    }
+  },
+  "royal-bronze": {
+    name: "Royal Bronze",
+    note: "royal-bronze, Regal deep purple with luxurious bronze metallic accents",
+    light: false,
+    c: {
+      bg: "#1A0A30", surf: "#220D40", surf2: "#3D1F5C",
+      ink: "#F0E6FF", ink2: "#D0B3E6",
+      pri: "#CD7F32", onpri: "#1A0A30", priC: "#A86428", onpriC: "#D99952",
+      sec: "#2D1550", onsec: "#F0E6FF", sec2: "#220D40",
+      bdg: "#2D1550", onbdg: "#F0E6FF",
+      info: "#9B7A5F", outv: "#4D2F5C",
+      ok: "#CD7F32", err: "#CF6679", warn: "#9B7A5F",
+      sky1: "#3D1F5C", sky2: "#220D40", gnd: "#220D40", gnd2: "#1A0A30"
+    }
+  },
+  "royal-silver": {
+    name: "Royal Silver",
+    note: "royal-silver, Royal purple background with elegant silver metallic accents",
+    light: false,
+    c: {
+      bg: "#1A1535", surf: "#211A40", surf2: "#3D2F5C",
+      ink: "#F0EBFF", ink2: "#C8BFE6",
+      pri: "#C0C0C0", onpri: "#1A1535", priC: "#9A9A9A", onpriC: "#E0E0E0",
+      sec: "#2A1F50", onsec: "#F0EBFF", sec2: "#211A40",
+      bdg: "#2A1F50", onbdg: "#F0EBFF",
+      info: "#A89BC9", outv: "#4D3F66",
+      ok: "#C0C0C0", err: "#CF6679", warn: "#A89BC9",
+      sky1: "#3D2F5C", sky2: "#211A40", gnd: "#211A40", gnd2: "#1A1535"
+    }
+  },
+  "sl-classic": {
+    name: "Second Life Viewer",
+    note: "sl_classic, Classic Linden Lab viewer look - Linden blue on deep slate",
+    light: false,
+    c: {
+      bg: "#1B2430", surf: "#263548", surf2: "#263548",
+      ink: "#E6ECF2", ink2: "#AEBECF",
+      pri: "#4AA3DF", onpri: "#0B1520", priC: "#4AA3DF", onpriC: "#E6ECF2",
+      sec: "#7FB3D5", onsec: "#0B1520", sec2: "#7FB3D5",
+      bdg: "#7FB3D5", onbdg: "#0B1520",
+      info: "#7FB3D5", outv: "#263548",
+      ok: "#4AA3DF", err: "#CF6679", warn: "#4AA3DF",
+      sky1: "#263548", sky2: "#263548", gnd: "#263548", gnd2: "#1B2430"
+    }
+  },
+  "slate-cyan": {
+    name: "Slate Cyan",
+    note: "slate-cyan, Cool modern slate gray with vibrant cyan metallic accents",
+    light: false,
+    c: {
+      bg: "#1A1F24", surf: "#232930", surf2: "#3D4854",
+      ink: "#E8F0F5", ink2: "#B8CAD6",
+      pri: "#00D9FF", onpri: "#1A1F24", priC: "#00A8CC", onpriC: "#4DE2FF",
+      sec: "#2A333D", onsec: "#E8F0F5", sec2: "#232930",
+      bdg: "#2A333D", onbdg: "#E8F0F5",
+      info: "#6BA5B8", outv: "#4D5A66",
+      ok: "#00D9FF", err: "#CF6679", warn: "#6BA5B8",
+      sky1: "#3D4854", sky2: "#232930", gnd: "#232930", gnd2: "#1A1F24"
+    }
+  },
+  "slate-gunmetal": {
+    name: "Slate Gunmetal",
+    note: "slate-gunmetal, Industrial slate gray with gunmetal metallic accents",
+    light: false,
+    c: {
+      bg: "#1A2029", surf: "#232C38", surf2: "#3D4854",
+      ink: "#E6ECF2", ink2: "#B8C5D6",
+      pri: "#8F9CA8", onpri: "#1A2029", priC: "#6F7D87", onpriC: "#B0BDC9",
+      sec: "#2D3844", onsec: "#E6ECF2", sec2: "#232C38",
+      bdg: "#2D3844", onbdg: "#E6ECF2",
+      info: "#9DAAB6", outv: "#4D5A66",
+      ok: "#8F9CA8", err: "#CF6679", warn: "#9DAAB6",
+      sky1: "#3D4854", sky2: "#232C38", gnd: "#232C38", gnd2: "#1A2029"
+    }
+  },
+  "solarpunk-civic": {
+    name: "Solarpunk Civic",
+    note: "solarpunk-civic, Optimistic civic palette with daylight greens and trust-building clarity",
+    light: true,
+    c: {
+      bg: "#F2FBF4", surf: "#FBFFFC", surf2: "#E2F2E8",
+      ink: "#1E3A27", ink2: "#456355",
+      pri: "#38B56A", onpri: "#1E3A27", priC: "#BFEFD0", onpriC: "#0E3F20",
+      sec: "#4FAEEA", onsec: "#1E3A27", sec2: "#C8E9FF",
+      bdg: "#4FAEEA", onbdg: "#1E3A27",
+      info: "#F2C46C", outv: "#B3D0BF",
+      ok: "#38B56A", err: "#BA1A1A", warn: "#F2C46C",
+      sky1: "#E2F2E8", sky2: "#FBFFFC", gnd: "#FBFFFC", gnd2: "#F2FBF4"
+    }
+  },
+  "windows-phone-metro": {
+    name: "Windows Phone Metro",
+    note: "windows-phone-metro, Flat, tile-first Metro-inspired interface theme",
+    light: false,
+    c: {
+      bg: "#001A33", surf: "#002448", surf2: "#3D4854",
+      ink: "#F0F8FF", ink2: "#B8CAD6",
+      pri: "#00AEEF", onpri: "#00151F", priC: "#0078D7", onpriC: "#E8F7FF",
+      sec: "#005A9E", onsec: "#EAF4FF", sec2: "#232930",
+      bdg: "#005A9E", onbdg: "#EAF4FF",
+      info: "#2D89EF", outv: "#4D5A66",
+      ok: "#00AEEF", err: "#CF6679", warn: "#2D89EF",
+      sky1: "#3D4854", sky2: "#002448", gnd: "#002448", gnd2: "#001A33"
+    }
+  },
+  "lcars-tng": {
+    name: "LCARS — TNG",
+    note: "lcars-tng, Warm rail/sweep LCARS palette tuned for TNG-era amber and lilac, with strict pill geometry",
+    light: false,
+    c: {
+      bg: "#120C1C", surf: "#1C132A", surf2: "#3D1F5C",
+      ink: "#F3E9FF", ink2: "#D0B3E6",
+      pri: "#F2A65A", onpri: "#120C1C", priC: "#CC7A2B", onpriC: "#FFE6CC",
+      sec: "#A485F7", onsec: "#120C1C", sec2: "#7A2454",
+      bdg: "#A485F7", onbdg: "#120C1C",
+      info: "#A485F7", outv: "#5C3D1F",
+      ok: "#F2A65A", err: "#CF6679", warn: "#A485F7",
+      sky1: "#3D1F5C", sky2: "#1C132A", gnd: "#1C132A", gnd2: "#120C1C"
+    }
+  },
+  "metro-cyan": {
+    name: "Metro Cyan",
+    note: "metro-cyan, High-contrast Windows Phone Metro variant on a deep navy field with vivid cyan tile accent",
+    light: false,
+    c: {
+      bg: "#001A33", surf: "#002448", surf2: "#3D4854",
+      ink: "#F0F8FF", ink2: "#B8CAD6",
+      pri: "#00AEEF", onpri: "#001A33", priC: "#0078D7", onpriC: "#E8F7FF",
+      sec: "#2D89EF", onsec: "#001A33", sec2: "#005A9E",
+      bdg: "#2D89EF", onbdg: "#001A33",
+      info: "#00CC6A", outv: "#222222",
+      ok: "#00AEEF", err: "#E81123", warn: "#00CC6A",
+      sky1: "#3D4854", sky2: "#002448", gnd: "#002448", gnd2: "#001A33"
+    }
+  },
+  "stargate-atlantis": {
+    name: "Stargate Atlantis",
+    note: "stargate-atlantis, Atlantean blue glass and bronze with Art Deco geometry and Frank Lloyd Wright prairie banding",
+    light: false,
+    c: {
+      bg: "#0B1B2E", surf: "#133355", surf2: "#1A4068",
+      ink: "#E8EFF7", ink2: "#8FB0CC",
+      pri: "#C4A062", onpri: "#0B1B2E", priC: "#8A6E3D", onpriC: "#FFF1D6",
+      sec: "#6FCFE8", onsec: "#001E2B", sec2: "#1A4E66",
+      bdg: "#6FCFE8", onbdg: "#001E2B",
+      info: "#E8D7A3", outv: "#1F4E7A",
+      ok: "#C4A062", err: "#C46462", warn: "#E8D7A3",
+      sky1: "#1A4068", sky2: "#133355", gnd: "#133355", gnd2: "#0B1B2E"
+    }
+  },
+  "stargate-sg1": {
+    name: "Stargate SG-1",
+    note: "stargate-sg1, Iris-bronze and event-horizon teal — warm gate-room console feel with restrained neon accents",
+    light: false,
+    c: {
+      bg: "#04141C", surf: "#0E2C3E", surf2: "#143A52",
+      ink: "#E8F4FF", ink2: "#94B5C9",
+      pri: "#FFC15A", onpri: "#1A0E04", priC: "#B07820", onpriC: "#FFF1D6",
+      sec: "#4FE0FF", onsec: "#001E2B", sec2: "#0E5D78",
+      bdg: "#4FE0FF", onbdg: "#001E2B",
+      info: "#B85AFF", outv: "#1A4359",
+      ok: "#FFC15A", err: "#FF6B6B", warn: "#B85AFF",
+      sky1: "#143A52", sky2: "#0E2C3E", gnd: "#0E2C3E", gnd2: "#04141C"
+    }
   }
 };
 
@@ -524,6 +989,34 @@ export const PALETTE_FAMILIES: { name: string; keys: string[] }[] = [
   { name: "METAL & JEWEL", keys: ["navy", "deco", "emerald", "royals", "deep", "charcoal", "slateg", "rose", "burgundy"] },
   { name: "DAYLIGHT", keys: ["aero", "paper", "nouveau", "calm", "solarpunk"] }
 ];
+
+/** Standardized responsive breakpoints (in dp / px). */
+export const BREAKPOINTS = {
+  compact: 600,
+  medium: 840,
+  expanded: 1200,
+} as const;
+
+export type BreakpointKey = keyof typeof BREAKPOINTS;
+
+/** Standardized multi-pane layout specification tokens. */
+export const MULTI_PANE_SPECS = {
+  splitRatio: 0.44,
+  minPaneWidth: 320,
+} as const;
+
+/**
+ * Helper function to determine responsive breakpoint category based on width.
+ */
+export function getBreakpoint(width: number): BreakpointKey {
+  if (width < BREAKPOINTS.compact) {
+    return "compact";
+  }
+  if (width < BREAKPOINTS.expanded) {
+    return "medium";
+  }
+  return "expanded";
+}
 
 export const DEVICES: Record<string, DevicePack> = {
   ios:  { name: "iPhone 15 Pro", dims: "393×852", w: 393, h: 852, split: false, notch: "island" },
@@ -535,12 +1028,40 @@ export const DEVICES: Record<string, DevicePack> = {
 
 /** Theme names synchronized from linkpoint-design. */
 export const themeNames = [
-  "art-deco", "art-nouveau", "aurora-glass-night", "burgundy-rose-gold",
-  "calm-clinical", "charcoal-champagne", "deep-purple-platinum",
-  "emerald-silver", "forest-copper", "frutiger-aero", "ink-terminal-modern",
-  "lcars", "midnight-amber", "navy-gold", "neo-noir-neon",
-  "obsidian-crimson", "paper-ink", "rose-gold", "royal-bronze",
-  "royal-silver", "slate-cyan", "slate-gunmetal", "solarpunk-civic",
+  "art-deco",
+  "art-nouveau",
+  "aurora-glass-night",
+  "burgundy-rose-gold",
+  "calm-clinical",
+  "charcoal-champagne",
+  "cleverferret-gold",
+  "cleverferret_gold",
+  "deep-purple-platinum",
+  "emerald-silver",
+  "firestorm",
+  "forest-copper",
+  "frutiger-aero",
+  "ink-terminal-modern",
+  "lcars",
+  "lcars-tng",
+  "linkpoint-default",
+  "linkpoint_default",
+  "metro-cyan",
+  "midnight-amber",
+  "navy-gold",
+  "neo-noir-neon",
+  "obsidian-crimson",
+  "paper-ink",
+  "rose-gold",
+  "royal-bronze",
+  "royal-silver",
+  "sl-classic",
+  "sl_classic",
+  "slate-cyan",
+  "slate-gunmetal",
+  "solarpunk-civic",
+  "stargate-atlantis",
+  "stargate-sg1",
   "windows-phone-metro",
 ] as const;
 
@@ -549,6 +1070,10 @@ export type LayoutKey = keyof typeof LAYOUTS & string;
 export type PaletteKey = keyof typeof PALETTES & string;
 export type DeviceKey = keyof typeof DEVICES & string;
 
+export type DensityMode = "compact" | "standard" | "comfortable";
+export type LayoutMode = "grid" | "list" | "rail" | "split";
+export type BreakpointPreset = "mobile" | "tablet" | "desktop";
+
 /**
  * Compute combined theme tokens given a layout key and palette key,
  * applying embedded WCAG 2.2 contrast enforcement.
@@ -556,14 +1081,23 @@ export type DeviceKey = keyof typeof DEVICES & string;
 export function computeThemeTokens(
   layoutKey: string,
   paletteKey: string,
-  options: { dense?: boolean; customColors?: Partial<PaletteColors> } = {}
+  options: {
+    dense?: boolean;
+    density?: DensityMode;
+    layoutMode?: LayoutMode;
+    customColors?: Partial<PaletteColors>;
+  } = {}
 ): ThemeTokens {
   const L = LAYOUTS[layoutKey] || LAYOUTS.terminal;
   const base = PALETTES[paletteKey] || PALETTES.ink;
   const c = options.customColors ? { ...base.c, ...options.customColors } : { ...base.c };
   const s = { ...L.s };
-  if (options.dense) {
-    s.pad = "8px";
+  
+  const density = options.density || (options.dense ? "compact" : "standard");
+  if (density === "compact") {
+    s.pad = "6px";
+  } else if (density === "comfortable") {
+    s.pad = "18px";
   }
 
   const V: ThemeTokens = { font: L.font, dfont: L.dfont, ...c, ...s };

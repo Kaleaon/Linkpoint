@@ -10,7 +10,7 @@ import os
 import sqlite3
 import threading
 import time
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 CURRENT_SCHEMA_VERSION = 1
 
@@ -209,7 +209,7 @@ class InventoryCache:
             return self._lock
         return _NULL_LOCK
 
-    def load_cached_inventory(self) -> Dict[str, Any]:
+    def load_cached_inventory(self) -> dict[str, Any]:
         """
         Immediately loads cached folder structures and item metadata from local SQLite storage on startup.
         Returns dict containing 'folders' and 'items'.
@@ -249,7 +249,7 @@ class InventoryCache:
             finally:
                 self._close_connection(conn)
 
-    def get_update_token(self, token_id: str = "default") -> Optional[str]:
+    def get_update_token(self, token_id: str = "default") -> str | None:
         with self._read_lock_context():
             conn = self._get_connection()
             try:
@@ -266,7 +266,7 @@ class InventoryCache:
                 self._close_connection(conn)
 
     def apply_delta_update(
-        self, delta_data: Dict[str, Any], new_token: str, token_id: str = "default"
+        self, delta_data: dict[str, Any], new_token: str, token_id: str = "default"
     ) -> bool:
         """
         Applies HTTP delta updates (added/updated/removed folders and items) to SQLite cache using executemany.
@@ -378,7 +378,7 @@ class InventoryCache:
                 self._close_connection(conn)
 
     def reload_full_inventory(
-        self, full_data: Dict[str, Any], new_token: str, token_id: str = "default"
+        self, full_data: dict[str, Any], new_token: str, token_id: str = "default"
     ) -> bool:
         """
         Clears existing cache and replaces with full HTTP sync data using batch executemany.
@@ -467,7 +467,7 @@ class InventoryCache:
                     pass
                 self._close_connection(conn)
 
-    def get_item(self, item_id: str) -> Optional[Dict[str, Any]]:
+    def get_item(self, item_id: str) -> dict[str, Any] | None:
         with self._read_lock_context():
             conn = self._get_connection()
             try:
@@ -478,7 +478,7 @@ class InventoryCache:
             finally:
                 self._close_connection(conn)
 
-    def get_folder_items(self, folder_id: str) -> List[Dict[str, Any]]:
+    def get_folder_items(self, folder_id: str) -> list[dict[str, Any]]:
         with self._read_lock_context():
             conn = self._get_connection()
             try:

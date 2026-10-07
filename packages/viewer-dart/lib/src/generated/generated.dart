@@ -6824,6 +6824,16 @@ class AgentDomainCapabilitiesCapabilities {
   });
 }
 
+class EventQueueGetCapabilities {
+  final int? ack;
+  final List<String>? events;
+
+  EventQueueGetCapabilities({
+    this.ack,
+    this.events,
+  });
+}
+
 class CapabilitiesRequestResponseCapabilities {
   final List<String>? capabilities;
   final String? seed_response;
@@ -6833,15 +6843,5 @@ class CapabilitiesRequestResponseCapabilities {
     this.capabilities,
     this.seed_response,
     this.fetch_inventory,
-  });
-}
-
-class EventQueueGetCapabilities {
-  final int? ack;
-  final List<String>? events;
-
-  EventQueueGetCapabilities({
-    this.ack,
-    this.events,
   });
 }

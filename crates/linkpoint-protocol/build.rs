@@ -35,11 +35,7 @@ fn main() {
 
     let status = Command::new(py_cmd)
         .arg(&cli_path)
-        .args([
-            "generate",
-            "--target",
-            "rust,c",
-        ])
+        .args(["generate", "--target", "rust,c"])
         .current_dir(&repo_root)
         .status();
 

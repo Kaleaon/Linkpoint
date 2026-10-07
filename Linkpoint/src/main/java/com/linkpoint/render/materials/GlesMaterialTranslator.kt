@@ -121,13 +121,6 @@ object GlesMaterialTranslator {
     }
 
     private fun buildTexMatrix(uv: MaterialDescriptor.UvTransform): FloatArray {
-        val c = cos(uv.rotation)
-        val s = sin(uv.rotation)
-        return floatArrayOf(
-            uv.scaleS * c,  uv.scaleS * -s, 0f, 0f,
-            uv.scaleT * s,  uv.scaleT * c,  0f, 0f,
-            0f,             0f,             1f, 0f,
-            uv.offsetS,     uv.offsetT,     0f, 1f
-        )
+        return uv.matrix
     }
 }

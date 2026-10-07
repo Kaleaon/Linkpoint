@@ -275,8 +275,14 @@ fun L2LoginRoute(
                         is LoginResult.MFARequired -> {
                             status = "2FA verification required. Opening verification portal…"
                             error = false
-                            webAuthUrl = "https://id.secondlife.com/openid/login"
-                            showWebAuthDialog = true
+                            val (authUrl, _) = authManager.startAuthSession()
+                            webAuthUrl = authUrl
+                            val launched = authManager.launchAuthPortal(context, authUrl)
+                            if (!launched) {
+                                showWebAuthDialog = true
+                            } else {
+                                status = "Opening Second Life OAuth2 Portal in Custom Tabs…"
+                            }
                         }
                         is LoginResult.Failure -> {
                             status = result.message

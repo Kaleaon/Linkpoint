@@ -99,20 +99,22 @@ object LSLLanguage {
     fun highlight(code: String): AnnotatedString {
         val builder = AnnotatedString.Builder(code)
 
-        // Track positions that have been styled (comments and strings take priority)
-        val styledRanges = mutableListOf<IntRange>()
-
         // 1. Highlight multi-line comments first (highest priority)
+        val multiLineCommentRanges = mutableListOf<IntRange>()
         multiLineCommentRegex.findAll(code).forEach { match ->
             builder.addStyle(
                 SpanStyle(color = Colors.COMMENT, fontStyle = FontStyle.Italic),
                 match.range.first,
                 match.range.last + 1
             )
-            styledRanges.add(match.range)
+            multiLineCommentRanges.add(match.range)
         }
 
+        // Merge multi-line comment ranges before matching single-line comments
+        var styledRanges = mergeRanges(multiLineCommentRanges)
+
         // 2. Highlight single-line comments
+        val singleLineCommentRanges = mutableListOf<IntRange>()
         singleLineCommentRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
@@ -120,11 +122,15 @@ object LSLLanguage {
                     match.range.first,
                     match.range.last + 1
                 )
-                styledRanges.add(match.range)
+                singleLineCommentRanges.add(match.range)
             }
         }
 
+        // Merge all comment ranges (multi-line + single-line) before matching strings
+        styledRanges = mergeRanges(styledRanges + singleLineCommentRanges)
+
         // 3. Highlight strings
+        val stringRanges = mutableListOf<IntRange>()
         stringRegex.findAll(code).forEach { match ->
             if (!isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
@@ -132,9 +138,12 @@ object LSLLanguage {
                     match.range.first,
                     match.range.last + 1
                 )
-                styledRanges.add(match.range)
+                stringRanges.add(match.range)
             }
         }
+
+        // Merge comment and string ranges before matching numbers and identifiers
+        styledRanges = mergeRanges(styledRanges + stringRanges)
 
         // 4. Highlight numbers (hex and decimal)
         numberRegex.findAll(code).forEach { match ->
@@ -170,8 +179,49 @@ object LSLLanguage {
         return builder.toAnnotatedString()
     }
 
-    private fun isInStyledRange(position: Int, ranges: List<IntRange>): Boolean {
-        return ranges.any { position in it }
+    /**
+     * Merges overlapping or adjacent IntRanges into a sorted list of disjoint ranges.
+     */
+    internal fun mergeRanges(ranges: List<IntRange>): List<IntRange> {
+        if (ranges.isEmpty()) return emptyList()
+        val sorted = ranges.sortedWith(compareBy({ it.first }, { it.last }))
+        val merged = mutableListOf<IntRange>()
+        var current = sorted[0]
+
+        for (i in 1 until sorted.size) {
+            val next = sorted[i]
+            if (next.first <= current.last + 1) {
+                current = current.first..maxOf(current.last, next.last)
+            } else {
+                merged.add(current)
+                current = next
+            }
+        }
+        merged.add(current)
+        return merged
+    }
+
+    /**
+     * Binary search to check if a position falls within any range in a sorted list of disjoint IntRanges.
+     */
+    internal fun isInStyledRange(position: Int, ranges: List<IntRange>): Boolean {
+        if (ranges.isEmpty()) return false
+
+        var low = 0
+        var high = ranges.size - 1
+
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val range = ranges[mid]
+
+            when {
+                position < range.first -> high = mid - 1
+                position > range.last -> low = mid + 1
+                else -> return true
+            }
+        }
+
+        return false
     }
 
     /**

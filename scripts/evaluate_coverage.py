@@ -25,7 +25,7 @@ def parse_jacoco_xml(xml_path: Path):
                     "covered": covered,
                     "missed": missed,
                     "total": total,
-                    "percentage": round(pct, 2)
+                    "percentage": round(pct, 2),
                 }
         # Fallback to INSTRUCTION if LINE counter is missing
         for counter in root.findall("counter"):
@@ -38,7 +38,7 @@ def parse_jacoco_xml(xml_path: Path):
                     "covered": covered,
                     "missed": missed,
                     "total": total,
-                    "percentage": round(pct, 2)
+                    "percentage": round(pct, 2),
                 }
     except Exception as e:
         print(f"Error parsing JaCoCo report {xml_path}: {e}")
@@ -68,7 +68,7 @@ def parse_lcov(lcov_path: Path):
             "covered": lines_hit,
             "missed": missed,
             "total": lines_found,
-            "percentage": round(pct, 2)
+            "percentage": round(pct, 2),
         }
     except Exception as e:
         print(f"Error parsing LCOV report {lcov_path}: {e}")
@@ -77,15 +77,39 @@ def parse_lcov(lcov_path: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate Component Coverage & Quality Gates")
-    parser.add_argument("--android-report", type=Path, default=Path("Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"))
+    parser = argparse.ArgumentParser(
+        description="Evaluate Component Coverage & Quality Gates"
+    )
+    parser.add_argument(
+        "--android-report",
+        type=Path,
+        default=Path(
+            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        ),
+    )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))
     parser.add_argument("--rust-report", type=Path, default=Path("lcov.info"))
-    parser.add_argument("--baseline-file", type=Path, default=Path("coverage-baseline.json"))
-    parser.add_argument("--allow-negative-delta", action="store_true", help="Allow negative delta coverage for urgent fixes")
-    parser.add_argument("--update-baseline", action="store_true", help="Update baseline file with current coverage")
-    parser.add_argument("--ignore-missing", action="store_true", help="Ignore missing reports for unprovided components")
-    parser.add_argument("--rust-only", action="store_true", help="Evaluate only Rust component coverage")
+    parser.add_argument(
+        "--baseline-file", type=Path, default=Path("coverage-baseline.json")
+    )
+    parser.add_argument(
+        "--allow-negative-delta",
+        action="store_true",
+        help="Allow negative delta coverage for urgent fixes",
+    )
+    parser.add_argument(
+        "--update-baseline",
+        action="store_true",
+        help="Update baseline file with current coverage",
+    )
+    parser.add_argument(
+        "--ignore-missing",
+        action="store_true",
+        help="Ignore missing reports for unprovided components",
+    )
+    parser.add_argument(
+        "--rust-only", action="store_true", help="Evaluate only Rust component coverage"
+    )
     args = parser.parse_args()
 
     # Load baseline config
@@ -135,7 +159,9 @@ def main():
                     baseline_data[comp] = {}
                 baseline_data[comp]["baseline"] = res["percentage"]
                 if "min_threshold" not in baseline_data[comp]:
-                    baseline_data[comp]["min_threshold"] = max(0.0, round(res["percentage"] - 5.0, 2))
+                    baseline_data[comp]["min_threshold"] = max(
+                        0.0, round(res["percentage"] - 5.0, 2)
+                    )
         with open(args.baseline_file, "w", encoding="utf-8") as f:
             json.dump(baseline_data, f, indent=2)
         print(f"Updated baseline file {args.baseline_file}")
@@ -163,12 +189,17 @@ def main():
 
         if comp_res is None:
             if args.ignore_missing or args.rust_only:
-                table_rows.append(f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ⚪ IGNORED |")
-                gate_evaluations.append(f"- **{display_name}**: ⚪ Missing report file (ignored)")
+                table_rows.append(
+                    f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ⚪ IGNORED |"
+                )
+                gate_evaluations.append(
+                    f"- **{display_name}**: ⚪ Missing report file (ignored)"
+                )
             else:
-                status_str = "❌ FAIL (Missing Report)"
                 all_passed = False
-                table_rows.append(f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ❌ MISSING |")
+                table_rows.append(
+                    f"| {display_name} | N/A | N/A | {base_pct:.2f}% | N/A | {min_thresh:.2f}% | ❌ MISSING |"
+                )
                 gate_evaluations.append(f"- **{display_name}**: ❌ Missing report file")
             continue
 
@@ -180,26 +211,36 @@ def main():
 
         reasons = []
         if curr_pct < min_thresh:
-            reasons.append(f"Coverage {curr_pct:.2f}% below minimum threshold {min_thresh:.2f}%")
+            reasons.append(
+                f"Coverage {curr_pct:.2f}% below minimum threshold {min_thresh:.2f}%"
+            )
         if delta < -0.01 and not args.allow_negative_delta:
             reasons.append(f"Negative delta coverage ({delta_str})")
 
         if reasons:
-            comp_passed = False
             all_passed = False
             status_icon = "❌ FAIL"
-            gate_evaluations.append(f"- **{display_name}**: ❌ Failed ({'; '.join(reasons)}) [Current: {curr_pct:.2f}%, Baseline: {base_pct:.2f}%, Threshold: {min_thresh:.2f}%]")
+            gate_evaluations.append(
+                f"- **{display_name}**: ❌ Failed ({'; '.join(reasons)}) [Current: {curr_pct:.2f}%, Baseline: {base_pct:.2f}%, Threshold: {min_thresh:.2f}%]"
+            )
         else:
-            comp_passed = True
             status_icon = "✅ PASS"
-            gate_evaluations.append(f"- **{display_name}**: ✅ Passed [Current: {curr_pct:.2f}%, Baseline: {base_pct:.2f}%, Threshold: {min_thresh:.2f}%, Delta: {delta_str}]")
+            gate_evaluations.append(
+                f"- **{display_name}**: ✅ Passed [Current: {curr_pct:.2f}%, Baseline: {base_pct:.2f}%, Threshold: {min_thresh:.2f}%, Delta: {delta_str}]"
+            )
 
-        table_rows.append(f"| {display_name} | {curr_pct:.2f}% | {covered:,} / {total:,} | {base_pct:.2f}% | {delta_str} | {min_thresh:.2f}% | {status_icon} |")
+        table_rows.append(
+            f"| {display_name} | {curr_pct:.2f}% | {covered:,} / {total:,} | {base_pct:.2f}% | {delta_str} | {min_thresh:.2f}% | {status_icon} |"
+        )
 
     # Build Markdown Summary
     markdown_lines = []
-    markdown_lines.append("## 📊 Continuous Integration Code Coverage & Quality Gate Summary\n")
-    markdown_lines.append("| Component | Coverage | Lines Hit / Total | Baseline | Delta | Minimum Threshold | Status |")
+    markdown_lines.append(
+        "## 📊 Continuous Integration Code Coverage & Quality Gate Summary\n"
+    )
+    markdown_lines.append(
+        "| Component | Coverage | Lines Hit / Total | Baseline | Delta | Minimum Threshold | Status |"
+    )
     markdown_lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
     for row in table_rows:
         markdown_lines.append(row)
@@ -213,12 +254,20 @@ def main():
     else:
         markdown_lines.append("\n**Overall Quality Gate Status**: ❌ **FAILED**")
         markdown_lines.append("\n> ⚠️ **Action Required for Quality Gate Failure**:")
-        markdown_lines.append("> One or more components failed coverage quality gate requirements.")
-        markdown_lines.append("> - Please add unit tests covering new or modified code logic.")
+        markdown_lines.append(
+            "> One or more components failed coverage quality gate requirements."
+        )
+        markdown_lines.append(
+            "> - Please add unit tests covering new or modified code logic."
+        )
         markdown_lines.append("> - To run coverage locally:")
-        markdown_lines.append(">   - Android: `./gradlew testDebugUnitTest jacocoTestReport`")
+        markdown_lines.append(
+            ">   - Android: `./gradlew testDebugUnitTest jacocoTestReport`"
+        )
         markdown_lines.append(">   - Web: `npm run test:coverage`")
-        markdown_lines.append(">   - Rust: `cargo llvm-cov --workspace --lcov --output-path lcov.info`")
+        markdown_lines.append(
+            ">   - Rust: `cargo llvm-cov --workspace --lcov --output-path lcov.info`"
+        )
         markdown_lines.append(">   - Evaluate: `python3 scripts/evaluate_coverage.py`")
 
     summary_content = "\n".join(markdown_lines)

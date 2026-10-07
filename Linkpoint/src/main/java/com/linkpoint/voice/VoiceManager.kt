@@ -252,7 +252,11 @@ class VoiceManager(
     }
 
     /**
-     * Connect to spatial voice channel with capability validation.
+     * Primary entry point for voice connection.
+     *
+     * Queries region capability status and parcel local ID prior to initiating
+     * WebRTC peer connections. Fails gracefully if voice capability is missing
+     * on the current region.
      */
     suspend fun connect(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
         val hasVoiceCap = capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) ||
@@ -361,8 +365,6 @@ class VoiceManager(
      * Top-level entry point for spatial voice. Picks the WebRTC flow
      * for WebRTC-enabled regions or OpenSim grids via [VoiceTransportAdapter], and falls back to legacy
      * parcel voice for non-WebRTC regions.
-     *
-     * Bypasses legacy native Vivox C++ JNI stubs completely on 64-bit Android runtimes.
      */
     suspend fun joinSpatialVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
         val effectiveConfig = (currentVoiceConfig ?: VoiceConfig()).copy(
@@ -380,6 +382,7 @@ class VoiceManager(
 
         joinParcelVoice()
     }
+
 
     /**
      * `voice_server_type == "webrtc"` from `SimulatorFeatures` is the

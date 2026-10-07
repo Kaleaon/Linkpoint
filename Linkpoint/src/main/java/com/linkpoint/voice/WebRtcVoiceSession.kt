@@ -106,7 +106,8 @@ class WebRtcVoiceSession(
     /** Required for AdHoc/Group/P2P — comes from the chat-system invite. */
     private val multiAgentChannel: String? = null,
     private val multiAgentCredentials: String? = null,
-) {
+    override val channelUri: String = multiAgentChannel ?: "webrtc_spatial"
+) : VoiceSession {
 
     enum class ChannelType(val wire: String) {
         SPATIAL("local"),
@@ -137,55 +138,55 @@ class WebRtcVoiceSession(
     /**
      * Run the full negotiation. Returns once [setRemoteDescription] has
      * succeeded; the caller can then start sending [SLData] updates via
-     * [sendPositionUpdate] / [sendJoin] / etc. Throws on failure — the
-     * caller is expected to surface that and close the session.
+     * [sendPositionUpdate] / [sendJoin] / etc. Returns true if negotiation
+     * succeeded, false otherwise.
      */
-    suspend fun connect(iceServers: List<PeerConnection.IceServer>) {
+    override suspend fun connect(iceServers: List<PeerConnection.IceServer>): Boolean {
         check(peerConnection == null) { "WebRtcVoiceSession.connect called twice" }
         emit(State.OFFERING)
 
-        val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
-            // SL voice uses Unified Plan; default to it explicitly so we
-            // don't get bitten by an SDK default change.
-            sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
-            // Bundle policy MAX_BUNDLE keeps audio + data on one transport,
-            // which both reduces ICE candidate count and matches what the
-            // SL Voice Server expects (single m-line bundle).
-            bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
-            rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
-            // ICE Lite isn't a viewer choice — server-side. We're the
-            // full ICE agent.
-            continualGatheringPolicy =
-                PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
+        return try {
+            val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
+                // SL voice uses Unified Plan; default to it explicitly so we
+                // don't get bitten by an SDK default change.
+                sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+                // Bundle policy MAX_BUNDLE keeps audio + data on one transport,
+                // which both reduces ICE candidate count and matches what the
+                // SL Voice Server expects (single m-line bundle).
+                bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
+                rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
+                // ICE Lite isn't a viewer choice — server-side. We're the
+                // full ICE agent.
+                continualGatheringPolicy =
+                    PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
+            }
+
+            val pc = factory.createPeerConnection(rtcConfig, pcObserver)
+                ?: error("PeerConnectionFactory.createPeerConnection returned null")
+            peerConnection = pc
+
+            // ⚠️ ORDERING-CRITICAL: SLData channel MUST exist before createOffer()
+            // so the SCTP m-line is in the offer SDP. Adding it after produces a
+            // valid offer that the server rejects.
+            openSlDataChannel(pc)
+
+            val offer = pc.createOfferSuspend(audioOnlyConstraints())
+            val mangled = mangleOpusFmtp(offer)
+            pc.setLocalDescriptionSuspend(mangled)
+
+            emit(State.AWAITING_ANSWER)
+            val answer = exchangeOffer(mangled)
+            pc.setRemoteDescriptionSuspend(answer)
+            answerReceived.set(true)
+
+            drainIceQueue()
+            emit(State.NEGOTIATED)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "WebRtcVoiceSession negotiation failed: ${e.message}", e)
+            emit(State.FAILED)
+            false
         }
-
-        val pc = factory.createPeerConnection(rtcConfig, pcObserver)
-            ?: error("PeerConnectionFactory.createPeerConnection returned null")
-        peerConnection = pc
-
-        // ⚠️ ORDERING-CRITICAL: SLData channel MUST exist before createOffer()
-        // so the SCTP m-line is in the offer SDP. Adding it after produces a
-        // valid offer that the server rejects.
-        openSlDataChannel(pc)
-
-        // Add the local audio track. The actual mic AudioSource and
-        // AudioTrack are owned by VoiceManager — we just attach them.
-        // (Caller responsibility — kept out of this skeleton because mic
-        // permission + AudioSource lifecycle is shared across sessions
-        // for cross-region voice.)
-        // pc.addTrack(localAudioTrack, listOf(streamId))
-
-        val offer = pc.createOfferSuspend(audioOnlyConstraints())
-        val mangled = mangleOpusFmtp(offer)
-        pc.setLocalDescriptionSuspend(mangled)
-
-        emit(State.AWAITING_ANSWER)
-        val answer = exchangeOffer(mangled)
-        pc.setRemoteDescriptionSuspend(answer)
-        answerReceived.set(true)
-
-        drainIceQueue()
-        emit(State.NEGOTIATED)
     }
 
     /**
@@ -201,8 +202,15 @@ class WebRtcVoiceSession(
      * the SLData channel state).
      */
 
+    override fun isConnected(): Boolean =
+        peerConnection != null && (stateFlow.replayCache.lastOrNull() == State.NEGOTIATED)
+
+    override fun disconnect() {
+        close()
+    }
+
     /** Tear down. Idempotent. Sends the LLSD `logout` to the cap. */
-    fun close() {
+    override fun close() {
         scope.launch {
             try {
                 viewerSession?.let { sendLogout(it) }
@@ -220,7 +228,7 @@ class WebRtcVoiceSession(
     }
 
     /** Update ICE server configuration on active PeerConnection. */
-    fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+    override fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
         val pc = peerConnection ?: return false
         return try {
             val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
@@ -247,12 +255,25 @@ class WebRtcVoiceSession(
      * crosses a region boundary, swap which session is primary; do
      * NOT close + reopen.
      */
-    fun sendJoin(primary: Boolean) {
+    override fun sendJoin(primary: Boolean) {
         sendSlData(JSONObject().put("j", JSONObject().put("p", primary)))
     }
 
     fun sendLeave() {
         sendSlData(JSONObject().put("l", true))
+    }
+
+    override fun sendPositionUpdate(
+        x: Float, y: Float, z: Float,
+        lookX: Float, lookY: Float, lookZ: Float
+    ) {
+        val posCm = IntVec3((x * 100).toInt(), (y * 100).toInt(), (z * 100).toInt())
+        sendPositionUpdate(
+            senderPosWorldCm = posCm,
+            senderHeadingX100 = null,
+            listenerPosWorldCm = null,
+            listenerHeadingX100 = null
+        )
     }
 
     /**

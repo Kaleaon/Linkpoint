@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "./Icon.jsx";
+import SpatialViewportContainer from "./SpatialViewportContainer.jsx";
 
 /**
  * ViewportTile container for feature screens/routes.
@@ -27,6 +28,16 @@ export default function ViewportTile({
   onToggleDensity = null,
   onDragStart = null,
   onResizeStart = null,
+  onRotate = null,
+  onZoom = null,
+  onReset = null,
+  yaw = 0,
+  pitch = 0,
+  zoom = 1,
+  isSpatialViewport = false,
+  spatialAriaLabel = "",
+  onMoveStep = null,
+  onResizeStep = null,
   children = null,
   style = {},
   className = "",
@@ -77,6 +88,25 @@ export default function ViewportTile({
     padding: 0,
   };
 
+  const handleHeaderKeyDown = (e) => {
+    const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const step = 32;
+    if (e.shiftKey) {
+      if (e.key === "ArrowUp") onResizeStep?.(0, -step);
+      else if (e.key === "ArrowDown") onResizeStep?.(0, step);
+      else if (e.key === "ArrowLeft") onResizeStep?.(-step, 0);
+      else if (e.key === "ArrowRight") onResizeStep?.(step, 0);
+    } else {
+      if (e.key === "ArrowUp") onMoveStep?.(0, -step);
+      else if (e.key === "ArrowDown") onMoveStep?.(0, step);
+      else if (e.key === "ArrowLeft") onMoveStep?.(-step, 0);
+      else if (e.key === "ArrowRight") onMoveStep?.(step, 0);
+    }
+  };
+
   return (
     <div
       data-testid={`viewport-tile-${id}`}
@@ -116,6 +146,10 @@ export default function ViewportTile({
       <div
         className="viewport-tile-header"
         style={tileHeaderStyle}
+        tabIndex={0}
+        role="region"
+        aria-label={`${title || id} header. Use arrow keys to move, Shift+arrow keys to resize.`}
+        onKeyDown={handleHeaderKeyDown}
         onMouseDown={(e) => {
           if (isFloating && onDragStart) {
             onDragStart(e);
@@ -159,6 +193,47 @@ export default function ViewportTile({
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >
+          {isFloating && (
+            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+              <button
+                type="button"
+                style={actionBtnStyle}
+                onClick={() => onMoveStep?.(0, -32)}
+                title="Move panel up"
+                aria-label="Move Up"
+              >
+                <Icon name="chevron-up" size={12} />
+              </button>
+              <button
+                type="button"
+                style={actionBtnStyle}
+                onClick={() => onMoveStep?.(0, 32)}
+                title="Move panel down"
+                aria-label="Move Down"
+              >
+                <Icon name="chevron-down" size={12} />
+              </button>
+              <button
+                type="button"
+                style={actionBtnStyle}
+                onClick={() => onMoveStep?.(-32, 0)}
+                title="Move panel left"
+                aria-label="Move Left"
+              >
+                <Icon name="chevron-left" size={12} />
+              </button>
+              <button
+                type="button"
+                style={actionBtnStyle}
+                onClick={() => onMoveStep?.(32, 0)}
+                title="Move panel right"
+                aria-label="Move Right"
+              >
+                <Icon name="chevron-right" size={12} />
+              </button>
+            </div>
+          )}
+
           {onToggleDensity && (
             <button
               type="button"
@@ -260,6 +335,9 @@ export default function ViewportTile({
       {/* Tile Content Area */}
       <div
         className="viewport-tile-body"
+        tabIndex={0}
+        role="region"
+        aria-label={title || id || "Viewport Tile"}
         style={{
           flex: 1,
           minHeight: 0,
@@ -269,30 +347,111 @@ export default function ViewportTile({
           padding: densityPadding,
           background: V.bg,
           position: "relative",
+          outline: "none",
         }}
       >
-        {children}
+        {isSpatialViewport || onRotate || onZoom || onReset ? (
+          <SpatialViewportContainer
+            ariaLabel={spatialAriaLabel || title || id || "3D Viewport Tile"}
+            yaw={yaw}
+            pitch={pitch}
+            zoom={zoom}
+            onRotate={onRotate}
+            onZoom={onZoom}
+            onReset={onReset}
+            style={{ width: "100%", height: "100%", position: "relative" }}
+          >
+            {children}
+          </SpatialViewportContainer>
+        ) : (
+          children
+        )}
       </div>
 
-      {/* Floating Window Resize Grip */}
-      {isFloating && onResizeStart && (
+      {/* Floating Window Resize Grip & Scale Controls */}
+      {isFloating && (
         <div
-          onMouseDown={onResizeStart}
-          onTouchStart={onResizeStart}
           style={{
             position: "absolute",
             right: 0,
             bottom: 0,
-            width: "16px",
-            height: "16px",
-            cursor: "nwse-resize",
-            background: `linear-gradient(135deg, transparent 50%, ${
-              active ? V.pri : V.outv || "#888"
-            } 50%)`,
+            display: "flex",
+            alignItems: "center",
+            gap: "2px",
             zIndex: 10,
+            background: V.surf,
+            padding: "1px",
+            borderRadius: "3px 0 0 0",
           }}
-          title="Resize window"
-        />
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => onResizeStep?.(-32, -32)}
+            style={{
+              width: "16px",
+              height: "16px",
+              padding: 0,
+              fontSize: "12px",
+              fontWeight: "bold",
+              lineHeight: "1",
+              border: `1px solid ${active ? V.pri : V.outv || "#888"}`,
+              background: V.surf,
+              color: V.ink,
+              borderRadius: "2px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: 0.9,
+            }}
+            aria-label="Decrease tile size"
+            title="Decrease tile size"
+          >
+            &minus;
+          </button>
+          <button
+            type="button"
+            onClick={() => onResizeStep?.(32, 32)}
+            style={{
+              width: "16px",
+              height: "16px",
+              padding: 0,
+              fontSize: "12px",
+              fontWeight: "bold",
+              lineHeight: "1",
+              border: `1px solid ${active ? V.pri : V.outv || "#888"}`,
+              background: V.surf,
+              color: V.ink,
+              borderRadius: "2px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: 0.9,
+            }}
+            aria-label="Increase tile size"
+            title="Increase tile size"
+          >
+            &#43;
+          </button>
+          {onResizeStart && (
+            <div
+              onMouseDown={onResizeStart}
+              onTouchStart={onResizeStart}
+              style={{
+                width: "16px",
+                height: "16px",
+                cursor: "nwse-resize",
+                background: `linear-gradient(135deg, transparent 50%, ${
+                  active ? V.pri : V.outv || "#888"
+                } 50%)`,
+              }}
+              title="Resize window"
+            />
+          )}
+        </div>
       )}
     </div>
   );

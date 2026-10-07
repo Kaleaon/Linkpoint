@@ -148,7 +148,7 @@ internal class VoiceSignalingOrchestrator(
     private val pollIntervalMs: Long = 1_000L
 ) {
     suspend fun connect(
-        session: VoiceSession,
+        session: InternalVoiceSession,
         channelUri: String,
         credentials: String,
         localIceCandidates: SharedFlow<IceCandidate>
@@ -175,7 +175,7 @@ internal class VoiceSignalingOrchestrator(
         }
     }
 
-    private fun ingestRemoteCandidates(session: VoiceSession, candidates: List<SignalingIceCandidate>) {
+    private fun ingestRemoteCandidates(session: InternalVoiceSession, candidates: List<SignalingIceCandidate>) {
         for (candidate in candidates) {
             session.addRemoteIceCandidate(candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate)
         }
@@ -204,7 +204,7 @@ internal class VoiceSignalingOrchestrator(
 
     private fun launchPolling(
         scope: kotlinx.coroutines.CoroutineScope,
-        session: VoiceSession,
+        session: InternalVoiceSession,
         pollUri: String?,
         credentials: String
     ) {

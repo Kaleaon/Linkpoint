@@ -24,6 +24,7 @@ class ProgressiveTextureStreamerTest {
         ProgressiveTextureStreamer.reset()
         // Warm up class loading and Robolectric shadow initialization
         val dummy = createDummyJ2kBytes()
+        JPEG2000Decoder.decodePlaceholder64(dummy)
         ProgressiveTextureStreamer.submit(
             id = UUID.randomUUID(),
             data = dummy,
@@ -70,7 +71,7 @@ class ProgressiveTextureStreamerTest {
         assertTrue("Placeholder width must be <= 64", bitmap.width <= 64)
         assertTrue("Placeholder height must be <= 64", bitmap.height <= 64)
 
-        // Requirement 1: Sub-2ms placeholder extraction (under 2.0ms in production)
+        // Requirement 1: Sub-2ms placeholder extraction (under 2.0ms in prod; relaxed for JVM test runner)
         assertTrue("Placeholder extraction duration ($durationMs ms) must be < 100.0ms in test environment", durationMs < 100.0)
 
         val diag = ProgressiveTextureStreamer.getDiagnostics()
@@ -98,7 +99,7 @@ class ProgressiveTextureStreamerTest {
         val diagBefore = ProgressiveTextureStreamer.getDiagnostics()
         assertEquals("20 tasks queued for high-res pass", 20, diagBefore.pendingTasks)
 
-        // Execute frame 1 with tight budget (e.g., 0ns) to force budget yielding
+        // Execute frame 1 with tight budget (0ns) to force budget yielding
         val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 0L)
         val diagFrame1 = ProgressiveTextureStreamer.getDiagnostics()
 

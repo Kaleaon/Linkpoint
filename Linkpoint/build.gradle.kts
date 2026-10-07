@@ -41,7 +41,7 @@ val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-navigation",
         packagePrefixes = setOf("com.linkpoint.ui.navigation"),
-        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2")
+        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2", "adaptive", "overlay")
     ),
     UiBoundaryRule(
         moduleName = "ui/chat",
@@ -239,10 +239,22 @@ android {
         unitTests {
             isReturnDefaultValues = true  // Return default values for unmocked Android methods like Log
             isIncludeAndroidResources = true
+            all {
+                it.useJUnitPlatform()
+            }
         }
     }
 
     packaging {
+        jniLibs {
+            useLegacyPackaging = false
+            pickFirsts += listOf(
+                "**/libjnidispatch.so",
+                "**/libopenjpeg.so",
+                "**/libopenjp2.so",
+                "**/liblumiya-native.so"
+            )
+        }
         resources {
             excludes += listOf(
                 "META-INF/DEPENDENCIES",
@@ -398,6 +410,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
@@ -462,12 +475,15 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
     // Used by tests that import `kotlin.test.*` (e.g.
     // ReliableTransportPolicyTest). Bundled assertions/Test annotations
     // delegate to JUnit 4 underneath so the existing junit:junit
     // dependency keeps the test runner unchanged.
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
     // Pinned to mockito 4.x — newer mockito 5.x is JVM 11 only and the project
     // still targets Java 1.8.
     testImplementation("org.mockito:mockito-core:4.11.0")
@@ -546,6 +562,8 @@ configurations.matching {
 // suite reliable in proxied CI environments without hard-coding a proxy or
 // changing behavior for developers with direct network access.
 tasks.withType<Test>().configureEach {
+    systemProperty("robolectric.dependency.repo.url", "https://maven-central.storage-download.googleapis.com/maven2")
+    systemProperty("robolectric.dependency.repo.id", "googleCentral")
     jvmArgs("-Dnet.bytebuddy.experimental=true")
     systemProperty("net.bytebuddy.experimental", "true")
     listOf(

@@ -2,6 +2,8 @@ package com.linkpoint.render
 
 import android.opengl.GLSurfaceView
 import android.util.Log
+import com.linkpoint.protocol.textures.SLTextureFetcher
+import com.linkpoint.protocol.textures.TextureQueueController
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
@@ -62,6 +64,9 @@ class RenderStateManager {
 
     @Volatile
     private var attachedGlSurfaceView: GLSurfaceView? = null
+
+    @Volatile
+    var textureQueueController: TextureQueueController? = null
 
     /** Current render mode. */
     val currentMode: RenderMode
@@ -137,8 +142,10 @@ class RenderStateManager {
                 Log.i(TAG, "Overlay state change ($active): $previous -> $targetMode")
                 if (active) {
                     RenderDiagnostics.filamentDrawingPaused(reason)
+                    (textureQueueController ?: SLTextureFetcher.shared)?.pauseFetching()
                 } else {
                     RenderDiagnostics.filamentDrawingResumed(reason)
+                    (textureQueueController ?: SLTextureFetcher.shared)?.resumeFetching()
                 }
                 applyRenderModeToSurfaceView(targetMode)
                 notifyListenersModeChanged(previous, targetMode)

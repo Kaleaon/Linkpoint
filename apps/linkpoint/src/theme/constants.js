@@ -3,13 +3,9 @@
 // buttons, per-screen sub-segments, the movement pad, worn HUDs, world-view
 // targets and the loading/empty/error copy bank.
 
-export const DEVICES = {
-  ios:  { name: "iPhone 15 Pro", dims: "393×852", w: 393, h: 852, split: false, notch: "island" },
-  and:  { name: "Pixel 8", dims: "412×892", w: 412, h: 892, split: false, notch: "hole" },
-  tab:  { name: 'Tablet 12.9" landscape', dims: "1194×834", w: 1194, h: 834, split: true, notch: "none" },
-  fold: { name: "Foldable, unfolded", dims: "840×880", w: 840, h: 880, split: true, notch: "hole" },
-  desk: { name: "Desktop", dims: "1440×900", w: 1440, h: 900, split: true, notch: "none", desk: true },
-};
+import { DEVICES } from "@linkpoint/design-system/tokens";
+
+export { DEVICES };
 
 // Desktop SL is not a screen stack — it is N resizable windows over one scene. The
 // floater set is the window model: position, size, z-order and minimise all live in state.

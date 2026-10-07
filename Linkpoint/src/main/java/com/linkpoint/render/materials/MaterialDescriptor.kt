@@ -43,8 +43,42 @@ data class MaterialDescriptor(
         val scaleT: Float,
         val offsetS: Float,
         val offsetT: Float,
-        val rotation: Float
+        val rotation: Float,
+        val precomputedMatrix: FloatArray? = null
     ) {
-        companion object { val IDENTITY = UvTransform(1f, 1f, 0f, 0f, 0f) }
+        val isIdentity: Boolean = scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f
+
+        val matrix: FloatArray by lazy(LazyThreadSafetyMode.NONE) {
+            if (precomputedMatrix != null) {
+                precomputedMatrix
+            } else if (isIdentity) {
+                IDENTITY_MATRIX
+            } else {
+                computeMatrix(scaleS, scaleT, offsetS, offsetT, rotation)
+            }
+        }
+
+        companion object {
+            val IDENTITY_MATRIX: FloatArray = FloatArray(16).also { android.opengl.Matrix.setIdentityM(it, 0) }
+            val IDENTITY = UvTransform(1f, 1f, 0f, 0f, 0f, precomputedMatrix = IDENTITY_MATRIX)
+
+            fun computeMatrix(
+                scaleS: Float,
+                scaleT: Float,
+                offsetS: Float,
+                offsetT: Float,
+                rotation: Float,
+                dest: FloatArray = FloatArray(16)
+            ): FloatArray {
+                android.opengl.Matrix.setIdentityM(dest, 0)
+                android.opengl.Matrix.translateM(dest, 0, 0.5f + offsetS, 0.5f + offsetT, 0f)
+                if (rotation != 0f) {
+                    android.opengl.Matrix.rotateM(dest, 0, Math.toDegrees(rotation.toDouble()).toFloat(), 0f, 0f, 1f)
+                }
+                android.opengl.Matrix.scaleM(dest, 0, scaleS, scaleT, 1f)
+                android.opengl.Matrix.translateM(dest, 0, -0.5f, -0.5f, 0f)
+                return dest
+            }
+        }
     }
 }
