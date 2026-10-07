@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "description": "Canonical cross-language test vectors for Second Life UDP packet framing, zero-coding, extra headers, and appended ACKs",
+  "packets": [
+    {
+      "name": "high_frequency_zerocoded",
+      "flags": {
+        "zerocoded": true,
+        "reliable": false,
+        "resent": false,
+        "appended_acks": false
+      },
+      "flags_byte": 128,
+      "sequence": 100,
+      "extra": [],
+      "frequency": "High",
+      "message_id": 4,
+      "payload_hex": "01000302"
+    },
+    {
+      "name": "medium_frequency_with_extra_header",
+      "flags": {
+        "zerocoded": false,
+        "reliable": true,
+        "resent": true,
+        "appended_acks": false
+      },
+      "flags_byte": 96,
+      "sequence": 101,
+      "extra": [1, 2],
+      "frequency": "Medium",
+      "message_id": 200,
+      "payload_hex": "aa0002bb"
+    },
+    {
+      "name": "low_frequency_appended_acks",
+      "flags": {
+        "zerocoded": false,
+        "reliable": false,
+        "resent": false,
+        "appended_acks": true
+      },
+      "flags_byte": 16,
+      "sequence": 102,
+      "extra": [],
+      "frequency": "Low",
+      "message_id": 4660,
+      "acks": [7, 9],
+      "payload_hex": "11223344"
+    },
+    {
+      "name": "fixed_frequency_packet",
+      "flags": {
+        "zerocoded": true,
+        "reliable": false,
+        "resent": false,
+        "appended_acks": true
+      },
+      "flags_byte": 144,
+      "sequence": 103,
+      "extra": [],
+      "frequency": "Fixed",
+      "message_id": 5,
+      "acks": [12],
+      "payload_hex": "5566"
+    }
+  ],
+  "zerocode": [
+    {
+      "name": "zero_decompression_test",
+      "compressed_hex": "01000302000204",
+      "expected_hex": "0100000002000004"
+    }
+  ]
+}

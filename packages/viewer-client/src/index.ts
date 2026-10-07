@@ -416,3 +416,8 @@ function publicError(error: unknown): { code: string; message: string } {
   if (error instanceof Error) return { code: "runtime-error", message: error.message };
   return { code: "runtime-error", message: "The viewer operation failed." };
 }
+
+export * from "./sl_packet";
+export * from "./spatial_codecs";
+export * from "./protocol_decoders";
+
