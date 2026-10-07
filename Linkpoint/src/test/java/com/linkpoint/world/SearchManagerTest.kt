@@ -40,7 +40,7 @@ class SearchManagerTest {
         """.trimIndent()
 
         val mockCallFactory = MockCallFactory(jsonResponse)
-        val mockCapabilityManager = mock(CapabilityManager::class.java)
+        val mockCapabilityManager = CapabilityManager()
 
         val searchManager = SearchManager(mockCapabilityManager, mockCallFactory)
         val results = searchManager.searchPlaces("test")

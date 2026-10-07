@@ -21,7 +21,7 @@ class GridConnectionAsyncTest {
     @Test
     fun `closeAsync and suspend close run without blocking caller thread`() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val mockUdpConnection = mock(UDPConnectionFixed::class.java)
+        val mockUdpConnection = UDPConnectionFixed()
 
         val testScope = TestScope(UnconfinedTestDispatcher())
         val gridConnection = GridConnection(

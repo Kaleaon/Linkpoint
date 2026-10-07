@@ -44,7 +44,7 @@ import kotlin.coroutines.resume
  * Services dependency so the app works on de-googled / Asian-market
  * devices, at the cost of APK size.
  */
-class CronetHttpClient(
+open class CronetHttpClient(
     private val engine: CronetEngine?,
     private val executor: Executor = Executors.newSingleThreadExecutor { r ->
         Thread(r, "CronetCallback").apply { isDaemon = true }
@@ -52,14 +52,14 @@ class CronetHttpClient(
 ) {
 
     /** True when [engine] is non-null and ready to serve requests. */
-    val isAvailable: Boolean get() = engine != null
+    open val isAvailable: Boolean get() = engine != null
 
     /**
      * GET a URL, returning the body bytes on 2xx or null on any failure
      * (caller falls back to OkHttp). Writes a structured log line so we
      * can A/B Cronet vs OkHttp performance from the debug report.
      */
-    suspend fun get(
+    open suspend fun get(
         url: String,
         headers: Map<String, String> = emptyMap(),
         timeoutMs: Long = 15_000L
@@ -72,7 +72,7 @@ class CronetHttpClient(
      * is the right fit (no streaming). Returns [CronetResult] in the same
      * shape as [get].
      */
-    suspend fun post(
+    open suspend fun post(
         url: String,
         body: ByteArray,
         contentType: String,
@@ -80,7 +80,7 @@ class CronetHttpClient(
         timeoutMs: Long = 15_000L
     ): CronetResult = execute("POST", url, headers, body = body, contentType = contentType, timeoutMs = timeoutMs)
 
-    suspend fun execute(
+    open suspend fun execute(
         method: String,
         url: String,
         headers: Map<String, String> = emptyMap(),

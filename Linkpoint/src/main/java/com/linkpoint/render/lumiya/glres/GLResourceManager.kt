@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * cleaned up even if the owner is garbage-collected without an explicit
  * `destroy()` call.  Deferred cleanup runs once per frame on the GL thread.
  */
-class GLResourceManager(private val glThreadGuard: ((String) -> Unit)? = null) {
+open class GLResourceManager(private val glThreadGuard: ((String) -> Unit)? = null) {
 
     companion object {
         private const val TAG = "GLResourceManager"
@@ -38,7 +38,7 @@ class GLResourceManager(private val glThreadGuard: ((String) -> Unit)? = null) {
 
     // ── Allocation helpers ───────────────────────────────────────────────
 
-    fun createTexture(): Int {
+    open fun createTexture(): Int {
         requireGlThread("createTexture")
         val buf = IntArray(1)
         GLES32.glGenTextures(1, buf, 0)
@@ -75,7 +75,7 @@ class GLResourceManager(private val glThreadGuard: ((String) -> Unit)? = null) {
 
     // ── Deferred deletion (thread-safe) ──────────────────────────────────
 
-    fun deleteTexture(handle: Int) { if (handle != 0) pendingTextureDeletes.add(handle) }
+    open fun deleteTexture(handle: Int) { if (handle != 0) pendingTextureDeletes.add(handle) }
     fun deleteBuffer(handle: Int)  { if (handle != 0) pendingBufferDeletes.add(handle) }
     fun deleteVAO(handle: Int)     { if (handle != 0) pendingVAODeletes.add(handle) }
     fun deleteFBO(handle: Int)     { if (handle != 0) pendingFBODeletes.add(handle) }
