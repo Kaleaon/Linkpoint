@@ -135,17 +135,20 @@ export const TERRAIN_VERTEX_SHADER = `
   attribute vec3 aPosition;
   attribute vec3 aNormal;
   attribute vec2 aTexCoord;
+  attribute vec3 aTangent;
   uniform mat4 uModelMatrix;
   uniform mat4 uViewMatrix;
   uniform mat4 uProjectionMatrix;
   uniform mat3 uNormalMatrix;
   varying vec3 vNormal;
+  varying vec3 vTangent;
   varying vec2 vTexCoord;
   varying vec3 vPosition;
   void main() {
     vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
     vPosition = worldPos.xyz;
     vNormal = normalize(uNormalMatrix * aNormal);
+    vTangent = normalize(uNormalMatrix * aTangent);
     vTexCoord = aTexCoord;
     gl_Position = uProjectionMatrix * uViewMatrix * worldPos;
   }
@@ -158,16 +161,24 @@ export const TERRAIN_FRAGMENT_SHADER = `
   precision mediump float;
   #endif
   varying vec3 vNormal;
+  varying vec3 vTangent;
   varying vec2 vTexCoord;
   varying vec3 vPosition;
   uniform vec3 uLightPos;
   uniform vec3 uLightColor;
   uniform vec3 uAmbientColor;
+  uniform vec3 uSkyColor;
+  uniform float uHazeHorizon;
+  uniform vec3 uHazeColor;
   uniform sampler2D uComposition;
   uniform sampler2D uDetail0;
   uniform sampler2D uDetail1;
   uniform sampler2D uDetail2;
   uniform sampler2D uDetail3;
+  uniform sampler2D uDetailNormal0;
+  uniform sampler2D uDetailNormal1;
+  uniform sampler2D uDetailNormal2;
+  uniform sampler2D uDetailNormal3;
   uniform vec4 uDetailUse;      // 1.0 when the detail texture is loaded
   uniform vec3 uFallback0;
   uniform vec3 uFallback1;
@@ -186,10 +197,41 @@ export const TERRAIN_FRAGMENT_SHADER = `
     vec3 lower = base < 0.5 ? c0 : (base < 1.5 ? c1 : c2);
     vec3 upper = base < 0.5 ? c1 : (base < 1.5 ? c2 : c3);
     vec3 albedo = mix(lower, upper, f);
-    vec3 normal = normalize(vNormal);
+
+    // Normal map sampling across layers
+    vec3 n0 = texture2D(uDetailNormal0, tiled).xyz * 2.0 - 1.0;
+    vec3 n1 = texture2D(uDetailNormal1, tiled).xyz * 2.0 - 1.0;
+    vec3 n2 = texture2D(uDetailNormal2, tiled).xyz * 2.0 - 1.0;
+    vec3 n3 = texture2D(uDetailNormal3, tiled).xyz * 2.0 - 1.0;
+    vec3 lowerNormal = base < 0.5 ? n0 : (base < 1.5 ? n1 : n2);
+    vec3 upperNormal = base < 0.5 ? n1 : (base < 1.5 ? n2 : n3);
+    vec3 blendedTangentNormal = mix(lowerNormal, upperNormal, f);
+    if (length(blendedTangentNormal) < 0.001) {
+      blendedTangentNormal = vec3(0.0, 0.0, 1.0);
+    } else {
+      blendedTangentNormal = normalize(blendedTangentNormal);
+    }
+
+    vec3 N = normalize(vNormal);
+    vec3 T = vTangent - dot(vTangent, N) * N;
+    if (length(T) > 0.001) {
+      T = normalize(T);
+    } else {
+      vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+      T = normalize(cross(up, N));
+    }
+    vec3 B = cross(N, T);
+    mat3 TBN = mat3(T, B, N);
+    vec3 normal = normalize(TBN * blendedTangentNormal);
+
     vec3 lightDir = normalize(uLightPos - vPosition);
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 light = pow(min(uAmbientColor + diff * uLightColor, vec3(1.0)), vec3(1.0 / 2.2));
+
+    // EEP atmospheric sky & haze lighting integration
+    float hazeFactor = clamp((uHazeHorizon - (vPosition.z / 256.0)) * 2.0, 0.0, 1.0);
+    vec3 skyHazeColor = mix(uSkyColor, uHazeColor, hazeFactor);
+    vec3 ambientTotal = mix(uAmbientColor, skyHazeColor, 0.25);
+    vec3 light = pow(min(ambientTotal + diff * uLightColor, vec3(1.0)), vec3(1.0 / 2.2));
     gl_FragColor = vec4(albedo * light, 1.0);
   }
 `;

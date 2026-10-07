@@ -18,6 +18,10 @@ material {
         { type : sampler2d, name : uDetail1 },
         { type : sampler2d, name : uDetail2 },
         { type : sampler2d, name : uDetail3 },
+        { type : sampler2d, name : uDetailNormal0 },
+        { type : sampler2d, name : uDetailNormal1 },
+        { type : sampler2d, name : uDetailNormal2 },
+        { type : sampler2d, name : uDetailNormal3 },
         { type : float4, name : uDetailUse },
         { type : float3, name : uFallback0 },
         { type : float3, name : uFallback1 },
@@ -26,6 +30,9 @@ material {
         { type : float3, name : uLightPos },
         { type : float3, name : uLightColor },
         { type : float3, name : uAmbientColor },
+        { type : float3, name : uSkyColor },
+        { type : float,  name : uHazeHorizon },
+        { type : float3, name : uHazeColor },
         { type : float,  name : uTileScale }
     ],
     requires : [ uv0, tangents ]
@@ -54,10 +61,33 @@ fragment {
         vec3 lower = base < 0.5 ? c0 : (base < 1.5 ? c1 : c2);
         vec3 upper = base < 0.5 ? c1 : (base < 1.5 ? c2 : c3);
         vec3 albedo = mix(lower, upper, f);
-        vec3 normal = normalize(variable_worldNrm.xyz);
+
+        vec3 n0 = texture(materialParams_uDetailNormal0, tiled).xyz * 2.0 - 1.0;
+        vec3 n1 = texture(materialParams_uDetailNormal1, tiled).xyz * 2.0 - 1.0;
+        vec3 n2 = texture(materialParams_uDetailNormal2, tiled).xyz * 2.0 - 1.0;
+        vec3 n3 = texture(materialParams_uDetailNormal3, tiled).xyz * 2.0 - 1.0;
+        vec3 lowerNormal = base < 0.5 ? n0 : (base < 1.5 ? n1 : n2);
+        vec3 upperNormal = base < 0.5 ? n1 : (base < 1.5 ? n2 : n3);
+        vec3 blendedTangentNormal = mix(lowerNormal, upperNormal, f);
+        if (length(blendedTangentNormal) < 0.001) {
+            blendedTangentNormal = vec3(0.0, 0.0, 1.0);
+        } else {
+            blendedTangentNormal = normalize(blendedTangentNormal);
+        }
+
+        vec3 N = normalize(variable_worldNrm.xyz);
+        vec3 T = normalize(getWorldTangentVector());
+        vec3 B = cross(N, T);
+        mat3 TBN = mat3(T, B, N);
+        vec3 normal = normalize(TBN * blendedTangentNormal);
+
         vec3 lightDir = normalize(materialParams.uLightPos - variable_worldPos.xyz);
         float diff = max(dot(normal, lightDir), 0.0);
-        vec3 light = pow(min(materialParams.uAmbientColor + diff * materialParams.uLightColor, vec3(1.0)), vec3(1.0 / 2.2));
+
+        float hazeFactor = clamp((materialParams.uHazeHorizon - (variable_worldPos.z / 256.0)) * 2.0, 0.0, 1.0);
+        vec3 skyHazeColor = mix(materialParams.uSkyColor, materialParams.uHazeColor, hazeFactor);
+        vec3 ambientTotal = mix(materialParams.uAmbientColor, skyHazeColor, 0.25);
+        vec3 light = pow(min(ambientTotal + diff * materialParams.uLightColor, vec3(1.0)), vec3(1.0 / 2.2));
         material.baseColor = vec4(albedo * light, 1.0);
     }
 }
