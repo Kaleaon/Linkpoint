@@ -203,6 +203,16 @@ class BentoSkeletonTest {
         assertEquals(10f, spine1.worldMatrix[12], 1e-4f)
         assertEquals(20f, spine1.worldMatrix[13], 1e-4f)
         assertEquals(30.04f, spine1.worldMatrix[14], 1e-4f)
+
+        // Rotate pelvis 90 degrees around Z axis: (0, 0, 1) -> (1, 0, 0)
+        pelvis.rotation = LLQuaternion.fromAngleAxis(Math.PI.toFloat() / 2f, LLVector3(0f, 0f, 1f))
+        spine1.position = LLVector3(1f, 0f, 0f)
+        skeleton.updateBoneMatrices()
+
+        // Spine1 translation after 90 deg Z parent rotation of (1, 0, 0) should be (10 + 0, 20 + 1, 30 + 0) = (10, 21, 30)
+        assertEquals(10f, spine1.worldMatrix[12], 1e-3f)
+        assertEquals(21f, spine1.worldMatrix[13], 1e-3f)
+        assertEquals(30f, spine1.worldMatrix[14], 1e-3f)
     }
 
     @Test
