@@ -7,6 +7,7 @@ import { macroTaskQueue } from "../linkpoint/macro-task-queue.ts";
 import Icon from "../components/Icon.jsx";
 import ListSkeletonLoader from "../components/ListSkeletonLoader.jsx";
 import GuidedEmptyState from "../components/GuidedEmptyState.jsx";
+import TextureUploadModal from "../components/TextureUploadModal.jsx";
 
 /** Inventory rows come directly from InventoryManager capability responses. */
 export default function Inventory() {
@@ -17,6 +18,7 @@ export default function Inventory() {
   const [category, setCategory] = useState("all");
   const [selected, setSelected] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -156,7 +158,31 @@ export default function Inventory() {
           <Icon name="rotate-cw" size={14} />
           {refreshing ? "FETCHING…" : "REFRESH"}
         </button>
+        <button
+          type="button"
+          onClick={() => setUploadModalOpen(true)}
+          style={{
+            height: "40px",
+            padding: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: V.pri,
+            border: "none",
+            borderRadius: V.rs,
+            color: V.onpri || "#fff",
+            fontSize: "11px",
+            fontWeight: 700,
+            cursor: "pointer",
+            flex: "none",
+          }}
+          title="Upload texture (JPEG2000)"
+        >
+          <Icon name="upload" size={14} />
+          UPLOAD TEXTURE
+        </button>
       </div>
+      <TextureUploadModal isOpen={uploadModalOpen} onClose={() => setUploadModalOpen(false)} />
       <div className="live-list">
         {refreshing ? (
           <ListSkeletonLoader count={5} variant="inventory" />
