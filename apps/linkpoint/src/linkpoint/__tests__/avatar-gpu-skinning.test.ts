@@ -169,8 +169,103 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
       expect(partitions[0].paletteIndex).toBe(0);
       expect(partitions[1].paletteIndex).toBe(1);
 
-      // Remapped bone index for joint 140 in palette 1 should be 140 - 128 = 12
+      // Remapped bone index for joint 140 in palette 1 should be 140 % 128 = 12
       expect(partitions[1].remappedBoneIndices[12]).toBe(12);
+    });
+
+    it('preserves relative bone indices for boundary vertices without zero-index fallback', () => {
+      const dummyGl = {} as WebGLRenderingContext;
+      const renderer = new AvatarMeshRenderer(dummyGl);
+
+      // A mesh where vertices reference combinations of low and high joints
+      const mesh: SkinnedMeshData = {
+        positions: new Float32Array([
+          0, 0, 0,  1, 0, 0,  0, 1, 0,
+          0, 0, 1,  1, 0, 1,  0, 1, 1,
+        ]),
+        normals: new Float32Array([
+          0, 0, 1,  0, 0, 1,  0, 0, 1,
+          0, 0, 1,  0, 0, 1,  0, 0, 1,
+        ]),
+        texCoords: new Float32Array([
+          0, 0,  1, 0,  0, 1,
+          0, 0,  1, 0,  0, 1,
+        ]),
+        boneIndices: new Float32Array([
+          15, 0, 0, 0,   15, 0, 0, 0,   15, 0, 0, 0,
+          140, 10, 0, 0,  140, 10, 0, 0,  140, 10, 0, 0,
+        ]),
+        boneWeights: new Float32Array([
+          1, 0, 0, 0,    1, 0, 0, 0,    1, 0, 0, 0,
+          0.7, 0.3, 0, 0, 0.7, 0.3, 0, 0, 0.7, 0.3, 0, 0,
+        ]),
+        indices: new Uint16Array([
+          0, 1, 2,
+          3, 4, 5,
+        ]),
+      };
+
+      const partitions = renderer.partitionSubmeshesByPalette(mesh, 128);
+      expect(partitions.length).toBe(2);
+
+      const p1 = partitions[1]; // Partition for palette 1
+      expect(p1.paletteIndex).toBe(1);
+
+      // Check vertex 3 (index 12, 13) in remappedBoneIndices:
+      // Joint 140 remapped -> 140 % 128 = 12
+      // Joint 10 remapped -> 10 % 128 = 10 (MUST NOT fallback to 0)
+      expect(p1.remappedBoneIndices[12]).toBe(12);
+      expect(p1.remappedBoneIndices[13]).toBe(10);
+    });
+
+    it('correctly remaps joint indices across 3+ palettes (> 256 joints)', () => {
+      const dummyGl = {} as WebGLRenderingContext;
+      const renderer = new AvatarMeshRenderer(dummyGl);
+
+      // Mesh with joints in Palette 0 (10), Palette 1 (140), and Palette 2 (266)
+      const mesh: SkinnedMeshData = {
+        positions: new Float32Array([
+          0, 0, 0,  1, 0, 0,  0, 1, 0,
+          0, 0, 1,  1, 0, 1,  0, 1, 1,
+          0, 0, 2,  1, 0, 2,  0, 1, 2,
+        ]),
+        normals: new Float32Array([
+          0, 0, 1,  0, 0, 1,  0, 0, 1,
+          0, 0, 1,  0, 0, 1,  0, 0, 1,
+          0, 0, 1,  0, 0, 1,  0, 0, 1,
+        ]),
+        texCoords: new Float32Array([
+          0, 0,  1, 0,  0, 1,
+          0, 0,  1, 0,  0, 1,
+          0, 0,  1, 0,  0, 1,
+        ]),
+        boneIndices: new Float32Array([
+          10, 0, 0, 0,   10, 0, 0, 0,   10, 0, 0, 0,
+          140, 0, 0, 0,  140, 0, 0, 0,  140, 0, 0, 0,
+          266, 0, 0, 0,  266, 0, 0, 0,  266, 0, 0, 0,
+        ]),
+        boneWeights: new Float32Array([
+          1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,
+          1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,
+          1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,
+        ]),
+        indices: new Uint16Array([
+          0, 1, 2,
+          3, 4, 5,
+          6, 7, 8,
+        ]),
+      };
+
+      const partitions = renderer.partitionSubmeshesByPalette(mesh, 128);
+
+      expect(partitions.length).toBe(3);
+      expect(partitions[0].paletteIndex).toBe(0);
+      expect(partitions[1].paletteIndex).toBe(1);
+      expect(partitions[2].paletteIndex).toBe(2);
+
+      // Check joint 266 in Palette 2 (vertex 6 -> boneIndices[24])
+      // 266 % 128 = 10
+      expect(partitions[2].remappedBoneIndices[24]).toBe(10);
     });
   });
 
