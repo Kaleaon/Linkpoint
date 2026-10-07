@@ -6,6 +6,7 @@ import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.SLMessagePackers
@@ -348,7 +349,7 @@ class TeleportManager(
                 identity = AgentIdentity(agentId, sessionId),
                 fromGroup = false,
                 toAgentId = lure.senderId,
-                dialog = 24, // IM_LURE_DECLINED
+                dialog = IMType.LURE_DECLINED, // IM_LURE_DECLINED
                 id = lure.lureId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
                 fromAgentName = "You",
