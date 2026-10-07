@@ -144,8 +144,9 @@ class ThemeManager private constructor(private val context: Context) {
         }
     }
 
-    private fun refreshThemesFromKtheme() {
+    internal fun refreshThemesFromKtheme() {
         isApplyingRemoteUpdate.set(true)
+        ThemeCatalog.resetCache()
         loadThemes()
         loadActiveTheme()
         isApplyingRemoteUpdate.set(false)
