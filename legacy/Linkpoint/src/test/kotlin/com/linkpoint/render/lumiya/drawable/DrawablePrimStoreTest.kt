@@ -1,5 +1,6 @@
 package com.linkpoint.render.lumiya.drawable
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.protocol.messages.PrimShapeParams
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -7,11 +8,13 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@RunWith(AndroidJUnit4::class)
 class DrawablePrimStoreTest {
 
     private lateinit var store: DrawablePrimStore
