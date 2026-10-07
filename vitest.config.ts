@@ -12,7 +12,8 @@ export default defineConfig({
     include: [
       "packages/**/*.test.ts",
       "apps/linkpoint/src/lib/llsd.test.ts",
-      "apps/linkpoint/src/linkpoint/__tests__/**/*.{test,spec}.{ts,tsx}"
+      "apps/linkpoint/src/linkpoint/__tests__/**/*.{test,spec}.{ts,tsx,jsx}",
+      "apps/linkpoint/src/components/__tests__/**/*.{test,spec}.{ts,tsx,jsx}"
     ],
     coverage: {
       provider: "v8",
