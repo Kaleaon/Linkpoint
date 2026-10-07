@@ -36,7 +36,7 @@ import com.linkpoint.scene.worker.TaskPriority
  * *.akamaized.net domains. The SSLHelper.configureForCdn() method handles this
  * hostname mismatch securely.
  */
-class MeshManager(
+open class MeshManager(
     private val context: Context,
     private val cache: AssetCache,
     private val capabilityManager: CapabilityManager,
@@ -122,7 +122,7 @@ class MeshManager(
     /**
      * Get mesh data (cached or download).
      */
-    suspend fun getMesh(meshId: UUID, lod: MeshLOD = MeshLOD.HIGH): MeshData? {
+    open suspend fun getMesh(meshId: UUID, lod: MeshLOD = MeshLOD.HIGH): MeshData? {
         // Drop or defer low-priority distant mesh decoding tasks when worker queue capacity reaches maximum limit
         if (lod == MeshLOD.LOW && workerPool.getQueueSize() >= workerPool.getMaxQueueCapacity()) {
             Log.w(TAG, "Worker queue capacity limit reached (${workerPool.getQueueSize()}/${workerPool.getMaxQueueCapacity()}). Dropping low-priority distant mesh decode for $meshId")

@@ -136,6 +136,56 @@ class CacheManager(private val context: Context) {
         }
     }
 
+    // SQLite WAL embedded asset database
+    val database: AssetCacheDatabase by lazy { AssetCacheDatabase(context) }
+
+    /**
+     * Store an asset in the SQLite WAL asset store.
+     */
+    fun storeAsset(key: String, assetType: CacheableAssetType, data: ByteArray): Boolean {
+        return database.storeAsset(key, assetType.name, data)
+    }
+
+    /**
+     * Retrieve asset data from SQLite WAL asset store.
+     */
+    fun getAssetData(key: String): ByteArray? {
+        return database.getAssetData(key)
+    }
+
+    /**
+     * Check if asset exists in SQLite WAL asset store.
+     */
+    fun hasAsset(key: String): Boolean {
+        return database.hasAsset(key)
+    }
+
+    /**
+     * Delete asset from SQLite WAL asset store.
+     */
+    fun deleteAsset(key: String): Boolean {
+        return database.deleteAsset(key)
+    }
+
+    private fun migrateLegacyFilesIfNeeded() {
+        try {
+            val texturesDir = getPublicAssetDirectory(CacheableAssetType.TEXTURES)
+            val meshesDir = getPublicAssetDirectory(CacheableAssetType.MESHES)
+            val soundsDir = getPublicAssetDirectory(CacheableAssetType.SOUNDS)
+            val animationsDir = getPublicAssetDirectory(CacheableAssetType.ANIMATIONS)
+            val generalDir = File(getPublicCacheDirectory(), GENERAL_DIR)
+            val privateDir = getPrivateCacheDirectory()
+
+            database.migrateFromDirectory(texturesDir, CacheableAssetType.TEXTURES.name)
+            database.migrateFromDirectory(meshesDir, CacheableAssetType.MESHES.name)
+            database.migrateFromDirectory(soundsDir, CacheableAssetType.SOUNDS.name)
+            database.migrateFromDirectory(animationsDir, CacheableAssetType.ANIMATIONS.name)
+            database.migrateFromDirectory(generalDir, "GENERAL")
+            database.migrateFromDirectory(privateDir, "PRIVATE")
+        } catch (e: Exception) {
+            Log.w(TAG, "Legacy cache file migration warning: ${e.message}")
+        }
+    }
     // Current grid name (e.g., "Agni", "Aditi")
     private var currentGridName: String = "SecondLife"
 
@@ -624,34 +674,26 @@ class CacheManager(private val context: Context) {
 
     /**
      * Get comprehensive cache statistics for the current grid.
-     * Scans both Public and Private cache directories.
+     * Uses SQL aggregation queries on the SQLite WAL asset store.
      */
     suspend fun getCacheStats(): CacheStatistics = withContext(Dispatchers.IO) {
-        // Public cache directories (shared per grid)
-        val texturesDir = getPublicAssetDirectory(CacheableAssetType.TEXTURES)
-        val meshesDir = getPublicAssetDirectory(CacheableAssetType.MESHES)
-        val soundsDir = getPublicAssetDirectory(CacheableAssetType.SOUNDS)
-        val animationsDir = getPublicAssetDirectory(CacheableAssetType.ANIMATIONS)
-        val generalDir = File(getPublicCacheDirectory(), GENERAL_DIR)
+        migrateLegacyFilesIfNeeded()
 
-        val texturesSize = calculateDirectorySize(texturesDir)
-        val meshesSize = calculateDirectorySize(meshesDir)
-        val soundsSize = calculateDirectorySize(soundsDir)
-        val animationsSize = calculateDirectorySize(animationsDir)
-        val generalSize = calculateDirectorySize(generalDir)
+        val texturesSize = database.getCategorySizeBytes(CacheableAssetType.TEXTURES.name)
+        val meshesSize = database.getCategorySizeBytes(CacheableAssetType.MESHES.name)
+        val soundsSize = database.getCategorySizeBytes(CacheableAssetType.SOUNDS.name)
+        val animationsSize = database.getCategorySizeBytes(CacheableAssetType.ANIMATIONS.name)
+        val generalSize = database.getCategorySizeBytes("GENERAL")
+        val privateSize = database.getCategorySizeBytes("PRIVATE")
 
-        val texturesCount = countFiles(texturesDir)
-        val meshesCount = countFiles(meshesDir)
-        val soundsCount = countFiles(soundsDir)
-        val animationsCount = countFiles(animationsDir)
-        val generalCount = countFiles(generalDir)
-
-        // Also include private cache size
-        val privateSize = calculateDirectorySize(getPrivateCacheDirectory())
-
+        val texturesCount = database.getCategoryCount(CacheableAssetType.TEXTURES.name)
+        val meshesCount = database.getCategoryCount(CacheableAssetType.MESHES.name)
+        val soundsCount = database.getCategoryCount(CacheableAssetType.SOUNDS.name)
+        val animationsCount = database.getCategoryCount(CacheableAssetType.ANIMATIONS.name)
+        val generalCount = database.getCategoryCount("GENERAL")
+        
         val totalSize = texturesSize + meshesSize + soundsSize + animationsSize + generalSize + privateSize
-        val totalCount = texturesCount + meshesCount + soundsCount + animationsCount + generalCount
-
+        val totalCount = texturesCount + meshesCount + soundsCount + animationsCount + database.getCategoryCount("PRIVATE")
         val maxSize = getDiskCacheSizeMB().toLong() * 1024 * 1024
         val usagePercent = if (maxSize > 0) (totalSize.toFloat() / maxSize * 100).toInt() else 0
 
@@ -692,11 +734,10 @@ class CacheManager(private val context: Context) {
      * Clear all cache (both public and private for current grid)
      */
     suspend fun clearAllCache(): ClearResult = withContext(Dispatchers.IO) {
-        var clearedBytes = 0L
-        var clearedFiles = 0
-        var errors = 0
+        val result = database.deleteAll()
+        database.checkpointAndVacuum()
 
-        // Clear public cache directories for current grid
+        // Also clean up any lingering flat files in public and private directories
         val publicDirectories = listOf(
             getPublicAssetDirectory(CacheableAssetType.TEXTURES),
             getPublicAssetDirectory(CacheableAssetType.MESHES),
@@ -704,27 +745,17 @@ class CacheManager(private val context: Context) {
             getPublicAssetDirectory(CacheableAssetType.ANIMATIONS),
             File(getPublicCacheDirectory(), GENERAL_DIR)
         )
-
         for (dir in publicDirectories) {
-            val result = clearDirectory(dir)
-            clearedBytes += result.first
-            clearedFiles += result.second
-            errors += result.third
+            clearDirectory(dir)
         }
+        clearDirectory(getPrivateCacheDirectory())
 
-        // Clear private cache for current user
-        val privateResult = clearDirectory(getPrivateCacheDirectory())
-        clearedBytes += privateResult.first
-        clearedFiles += privateResult.second
-        errors += privateResult.third
-
-        Log.i(TAG, "Cleared ${formatSize(clearedBytes)} ($clearedFiles files), $errors errors")
-
+        Log.i(TAG, "Cleared ${formatSize(result.first)} (${result.second} files), ${result.third} errors")
         ClearResult(
-            clearedBytes = clearedBytes,
-            clearedFiles = clearedFiles,
-            errors = errors,
-            success = errors == 0
+            clearedBytes = result.first,
+            clearedFiles = result.second,
+            errors = result.third,
+            success = result.third == 0
         )
     }
 
@@ -732,9 +763,8 @@ class CacheManager(private val context: Context) {
      * Clear specific cache type (public cache)
      */
     suspend fun clearCache(assetType: CacheableAssetType): ClearResult = withContext(Dispatchers.IO) {
-        val dir = getPublicAssetDirectory(assetType)
-        val result = clearDirectory(dir)
-
+        val result = database.deleteCategory(assetType.name)
+        clearDirectory(getPublicAssetDirectory(assetType))
         Log.i(TAG, "Cleared ${assetType.name}: ${formatSize(result.first)} (${result.second} files)")
 
         ClearResult(
@@ -749,8 +779,8 @@ class CacheManager(private val context: Context) {
      * Clear private cache for current user
      */
     suspend fun clearPrivateCache(): ClearResult = withContext(Dispatchers.IO) {
-        val result = clearDirectory(getPrivateCacheDirectory())
-
+        val result = database.deleteCategory("PRIVATE")
+        clearDirectory(getPrivateCacheDirectory())
         Log.i(TAG, "Cleared private cache: ${formatSize(result.first)} (${result.second} files)")
 
         ClearResult(
@@ -775,34 +805,9 @@ class CacheManager(private val context: Context) {
                 needed = false
             )
         }
-
-        // Need to prune - delete oldest files first from public cache
-        val targetSize = (maxBytes * 0.8).toLong() // Prune to 80% capacity
-        var currentSize = stats.totalSizeBytes
-        var prunedBytes = 0L
-        var prunedFiles = 0
-
-        val allCacheFiles = mutableListOf<File>()
-        // Collect files from public cache (don't prune private user data)
-        CacheableAssetType.values().forEach { assetType ->
-            val dir = getPublicAssetDirectory(assetType)
-            dir.listFiles()?.let { allCacheFiles.addAll(it) }
-        }
-        File(getPublicCacheDirectory(), GENERAL_DIR).listFiles()?.let { allCacheFiles.addAll(it) }
-
-        // Sort by last modified (oldest first)
-        allCacheFiles.sortBy { it.lastModified() }
-
-        for (file in allCacheFiles) {
-            if (currentSize <= targetSize) break
-
-            val fileSize = file.length()
-            if (file.delete()) {
-                currentSize -= fileSize
-                prunedBytes += fileSize
-                prunedFiles++
-            }
-        }
+        val targetSize = (maxBytes * 0.8).toLong()
+        val (prunedBytes, prunedFiles) = database.pruneToTargetSize(targetSize)
+        database.checkpointAndVacuum()
 
         Log.i(TAG, "Pruned cache: ${formatSize(prunedBytes)} ($prunedFiles files)")
 
@@ -823,7 +828,6 @@ class CacheManager(private val context: Context) {
 
         // Check for low space - use less aggressive pruning instead of clearing everything
         if (stats.isLowSpace && isAutoClearOnLowSpaceEnabled()) {
-            // Prune to 50% instead of clearing everything to preserve recently used assets
             val pruneResult = pruneCache()
             actionTaken = "Auto-pruned due to low space"
             prunedBytes = pruneResult.prunedBytes
@@ -841,6 +845,7 @@ class CacheManager(private val context: Context) {
             actionTaken = "Preemptive prune (>90% full)"
             prunedBytes = pruneResult.prunedBytes
         }
+        database.checkpointAndVacuum()
 
         MaintenanceResult(
             actionTaken = actionTaken,
@@ -857,12 +862,29 @@ class CacheManager(private val context: Context) {
         return getPublicAssetDirectory(assetType)
     }
 
+    private fun getCategoryFromDir(dir: File): String {
+        val path = dir.name.lowercase()
+        return when {
+            path.contains("texture") -> CacheableAssetType.TEXTURES.name
+            path.contains("mesh") -> CacheableAssetType.MESHES.name
+            path.contains("sound") -> CacheableAssetType.SOUNDS.name
+            path.contains("anim") -> CacheableAssetType.ANIMATIONS.name
+            path.contains("private") -> "PRIVATE"
+            else -> "GENERAL"
+        }
+    }
     private fun calculateDirectorySize(dir: File): Long {
+        val category = getCategoryFromDir(dir)
+        val dbSize = database.getCategorySizeBytes(category)
+        if (dbSize > 0) return dbSize
         if (!dir.exists()) return 0
         return dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
     }
 
     private fun countFiles(dir: File): Int {
+        val category = getCategoryFromDir(dir)
+        val dbCount = database.getCategoryCount(category)
+        if (dbCount > 0) return dbCount
         if (!dir.exists()) return 0
         return dir.listFiles()?.size ?: 0
     }

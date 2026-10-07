@@ -1,21 +1,32 @@
 package com.linkpoint.world
 
 import android.util.Log
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.CapabilityRequester
 import com.linkpoint.protocol.llsd.*
+import com.linkpoint.world.profile.CapabilityProfileStrategy
+import com.linkpoint.world.profile.ProfileResolverStrategy
 import kotlinx.coroutines.*
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Manages avatar and group profiles
+ * Manages avatar and group profiles using pluggable resolver strategies.
  */
 class ProfileManager(
-    private val capabilityManager: CapabilityRequester
+    private val capabilityManager: CapabilityRequester,
+    initialStrategies: List<ProfileResolverStrategy> = emptyList()
 ) {
     companion object {
         private const val TAG = "ProfileManager"
+        private const val STRATEGY_TIMEOUT_MS = 5000L
+
+        private fun logD(msg: String) { try { Log.d(TAG, msg) } catch (_: Throwable) {} }
+        private fun logI(msg: String) { try { Log.i(TAG, msg) } catch (_: Throwable) {} }
+        private fun logW(msg: String) { try { Log.w(TAG, msg) } catch (_: Throwable) {} }
+        private fun logE(msg: String, tr: Throwable? = null) { try { Log.e(TAG, msg, tr) } catch (_: Throwable) {} }
     }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -27,124 +38,83 @@ class ProfileManager(
     // Display names cache
     private val displayNames = ConcurrentHashMap<UUID, String>()
 
+    // Registered strategies
+    private val strategies = CopyOnWriteArrayList<ProfileResolverStrategy>()
+
+    init {
+        strategies.add(CapabilityProfileStrategy(capabilityManager))
+        strategies.addAll(initialStrategies)
+    }
+
+    fun registerStrategy(strategy: ProfileResolverStrategy) {
+        if (!strategies.contains(strategy)) {
+            strategies.add(strategy)
+        }
+    }
+
+    fun unregisterStrategy(strategyName: String) {
+        strategies.removeAll { it.name == strategyName }
+    }
+
+    fun getRegisteredStrategies(): List<ProfileResolverStrategy> {
+        return strategies.sortedBy { it.priority }
+    }
+
     /**
-     * Get avatar profile via capability request.
+     * Get avatar profile via registered strategies in priority order.
      */
     suspend fun getAvatarProfile(agentId: UUID): AvatarProfile? {
         avatarProfiles[agentId]?.let { return it }
 
         return withContext(Dispatchers.IO) {
-            try {
-                // Request profile from AgentProfile capability
-                val request = LLSDMap().apply {
-                    this["agent_id"] = LLSDString(agentId.toString())
-                }
+            val availableStrategies = strategies.filter { it.isAvailable() }.sortedBy { it.priority }
 
-                val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
-
-                if (response is LLSDMap) {
-                    val profile = AvatarProfile(
-                        agentId = agentId,
-                        displayName = response.getString("display_name") ?: displayNames[agentId] ?: "",
-                        userName = response.getString("username") ?: "",
-                        aboutText = response.getString("sl_about_text") ?: "",
-                        firstLifeText = response.getString("fl_about_text") ?: "",
-                        profileImage = response.getString("sl_image_id")?.let {
-                            try { UUID.fromString(it) } catch (e: Exception) { null }
-                        },
-                        firstLifeImage = response.getString("fl_image_id")?.let {
-                            try { UUID.fromString(it) } catch (e: Exception) { null }
-                        },
-                        partner = response.getString("partner_id")?.let {
-                            try { UUID.fromString(it) } catch (e: Exception) { null }
-                        },
-                        bornOn = response.getString("born_on") ?: "",
-                        memberOf = emptyList(), // Parsed from response if available
-                        groups = emptyList(),
-                        picks = emptyList(),
-                        interests = ProfileInterests()
-                    )
-                    avatarProfiles[agentId] = profile
-                    Log.d(TAG, "Retrieved profile for $agentId")
-                    profile
-                } else {
-                    // Return placeholder if capability not available
-                    Log.w(TAG, "AgentProfile capability returned non-map response")
-                    val profile = AvatarProfile(
-                        agentId = agentId,
-                        displayName = displayNames[agentId] ?: "",
-                        userName = "",
-                        aboutText = "",
-                        firstLifeText = "",
-                        profileImage = null,
-                        firstLifeImage = null,
-                        partner = null,
-                        bornOn = "",
-                        memberOf = emptyList(),
-                        groups = emptyList(),
-                        picks = emptyList(),
-                        interests = ProfileInterests()
-                    )
-                    avatarProfiles[agentId] = profile
-                    profile
+            for (strategy in availableStrategies) {
+                try {
+                    val profile = withTimeoutOrNull(STRATEGY_TIMEOUT_MS) {
+                        strategy.getAvatarProfile(agentId)
+                    }
+                    if (profile != null) {
+                        avatarProfiles[agentId] = profile
+                        logD("Retrieved profile for $agentId via ${strategy.name}")
+                        return@withContext profile
+                    }
+                } catch (e: Exception) {
+                    logW("Strategy ${strategy.name} failed for $agentId: ${e.message}")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to get avatar profile", e)
-                null
             }
+            null
         }
     }
 
     /**
-     * Get display name via GetDisplayNames capability.
-     *
-     * Returns null when the lookup did not resolve a name from the simulator.
-     * We deliberately do not synthesise a UUID-prefix fallback here, because
-     * caching that would prevent any later retry from ever updating the
-     * friends list / chat headers with the real name.
+     * Get display name via registered strategies in priority order.
      */
     suspend fun getDisplayName(agentId: UUID): String? {
         displayNames[agentId]?.let { return it }
 
         return withContext(Dispatchers.IO) {
-            try {
-                val request = LLSDMap().apply {
-                    this["ids"] = LLSDArray().apply {
-                        add(LLSDString(agentId.toString()))
-                    }
-                }
+            val availableStrategies = strategies.filter { it.isAvailable() }.sortedBy { it.priority }
 
-                val response = capabilityManager.request(CapabilityManager.CAP_GET_DISPLAY_NAMES, request)
-
-                if (response is LLSDMap) {
-                    val agents = response.getArray("agents")
-                    if (agents != null && agents.size > 0) {
-                        val agentData = agents.get(0) as? LLSDMap
-                        val name = agentData?.getString("display_name")?.takeIf { it.isNotBlank() }
-                            ?: agentData?.getString("username")?.takeIf { it.isNotBlank() }
-                        if (name != null) {
-                            displayNames[agentId] = name
-                            return@withContext name
-                        }
+            for (strategy in availableStrategies) {
+                try {
+                    val name = withTimeoutOrNull(STRATEGY_TIMEOUT_MS) {
+                        strategy.getDisplayName(agentId)
                     }
+                    if (!name.isNullOrBlank()) {
+                        displayNames[agentId] = name
+                        return@withContext name
+                    }
+                } catch (e: Exception) {
+                    logW("Strategy ${strategy.name} failed for display name $agentId: ${e.message}")
                 }
-                null
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to get display name for $agentId: ${e.message}")
-                null
             }
+            null
         }
     }
 
     /**
-     * Get multiple display names via the GetDisplayNames capability.
-     *
-     * The cap is HTTP GET with repeated `ids=<uuid>` query parameters,
-     * not a POST LLSD body. Previously this function POSTed LLSD which
-     * the simulator silently dropped, so friend names stayed on the
-     * `Resident (xxxx)` placeholder forever (2026-04-25 Athanasia debug
-     * capture). Now uses [CapabilityRequester.requestWithQuery] and
-     * chunks IDs at the SL server limit.
+     * Get multiple display names via registered strategies in priority order.
      */
     suspend fun getDisplayNames(agentIds: List<UUID>): Map<UUID, String> {
         return withContext(Dispatchers.IO) {
@@ -156,46 +126,35 @@ class ProfileManager(
             }
             if (missing.isEmpty()) return@withContext results
 
-            // SL caps a single GetDisplayNames request at ~90 ids.
-            for (batch in missing.chunked(80)) {
+            val availableStrategies = strategies.filter { it.isAvailable() }.sortedBy { it.priority }
+
+            var currentMissing = missing.toList()
+            for (strategy in availableStrategies) {
+                if (currentMissing.isEmpty()) break
                 try {
-                    val response = capabilityManager.requestWithQuery(
-                        CapabilityManager.CAP_GET_DISPLAY_NAMES,
-                        batch.map { "ids" to it.toString() }
-                    )
-                    if (response is LLSDMap) {
-                        val agents = response.getArray("agents")
-                        if (agents != null) {
-                            for (i in 0 until agents.size) {
-                                val agentData = agents.get(i) as? LLSDMap ?: continue
-                                val idStr = agentData.getString("id") ?: continue
-                                val name = agentData.getString("display_name")?.takeIf { it.isNotBlank() }
-                                    ?: agentData.getString("username")?.takeIf { it.isNotBlank() }
-                                    ?: run {
-                                        val first = agentData.getString("legacy_first_name") ?: ""
-                                        val last = agentData.getString("legacy_last_name") ?: ""
-                                        "$first $last".trim().takeIf { it.isNotBlank() }
-                                    }
-                                    ?: continue
-                                try {
-                                    val uuid = UUID.fromString(idStr)
-                                    displayNames[uuid] = name
-                                    results[uuid] = name
-                                } catch (_: Exception) { /* invalid UUID */ }
+                    val resolved = withTimeoutOrNull(STRATEGY_TIMEOUT_MS) {
+                        strategy.getDisplayNames(currentMissing)
+                    }
+                    if (resolved != null && resolved.isNotEmpty()) {
+                        for ((id, name) in resolved) {
+                            if (name.isNotBlank()) {
+                                displayNames[id] = name
+                                results[id] = name
                             }
                         }
+                        currentMissing = currentMissing.filterNot { results.containsKey(it) }
                     }
                 } catch (e: Exception) {
-                    Log.w(TAG, "Batch display-name lookup failed: ${e.message}")
+                    logW("Strategy ${strategy.name} failed for batch display names: ${e.message}")
                 }
             }
-            Log.d(TAG, "Retrieved ${results.size} display names (requested ${agentIds.size})")
+            logD("Retrieved ${results.size} display names (requested ${agentIds.size})")
             results
         }
     }
 
     /**
-     * Update avatar profile
+     * Update avatar profile using registered strategies in priority order.
      */
     suspend fun updateProfile(
         aboutText: String? = null,
@@ -205,31 +164,23 @@ class ProfileManager(
         interests: ProfileInterests? = null
     ): Boolean {
         return withContext(Dispatchers.IO) {
-            try {
-                // Build profile update request using LLSD
-                val request = LLSDMap().apply {
-                    aboutText?.let { this["sl_about_text"] = LLSDString(it) }
-                    firstLifeText?.let { this["fl_about_text"] = LLSDString(it) }
-                    profileImage?.let { this["sl_image_id"] = LLSDString(it.toString()) }
-                    firstLifeImage?.let { this["fl_image_id"] = LLSDString(it.toString()) }
-                    interests?.let { interestsData ->
-                        this["interests"] = LLSDMap().apply {
-                            this["want_to_mask"] = LLSDInteger(interestsData.wantToMask)
-                            this["want_to_text"] = LLSDString(interestsData.wantToText)
-                            this["skills_mask"] = LLSDInteger(interestsData.skillsMask)
-                            this["skills_text"] = LLSDString(interestsData.skillsText)
-                            this["languages_text"] = LLSDString(interestsData.languagesText)
-                        }
-                    }
-                }
+            val availableStrategies = strategies.filter { it.isAvailable() }.sortedBy { it.priority }
 
-                // Use AgentProfile capability
-                val response = capabilityManager.request(CapabilityManager.CAP_AGENT_PROFILE, request)
-                response != null
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to update profile", e)
-                false
+            for (strategy in availableStrategies) {
+                try {
+                    val success = withTimeoutOrNull(STRATEGY_TIMEOUT_MS) {
+                        strategy.updateProfile(aboutText, firstLifeText, profileImage, firstLifeImage, interests)
+                    } ?: false
+
+                    if (success) {
+                        logI("Successfully updated profile via strategy ${strategy.name}")
+                        return@withContext true
+                    }
+                } catch (e: Exception) {
+                    logW("Strategy ${strategy.name} failed profile update: ${e.message}")
+                }
             }
+            false
         }
     }
 
@@ -273,11 +224,11 @@ class ProfileManager(
                         notices = emptyList()
                     )
                     groupProfiles[groupId] = profile
-                    Log.d(TAG, "Retrieved group profile for $groupId: ${profile.name}")
+                    logD("Retrieved group profile for $groupId: ${profile.name}")
                     profile
                 } else {
                     // Return placeholder if capability not available
-                    Log.w(TAG, "GroupProfile capability returned non-map response")
+                    logW("GroupProfile capability returned non-map response")
                     val profile = GroupProfile(
                         groupId = groupId,
                         name = "",
@@ -299,7 +250,7 @@ class ProfileManager(
                     profile
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to get group profile", e)
+                logE("Failed to get group profile", e)
                 null
             }
         }
@@ -319,14 +270,14 @@ class ProfileManager(
 
                 val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
-                    Log.i(TAG, "Successfully joined group $groupId")
+                    logI("Successfully joined group $groupId")
                     true
                 } else {
-                    Log.w(TAG, "Failed to join group $groupId - no response")
+                    logW("Failed to join group $groupId - no response")
                     false
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to join group", e)
+                logE("Failed to join group", e)
                 false
             }
         }
@@ -346,14 +297,14 @@ class ProfileManager(
 
                 val response = capabilityManager.request(CapabilityManager.CAP_GROUP_MEMBER_DATA, request)
                 if (response != null) {
-                    Log.i(TAG, "Successfully left group $groupId")
+                    logI("Successfully left group $groupId")
                     true
                 } else {
-                    Log.w(TAG, "Failed to leave group $groupId - no response")
+                    logW("Failed to leave group $groupId - no response")
                     false
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to leave group", e)
+                logE("Failed to leave group", e)
                 false
             }
         }
@@ -369,15 +320,15 @@ class ProfileManager(
                 // Use ChatSend capability for friendship offer
                 val request = LLSDMap().apply {
                     this["target_id"] = LLSDString(agentId.toString())
-                    this["dialog"] = LLSDInteger(38)  // IM_FRIENDSHIP_OFFERED
+                    this["dialog"] = LLSDInteger(IMType.FRIENDSHIP_OFFERED.value)
                     this["message"] = LLSDString(message)
                 }
 
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
-                Log.i(TAG, "Sent friendship offer to $agentId")
+                logI("Sent friendship offer to $agentId")
                 response != null
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to offer friendship", e)
+                logE("Failed to offer friendship", e)
                 false
             }
         }
@@ -393,14 +344,14 @@ class ProfileManager(
                 val request = LLSDMap().apply {
                     this["target_id"] = LLSDString(agentId.toString())
                     this["transaction_id"] = LLSDString(transactionId.toString())
-                    this["dialog"] = LLSDInteger(39)  // IM_FRIENDSHIP_ACCEPTED
+                    this["dialog"] = LLSDInteger(IMType.FRIENDSHIP_ACCEPTED.value)
                 }
 
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
-                Log.i(TAG, "Accepted friendship from $agentId")
+                logI("Accepted friendship from $agentId")
                 response != null
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to accept friendship", e)
+                logE("Failed to accept friendship", e)
                 false
             }
         }
@@ -416,14 +367,14 @@ class ProfileManager(
                 val request = LLSDMap().apply {
                     this["target_id"] = LLSDString(agentId.toString())
                     this["transaction_id"] = LLSDString(transactionId.toString())
-                    this["dialog"] = LLSDInteger(40)  // IM_FRIENDSHIP_DECLINED
+                    this["dialog"] = LLSDInteger(IMType.FRIENDSHIP_DECLINED.value)
                 }
 
                 val response = capabilityManager.request(CapabilityManager.CAP_CHAT_SEND, request)
-                Log.i(TAG, "Declined friendship from $agentId")
+                logI("Declined friendship from $agentId")
                 response != null
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to decline friendship", e)
+                logE("Failed to decline friendship", e)
                 false
             }
         }
@@ -441,16 +392,22 @@ class ProfileManager(
                 }
 
                 val response = capabilityManager.request(CapabilityManager.CAP_FRIENDSHIP_TERMINATE, request)
-                Log.i(TAG, "Removed friend $agentId")
+                logI("Removed friend $agentId")
                 response != null
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to remove friend", e)
+                logE("Failed to remove friend", e)
                 false
             }
         }
     }
 
     fun shutdown() {
+        for (strategy in strategies) {
+            if (strategy is com.linkpoint.world.profile.UdpProfileStrategy) {
+                strategy.dispose()
+            }
+        }
+        strategies.clear()
         scope.cancel()
     }
 }

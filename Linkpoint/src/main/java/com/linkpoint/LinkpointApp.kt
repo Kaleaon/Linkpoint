@@ -83,6 +83,7 @@ import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.objects.SitManager
 import com.linkpoint.snapshot.SnapshotManager
@@ -472,6 +473,8 @@ class LinkpointApp : Application() {
      */
     lateinit var simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager
         private set
+    lateinit var renderMaterialsManager: com.linkpoint.render.RenderMaterialsManager
+        private set
     lateinit var udpConnection: UDPConnectionFixed
         private set
 
@@ -498,7 +501,8 @@ class LinkpointApp : Application() {
         private set
     lateinit var imManager: IMManager
         private set
-
+    lateinit var frameAlignedQueueService: com.linkpoint.chat.queue.FrameAlignedMessageQueueService
+        private set
     // Inventory
     lateinit var inventoryManager: InventoryManager
         private set
@@ -795,6 +799,7 @@ class LinkpointApp : Application() {
                 }
             }
         }
+        renderMaterialsManager = com.linkpoint.render.RenderMaterialsManager(capabilityManager)
         udpConnection = UDPConnectionFixed()
 
         // Protocol handler
@@ -806,7 +811,8 @@ class LinkpointApp : Application() {
         filamentCommandConsumer = FilamentRenderCommandConsumer(
             renderManager = renderManager,
             stream = renderCommandStream,
-            scope = applicationScope
+            scope = applicationScope,
+            materialsManager = renderMaterialsManager
         ).also { it.start() }
         gles3CommandConsumer = Gles3RenderCommandConsumer(
             stream = renderCommandStream,
@@ -822,6 +828,9 @@ class LinkpointApp : Application() {
         // Asset system
         assetCache = AssetCache(this, cacheManager)
         textureManager = TextureManager(this, assetCache, capabilityManager)
+        renderMaterialsManager.setTexturePrefetcher { ids ->
+            textureManager.prefetch(ids)
+        }
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
@@ -1007,6 +1016,14 @@ class LinkpointApp : Application() {
 
         // NEW: User Profile Manager
         userProfileManager = UserProfileManager(capabilityManager, udpConnection, agentId)
+
+        // Register UDP and OpenSim REST Profile Strategies
+        val udpStrategy = com.linkpoint.world.profile.UdpProfileStrategy(udpConnection, agentId)
+        val selectedGrid = if (::gridManager.isInitialized) gridManager.getSelectedGrid() else null
+        val restUrl = selectedGrid?.website ?: selectedGrid?.helperUri
+        val restStrategy = com.linkpoint.world.profile.OpenSimRestProfileStrategy(restUrl)
+        profileManager.registerStrategy(udpStrategy)
+        profileManager.registerStrategy(restStrategy)
 
         // NEW: Initialize connection keep-alive with credentials
         connectionKeepAlive.initialize(agentId, udpConnection.getSessionId())
@@ -1204,6 +1221,16 @@ class LinkpointApp : Application() {
 
         // IM manager
         imManager = IMManager(udpConnection, capabilityManager, agentId)
+        if (::teleportManager.isInitialized) {
+            imManager.teleportManager = teleportManager
+        }
+
+        // Dedicated Frame-Aligned Message Queue and Ring Buffer Service
+        frameAlignedQueueService = com.linkpoint.chat.queue.FrameAlignedMessageQueueService(
+            chatManager = chatManager,
+            imManager = imManager,
+            myAgentIdProvider = { sessionManager.getAgentId() ?: UUID(0L, 0L) }
+        )
 
         // Wire IMManager into GroupsManager so `sendGroupChat` routes
         // through the IM session state machine (Dialog=15 bring-up +
@@ -1295,6 +1322,9 @@ class LinkpointApp : Application() {
 
         // Teleport manager
         teleportManager = TeleportManager(udpConnection, capabilityManager, agentId)
+        if (::imManager.isInitialized) {
+            imManager.teleportManager = teleportManager
+        }
         if (::notificationManager.isInitialized) {
             notificationManager.teleportManager = teleportManager
         }
@@ -1715,12 +1745,22 @@ class LinkpointApp : Application() {
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
 
-                    // Extract and prefetch textures from the object's TextureEntry
-                    if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
-                        val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
-                        val downloadableIds = textureIds.filter { TextureEntryParser.shouldDownload(it) }
-                        if (downloadableIds.isNotEmpty()) {
-                            textureManager.prefetch(downloadableIds.toList())
+                    // Extract and prefetch textures and materials from the object's TextureEntry
+                    if (update.textureEntry.isNotEmpty()) {
+                        if (::textureManager.isInitialized) {
+                            val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
+                            val downloadableIds = textureIds.filter { TextureEntryParser.shouldDownload(it) }
+                            if (downloadableIds.isNotEmpty()) {
+                                textureManager.prefetch(downloadableIds.toList())
+                            }
+                        }
+                        if (::renderMaterialsManager.isInitialized) {
+                            val materialIds = TextureEntryParser.extractMaterialIds(update.textureEntry)
+                            if (materialIds.isNotEmpty()) {
+                                applicationScope.launch {
+                                    renderMaterialsManager.prefetchMaterials(materialIds.toList())
+                                }
+                            }
                         }
                     }
                 }
@@ -2784,7 +2824,9 @@ class LinkpointApp : Application() {
                     val data = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseAvatarPropertiesReply(payload)
                     if (data != null) {
                         Log.d(TAG, "👤 AvatarPropertiesReply: ${data.avatarID}")
-                        // Cache profile data for later use
+                        com.linkpoint.eventbus.AppEventBus.publish(
+                            com.linkpoint.eventbus.events.AvatarPropertiesReplyEvent(data)
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -2949,7 +2991,13 @@ class LinkpointApp : Application() {
             try {
                 val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
                 if (payload != null) {
-                    Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                    val replyData = com.linkpoint.protocol.messages.AdditionalMessageParsers.parseMapItemReply(payload)
+                    if (replyData != null && ::worldMap.isInitialized) {
+                        worldMap.handleMapItemReply(replyData)
+                        Log.d(TAG, "🗺️ MapItemReply received: itemType=${replyData.itemType}, items=${replyData.items.size}")
+                    } else {
+                        Log.d(TAG, "🗺️ MapItemReply received (${payload.size} bytes)")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling MapItemReply", e)
@@ -4765,7 +4813,18 @@ class LinkpointApp : Application() {
         }
 
         udpConnection.registerHandler(com.linkpoint.protocol.messages.ids.MessageIdRegistry.AVATAR_PROPERTIES_UPDATE) { _, rawPacket ->
-            Log.d(TAG, "👤 AvatarPropertiesUpdate received")
+            try {
+                val payload = com.linkpoint.protocol.messages.MessageParser.extractPayload(rawPacket)
+                if (payload != null) {
+                    val event = com.linkpoint.eventbus.events.AvatarPropertiesUpdateEvent.fromPayload(payload)
+                    if (event != null) {
+                        Log.d(TAG, "👤 AvatarPropertiesUpdate received for ${event.agentId}")
+                        com.linkpoint.eventbus.AppEventBus.publish(event)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling AvatarPropertiesUpdate", e)
+            }
         }
 
         // --- Velocity Interpolation Messages ---
@@ -5586,7 +5645,7 @@ class LinkpointApp : Application() {
                         fromName = imData.fromAgentName,
                         message = imData.message,
                         sessionId = imData.sessionId,
-                        dialogType = imData.dialog,
+                        dialogType = IMType.fromValue(imData.dialog),
                         timestamp = imData.timestamp,
                         binaryBucket = imData.binaryBucket
                     )
@@ -5770,12 +5829,14 @@ class LinkpointApp : Application() {
         if (::objectManager.isInitialized) objectManager.shutdown()
         if (::chatManager.isInitialized) chatManager.shutdown()
         if (::imManager.isInitialized) imManager.shutdown()
+        if (::frameAlignedQueueService.isInitialized) frameAlignedQueueService.shutdown()
         if (::inventoryManager.isInitialized) inventoryManager.shutdown()
         if (::gestureManager.isInitialized) gestureManager.shutdown()
 
         worldMap.shutdown()
         searchManager.shutdown()
         profileManager.shutdown()
+        com.linkpoint.eventbus.AppEventBus.clear()
         parcelManager.shutdown()
 
         soundManager.shutdown()
@@ -5871,7 +5932,7 @@ class LinkpointApp : Application() {
 
     fun bindGlesRenderEngine(provider: com.linkpoint.render.lumiya.core.RenderEngineProvider?) {
         if (::gles3CommandConsumer.isInitialized) {
-            gles3CommandConsumer.bindEngine(provider)
+            gles3CommandConsumer.bindEngine(provider, { it.run() }, null, if (::renderMaterialsManager.isInitialized) renderMaterialsManager else null)
         }
     }
 
@@ -5904,7 +5965,8 @@ class LinkpointApp : Application() {
                 }
             }
         } else null
-        gles3CommandConsumer.bindEngine(provider, glThreadExecutor, fetcher)
+        val materialsManagerRef = if (::renderMaterialsManager.isInitialized) renderMaterialsManager else null
+        gles3CommandConsumer.bindEngine(provider, glThreadExecutor, fetcher, materialsManagerRef)
     }
 
     private fun publishRenderCommand(command: SceneRenderCommand): Boolean {
@@ -5970,6 +6032,11 @@ class LinkpointApp : Application() {
      * Check if IM manager is initialized (for debug reports)
      */
     fun isIMManagerInitialized(): Boolean = ::imManager.isInitialized
+
+    /**
+     * Check if frame-aligned queue service is initialized
+     */
+    fun isFrameAlignedQueueServiceInitialized(): Boolean = ::frameAlignedQueueService.isInitialized
 
     /**
      * Check if texture manager is initialized (for debug reports)
@@ -6062,6 +6129,11 @@ class LinkpointApp : Application() {
      * Check if teleport manager is initialized (for debug reports)
      */
     fun isTeleportManagerInitialized(): Boolean = ::teleportManager.isInitialized
+
+    /**
+     * Check if landmark manager is initialized (for debug reports)
+     */
+    fun isLandmarkManagerInitialized(): Boolean = ::landmarkManager.isInitialized
 
     /**
      * Check if HUD manager is initialized (for debug reports)

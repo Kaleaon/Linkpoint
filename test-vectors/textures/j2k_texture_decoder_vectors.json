@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "description": "Shared canonical JPEG2000 codestream and texture decoder test vectors",
+  "j2k_vectors": [
+    {
+      "name": "jp2_header_64x64",
+      "hex_bytes": "0000000c6a5020200d0a870a69686472000000400000004000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "status": "success",
+        "width": 64,
+        "height": 64,
+        "channels": 4,
+        "buffer_length": 16384,
+        "sha256": ""
+      }
+    },
+    {
+      "name": "jp2_header_32x32",
+      "hex_bytes": "0000000c6a5020200d0a870a6968647200000020000000200000000000000000000000000000000000000000000000000000000000000000",
+      "expected": {
+        "status": "success",
+        "width": 32,
+        "height": 32,
+        "channels": 4,
+        "buffer_length": 4096,
+        "sha256": ""
+      }
+    },
+    {
+      "name": "corrupt_codestream_fallback",
+      "hex_bytes": "434f52525550545f4a504547323030305f44415441",
+      "expected": {
+        "status": "fallback",
+        "width": 0,
+        "height": 0,
+        "channels": 4,
+        "buffer_length": 0,
+        "sha256": ""
+      }
+    }
+  ]
+}

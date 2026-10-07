@@ -14,7 +14,9 @@
     "./tokens": "./src/tokens/index.ts",
     "./css": "./src/css/index.ts",
     "./layout": "./src/layout/index.ts",
-    "./react": "./src/react/index.ts"
+    "./react": "./src/react/index.ts",
+    "./themes/*": "./themes/*",
+    "./themes/community/*": "./themes/community/*"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

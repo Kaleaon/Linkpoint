@@ -12,9 +12,9 @@ object GeneratedProtocolCatalog {
     const val TEMPLATE_VERSION = "2.0"
     val REGISTERED_MESSAGES = mapOf(
         "TestMessage" to 1,
-        "PacketAck" to 4294967291.toInt(),
-        "OpenCircuit" to 4294967292.toInt(),
-        "CloseCircuit" to 4294967293.toInt(),
+        "PacketAck" to -5,
+        "OpenCircuit" to -4,
+        "CloseCircuit" to -3,
         "StartPingCheck" to 1,
         "CompletePingCheck" to 2,
         "AddCircuitCode" to 2,
@@ -543,14 +543,14 @@ data class TestMessagePacket(
 // Message: PacketAck (Fixed 4294967291)
 data class PacketAckPacket(
     val messageName: String = "PacketAck",
-    val messageNumber: Int = 4294967291.toInt(),
+    val messageNumber: Int = -5,
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967291.toInt())
+        buffer.putInt(-5)
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -559,14 +559,14 @@ data class PacketAckPacket(
 // Message: OpenCircuit (Fixed 4294967292)
 data class OpenCircuitPacket(
     val messageName: String = "OpenCircuit",
-    val messageNumber: Int = 4294967292.toInt(),
+    val messageNumber: Int = -4,
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967292.toInt())
+        buffer.putInt(-4)
         return buffer.array().copyOf(buffer.position())
     }
 
@@ -575,14 +575,14 @@ data class OpenCircuitPacket(
 // Message: CloseCircuit (Fixed 4294967293)
 data class CloseCircuitPacket(
     val messageName: String = "CloseCircuit",
-    val messageNumber: Int = 4294967293.toInt(),
+    val messageNumber: Int = -3,
     val frequency: String = "Fixed",
     val isZerocoded: Boolean = false
 ) {
 
     fun serialize(): ByteArray {
         val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(4294967293.toInt())
+        buffer.putInt(-3)
         return buffer.array().copyOf(buffer.position())
     }
 

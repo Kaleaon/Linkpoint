@@ -1,11 +1,14 @@
 package com.linkpoint.protocol.llsd
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+@RunWith(RobolectricTestRunner::class)
 class LLSDXmlUtilsTest {
 
     @Test

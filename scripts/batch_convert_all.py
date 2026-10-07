@@ -5,11 +5,12 @@ Processes all remaining Java files in the project
 """
 
 import os
-import sys
 import subprocess
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
 
 class BatchConverter:
     """Batch conversion manager"""
@@ -32,7 +33,7 @@ class BatchConverter:
 
         for java_file in self.java_dir.rglob("*.java"):
             # Check if Kotlin version already exists
-            kotlin_file = java_file.with_suffix('.kt')
+            kotlin_file = java_file.with_suffix(".kt")
 
             if not kotlin_file.exists():
                 java_files.append(java_file)
@@ -43,15 +44,20 @@ class BatchConverter:
 
     def convert_file(self, java_file: Path) -> tuple:
         """Convert a single file"""
-        kotlin_file = java_file.with_suffix('.kt')
+        kotlin_file = java_file.with_suffix(".kt")
 
         try:
             # Run converter
             result = subprocess.run(
-                [sys.executable, str(self.converter_script), str(java_file), str(kotlin_file)],
+                [
+                    sys.executable,
+                    str(self.converter_script),
+                    str(java_file),
+                    str(kotlin_file),
+                ],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode == 0:
@@ -59,7 +65,7 @@ class BatchConverter:
                 subprocess.run(
                     [str(self.ktlint), "--format", str(kotlin_file)],
                     capture_output=True,
-                    timeout=10
+                    timeout=10,
                 )
 
                 # Delete Java file after successful conversion
@@ -87,25 +93,29 @@ class BatchConverter:
 
                 if success:
                     self.converted_files += 1
-                    print(f"✓ [{self.converted_files}/{len(java_files)}] {Path(file_path).name}")
+                    print(
+                        f"✓ [{self.converted_files}/{len(java_files)}] {Path(file_path).name}"
+                    )
                 else:
                     self.failed_files.append((file_path, error))
-                    print(f"✗ [{self.converted_files}/{len(java_files)}] {Path(file_path).name} - {error}")
+                    print(
+                        f"✗ [{self.converted_files}/{len(java_files)}] {Path(file_path).name} - {error}"
+                    )
 
         elapsed_time = time.time() - start_time
 
-        print(f"\n{'='*60}")
-        print(f"Conversion Complete!")
-        print(f"{'='*60}")
+        print(f"\n{'=' * 60}")
+        print("Conversion Complete!")
+        print(f"{'=' * 60}")
         print(f"Total files processed: {len(java_files)}")
         print(f"Successfully converted: {self.converted_files}")
         print(f"Failed: {len(self.failed_files)}")
         print(f"Skipped (already converted): {len(self.skipped_files)}")
         print(f"Time elapsed: {elapsed_time:.2f} seconds")
-        print(f"Average: {elapsed_time/len(java_files):.2f} seconds per file")
+        print(f"Average: {elapsed_time / len(java_files):.2f} seconds per file")
 
         if self.failed_files:
-            print(f"\n❌ Failed conversions:")
+            print("\n❌ Failed conversions:")
             for file_path, error in self.failed_files[:10]:  # Show first 10
                 print(f"  - {Path(file_path).name}: {error[:100]}")
             if len(self.failed_files) > 10:
@@ -113,9 +123,9 @@ class BatchConverter:
 
     def run(self):
         """Run the batch conversion"""
-        print("="*60)
+        print("=" * 60)
         print("Linkpoint Java to Kotlin Batch Converter")
-        print("="*60)
+        print("=" * 60)
 
         # Find files
         print("\n📁 Scanning for Java files...")
@@ -130,7 +140,7 @@ class BatchConverter:
 
         # Confirm
         response = input(f"\nConvert {len(java_files)} files? (yes/no): ")
-        if response.lower() not in ['yes', 'y']:
+        if response.lower() not in ["yes", "y"]:
             print("Cancelled.")
             return
 
@@ -144,23 +154,26 @@ class BatchConverter:
         """Save conversion report"""
         report_file = self.workspace_dir / "CONVERSION_REPORT.md"
 
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             f.write("# Batch Conversion Report\n\n")
             f.write(f"**Date:** {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-            f.write(f"## Summary\n\n")
-            f.write(f"- Total files processed: {self.converted_files + len(self.failed_files)}\n")
+            f.write("## Summary\n\n")
+            f.write(
+                f"- Total files processed: {self.converted_files + len(self.failed_files)}\n"
+            )
             f.write(f"- Successfully converted: {self.converted_files}\n")
             f.write(f"- Failed: {len(self.failed_files)}\n")
             f.write(f"- Skipped: {len(self.skipped_files)}\n\n")
 
             if self.failed_files:
-                f.write(f"## Failed Conversions\n\n")
+                f.write("## Failed Conversions\n\n")
                 for file_path, error in self.failed_files:
                     f.write(f"### {Path(file_path).name}\n")
                     f.write(f"**Path:** `{file_path}`\n\n")
                     f.write(f"**Error:**\n```\n{error}\n```\n\n")
 
         print(f"\n📄 Report saved to: {report_file}")
+
 
 def main():
     if len(sys.argv) < 2:
@@ -176,5 +189,6 @@ def main():
     converter = BatchConverter(workspace_dir)
     converter.run()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

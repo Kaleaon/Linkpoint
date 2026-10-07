@@ -77,6 +77,7 @@ class SessionManager(private val context: Context) {
     fun getHelperUri(): String? = _activeGrid.value?.helperUri
     fun getEconomyUri(): String? = _activeGrid.value?.economyUri
     fun getMapUri(): String? = _activeGrid.value?.mapUri
+    fun getSearchUri(): String? = _activeGrid.value?.searchUri
     fun getWelcomeUri(): String? = _activeGrid.value?.welcomeUri ?: _activeGrid.value?.website
 
     /**
@@ -151,18 +152,26 @@ class SessionManager(private val context: Context) {
         regionId: UUID?,
         regionFlags: Int,
         regionFlagsExtended: Long?,
-        simAccess: Int
+        simAccess: Int,
+        regionSizeX: Int = 256,
+        regionSizeY: Int = 256
     ) {
         val trimmedName = simName.trim()
         if (trimmedName.isNotEmpty()) {
             updateRegionName(trimmedName)
+        }
+        val current = _currentRegion.value
+        if (current != null) {
+            _currentRegion.value = current.copy(regionSizeX = regionSizeX, regionSizeY = regionSizeY)
         }
         _regionSessionState.value = _regionSessionState.value.copy(
             simName = trimmedName,
             regionId = regionId,
             regionFlags = regionFlags,
             regionFlagsExtended = regionFlagsExtended,
-            simAccess = simAccess
+            simAccess = simAccess,
+            regionSizeX = regionSizeX,
+            regionSizeY = regionSizeY
         )
     }
 
@@ -481,7 +490,9 @@ data class RegionInfo(
     val simIP: String,
     val simPort: Int,
     val seedCapability: String? = null,
-    val waterHeight: Float = 20f
+    val waterHeight: Float = 20f,
+    val regionSizeX: Int = 256,
+    val regionSizeY: Int = 256
 )
 
 data class RegionSessionState(
@@ -489,7 +500,9 @@ data class RegionSessionState(
     val regionId: UUID? = null,
     val regionFlags: Int = 0,
     val regionFlagsExtended: Long? = null,
-    val simAccess: Int = 0
+    val simAccess: Int = 0,
+    val regionSizeX: Int = 256,
+    val regionSizeY: Int = 256
 )
 
 data class TeleportHistoryEntry(

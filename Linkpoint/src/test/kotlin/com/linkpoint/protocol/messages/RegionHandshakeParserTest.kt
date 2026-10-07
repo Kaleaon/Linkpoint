@@ -23,6 +23,18 @@ class RegionHandshakeParserTest {
         val parsed = MessageParser.parseRegionHandshake(data)
         assertNotNull(parsed)
         assertEquals("TestRegion", parsed?.simName)
+        assertEquals(256, parsed?.regionSizeX)
+        assertEquals(256, parsed?.regionSizeY)
+    }
+
+    @Test
+    fun `parseRegionHandshake extracts regionSizeX and regionSizeY for varregions`() {
+        val data = buildRegionHandshakePayload("VarRegion", sizeX = 1024, sizeY = 1024)
+        val parsed = MessageParser.parseRegionHandshake(data)
+        assertNotNull(parsed)
+        assertEquals("VarRegion", parsed?.simName)
+        assertEquals(1024, parsed?.regionSizeX)
+        assertEquals(1024, parsed?.regionSizeY)
     }
 
     @Test
@@ -31,7 +43,7 @@ class RegionHandshakeParserTest {
         assertNull(MessageParser.parseRegionHandshake(ByteArray(10)))
     }
 
-    private fun buildRegionHandshakePayload(simName: String): ByteArray {
+    private fun buildRegionHandshakePayload(simName: String, sizeX: Int? = null, sizeY: Int? = null): ByteArray {
         val simNameBytes = simName.toByteArray(Charsets.UTF_8)
         val buffer = ByteBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN)
 
@@ -64,6 +76,15 @@ class RegionHandshakeParserTest {
 
         // TerrainHeightRange00-11 (4 floats)
         repeat(4) { buffer.putFloat(0f) }
+
+        // RegionInfo4 block count = 0
+        buffer.put(0.toByte())
+
+        // Optional OpenSim RegionSizeX & RegionSizeY
+        if (sizeX != null && sizeY != null) {
+            buffer.putInt(sizeX)
+            buffer.putInt(sizeY)
+        }
 
         val size = buffer.position()
         return buffer.array().copyOf(size)

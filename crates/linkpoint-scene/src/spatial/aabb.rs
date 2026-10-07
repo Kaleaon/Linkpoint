@@ -113,6 +113,7 @@ impl AABB {
     }
 
     #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "sse2")]
     #[inline]
     unsafe fn intersects_simd_sse2(&self, other: &AABB) -> bool {
         use std::arch::x86_64::*;
@@ -133,6 +134,7 @@ impl AABB {
     }
 
     #[cfg(target_arch = "aarch64")]
+    #[target_feature(enable = "neon")]
     #[inline]
     unsafe fn intersects_simd_neon(&self, other: &AABB) -> bool {
         use std::arch::aarch64::*;
@@ -182,6 +184,7 @@ impl AABB {
     }
 
     #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "sse2")]
     unsafe fn intersects_batch_simd_sse2(&self, candidates: &[AABB]) -> Vec<bool> {
         use std::arch::x86_64::*;
 
@@ -208,6 +211,7 @@ impl AABB {
     }
 
     #[cfg(target_arch = "aarch64")]
+    #[target_feature(enable = "neon")]
     unsafe fn intersects_batch_simd_neon(&self, candidates: &[AABB]) -> Vec<bool> {
         use std::arch::aarch64::*;
 

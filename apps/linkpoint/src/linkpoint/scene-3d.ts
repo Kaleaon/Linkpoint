@@ -225,6 +225,11 @@ export class Scene3D extends Utils.EventEmitter {
     return texName;
   }
 
+  removeTexture(textureId: string): boolean {
+    if (!textureId) return false;
+    return this.graphics.deleteTexture(textureId);
+  }
+
   /** Replace the flat helper grid with the simulator's height field. */
   setTerrain(heights: number[], size = 256) {
     if (!Array.isArray(heights) || size < 2 || heights.length < size * size) return false;

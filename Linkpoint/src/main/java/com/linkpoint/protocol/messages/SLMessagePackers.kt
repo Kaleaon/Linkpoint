@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.messages
 
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
@@ -80,7 +81,7 @@ object SLMessagePackers {
         regionId: UUID = AgentIdentity.ZERO_UUID,
         position: LLVector3 = LLVector3.zero(),
         offline: Int = 0,
-        dialog: Int,
+        dialog: IMType,
         id: UUID,
         timestamp: Int = 0,
         fromAgentName: String,
@@ -118,7 +119,7 @@ object SLMessagePackers {
         buf.putUUID(regionId)
         buf.putFloat(position.x); buf.putFloat(position.y); buf.putFloat(position.z)
         buf.put(offline.toByte())
-        buf.put(dialog.toByte())
+        buf.put(dialog.value.toByte())
         buf.putUUID(id)
         buf.putInt(timestamp)
 

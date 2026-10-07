@@ -1,13 +1,14 @@
 import os
-from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 class TypeScriptEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("TypeScript", ".ts")
 
-    def emit(self, ast: ProtocolAST, out_dir: str) -> Dict[str, str]:
+    def emit(self, ast: ProtocolAST, out_dir: str) -> dict[str, str]:
         os.makedirs(out_dir, exist_ok=True)
 
         code = self._generate_ts_code(ast)
@@ -65,7 +66,9 @@ class TypeScriptEmitter(BaseEmitter):
             out.append(f'  messageName: "{msg.name}";')
             out.append(f"  messageNumber: {msg.message_number};")
             out.append(f'  frequency: "{msg.frequency}";')
-            out.append(f'  isZerocoded: {"true" if msg.encoding == "Zerocoded" else "false"};')
+            out.append(
+                f"  isZerocoded: {'true' if msg.encoding == 'Zerocoded' else 'false'};"
+            )
             out.append("}\n")
 
         out.append("// Generated LLSD Capability Schemas")

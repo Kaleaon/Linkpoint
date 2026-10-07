@@ -70,7 +70,9 @@ class SessionLogRecorder(private val context: Context) {
     private val isInitialized = AtomicBoolean(false)
     private val isShuttingDown = AtomicBoolean(false)
 
-    private val dateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
+    private val dateFormat = ThreadLocal.withInitial {
+        SimpleDateFormat(DATE_FORMAT, Locale.US)
+    }
 
     init {
         if (isInitialized.compareAndSet(false, true)) {
@@ -120,7 +122,7 @@ class SessionLogRecorder(private val context: Context) {
         }
 
         // Format log entry
-        val formattedDate = dateFormat.format(Date(entry.timestamp))
+        val formattedDate = dateFormat.get()!!.format(Date(entry.timestamp))
         val logLine = "$formattedDate ${entry.level}/${entry.tag} [${entry.threadName}]: ${entry.message}\n"
 
         // Write to file

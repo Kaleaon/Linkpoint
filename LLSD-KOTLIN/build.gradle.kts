@@ -24,6 +24,7 @@ dependencies {
     implementation("kxml2:kxml2:2.3.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.json:json:20240303")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 }
 

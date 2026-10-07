@@ -1,7 +1,5 @@
 package com.linkpoint.ui.components.state
 
-import app.cash.paparazzi.DeviceConfig
-import app.cash.paparazzi.Paparazzi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -9,44 +7,43 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onRoot
+import com.github.takahirom.roborazzi.RoborazziOptions
+import com.github.takahirom.roborazzi.captureRoboImage
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import org.robolectric.ParameterizedRobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
+import java.io.File
 
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedRobolectricTestRunner::class)
+@Config(sdk = [34])
 class StateComponentsSnapshotTest(
-    private val deviceConfig: DeviceConfig,
-    private val deviceName: String
+    private val deviceName: String,
+    private val qualifiers: String,
+    private val themeName: String,
+    private val isDark: Boolean
 ) {
-    companion object {
-        val NEXUS_9: DeviceConfig = DeviceConfig.NEXUS_10.copy(screenWidth = 1536, screenHeight = 2048)
-        val FOLDABLE: DeviceConfig = DeviceConfig.PIXEL_5.copy(screenWidth = 1768, screenHeight = 2208)
-
-        @JvmStatic
-        @Parameterized.Parameters(name = "{1}")
-        fun params(): Collection<Array<Any>> = listOf(
-            arrayOf(DeviceConfig.PIXEL_5, "pixel_5"),
-            arrayOf(NEXUS_9, "nexus_9"),
-            arrayOf(FOLDABLE, "foldable")
-        )
-    }
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = deviceConfig)
+    val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+        RuntimeEnvironment.setQualifiers(qualifiers)
+    }
 
     @Test
-    fun loadingState_light() = snapshot("loading_light", dark = false) {
+    fun loadingState() = snapshot("loadingState") {
         LoadingState(message = "Loading nearby avatars…")
     }
 
     @Test
-    fun loadingState_dark() = snapshot("loading_dark", dark = true) {
-        LoadingState(message = "Loading nearby avatars…")
-    }
-
-    @Test
-    fun errorState_light() = snapshot("error_light", dark = false) {
+    fun errorState() = snapshot("errorState") {
         ErrorState(
             title = "Unable to load chat",
             message = "Your connection dropped. Try again.",
@@ -56,17 +53,7 @@ class StateComponentsSnapshotTest(
     }
 
     @Test
-    fun errorState_dark() = snapshot("error_dark", dark = true) {
-        ErrorState(
-            title = "Unable to load chat",
-            message = "Your connection dropped. Try again.",
-            retryLabel = "Retry",
-            onRetry = {}
-        )
-    }
-
-    @Test
-    fun emptyState_light() = snapshot("empty_light", dark = false) {
+    fun emptyState() = snapshot("emptyState") {
         EmptyState(
             title = "No friends yet",
             message = "Add friends to see them here.",
@@ -76,46 +63,67 @@ class StateComponentsSnapshotTest(
     }
 
     @Test
-    fun emptyState_dark() = snapshot("empty_dark", dark = true) {
-        EmptyState(
-            title = "No friends yet",
-            message = "Add friends to see them here.",
-            actionLabel = "Refresh",
-            onAction = {}
-        )
-    }
-
-    @Test
-    fun reconnectingBanner_light() = snapshot("reconnecting_banner_light", dark = false) {
+    fun reconnectingBanner() = snapshot("reconnectingBanner") {
         ReconnectingBanner(message = "Reconnecting to simulator…")
     }
 
     @Test
-    fun reconnectingBanner_dark() = snapshot("reconnecting_banner_dark", dark = true) {
-        ReconnectingBanner(message = "Reconnecting to simulator…")
-    }
-
-    @Test
-    fun lowBandwidthOverlay_light() = snapshot("low_bandwidth_overlay_light", dark = false) {
+    fun lowBandwidthOverlay() = snapshot("lowBandwidthOverlay") {
         Box(modifier = Modifier.fillMaxSize()) {
-            LowBandwidthOverlay(message = "Packet loss is high. You may see delayed updates.", onRetry = {})
+            LowBandwidthOverlay(
+                message = "Packet loss is high. You may see delayed updates.",
+                onRetry = {}
+            )
         }
     }
 
-    @Test
-    fun lowBandwidthOverlay_dark() = snapshot("low_bandwidth_overlay_dark", dark = true) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LowBandwidthOverlay(message = "Packet loss is high. You may see delayed updates.", onRetry = {})
-        }
-    }
-
-    private fun snapshot(name: String, dark: Boolean, content: @Composable () -> Unit) {
-        paparazzi.snapshot(name = "${name}_$deviceName") {
+    private fun snapshot(componentName: String, content: @Composable () -> Unit) {
+        composeTestRule.setContent {
             MaterialTheme(
-                colorScheme = if (dark) darkColorScheme() else lightColorScheme()
+                colorScheme = if (isDark) darkColorScheme() else lightColorScheme()
             ) {
                 content()
             }
+        }
+
+        val snapshotName = "${componentName}_${deviceName}_${themeName}"
+        val outputDir = File("build/outputs/roborazzi")
+        if (!outputDir.exists()) {
+            outputDir.mkdirs()
+        }
+        val file = File(outputDir, "$snapshotName.png")
+
+        composeTestRule.onRoot().captureRoboImage(
+            filePath = file.path,
+            roborazziOptions = RoborazziOptions(
+                compareOptions = RoborazziOptions.CompareOptions(
+                    changeThreshold = 0.005f
+                )
+            )
+        )
+    }
+
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}_{2}")
+        fun data(): Collection<Array<Any>> {
+            val viewports = listOf(
+                Triple("phone", "w360dp-h800dp-mdpi", "Phone (360x800dp)"),
+                Triple("tablet", "w800dp-h1280dp-mdpi", "Tablet (800x1280dp)"),
+                Triple("foldable", "w670dp-h840dp-mdpi", "Foldable (670x840dp)")
+            )
+            val themes = listOf(
+                Pair("light", false),
+                Pair("dark", true)
+            )
+
+            val params = mutableListOf<Array<Any>>()
+            for ((deviceName, qualifiers, _) in viewports) {
+                for ((themeName, isDark) in themes) {
+                    params.add(arrayOf(deviceName, qualifiers, themeName, isDark))
+                }
+            }
+            return params
         }
     }
 }

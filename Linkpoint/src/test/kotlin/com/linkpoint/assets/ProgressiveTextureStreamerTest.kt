@@ -24,6 +24,7 @@ class ProgressiveTextureStreamerTest {
         ProgressiveTextureStreamer.reset()
         // Warm up class loading and Robolectric shadow initialization
         val dummy = createDummyJ2kBytes()
+        JPEG2000Decoder.decodePlaceholder64(dummy)
         ProgressiveTextureStreamer.submit(
             id = UUID.randomUUID(),
             data = dummy,
@@ -70,7 +71,7 @@ class ProgressiveTextureStreamerTest {
         assertTrue("Placeholder width must be <= 64", bitmap.width <= 64)
         assertTrue("Placeholder height must be <= 64", bitmap.height <= 64)
 
-        // Requirement 1: Sub-2ms placeholder extraction (under 2.0ms in production)
+        // Requirement 1: Sub-2ms placeholder extraction (under 2.0ms in prod; relaxed for JVM test runner)
         assertTrue("Placeholder extraction duration ($durationMs ms) must be < 100.0ms in test environment", durationMs < 100.0)
 
         val diag = ProgressiveTextureStreamer.getDiagnostics()
@@ -98,8 +99,8 @@ class ProgressiveTextureStreamerTest {
         val diagBefore = ProgressiveTextureStreamer.getDiagnostics()
         assertEquals("20 tasks queued for high-res pass", 20, diagBefore.pendingTasks)
 
-        // Execute frame 1 with tight budget (e.g., 1ns) to force budget yielding
-        val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 1L)
+        // Execute frame 1 with tight budget (0ns) to force budget yielding
+        val completedFrame1 = ProgressiveTextureStreamer.processFrameQueue(maxBudgetNs = 0L)
         val diagFrame1 = ProgressiveTextureStreamer.getDiagnostics()
 
         assertTrue("Frame 1 should yield due to budget cap", diagFrame1.pendingTasks < 20)
@@ -117,9 +118,15 @@ class ProgressiveTextureStreamerTest {
 
     @Test
     fun testRequirement3_seamlessTextureSwapWithoutShaderRebuild() {
-        val mockResourceManager = mock(GLResourceManager::class.java)
-        var nextHandle = 101
-        `when`(mockResourceManager.createTexture()).thenAnswer { nextHandle++ }
+        class FakeGLResourceManager : GLResourceManager() {
+            var nextHandle = 101
+            val deletedHandles = mutableListOf<Int>()
+            override fun createTexture(): Int = nextHandle++
+            override fun deleteTexture(handle: Int) {
+                deletedHandles.add(handle)
+            }
+        }
+        val mockResourceManager = FakeGLResourceManager()
 
         val textureCache = GLTextureCache(mockResourceManager)
         val textureId = UUID.randomUUID()
@@ -139,7 +146,7 @@ class ProgressiveTextureStreamerTest {
         assertEquals("Cache size must remain 1 after replacement", 1, textureCache.size)
 
         // Verify old placeholder handle was deleted
-        verify(mockResourceManager).deleteTexture(101)
+        assertTrue("Old placeholder handle should be deleted", mockResourceManager.deletedHandles.contains(101))
     }
 
     @Test

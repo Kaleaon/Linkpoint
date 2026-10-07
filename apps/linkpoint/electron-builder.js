@@ -100,6 +100,8 @@ function dependencyClosure(rootDir, workspaceRoot) {
     const [name, fromDir] = stack.pop();
     if (NOT_ACTUALLY_RUNTIME.has(name)) continue;
 
+    keptNames.add(name);
+
     const dir = resolvePackageDir(name, fromDir, workspaceRoot);
     if (!dir) continue; // optional/unmet dependency; nothing to package
 

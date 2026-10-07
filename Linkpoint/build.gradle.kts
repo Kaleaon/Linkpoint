@@ -9,17 +9,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
     jacoco
-    // NOTE: Paparazzi's Gradle plugin (`app.cash.paparazzi`) is intentionally
-    // *not* applied here. The project's production classpath bundles
-    // `org.conscrypt:conscrypt-android` whose AAR ships an `org.conscrypt.R`
-    // class signed differently from `org.conscrypt:conscrypt-openjdk-uber`
-    // (the Robolectric/Paparazzi-friendly variant). Paparazzi's resource
-    // bootstrap loads every R class on the test classpath, hitting a
-    // SecurityException for org.conscrypt.R. Until upstream Paparazzi adds
-    // a way to exclude library-AAR R classes, the existing
-    // StateComponentsSnapshotTest is annotated with @Ignore so Robolectric
-    // tests remain green; the snapshots will move to the AndroidJUnit4
-    // instrumented suite.
+    id("io.github.takahirom.roborazzi") version "1.32.0"
 }
 
 jacoco {
@@ -51,7 +41,7 @@ val uiBoundaryRules = listOf(
     UiBoundaryRule(
         moduleName = "ui-navigation",
         packagePrefixes = setOf("com.linkpoint.ui.navigation"),
-        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2")
+        allowedUiDependencies = setOf("theme", "components", "common", "dialogs", "linkpoint2", "adaptive", "overlay")
     ),
     UiBoundaryRule(
         moduleName = "ui/chat",
@@ -249,10 +239,22 @@ android {
         unitTests {
             isReturnDefaultValues = true  // Return default values for unmocked Android methods like Log
             isIncludeAndroidResources = true
+            all {
+                it.useJUnitPlatform()
+            }
         }
     }
 
     packaging {
+        jniLibs {
+            useLegacyPackaging = false
+            pickFirsts += listOf(
+                "**/libjnidispatch.so",
+                "**/libopenjpeg.so",
+                "**/libopenjp2.so",
+                "**/liblumiya-native.so"
+            )
+        }
         resources {
             excludes += listOf(
                 "META-INF/DEPENDENCIES",
@@ -408,6 +410,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
@@ -472,12 +475,15 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
     // Used by tests that import `kotlin.test.*` (e.g.
     // ReliableTransportPolicyTest). Bundled assertions/Test annotations
     // delegate to JUnit 4 underneath so the existing junit:junit
     // dependency keeps the test runner unchanged.
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
     // Pinned to mockito 4.x — newer mockito 5.x is JVM 11 only and the project
     // still targets Java 1.8.
     testImplementation("org.mockito:mockito-core:4.11.0")
@@ -492,7 +498,11 @@ dependencies {
     testImplementation("com.squareup.okhttp3:okhttp:4.12.0")  // For integration tests
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.json:json:20240303")
-    testImplementation("app.cash.paparazzi:paparazzi:1.3.5")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.32.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.32.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-junit-rule:1.32.0")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("androidx.compose.ui:ui-test-manifest")
 
     // ── Robolectric + AndroidX test stack ────────────────────────────────
     // Robolectric provides JVM-friendly Android framework stubs (android.util.Log,
@@ -520,13 +530,17 @@ dependencies {
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
 }
 
+roborazzi {
+    outputDir.set(file("build/outputs/roborazzi"))
+}
+
 // The production classpath uses `org.conscrypt:conscrypt-android` (which only
 // ships its native lib for ARM/x86 Android) but the JVM unit-test classpath
 // needs `org.conscrypt:conscrypt-openjdk-uber`. They share the same
 // `org.conscrypt` package but are signed by different entities — keeping
 // both on the same classpath triggers a `SecurityException: signer
 // information does not match`. Substitute the Android variant on every
-// unit-test configuration so Robolectric/Paparazzi see a single, JVM-friendly
+// unit-test configuration so Robolectric/Roborazzi see a single, JVM-friendly
 // Conscrypt provider.
 configurations.matching {
     it.name.contains("UnitTest", ignoreCase = true) ||
@@ -548,6 +562,10 @@ configurations.matching {
 // suite reliable in proxied CI environments without hard-coding a proxy or
 // changing behavior for developers with direct network access.
 tasks.withType<Test>().configureEach {
+    systemProperty("robolectric.dependency.repo.url", "https://maven-central.storage-download.googleapis.com/maven2")
+    systemProperty("robolectric.dependency.repo.id", "googleCentral")
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
+    systemProperty("net.bytebuddy.experimental", "true")
     listOf(
         "http.proxyHost",
         "http.proxyPort",
@@ -794,4 +812,16 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             "jacoco/test.exec"
         )
     })
+}
+
+tasks.register("verifyRoborazziDebug") {
+    group = "verification"
+    description = "Runs Roborazzi verification for debug build"
+    dependsOn("verifyRoborazziStableDebug")
+}
+
+tasks.register("recordRoborazziDebug") {
+    group = "verification"
+    description = "Records Roborazzi golden images for debug build"
+    dependsOn("recordRoborazziStableDebug")
 }

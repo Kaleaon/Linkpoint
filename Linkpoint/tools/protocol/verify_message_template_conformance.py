@@ -93,8 +93,7 @@ def main() -> int:
     ap.add_argument(
         "--report",
         type=Path,
-        default=PROJECT_ROOT
-        / "build/reports/protocol/message-template-audit.txt",
+        default=PROJECT_ROOT / "build/reports/protocol/message-template-audit.txt",
     )
     args = ap.parse_args()
 
@@ -114,9 +113,13 @@ def main() -> int:
     #                               - implementedDeclaredMessageNames
     #   deprecatedTemplateMessages  = deprecatedMessagesWithRationale.keys
     declared_pw = parse_kotlin_set("declaredParserOrWriterMessages", catalog_src)
-    parser_supported = parse_kotlin_set("parserSupportedMessageNamesForConformance", app_src)
+    parser_supported = parse_kotlin_set(
+        "parserSupportedMessageNamesForConformance", app_src
+    )
     backlog = parse_kotlin_map("declaredOnlyBacklogMessages", catalog_src)
-    implemented_declared = parse_kotlin_set("implementedDeclaredMessageNames", catalog_src)
+    implemented_declared = parse_kotlin_set(
+        "implementedDeclaredMessageNames", catalog_src
+    )
     deprecated_map = parse_kotlin_map("deprecatedMessagesWithRationale", catalog_src)
 
     supported: set[str] = declared_pw | parser_supported
@@ -128,11 +131,13 @@ def main() -> int:
     deprecated_in_template = [n for n, dep in template_messages if dep]
 
     duplicate = sorted(
-        n for n in template_names
+        n
+        for n in template_names
         if (int(n in supported) + int(n in declared_only) + int(n in deprecated)) > 1
     )
     missing = sorted(
-        n for n in template_names
+        n
+        for n in template_names
         if n not in supported and n not in declared_only and n not in deprecated
     )
     blank_declared = sorted(k for k, v in declared_only.items() if not v.strip())
@@ -177,7 +182,9 @@ def main() -> int:
     if failed:
         print(f"classification audit failed; see {args.report}", file=sys.stderr)
         return 1
-    print(f"classification audit OK ({len(template_names)} messages); report at {args.report}")
+    print(
+        f"classification audit OK ({len(template_names)} messages); report at {args.report}"
+    )
     return 0
 
 

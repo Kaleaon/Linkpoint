@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/linkpoint_dart.dart';
 
 void main() {
-  testWidgets('GridStatusBanner renders region name when connected', (WidgetTester tester) async {
+  testWidgets('GridStatusBanner renders region name when connected',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

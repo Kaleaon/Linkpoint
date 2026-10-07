@@ -1,14 +1,15 @@
 import os
 import subprocess
-from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 class RustEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("Rust", ".rs")
 
-    def emit(self, ast: ProtocolAST, out_dir: str) -> Dict[str, str]:
+    def emit(self, ast: ProtocolAST, out_dir: str) -> dict[str, str]:
         os.makedirs(out_dir, exist_ok=True)
 
         code = self._generate_rust_code(ast)
@@ -18,7 +19,12 @@ class RustEmitter(BaseEmitter):
             f.write(code)
 
         try:
-            subprocess.run(["rustfmt", out_file], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(
+                ["rustfmt", out_file],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
             with open(out_file, "r", encoding="utf-8") as f:
                 code = f.read().replace("\r\n", "\n")
             with open(out_file, "w", encoding="utf-8", newline="\n") as f:
@@ -92,12 +98,18 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
 
             out.append(f"impl {struct_name} {{")
             out.append(f"    pub const MESSAGE_ID: u32 = {msg.message_number};")
-            out.append(f"    pub const FREQUENCY: MessageFrequency = MessageFrequency::{msg.frequency};")
-            out.append(f'    pub const ZEROCODED: bool = {"true" if msg.encoding == "Zerocoded" else "false"};')
+            out.append(
+                f"    pub const FREQUENCY: MessageFrequency = MessageFrequency::{msg.frequency};"
+            )
+            out.append(
+                f"    pub const ZEROCODED: bool = {'true' if msg.encoding == 'Zerocoded' else 'false'};"
+            )
             out.append("    pub fn new() -> Self {")
             out.append("        Self {")
             out.append(f"            message_id: {msg.message_number},")
-            out.append(f'            zerocoded: {"true" if msg.encoding == "Zerocoded" else "false"},')
+            out.append(
+                f"            zerocoded: {'true' if msg.encoding == 'Zerocoded' else 'false'},"
+            )
             out.append("        }")
             out.append("    }")
             out.append("}")

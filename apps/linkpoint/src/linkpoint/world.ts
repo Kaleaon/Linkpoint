@@ -18,6 +18,7 @@ import { BODY_PARTS, bodyPartRows, bodyPartSkin, bodyPartVertexSkin, loadBodyPar
 import { HUD_POINTS, HUD_SIZE, isHudPoint, type HudInfo } from './hud';
 import { ParticleEngine } from './particles';
 import { CoordinateNormalizer } from './coordinate-normalizer';
+import { TextureCache } from './texture-cache';
 
 export class WorldViewer extends Utils.EventEmitter {
   /**
@@ -55,7 +56,10 @@ export class WorldViewer extends Utils.EventEmitter {
   private sceneObjects = new Map<string, any>();
   private localObjectIds = new Map<number, string>();
   private decodedAssets = new Map<string, any>();
-  private decodedTextures = new Map<string, any>();
+  private decodedTextures = new TextureCache<any>({
+    capacity: 100,
+    onEvict: (asset, key) => this.handleTextureEviction(asset, key),
+  });
   private decodedMaterials = new Map<string, any>();
   private particles = new ParticleEngine();
   private renderedParticles = new Set<string>();
@@ -429,6 +433,32 @@ export class WorldViewer extends Utils.EventEmitter {
     // One newly decoded attachment can alter the shared skeleton used by all clothing and the body.
     // Reapply the complete avatar, matching Lumiya's shapeParamsUpdate skeleton rebuild.
     for (const subject of affectedSubjects) this.reapplyAvatarSubject(subject);
+  }
+
+  private handleTextureEviction(asset: any, key: string) {
+    if (!key) return;
+    const keyStr = String(key);
+    if (this.scene3d) {
+      this.scene3d.removeTexture(keyStr);
+    }
+    for (const object of this.sceneObjects.values()) {
+      let modified = false;
+      if (this.sameId(object.textureId, keyStr)) {
+        object.decodedTexture = undefined;
+        modified = true;
+      }
+      const usesEvicted = object.faceTextures?.some((face: any) =>
+        [face.textureId, ...this.overrideTextureIds(face), ...this.materialTextureIds(face.materialId)]
+          .some((id: any) => this.sameId(id, keyStr))
+      );
+      if (usesEvicted) {
+        object.decodedFaceTextures = (object.faceTextures || []).map((face: any) => this.resolveFace(face));
+        modified = true;
+      }
+      if (modified) {
+        this.applySceneObject(object);
+      }
+    }
   }
 
   private applyTexture(asset: any) {

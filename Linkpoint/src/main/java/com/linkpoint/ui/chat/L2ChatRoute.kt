@@ -75,14 +75,26 @@ fun L2ChatRoute(
     val myAgentId = app.sessionManager.getAgentId() ?: UUID(0L, 0L)
     val region by app.sessionManager.currentRegion.collectAsState()
 
-    val messages = remember { mutableStateListOf<ChatMessage>() }
     var activeImSessionId by remember { mutableStateOf<UUID?>(null) }
     var activeGroupSessionId by remember { mutableStateOf<UUID?>(null) }
 
+    val queueService = remember(app) {
+        if (app != null && app.isFrameAlignedQueueServiceInitialized()) {
+            app.frameAlignedQueueService
+        } else {
+            com.linkpoint.chat.queue.FrameAlignedMessageQueueService(
+                chatManager = app?.chatManager,
+                imManager = if (app?.isIMManagerInitialized() == true) app.imManager else null,
+                myAgentIdProvider = { myAgentId }
+            )
+        }
+    }
+
     // Seed with local-chat history so the screen isn't empty mid-session.
     LaunchedEffect(Unit) {
-        app.chatManager.getHistory().forEach { chat ->
-            messages.add(chat.toUiMessage(myAgentId))
+        if (app != null && app.isChatManagerInitialized()) {
+            val history = app.chatManager.getHistory().map { it.toUiMessage(myAgentId) }
+            queueService.seedHistory(history)
         }
     }
 
@@ -90,9 +102,9 @@ fun L2ChatRoute(
     // When it isn't (e.g. chat initialized before IM completes bootstrapping)
     // we display nearby/local chat only without crashing.
     // Collect flows unconditionally to obey the Rules of Hooks.
-    val imAvailable = app.isIMManagerInitialized()
+    val imAvailable = app?.isIMManagerInitialized() == true
     val emptySessionFlow = remember { kotlinx.coroutines.flow.MutableStateFlow(emptyList<com.linkpoint.chat.IMSession>()) }
-    val sessions by (if (imAvailable) app.imManager.activeSessions else emptySessionFlow).collectAsState()
+    val sessions by (if (imAvailable && app != null) app.imManager.activeSessions else emptySessionFlow).collectAsState()
 
     LaunchedEffect(sessions) {
         if (!imAvailable) return@LaunchedEffect
@@ -104,32 +116,15 @@ fun L2ChatRoute(
                 it.type == SessionType.GROUP || it.type == SessionType.CONFERENCE
             }?.sessionId
         }
+        queueService.activeImSessionId = activeImSessionId
+        queueService.activeGroupSessionId = activeGroupSessionId
     }
 
-    // Stream incoming nearby chat into the visible list.
-    LaunchedEffect(Unit) {
-        app.chatManager.chatFlow.collect { chat ->
-            messages.addCapped(chat.toUiMessage(myAgentId))
-        }
-    }
-
-    // Stream incoming IMs, scoped to the currently-active sessions so an
-    // unrelated group doesn't pollute the visible list.
-    LaunchedEffect(imAvailable, activeImSessionId, activeGroupSessionId) {
-        if (!imAvailable) return@LaunchedEffect
-        app.imManager.messageFlow.collect { im ->
-            val channel = when (im.sessionId) {
-                activeImSessionId -> ChatChannel.IM
-                activeGroupSessionId -> ChatChannel.GROUP
-                else -> return@collect
-            }
-            messages.addCapped(im.toUiMessage(myAgentId, channel))
-        }
-    }
+    val viewState by queueService.chatViewState.collectAsState()
 
     val typingAvatars by app.chatManager.typingAvatars.collectAsState()
 
-    val typingAvatarNames = remember(typingAvatars, messages) {
+    val typingAvatarNames = remember(typingAvatars, viewState.messages) {
         typingAvatars.filter { it != myAgentId }.map { id ->
             val avatar = if (app.isAvatarManagerInitialized()) app.avatarManager.getAvatar(id) else null
             avatar?.displayName?.takeIf { it.isNotBlank() }
@@ -140,7 +135,7 @@ fun L2ChatRoute(
     }
 
     ChatScreen(
-        messages = messages,
+        messages = viewState.messages,
         typingAvatarNames = typingAvatarNames,
         currentAvatarName = avatarName,
         threadAvatarName = sessions

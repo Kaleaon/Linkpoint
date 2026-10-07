@@ -45,7 +45,7 @@ class CapEventQueue(
      */
     data class Event(
         val eventType: String,
-        val eventData: Map<String, Any>,
+        val body: LLSDMap,
         val timestamp: Long = System.currentTimeMillis()
     )
 
@@ -326,7 +326,7 @@ class CapEventQueue(
                             if (msg != null) {
                                 val localEvent = Event(
                                     eventType = msg,
-                                    eventData = convertLLSDMapToMap(body),
+                                    body = body,
                                     timestamp = System.currentTimeMillis()
                                 )
                                 rawEvents.add(localEvent)
@@ -338,7 +338,7 @@ class CapEventQueue(
                     // Buffer through sliding window queue to guarantee chronological ordering
                     val readyEvents = slidingWindow.offerBatch(responseId, rawEvents)
                     for (readyEvent in readyEvents) {
-                        dispatchLocalEvent(readyEvent, llsd)
+                        dispatchLocalEvent(readyEvent)
                     }
                 }
             }
@@ -354,47 +354,25 @@ class CapEventQueue(
 
         NetworkLogger.log(NetworkLogger.Level.DEBUG, NetworkLogger.Category.UDP, "Event: $message")
 
-        val eventData = convertLLSDMapToMap(body)
         val localEvent = Event(
             eventType = message,
-            eventData = eventData,
+            body = body,
             timestamp = System.currentTimeMillis()
         )
         addEvent(localEvent)
 
-        dispatchLocalEvent(localEvent, body)
+        dispatchLocalEvent(localEvent)
     }
 
-    private fun dispatchLocalEvent(localEvent: Event, body: LLSDMap) {
+    private fun dispatchLocalEvent(localEvent: Event) {
         eventListeners[localEvent.eventType]?.forEach { listener ->
             try {
-                listener.onEvent(localEvent.eventType, body)
+                listener.onEvent(localEvent.eventType, localEvent.body)
             } catch (e: Exception) {
                 Log.e(TAG, "Event listener error for ${localEvent.eventType}", e)
             }
         }
     }
-
-    /**
-     * Convert LLSDMap to Map<String, Any> for simpler event data storage
-     */
-    private fun convertLLSDMapToMap(llsdMap: LLSDMap): Map<String, Any> {
-        val result = mutableMapOf<String, Any>()
-        for ((key, value) in llsdMap.value) {
-            when (value) {
-                is LLSDString -> result[key] = value.value
-                is LLSDInteger -> result[key] = value.value
-                is LLSDReal -> result[key] = value.value
-                is LLSDBoolean -> result[key] = value.value
-                is LLSDUUID -> result[key] = value.value
-                is LLSDMap -> result[key] = convertLLSDMapToMap(value)
-                is LLSDArray -> result[key] = value.value.map { it.toString() }
-                else -> result[key] = value.toString()
-            }
-        }
-        return result
-    }
-
     /**
      * Add an event to the queue
      */

@@ -108,6 +108,7 @@ export default function DiagnosticsPanel() {
           type="button"
           onClick={handlePingNow}
           disabled={pinging || !isConnected}
+          aria-label={pinging ? "Pinging simulator connection" : "Execute simulator ping probe"}
           style={{
             minHeight: 36,
             padding: "0 14px",
@@ -217,6 +218,8 @@ export default function DiagnosticsPanel() {
               <div
                 key={idx}
                 title={`${val} ms`}
+                role="img"
+                aria-label={`Ping sample ${idx + 1}: ${val} ms`}
                 style={{
                   flex: 1,
                   height: `${hPct}%`,

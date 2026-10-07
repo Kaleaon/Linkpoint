@@ -181,6 +181,13 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
     var waterPlanarReflectionsEnabled: Boolean = false
         private set
+    /** Downscaling factor for water FBOs (0.25f = quarter-resolution, 0.5f = half-resolution). */
+    var waterFboScaleFactor: Float = 0.5f
+        private set
+    /** Frame update interval for temporal throttling of offscreen reflection passes. */
+    var reflectionUpdateInterval: Int = 2
+        private set
+
     /** Planar reflection FBO. Equivalent to LLPipeline::mWaterRef. */
     var mWaterRef: Int = 0; private set
     var waterReflectionTexture: Int = 0; private set
@@ -524,6 +531,33 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
     }
 
     /**
+     * Configure downscaling factor for offscreen water reflection/refraction framebuffers.
+     * Supports quarter-resolution scaling (0.25f) or custom scale factors [0.1f..1.0f].
+     */
+    fun setWaterFboScaleFactor(scale: Float, viewportWidth: Int = 0, viewportHeight: Int = 0) {
+        waterFboScaleFactor = scale.coerceIn(0.1f, 1.0f)
+        if (waterPlanarReflectionsEnabled && viewportWidth > 0 && viewportHeight > 0) {
+            createWaterFramebuffers(viewportWidth, viewportHeight)
+        }
+    }
+
+    /**
+     * Set frame update interval for temporal throttling of offscreen reflection passes.
+     * E.g. interval = 2 updates reflection targets every second frame (30 FPS at 60 FPS primary).
+     */
+    fun setReflectionUpdateInterval(interval: Int) {
+        reflectionUpdateInterval = interval.coerceAtLeast(1)
+    }
+
+    /**
+     * Check if offscreen reflection passes should be updated on the current frame.
+     */
+    fun shouldUpdateReflection(): Boolean {
+        if (!waterPlanarReflectionsEnabled) return false
+        return (frameNumber % reflectionUpdateInterval) == 0L
+    }
+
+    /**
      * Recreate the water FBOs to match a new viewport. Cheap no-op
      * when reflections are disabled. Call from [onSurfaceChanged] in
      * the renderer alongside the FXAA FBO recreation.
@@ -535,8 +569,8 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
     private fun createWaterFramebuffers(viewportWidth: Int, viewportHeight: Int) {
         destroyWaterFramebuffers()
-        val w = (viewportWidth / WATER_FBO_DIVISOR).coerceAtLeast(64)
-        val h = (viewportHeight / WATER_FBO_DIVISOR).coerceAtLeast(64)
+        val w = (viewportWidth * waterFboScaleFactor).toInt().coerceAtLeast(64)
+        val h = (viewportHeight * waterFboScaleFactor).toInt().coerceAtLeast(64)
         waterFboWidth = w
         waterFboHeight = h
 

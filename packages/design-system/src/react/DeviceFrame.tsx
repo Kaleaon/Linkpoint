@@ -13,9 +13,12 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({ children }) => {
   const theme = useTheme();
   const V = theme.v;
   const nav = theme.nav;
+  const breakpoint = theme.breakpoint || "desktop";
 
   const isConsole = nav === "sweep";
   const isRail = nav === "rail";
+
+  const frameWidth = breakpoint === "mobile" ? "375px" : breakpoint === "tablet" ? "768px" : "100%";
 
   const frameStyle: React.CSSProperties = {
     position: "relative",
@@ -25,8 +28,12 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({ children }) => {
     fontFamily: theme.font,
     display: "flex",
     flexDirection: isRail ? "row" : "column",
-    width: "100%",
-    height: "100%"
+    width: frameWidth,
+    maxWidth: "100%",
+    height: "100%",
+    margin: breakpoint === "desktop" ? "0" : "0 auto",
+    boxShadow: breakpoint === "desktop" ? "none" : "0 8px 30px rgba(0,0,0,0.35)",
+    transition: "width 0.25s ease-in-out, margin 0.25s ease-in-out"
   };
 
   if (isConsole) {

@@ -10,12 +10,12 @@ pub use chunk::{ChunkGrid, ChunkId, SpatialChunk};
 pub use octree::{Octree, SpatialEntity};
 pub use worker::SpatialWorkerPool;
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 use std::time::Instant;
 
 /// Central coordinator for region spatial simulation, SIMD bounding box queries, and multi-threaded octrees.
 pub struct SpatialManager {
-    pub grid: Arc<Mutex<ChunkGrid>>,
+    pub grid: Arc<RwLock<ChunkGrid>>,
     pub pool: SpatialWorkerPool,
 }
 
@@ -26,7 +26,7 @@ impl SpatialManager {
         chunk_size: [f32; 3],
         worker_threads: usize,
     ) -> Self {
-        let grid = Arc::new(Mutex::new(ChunkGrid::new(
+        let grid = Arc::new(RwLock::new(ChunkGrid::new(
             region_min, region_max, chunk_size,
         )));
         let pool = SpatialWorkerPool::new(worker_threads, Arc::clone(&grid));
@@ -35,7 +35,7 @@ impl SpatialManager {
     }
 
     pub fn insert(&self, entity: SpatialEntity) -> bool {
-        if let Ok(mut grid) = self.grid.lock() {
+        if let Ok(mut grid) = self.grid.write() {
             grid.insert_entity(entity)
         } else {
             false
@@ -43,7 +43,7 @@ impl SpatialManager {
     }
 
     pub fn query_aabb_simd(&self, search_bounds: &AABB) -> Vec<SpatialEntity> {
-        if let Ok(grid) = self.grid.lock() {
+        if let Ok(grid) = self.grid.read() {
             grid.query_aabb(search_bounds)
         } else {
             Vec::new()
@@ -60,7 +60,7 @@ impl SpatialManager {
         entity.position = new_position;
         entity.bounds = new_bounds;
 
-        if let Ok(grid) = self.grid.lock() {
+        if let Ok(grid) = self.grid.read() {
             grid.handoff_boundary_entities(entity, from_chunk)
         } else {
             Err("Failed to acquire chunk grid lock".to_string())
@@ -69,7 +69,7 @@ impl SpatialManager {
 
     pub fn rebalance_async(&self) -> f32 {
         let start = Instant::now();
-        if let Ok(grid) = self.grid.lock() {
+        if let Ok(grid) = self.grid.read() {
             self.pool.parallel_rebalance(&grid);
         }
         start.elapsed().as_secs_f32() * 1000.0
@@ -79,7 +79,7 @@ impl SpatialManager {
         if estimated_region_allocation_bytes == 0 {
             return 0.0;
         }
-        if let Ok(grid) = self.grid.lock() {
+        if let Ok(grid) = self.grid.read() {
             let usage = grid.total_memory_usage_bytes();
             (usage as f64 / estimated_region_allocation_bytes as f64) * 100.0
         } else {

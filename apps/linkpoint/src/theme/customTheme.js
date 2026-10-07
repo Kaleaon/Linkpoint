@@ -16,16 +16,32 @@ export function sanitizeTheme(input) {
     if (typeof input.colors?.[key] === "string" && HEX.test(input.colors[key])) colors[key] = input.colors[key];
   }
   if (Object.keys(colors).length !== EDITABLE_THEME_TOKENS.length) return null;
+
+  const layoutMode = ["grid", "list", "rail", "split"].includes(input.layoutMode) ? input.layoutMode : "grid";
+  const density = ["compact", "standard", "comfortable"].includes(input.density) ? input.density : "standard";
+  const breakpoint = ["mobile", "tablet", "desktop"].includes(input.breakpoint) ? input.breakpoint : "desktop";
+
   return {
     version: 1,
     active: true,
     name: String(input.name || "My Linkpoint theme").trim().slice(0, 48) || "My Linkpoint theme",
     colors,
+    layoutMode,
+    density,
+    breakpoint,
   };
 }
 
 export function themeFromPalette(palette, name = "My Linkpoint theme") {
-  return { version: 1, active: false, name, colors: Object.fromEntries(EDITABLE_THEME_TOKENS.map(([key]) => [key, palette.c[key]])) };
+  return {
+    version: 1,
+    active: false,
+    name,
+    colors: Object.fromEntries(EDITABLE_THEME_TOKENS.map(([key]) => [key, palette.c[key]])),
+    layoutMode: "grid",
+    density: "standard",
+    breakpoint: "desktop",
+  };
 }
 
 export function readSavedTheme() {

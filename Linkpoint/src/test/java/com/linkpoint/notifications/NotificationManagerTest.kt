@@ -138,6 +138,20 @@ class NotificationManagerTest {
     }
 
     @Test
+    fun testDeclineLureWhenTeleportManagerIsNullDoesNotThrow() {
+        notificationManager.teleportManager = null
+        val lure = TeleportLure(
+            lureId = UUID.randomUUID(),
+            senderId = UUID.randomUUID(),
+            senderName = "Test Sender",
+            regionName = "Test Region",
+            message = "Come visit!"
+        )
+        notificationManager.declineLure(lure)
+        assertNull(notificationManager.activeLure.value)
+    }
+
+    @Test
     fun testClearAllAndShutdownResetsActiveLure() {
         val body = LLSDMap().apply {
             this["from_id"] = LLSDUUID(UUID.randomUUID())
@@ -156,5 +170,59 @@ class NotificationManagerTest {
 
         notificationManager.shutdown()
         assertNull(notificationManager.activeLure.value)
+    }
+
+    @Test
+    fun testDeclineLureWithRealTeleportManagerTransmitsUdpPacket() {
+        val mockUdpConnection = mock<com.linkpoint.protocol.messages.UDPConnectionFixed> {
+            on { getSessionId() } doReturn UUID.randomUUID()
+        }
+        val realTeleportManager = TeleportManager(mockUdpConnection, capabilityManager, UUID.randomUUID())
+        notificationManager.teleportManager = realTeleportManager
+
+        val lure = TeleportLure(
+            lureId = UUID.randomUUID(),
+            senderId = UUID.randomUUID(),
+            senderName = "Test Sender",
+            regionName = "Test Region",
+            message = "Come visit!"
+        )
+
+        notificationManager.declineLure(lure)
+
+        verify(mockUdpConnection).sendPacket(
+            org.mockito.kotlin.eq(com.linkpoint.protocol.messages.ids.MessageIdRegistry.IMPROVED_INSTANT_MESSAGE),
+            org.mockito.kotlin.any(),
+            org.mockito.kotlin.eq(true),
+            org.mockito.kotlin.eq(false),
+            org.mockito.kotlin.anyOrNull()
+        )
+    }
+
+    @Test
+    fun testAcceptLureWithRealTeleportManagerTransmitsUdpPacket() = runTest {
+        val mockUdpConnection = mock<com.linkpoint.protocol.messages.UDPConnectionFixed> {
+            on { getSessionId() } doReturn UUID.randomUUID()
+        }
+        val realTeleportManager = TeleportManager(mockUdpConnection, capabilityManager, UUID.randomUUID())
+        notificationManager.teleportManager = realTeleportManager
+
+        val lure = TeleportLure(
+            lureId = UUID.randomUUID(),
+            senderId = UUID.randomUUID(),
+            senderName = "Test Sender",
+            regionName = "Test Region",
+            message = "Come visit!"
+        )
+
+        notificationManager.acceptLure(lure)
+
+        verify(mockUdpConnection).sendPacket(
+            org.mockito.kotlin.eq(com.linkpoint.protocol.messages.ids.MessageIdRegistry.TELEPORT_LURE_REQUEST),
+            org.mockito.kotlin.any(),
+            org.mockito.kotlin.eq(true),
+            org.mockito.kotlin.eq(false),
+            org.mockito.kotlin.anyOrNull()
+        )
     }
 }

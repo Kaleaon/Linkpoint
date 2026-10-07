@@ -198,6 +198,12 @@ export function useAppState() {
 
   const setThemeColor = useCallback((key, value) => setCustomTheme((theme) => ({ ...theme, active: true, colors: { ...theme.colors, [key]: value } })), []);
   const renameTheme = useCallback((name) => setCustomTheme((theme) => ({ ...theme, active: true, name })), []);
+  const setLayoutMode = useCallback((layoutMode) => setCustomTheme((theme) => ({ ...theme, active: true, layoutMode })), []);
+  const setDensity = useCallback((density) => {
+    setCustomTheme((theme) => ({ ...theme, active: true, density }));
+    setDense(density === "compact");
+  }, []);
+  const setBreakpoint = useCallback((breakpoint) => setCustomTheme((theme) => ({ ...theme, active: true, breakpoint })), []);
   const selectPalette = useCallback((key) => { setPalette(key); setCustomTheme(themeFromPalette(PALETTES[key])); }, []);
   const saveTheme = useCallback(() => { localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(customTheme)); notify("Theme saved to this device."); }, [customTheme, notify]);
   const resetTheme = useCallback(() => { setCustomTheme(themeFromPalette(PALETTES[palette])); localStorage.removeItem(THEME_STORAGE_KEY); notify("Theme reset to the selected colour pack."); }, [palette, notify]);
@@ -408,6 +414,36 @@ export function useAppState() {
     [flR, flFocus]
   );
 
+  const flMoveStep = useCallback(
+    (id, dx = 0, dy = 0) => {
+      const r = flR(id);
+      const n = {
+        x: Math.max(0, r.x + dx),
+        y: Math.max(0, r.y + dy),
+        w: r.w,
+        h: r.h,
+      };
+      setFlRect((st) => ({ ...st, [id]: n }));
+      flFocus(id);
+    },
+    [flR, flFocus]
+  );
+
+  const flResizeStep = useCallback(
+    (id, dw = 0, dh = 0) => {
+      const r = flR(id);
+      const n = {
+        x: r.x,
+        y: r.y,
+        w: Math.max(216, r.w + dw),
+        h: Math.max(96, r.h + dh),
+      };
+      setFlRect((st) => ({ ...st, [id]: n }));
+      flFocus(id);
+    },
+    [flR, flFocus]
+  );
+
   const flToggle = useCallback(
     (id) => {
       setFlOpen((open) => {
@@ -580,12 +616,12 @@ export function useAppState() {
       prefs, cacheCleared, camPreset, useWindowManager, workspacePreset, tileDensity,
     },
     actions: {
-      setLayout, setPalette: selectPalette, setThemeColor, renameTheme, saveTheme, resetTheme, importTheme, downloadTheme, shareTheme, setDevice, setViewMode, toggleViewMode, setScreen: screenPick, setDialog, setDense,
+      setLayout, setPalette: selectPalette, setThemeColor, renameTheme, setLayoutMode, setDensity, setBreakpoint, saveTheme, resetTheme, importTheme, downloadTheme, shareTheme, setDevice, setViewMode, toggleViewMode, setScreen: screenPick, setDialog, setDense,
       setUseWindowManager, setWorkspacePreset, setTileDensity,
       allGrids, openAddGrid, cancelAddGrid, saveCustomGrid, setAddGridName, setAddGridHost,
       setTab, setChip, setTileOk, toggleInvFolder, dismiss, toggleSetting, pin,
       cycleLayout, cyclePalette, setCond, setMenu,
-      flR, flDrag, flFocus, flToggle, flClose,
+      flR, flDrag, flMoveStep, flResizeStep, flFocus, flToggle, flClose,
       hudDrag, toggleHud, setHudPicker, setTarget, setTargetPicker, setNavPeek,
       cf, cTap, cHold, cPress,
       holdStart, holdEnd, endEdit, togglePad, toggleRun, flyUpDown, flyDnDown, flyRelease, addSlot, removeDockSlot,

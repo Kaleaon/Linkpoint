@@ -11,6 +11,8 @@ import com.ktheme.models.ThemeMetadata
 fun Theme.toThemePack(isBuiltIn: Boolean = true): ThemePack {
     val densityProfile = metadata.tags.firstNotNullOfOrNull { tag ->
         tag.removePrefix("density:").takeIf { it != tag }?.let { runCatching { DensityProfile.valueOf(it.uppercase()) }.getOrNull() }
+    } ?: adaptation?.layout?.density?.let { densityStr ->
+        runCatching { DensityProfile.valueOf(densityStr.uppercase()) }.getOrNull()
     }
     val cornerProfile = metadata.tags.firstNotNullOfOrNull { tag ->
         tag.removePrefix("corner:").takeIf { it != tag }?.let { runCatching { CornerProfile.valueOf(it.uppercase()) }.getOrNull() }
@@ -114,6 +116,11 @@ fun ThemePack.toKthemeTheme(): Theme {
             inverseOnSurface = colorSurface,
             inversePrimary = colorPrimary
         ),
-        layoutStructure = layoutStructure
+        layoutStructure = layoutStructure,
+        adaptation = com.ktheme.models.Adaptation(
+            layout = com.ktheme.models.LayoutAdaptation(
+                density = (densityProfile ?: DensityProfile.STANDARD).name.lowercase()
+            )
+        )
     )
 }

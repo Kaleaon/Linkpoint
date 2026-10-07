@@ -1,13 +1,14 @@
 import os
-from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 class DartEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("Dart", ".dart")
 
-    def emit(self, ast: ProtocolAST, out_dir: str) -> Dict[str, str]:
+    def emit(self, ast: ProtocolAST, out_dir: str) -> dict[str, str]:
         os.makedirs(out_dir, exist_ok=True)
 
         code = self._generate_dart_code(ast)
@@ -66,7 +67,9 @@ class DartEmitter(BaseEmitter):
             out.append(f'  final String name = "{msg.name}";')
             out.append(f"  final int messageNumber = {msg.message_number};")
             out.append(f'  final String frequency = "{msg.frequency}";')
-            out.append(f'  final bool isZerocoded = {"true" if msg.encoding == "Zerocoded" else "false"};\n')
+            out.append(
+                f"  final bool isZerocoded = {'true' if msg.encoding == 'Zerocoded' else 'false'};\n"
+            )
             out.append("  Uint8List serialize() {")
             out.append("    final buffer = ByteData(8);")
             out.append(f"    buffer.setUint32(0, {msg.message_number}, Endian.little);")

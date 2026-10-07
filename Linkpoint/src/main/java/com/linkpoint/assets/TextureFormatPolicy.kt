@@ -17,7 +17,15 @@ object TextureFormatPolicy {
         /** Color textures sampled in perceptual space. */
         ALBEDO,
         /** Non-color textures (normal/metal/roughness/etc) sampled in linear space. */
-        DATA
+        DATA,
+        /** Normal map channel. */
+        NORMAL,
+        /** Metallic/roughness map channel. */
+        METALLIC_ROUGHNESS,
+        /** Emissive map channel. */
+        EMISSIVE,
+        /** Occlusion map channel. */
+        OCCLUSION
     }
 
     enum class TargetFormat {
