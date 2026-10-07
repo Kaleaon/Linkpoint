@@ -11,6 +11,7 @@ import tempfile
 import threading
 import time
 import unittest
+
 from inventory_cache import InventoryCache
 
 

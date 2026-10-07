@@ -175,8 +175,11 @@ def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
             buf_ptr = _PYBYTES_AS_STRING(py_bytes)
             try:
                 import cffi  # type: ignore
+
                 ffi = cffi.FFI()
-                dst_cffi = ffi.cast("char*", int(ctypes.cast(buf_ptr, ctypes.c_void_p).value))
+                dst_cffi = ffi.cast(
+                    "char*", int(ctypes.cast(buf_ptr, ctypes.c_void_p).value)
+                )
                 tile_cffi = ffi.from_buffer("char[]", tile)
                 for offset in range(0, buffer_size, tile_len):
                     chunk_len = min(tile_len, buffer_size - offset)
@@ -186,7 +189,9 @@ def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
                 tile_ctypes = (ctypes.c_char * tile_len).from_buffer_copy(tile)
                 for offset in range(0, buffer_size, tile_len):
                     chunk_len = min(tile_len, buffer_size - offset)
-                    ctypes.memmove(ctypes.byref(buf_ptr.contents, offset), tile_ctypes, chunk_len)
+                    ctypes.memmove(
+                        ctypes.byref(buf_ptr.contents, offset), tile_ctypes, chunk_len
+                    )
                 return py_bytes
         except Exception as e:
             logger.debug(f"pythonapi direct byte population failed: {e}")
@@ -195,6 +200,7 @@ def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
     decoded_bytes = _get_preallocated_buffer(buffer_size)
     try:
         import cffi  # type: ignore
+
         ffi = cffi.FFI()
         dst_ptr = ffi.from_buffer(decoded_bytes)
         tile_ptr = ffi.from_buffer(tile)
@@ -304,13 +310,17 @@ def parse_jp2_dimensions(raw_bytes: bytes) -> tuple:
 
         if idx >= 4:
             possible_box_len = struct.unpack(">I", raw_bytes[idx - 4 : idx])[0]
-            if 8 <= possible_box_len <= 1048576 and (idx - 4 + possible_box_len > len(raw_bytes)):
+            if 8 <= possible_box_len <= 1048576 and (
+                idx - 4 + possible_box_len > len(raw_bytes)
+            ):
                 raise ValueError("Truncated JP2 box boundary in payload stream")
 
         try:
             height, width = struct.unpack(">II", raw_bytes[idx + 4 : idx + 12])
             if not (is_power_of_two(width) and is_power_of_two(height)):
-                raise ValueError(f"Non-power-of-two texture dimensions: {width}x{height}")
+                raise ValueError(
+                    f"Non-power-of-two texture dimensions: {width}x{height}"
+                )
             return (width, height)
         except struct.error as e:
             raise ValueError(f"Malformed ihdr box structure: {e}")
@@ -318,7 +328,9 @@ def parse_jp2_dimensions(raw_bytes: bytes) -> tuple:
     if raw_bytes.startswith(b"\xff\x4f"):
         idx = raw_bytes.find(b"\xff\x51")
         if idx == -1 or len(raw_bytes) < idx + 14:
-            raise ValueError("Incomplete or truncated SIZ marker segment in J2K codestream")
+            raise ValueError(
+                "Incomplete or truncated SIZ marker segment in J2K codestream"
+            )
         try:
             xsiz, ysiz = struct.unpack(">II", raw_bytes[idx + 6 : idx + 14])
             xosiz, yosiz = 0, 0
@@ -327,7 +339,9 @@ def parse_jp2_dimensions(raw_bytes: bytes) -> tuple:
             width = max(0, xsiz - xosiz)
             height = max(0, ysiz - yosiz)
             if not (is_power_of_two(width) and is_power_of_two(height)):
-                raise ValueError(f"Non-power-of-two texture dimensions: {width}x{height}")
+                raise ValueError(
+                    f"Non-power-of-two texture dimensions: {width}x{height}"
+                )
             return (width, height)
         except struct.error as e:
             raise ValueError(f"Malformed SIZ marker segment structure: {e}")

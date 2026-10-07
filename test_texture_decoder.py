@@ -263,6 +263,8 @@ class TestTextureDecoder(unittest.TestCase):
         )
         raw_bytes = jp2_header + b"\x00" * 256
 
+        _get_native_lib()
+
         t0 = time.time()
         decoded = decode_jpeg2000_buffer("tex_large_8k", raw_bytes)
         elapsed = time.time() - t0
@@ -315,12 +317,17 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertEqual(dec_sig.status, "fallback")
 
         # Truncated ihdr box
-        trunc_ihdr = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00"
+        trunc_ihdr = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00"
+        )
         dec_ihdr = decode_jpeg2000_buffer("tex_trunc_ihdr", trunc_ihdr)
         self.assertEqual(dec_ihdr.status, "fallback")
 
         # Truncated box boundary length
-        trunc_box = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x00\x00\x27\x10" + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        trunc_box = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x00\x00\x27\x10"
+            + b"ihdr\x00\x00\x00\x40\x00\x00\x00\x40"
+        )
         dec_box = decode_jpeg2000_buffer("tex_trunc_box", trunc_box)
         self.assertEqual(dec_box.status, "fallback")
 
@@ -331,12 +338,20 @@ class TestTextureDecoder(unittest.TestCase):
 
     def test_non_power_of_two_mipmap_dimensions(self):
         # 100x100 Non-power-of-two JP2 header
-        npot_jp2 = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x64\x00\x00\x00\x64" + b"\x00" * 32
+        npot_jp2 = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x00\x64\x00\x00\x00\x64"
+            + b"\x00" * 32
+        )
         dec_npot = decode_jpeg2000_buffer("tex_npot", npot_jp2)
         self.assertEqual(dec_npot.status, "fallback")
 
         # 128x128 Power-of-two JP2 header
-        pot_jp2 = b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a" + b"ihdr\x00\x00\x00\x80\x00\x00\x00\x80" + b"\x00" * 32
+        pot_jp2 = (
+            b"\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+            + b"ihdr\x00\x00\x00\x80\x00\x00\x00\x80"
+            + b"\x00" * 32
+        )
         dec_pot = decode_jpeg2000_buffer("tex_pot", pot_jp2)
         self.assertEqual(dec_pot.status, "success")
         self.assertEqual(dec_pot.width, 128)
@@ -348,7 +363,9 @@ class TestTextureDecoder(unittest.TestCase):
         self.assertEqual(dec_empty.status, "fallback")
 
         # Random garbage bytes
-        dec_garbage = decode_jpeg2000_buffer("tex_garbage", b"\x12\x34\x56\x78\x9a\xbc\xde\xf0" * 10)
+        dec_garbage = decode_jpeg2000_buffer(
+            "tex_garbage", b"\x12\x34\x56\x78\x9a\xbc\xde\xf0" * 10
+        )
         self.assertEqual(dec_garbage.status, "fallback")
 
     def test_native_decoder_memory_guardrails(self):
@@ -367,7 +384,11 @@ class TestTextureDecoder(unittest.TestCase):
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
         self.assertEqual(dec.status, "fallback")
-        self.assertLess(elapsed_ms, 5.0, f"Fallback processing took {elapsed_ms:.3f}ms, expected < 5.0ms")
+        self.assertLess(
+            elapsed_ms,
+            5.0,
+            f"Fallback processing took {elapsed_ms:.3f}ms, expected < 5.0ms",
+        )
 
 
 if __name__ == "__main__":
