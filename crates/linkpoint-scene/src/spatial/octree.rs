@@ -172,7 +172,8 @@ impl OctreeNode {
         let hy = (self.bounds.max[1] - self.bounds.min[1]) * 0.5;
         let node_radius = (hx * hx + hy * hy).sqrt();
 
-        let node_dist = topography.surface_geodesic_distance(center, [node_center[0], node_center[1]]);
+        let node_dist =
+            topography.surface_geodesic_distance(center, [node_center[0], node_center[1]]);
         if node_dist > max_distance + node_radius {
             return;
         }
@@ -236,7 +237,11 @@ impl OctreeNode {
 
     pub fn max_depth(&self) -> usize {
         if let Some(ref children) = self.children {
-            children.iter().map(|c| c.max_depth()).max().unwrap_or(self.depth)
+            children
+                .iter()
+                .map(|c| c.max_depth())
+                .max()
+                .unwrap_or(self.depth)
         } else {
             self.depth
         }
@@ -355,7 +360,8 @@ impl Octree {
 
     pub fn query_geodesic(&self, center: [f32; 2], max_distance: f32) -> Vec<&SpatialEntity> {
         let mut results = Vec::new();
-        self.root.query_geodesic(center, max_distance, self.topography, &mut results);
+        self.root
+            .query_geodesic(center, max_distance, self.topography, &mut results);
         results
     }
 

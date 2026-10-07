@@ -1,6 +1,6 @@
 use linkpoint_scene::spatial::{
-    TopographyNetworkSerializer, TopographyType, AABB, ChunkGrid, ChunkId, Octree, SpatialEntity,
-    SpatialManager,
+    AABB, ChunkGrid, ChunkId, Octree, SpatialEntity, SpatialManager, TopographyNetworkSerializer,
+    TopographyType,
 };
 use std::time::Instant;
 
@@ -396,7 +396,8 @@ fn test_topography_projections_and_network_serializer() {
     let local_pos = [100.0, 50.0, 10.0];
 
     let cartesian = TopographyNetworkSerializer::to_cartesian_protocol_packet(local_pos, topo_ring);
-    let restored = TopographyNetworkSerializer::from_cartesian_protocol_packet(cartesian, topo_ring);
+    let restored =
+        TopographyNetworkSerializer::from_cartesian_protocol_packet(cartesian, topo_ring);
 
     assert!((local_pos[0] - restored[0]).abs() < 1e-3);
     assert!((local_pos[1] - restored[1]).abs() < 1e-3);
@@ -482,7 +483,8 @@ fn test_non_planar_octree_tight_depth_and_range_queries() {
     let geodesic_results = octree.query_geodesic(center, 10.0);
     assert!(!geodesic_results.is_empty());
     for entity in &geodesic_results {
-        let dist = topo_ring.surface_geodesic_distance(center, [entity.position[0], entity.position[1]]);
+        let dist =
+            topo_ring.surface_geodesic_distance(center, [entity.position[0], entity.position[1]]);
         assert!(dist <= 10.0 + 1.0);
     }
 
@@ -491,4 +493,3 @@ fn test_non_planar_octree_tight_depth_and_range_queries() {
     let culled_results = octree.query_horizon_culled([15.0, 15.0, 10.0], &query_bounds);
     assert!(!culled_results.is_empty());
 }
-

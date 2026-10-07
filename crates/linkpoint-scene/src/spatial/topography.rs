@@ -1,14 +1,19 @@
 //! Local manifold topography projections, surface geodesic metrics, and network protocol serialization.
 
-use std::f32::consts::PI;
 use serde::{Deserialize, Serialize};
+use std::f32::consts::PI;
 
 #[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
 pub enum TopographyType {
     #[default]
     Planar,
-    Ringworld { radius: f32, width: f32 },
-    Spherical { radius: f32 },
+    Ringworld {
+        radius: f32,
+        width: f32,
+    },
+    Spherical {
+        radius: f32,
+    },
 }
 
 impl TopographyType {
@@ -94,7 +99,7 @@ impl TopographyType {
 
                 let cos_sigma = (phi1.sin() * phi2.sin()
                     + phi1.cos() * phi2.cos() * (lambda2 - lambda1).cos())
-                    .clamp(-1.0, 1.0);
+                .clamp(-1.0, 1.0);
                 let delta_sigma = cos_sigma.acos();
                 delta_sigma * radius
             }
@@ -120,7 +125,11 @@ impl TopographyType {
                     [target_local[0], target_local[1]],
                 );
                 let delta_sigma = dist_geo / radius;
-                let angular_radius = if radius > 0.0 { target_radius / radius } else { 0.0 };
+                let angular_radius = if radius > 0.0 {
+                    target_radius / radius
+                } else {
+                    0.0
+                };
 
                 delta_sigma > (sigma_horizon + angular_radius)
             }
