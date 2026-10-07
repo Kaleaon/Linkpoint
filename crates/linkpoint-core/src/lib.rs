@@ -1,5 +1,7 @@
 //! Platform-independent Linkpoint session boundary.
 
+pub mod generated_tokens;
+
 use serde::{Deserialize, Serialize};
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
@@ -739,6 +741,19 @@ mod tests {
         assert_eq!(
             err_trans.public_message(),
             "The viewer could not reach the grid."
+        );
+    }
+
+    #[test]
+    fn test_generated_tokens_parity() {
+        use super::generated_tokens::*;
+        assert_eq!(
+            GENERATED_TOKENS.color.status.online,
+            RgbaColor::new(0.298039, 0.686275, 0.313725, 1.0)
+        );
+        assert_eq!(
+            GENERATED_TOKENS.color.scene.background,
+            RgbaColor::new(0.0, 0.0, 0.0, 1.0)
         );
     }
 }

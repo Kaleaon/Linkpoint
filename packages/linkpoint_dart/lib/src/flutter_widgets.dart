@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'generated_tokens.dart';
 import 'session.dart';
 
 /// Flutter Widget rendering Second Life Grid Status Banner.
@@ -16,7 +17,7 @@ class GridStatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: isConnected ? Colors.green.shade800 : Colors.grey.shade900,
+      color: isConnected ? GeneratedTokens.color.status.online : GeneratedTokens.color.status.offline,
       child: Row(
         children: [
           Icon(

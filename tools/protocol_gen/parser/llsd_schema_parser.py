@@ -64,14 +64,15 @@ class LLSDSchemaParser:
             return ast
 
         json_files = []
-        for root, _, files in os.walk(dir_path):
+        for root, dirs, files in os.walk(dir_path):
             for file_name in files:
                 if file_name.endswith(".json"):
-                    full_path = os.path.join(root, file_name).replace("\\", "/")
-                    json_files.append(full_path)
+                    full_path = os.path.join(root, file_name)
+                    rel_path = os.path.relpath(full_path, dir_path).replace("\\", "/")
+                    json_files.append((rel_path, full_path.replace("\\", "/")))
 
-        json_files.sort()
-        for full_path in json_files:
+        json_files.sort(key=lambda x: x[0])
+        for _, full_path in json_files:
             self.parse_file(full_path, ast)
 
         ast.llsd_schemas.sort(key=lambda s: (s.title, s.id))
