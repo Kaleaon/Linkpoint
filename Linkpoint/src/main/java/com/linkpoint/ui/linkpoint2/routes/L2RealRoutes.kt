@@ -925,16 +925,31 @@ fun L2MapRoute(
     val region = app?.sessionManager?.currentRegion?.collectAsState()?.value
     val pos = app?.avatarManager?.takeIf { app.isAvatarManagerInitialized() }
         ?.getMyAvatar()?.position
+    val landmarks = if (app != null && app.isLandmarkManagerInitialized()) {
+        app.landmarkManager.favorites.collectAsState().value
+    } else {
+        emptyList()
+    }
     MapScreen(
         currentRegion = region?.name ?: "Unknown region",
         currentPosition = if (pos != null) Offset(pos.x, pos.y) else Offset(128f, 128f),
+        currentRegionGridX = region?.x ?: 1000,
+        currentRegionGridY = region?.y ?: 1000,
+        landmarks = landmarks,
         uiLoadState = if (region == null) UiLoadState.Empty(
             title = "Not in a region",
             message = "The world map populates after login.",
         ) else UiLoadState.Content,
         onRetry = {},
         onNavigateBack = onNavigateBack,
-        onTeleportTo = { /* requires region picker — not yet wired */ },
+        onTeleportTo = {},
+        onTeleportToLocation = { regionName, x, y, z ->
+            if (app != null && app.isTeleportManagerInitialized()) {
+                scope.launch {
+                    app.teleportManager.teleportToLocation(regionName, x, y, z)
+                }
+            }
+        },
         onTeleportHome = {
             if (app != null && app.isTeleportManagerInitialized()) {
                 scope.launch { app.teleportManager.teleportHome() }
