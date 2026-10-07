@@ -46,4 +46,26 @@ elif [ -f "target/x86_64-unknown-linux-gnu/release/liblinkpoint_protocol.so" ]; 
     cp "target/x86_64-unknown-linux-gnu/release/liblinkpoint_protocol.so" "${OUTPUT_DIR}/liblinkpoint_protocol.so"
 fi
 
+echo "=== Compiling Texture Decoder Native Library ==="
+C_SRC="${ROOT_DIR}/texture_decoder_native.c"
+if [ -f "${C_SRC}" ]; then
+    CC_CMD=""
+    if command -v gcc >/dev/null 2>&1; then
+        CC_CMD="gcc"
+    elif command -v clang >/dev/null 2>&1; then
+        CC_CMD="clang"
+    elif command -v cc >/dev/null 2>&1; then
+        CC_CMD="cc"
+    fi
+
+    if [ -n "${CC_CMD}" ]; then
+        echo "Compiling ${C_SRC} with ${CC_CMD}..."
+        ${CC_CMD} -O3 -fopenmp -fPIC -shared "${C_SRC}" -o "${OUTPUT_DIR}/libtexture_decoder_native.so" 2>/dev/null || \
+        ${CC_CMD} -O3 -fPIC -shared "${C_SRC}" -o "${OUTPUT_DIR}/libtexture_decoder_native.so"
+        cp "${OUTPUT_DIR}/libtexture_decoder_native.so" "${ROOT_DIR}/libtexture_decoder_native.so" 2>/dev/null || true
+    else
+        echo "Warning: No C compiler found to compile texture_decoder_native.c"
+    fi
+fi
+
 echo "Native libraries packaged in ${OUTPUT_DIR}"
