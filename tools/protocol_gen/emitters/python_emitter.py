@@ -1,13 +1,14 @@
 import os
-from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 class PythonEmitter(BaseEmitter):
     def __init__(self):
         super().__init__("Python", ".py")
 
-    def emit(self, ast: ProtocolAST, out_dir: str) -> Dict[str, str]:
+    def emit(self, ast: ProtocolAST, out_dir: str) -> dict[str, str]:
         os.makedirs(out_dir, exist_ok=True)
 
         code = self._generate_python_code(ast)
@@ -63,7 +64,9 @@ class PythonEmitter(BaseEmitter):
             out.append(f'    message_name: str = "{msg.name}"')
             out.append(f"    message_number: int = {msg.message_number}")
             out.append(f'    frequency: str = "{msg.frequency}"')
-            out.append(f'    is_zerocoded: bool = {"True" if msg.encoding == "Zerocoded" else "False"}\n')
+            out.append(
+                f"    is_zerocoded: bool = {'True' if msg.encoding == 'Zerocoded' else 'False'}\n"
+            )
             out.append("    def serialize(self) -> bytes:")
             out.append(f"        return struct.pack('<I', {msg.message_number})\n")
 

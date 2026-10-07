@@ -1,14 +1,19 @@
 import json
 import os
-from typing import List, Optional
-from tools.protocol_gen.proto_ast.models import LLSDSchemaSpec, PropertySpec, ProtocolAST
+
+from tools.protocol_gen.proto_ast.models import (
+    LLSDSchemaSpec,
+    PropertySpec,
+    ProtocolAST,
+)
+
 
 class LLSDSchemaParser:
     """
     Parser for LLSD JSON Schemas into ProtocolAST LLSDSchemaSpecs.
     """
 
-    def parse_file(self, file_path: str, ast: Optional[ProtocolAST] = None) -> ProtocolAST:
+    def parse_file(self, file_path: str, ast: ProtocolAST | None = None) -> ProtocolAST:
         if ast is None:
             ast = ProtocolAST()
 
@@ -41,7 +46,7 @@ class LLSDSchemaParser:
                 description=prop_desc,
                 format=prop_format,
                 items_type=items_type,
-                enum_values=enum_vals
+                enum_values=enum_vals,
             )
 
         spec = LLSDSchemaSpec(
@@ -50,13 +55,15 @@ class LLSDSchemaParser:
             description=description,
             schema_type=schema_type,
             properties=properties_map,
-            required=required_list
+            required=required_list,
         )
 
         ast.llsd_schemas.append(spec)
         return ast
 
-    def parse_directory(self, dir_path: str, ast: Optional[ProtocolAST] = None) -> ProtocolAST:
+    def parse_directory(
+        self, dir_path: str, ast: ProtocolAST | None = None
+    ) -> ProtocolAST:
         if ast is None:
             ast = ProtocolAST()
 

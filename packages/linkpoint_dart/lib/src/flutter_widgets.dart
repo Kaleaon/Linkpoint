@@ -28,7 +28,8 @@ class GridStatusBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             isConnected ? 'Connected: $regionName' : 'Offline',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -55,7 +56,8 @@ class ChatFeedWidget extends StatelessWidget {
               children: [
                 TextSpan(
                   text: '${msg.fromName}: ',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigoAccent),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.indigoAccent),
                 ),
                 TextSpan(
                   text: msg.body,
@@ -91,7 +93,8 @@ class _LinkpointViewerWidgetState extends State<LinkpointViewerWidget> {
         setState(() {
           _messages.add(event.message);
         });
-      } else if (event is SessionConnectedEvent || event is SessionDisconnectedEvent) {
+      } else if (event is SessionConnectedEvent ||
+          event is SessionDisconnectedEvent) {
         setState(() {});
       }
     });

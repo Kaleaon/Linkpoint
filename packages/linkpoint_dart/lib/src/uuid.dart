@@ -48,7 +48,8 @@ class LLUUID {
 
   @override
   String toString() {
-    final hexStr = _bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final hexStr =
+        _bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     return '${hexStr.substring(0, 8)}-${hexStr.substring(8, 12)}-${hexStr.substring(12, 16)}-${hexStr.substring(16, 20)}-${hexStr.substring(20, 32)}';
   }
 

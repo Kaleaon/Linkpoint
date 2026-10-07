@@ -28,9 +28,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 # tasklist lives at repo root (one level above the Linkpoint project root)
-DEFAULT_TASKLIST = (
-    PROJECT_ROOT.parent / "docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md"
-)
+DEFAULT_TASKLIST = PROJECT_ROOT.parent / "docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md"
 
 REQUIRED_FIELDS = (
     "title",
@@ -144,7 +142,7 @@ def lint(tasks: list[dict]) -> list[str]:
         if isinstance(labels, str):
             # support inline form: labels: [A, B, C]
             inner = labels.strip().lstrip("[").rstrip("]")
-            label_iter = [l.strip() for l in inner.split(",") if l.strip()]
+            label_iter = [lbl.strip() for lbl in inner.split(",") if lbl.strip()]
         elif isinstance(labels, list):
             label_iter = labels
         else:
@@ -192,7 +190,9 @@ def main() -> int:
     out.append("")
     out.append("[TASK_IDS]")
     for t in tasks:
-        out.append(f"- {t.get('task_id')} :: {t.get('priority', '?')} :: {t.get('status', '?')}")
+        out.append(
+            f"- {t.get('task_id')} :: {t.get('priority', '?')} :: {t.get('status', '?')}"
+        )
     out.append("")
     out.append("[ERRORS]")
     if errors:
@@ -202,7 +202,10 @@ def main() -> int:
     args.report.write_text("\n".join(out) + "\n")
 
     if errors:
-        print(f"protocol docs audit failed ({len(errors)} errors); see {args.report}", file=sys.stderr)
+        print(
+            f"protocol docs audit failed ({len(errors)} errors); see {args.report}",
+            file=sys.stderr,
+        )
         return 1
     print(f"protocol docs audit OK ({len(tasks)} tasks); report at {args.report}")
     return 0

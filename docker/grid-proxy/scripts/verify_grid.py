@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-import sys
-import time
+import json
 import ssl
+import sys
 import urllib.request
 import xmlrpc.client
-import json
+
 
 def log(msg):
     print(f"[verify-grid] {msg}", flush=True)
+
 
 def test_nginx_health():
     log("Testing NGINX proxy /health endpoint over HTTP and HTTPS...")
@@ -27,6 +28,7 @@ def test_nginx_health():
     assert data_ssl["status"] == "ok", f"HTTPS health status invalid: {data_ssl}"
     log("✅ HTTPS /health passed!")
 
+
 def test_xmlrpc_login():
     log("Testing XML-RPC login endpoint over HTTPS through NGINX proxy...")
     ctx = ssl.create_default_context()
@@ -44,7 +46,7 @@ def test_xmlrpc_login():
         "start": "last",
         "major": "0",
         "minor": "9",
-        "channel": "Linkpoint Mobile"
+        "channel": "Linkpoint Mobile",
     }
 
     response = proxy.login_to_simulator(login_params)
@@ -53,9 +55,12 @@ def test_xmlrpc_login():
     assert "agent_id" in response, "agent_id missing from login response"
     assert "seed_capability" in response, "seed_capability missing from login response"
 
-    agent_id = response['agent_id']
-    log(f"✅ XML-RPC Login successful! Agent ID: {agent_id}, Session ID: {response['session_id']}")
+    agent_id = response["agent_id"]
+    log(
+        f"✅ XML-RPC Login successful! Agent ID: {agent_id}, Session ID: {response['session_id']}"
+    )
     return agent_id
+
 
 def test_microservices(agent_id):
     log("Testing microservice endpoints through proxy...")
@@ -64,7 +69,9 @@ def test_microservices(agent_id):
     ctx.verify_mode = ssl.CERT_NONE
 
     # CAPS
-    req = urllib.request.urlopen("https://localhost/CAPS/seed-cap", context=ctx, timeout=5)
+    req = urllib.request.urlopen(
+        "https://localhost/CAPS/seed-cap", context=ctx, timeout=5
+    )
     body = req.read().decode("utf-8")
     assert "<llsd>" in body, f"CAPS response invalid: {body}"
     log("✅ CAPS microservice routing passed!")
@@ -74,13 +81,16 @@ def test_microservices(agent_id):
     try:
         req_user = urllib.request.urlopen(url, context=ctx, timeout=5)
         user_data = json.loads(req_user.read().decode("utf-8"))
-        assert user_data.get("PrincipalID") == agent_id, f"User account data mismatch: {user_data}"
+        assert (
+            user_data.get("PrincipalID") == agent_id
+        ), f"User account data mismatch: {user_data}"
         log("✅ UserAccount microservice routing & lookup passed!")
     except urllib.error.HTTPError as e:
         if e.code == 404:
             log("✅ UserAccount microservice routing passed (404 Not Found)!")
         else:
             raise
+
 
 def main():
     log("Starting OpenSim Grid Proxy verification tests...")
@@ -92,6 +102,7 @@ def main():
     except Exception as e:
         log(f"❌ Verification test failed: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
