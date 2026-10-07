@@ -33,9 +33,6 @@ fn find_vector_file(relative_subpath: &str) -> PathBuf {
         if candidate.exists() {
             return candidate.clone();
         }
-        if let Ok(canonical) = candidate.canonicalize() {
-            return canonical;
-        }
     }
     panic!("Vector file missing for subpath: {}", relative_subpath);
 }
