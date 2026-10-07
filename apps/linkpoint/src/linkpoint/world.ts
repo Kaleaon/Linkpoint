@@ -11,10 +11,11 @@ import { CameraControls } from './camera-controls';
 import { estimatedSunHour, windlightEnvironment } from './windlight';
 import { AvatarSkeleton, jointPositionOverrides, skinMatrices, type MeshSkin } from './avatar-skeleton';
 import { parseAnimation, type JointPose } from './avatar-animation';
-import { packJointRows } from './skinning';
+import { packJointRows, SL_MAX_RIGGED_JOINTS } from './skinning';
 import { generateVolume, volumeKey, volumeParamsFrom, type VolumeFace } from './sl-volume';
 import { AvatarAnimator, bundledAnimationLoader } from './avatar-animator';
-import { BODY_PARTS, bodyPartRows, bodyPartSkin, bodyPartVertexSkin, loadBodyParts, type BodyPartGeometry } from './avatar-body';
+import { BODY_PARTS, bodyPartRows, bodyPartSkin, bodyPartVertexSkin, createProceduralHumanoidParts, loadBodyParts, type BodyPartGeometry } from './avatar-body';
+import { AvatarParamsManager } from './phase2/avatar-params';
 import { HUD_POINTS, HUD_SIZE, isHudPoint, type HudInfo } from './hud';
 import { ParticleEngine } from './particles';
 import { CoordinateNormalizer } from './coordinate-normalizer';
@@ -297,9 +298,11 @@ export class WorldViewer extends Utils.EventEmitter {
   /** Avatars without any announced animation stand (the viewer's default idle). */
   private static readonly STAND_ANIMATION = '2408fe9e-df1d-1d7d-f4ff-1384fa7b350f';
   private bodyParts: Map<string, BodyPartGeometry> | null = null;
+  private fallbackBodyParts: Map<string, BodyPartGeometry> | null = null;
   private bodyLoad: Promise<void> | null = null;
   private bodyMeshesReadyFor: unknown = null;
   private bodySkins = new Map<string, ReturnType<typeof bodyPartSkin>>();
+  private avatarVisualParams = new Map<string, AvatarParamsManager>();
   /** Official-viewer style last-known-good baked texture per avatar/body layer. */
   private avatarBakes = new Map<string, string>();
   /** Objects whose skin currently holds an animated pose (restored to rest when their animation ends). */
@@ -320,8 +323,10 @@ export class WorldViewer extends Utils.EventEmitter {
         overrides: jointPositionOverrides(this.skeleton, skin),
         pelvisOffset: typeof skin.pelvisOffset === 'number' ? skin.pelvisOffset : 0,
       };
-      const world = this.skeleton.worldMatrices(pose, deformation.overrides, [0, 0, deformation.pelvisOffset]);
-      const maxJoints = (this.scene3d as any)?.graphics?.maxJoints || 110;
+      const world = subject
+        ? this.avatarWorldMatrices(subject, pose)
+        : this.skeleton.worldMatrices(pose, deformation.overrides, [0, 0, deformation.pelvisOffset]);
+      const maxJoints = (this.scene3d as any)?.graphics?.maxJoints || SL_MAX_RIGGED_JOINTS;
       rows = packJointRows(skinMatrices(this.skeleton, { ...skin, pelvisOffset: undefined }, world), maxJoints);
     }
     return rows;
@@ -352,7 +357,11 @@ export class WorldViewer extends Utils.EventEmitter {
   private avatarWorldMatrices(subject: string, pose = this.animator.pose(subject)) {
     this.skeleton ||= new AvatarSkeleton();
     const deformation = this.avatarDeformation(subject);
-    return this.skeleton.worldMatrices(pose, deformation.overrides, [0, 0, deformation.pelvisOffset]);
+    const paramsMgr = this.avatarVisualParams.get(subject);
+    const morphs = paramsMgr
+      ? paramsMgr.computeBoneTransforms(this.skeleton)
+      : { scaleOverrides: new Map(), offsetOverrides: new Map() };
+    return this.skeleton.worldMatrices(pose, deformation.overrides, [0, 0, deformation.pelvisOffset], morphs.scaleOverrides, morphs.offsetOverrides);
   }
 
   /** The avatar a rigged attachment is worn by, or the object itself (an animated object is its own subject). */
@@ -1245,14 +1254,29 @@ export class WorldViewer extends Utils.EventEmitter {
     this.renderedParticles = live;
   }
 
-  /** Load the base avatar meshes once; on failure avatars keep the placeholder shapes. */
+  /** Load the base avatar meshes once; fall back to low-poly procedural body if loading or failed. */
   private loadBody(): Promise<void> {
-    if (this.bodyParts) return Promise.resolve();
+    this.skeleton ||= new AvatarSkeleton();
+    if (!this.fallbackBodyParts) {
+      this.fallbackBodyParts = createProceduralHumanoidParts(this.skeleton);
+    }
+    if (this.bodyParts && this.bodyParts !== this.fallbackBodyParts) return Promise.resolve();
     this.bodyLoad ||= loadBodyParts()
-      .then((parts) => { this.bodyParts = parts; })
+      .then((parts) => {
+        this.bodyParts = parts;
+        if (this.scene3d) {
+          this.installBodyMeshes(this.scene3d);
+          for (const object of this.sceneObjects.values()) if (object.avatar) this.applySceneObject(object);
+        }
+      })
       .catch((error) => {
-        console.warn('[WorldViewer] avatar body meshes unavailable, using placeholder avatars:', error);
+        console.warn('[WorldViewer] avatar body meshes unavailable, using low-poly procedural fallback body:', error);
+        this.bodyParts = this.fallbackBodyParts;
         this.bodyLoad = null;
+        if (this.scene3d) {
+          this.installBodyMeshes(this.scene3d);
+          for (const object of this.sceneObjects.values()) if (object.avatar) this.applySceneObject(object);
+        }
         this.scheduleBodyRetry();
       });
     return this.bodyLoad;
@@ -1278,7 +1302,9 @@ export class WorldViewer extends Utils.EventEmitter {
   private installBodyMeshes(scene: Scene3D) {
     if (!this.bodyParts || this.bodyMeshesReadyFor === scene) return;
     for (const [part, geometry] of this.bodyParts) {
-      scene.addSkinnedMesh(`avatar-body:${part}`, geometry, bodyPartVertexSkin(geometry));
+      if (typeof scene.addSkinnedMesh === 'function') {
+        scene.addSkinnedMesh(`avatar-body:${part}`, geometry, bodyPartVertexSkin(geometry));
+      }
     }
     this.bodyMeshesReadyFor = scene;
   }
@@ -1287,7 +1313,7 @@ export class WorldViewer extends Utils.EventEmitter {
   private avatarBodyRows(avatarId: string): Map<string, Float32Array> {
     this.skeleton ||= new AvatarSkeleton();
     const world = this.avatarWorldMatrices(avatarId);
-    const maxJoints = (this.scene3d as any)?.graphics?.maxJoints || 110;
+    const maxJoints = (this.scene3d as any)?.graphics?.maxJoints || SL_MAX_RIGGED_JOINTS;
     const rows = new Map<string, Float32Array>();
     for (const { part, instance, rigidJoint } of BODY_PARTS) {
       const geometry = this.bodyParts?.get(part);
@@ -1354,7 +1380,7 @@ export class WorldViewer extends Utils.EventEmitter {
         mesh: 'cube', meshes: [{ mesh: 'avatar-body:skirt', materialIndex: 0 }],
         position: [x, y, z - height / 2], rotation: config.rotation, scale: [1, 1, 1], color: [1, 1, 1, 1],
         faces: [{ texture: skirtTexture, color: [1, 1, 1, 1], repeat: [1, 1], offset: [0, 0], rotation: 0, pbr: { alphaMode: 'MASK', alphaCutoff: 0.5, doubleSided: true } }],
-        skin: bodyPartRows(this.skeleton, skirtSkin, this.avatarWorldMatrices(id), (this.scene3d as any).graphics?.maxJoints || 110), visible: true,
+        skin: bodyPartRows(this.skeleton, skirtSkin, this.avatarWorldMatrices(id), (this.scene3d as any).graphics?.maxJoints || SL_MAX_RIGGED_JOINTS), visible: true,
       };
       if (this.scene3d.objects.has(skirtId)) this.scene3d.updateObject(skirtId, skirt);
       else this.scene3d.addObject(skirtId, skirt);
@@ -1377,16 +1403,26 @@ export class WorldViewer extends Utils.EventEmitter {
         let skirtSkin = this.bodySkins.get('skirt');
         if (!skirtSkin) { skirtSkin = bodyPartSkin(this.skeleton, skirtGeometry); this.bodySkins.set('skirt', skirtSkin); }
         const world = this.avatarWorldMatrices(object.id);
-        this.scene3d.updateObject(`${object.id}:body:skirt`, { skin: bodyPartRows(this.skeleton, skirtSkin, world, (this.scene3d as any).graphics?.maxJoints || 110) });
+        this.scene3d.updateObject(`${object.id}:body:skirt`, { skin: bodyPartRows(this.skeleton, skirtSkin, world, (this.scene3d as any).graphics?.maxJoints || SL_MAX_RIGGED_JOINTS) });
       }
+    }
+  }
+
+  public setAvatarVisualParam(avatarId: string, paramIdOrName: number | string, value: number) {
+    let paramsMgr = this.avatarVisualParams.get(avatarId);
+    if (!paramsMgr) {
+      paramsMgr = new AvatarParamsManager();
+      this.avatarVisualParams.set(avatarId, paramsMgr);
+    }
+    paramsMgr.setParam(paramIdOrName, value);
+    if (this.sceneObjects.has(avatarId)) {
+      this.reapplyAvatarSubject(avatarId);
     }
   }
 
   private applyAvatarParts(id: string, config: any, object?: any) {
     if (!this.scene3d) return;
     if (this.bodyParts && this.bodyMeshesReadyFor === this.scene3d) return this.applyAvatarBody(id, config, object);
-    // Do not regress avatars to block/cylinder stand-ins during renderer startup. Load the real
-    // skinned body lazily and replace the hidden simulator marker as soon as its meshes are ready.
     this.scene3d.updateObject(id, { visible: false });
     const scene = this.scene3d;
     void this.loadBody().then(() => {
