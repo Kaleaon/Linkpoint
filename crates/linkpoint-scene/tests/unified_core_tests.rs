@@ -277,7 +277,7 @@ fn test_spatial_and_lib_comprehensive() {
     let mgr_hits = mgr.query_aabb_simd(&AABB::new([-5.0; 3], [15.0; 3]));
     assert!(!mgr_hits.is_empty());
 
-    let pool = SpatialWorkerPool::new(2, std::sync::Arc::new(std::sync::Mutex::new(grid)));
+    let pool = SpatialWorkerPool::new(2, std::sync::Arc::new(std::sync::RwLock::new(grid)));
     let _ = pool;
 
     let mat = Material {

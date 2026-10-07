@@ -299,7 +299,7 @@ fn test_spatial_worker_pool_additional_coverage() {
     // Test parallel_rebalance
     let rebalance_ms = manager
         .pool
-        .parallel_rebalance(&manager.grid.lock().unwrap());
+        .parallel_rebalance(&manager.grid.read().unwrap());
     assert!(rebalance_ms >= 0.0);
 
     // Test empty parallel_batch_collisions
@@ -307,7 +307,7 @@ fn test_spatial_worker_pool_additional_coverage() {
     assert!(empty_res.is_empty());
 
     // Test total_memory_usage_bytes and handoff early return
-    let grid = manager.grid.lock().unwrap();
+    let grid = manager.grid.read().unwrap();
     let mem_bytes = grid.total_memory_usage_bytes();
     assert!(mem_bytes > 0);
 
