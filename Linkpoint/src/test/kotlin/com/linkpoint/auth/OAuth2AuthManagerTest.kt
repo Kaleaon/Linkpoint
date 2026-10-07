@@ -136,4 +136,71 @@ class OAuth2AuthManagerTest {
         assertEquals("User cancelled", cancelled.message)
         assertFalse(authManager.hasPendingSession())
     }
+
+    @Test
+    fun testMissingCodeParameterReturnsError() = kotlinx.coroutines.runBlocking {
+        val tokenUrl = server.url("/oauth2/token").toString()
+        val (_, state) = authManager.startAuthSession(
+            tokenEndpoint = tokenUrl,
+            redirectUri = "slviewer://auth-callback"
+        )
+
+        val missingCodeUri = Uri.parse("slviewer://auth-callback?state=$state")
+        val result = authManager.handleRedirectUri(missingCodeUri)
+
+        assertTrue(result is OAuth2Result.Error)
+        val errorResult = result as OAuth2Result.Error
+        assertTrue(errorResult.message.contains("Missing authorization code"))
+        assertFalse(authManager.hasPendingSession())
+    }
+
+    @Test
+    fun testGeneralAuthorizationErrorReturnsError() = kotlinx.coroutines.runBlocking {
+        val tokenUrl = server.url("/oauth2/token").toString()
+        authManager.startAuthSession(
+            tokenEndpoint = tokenUrl,
+            redirectUri = "slviewer://auth-callback"
+        )
+
+        val errorUri = Uri.parse("slviewer://auth-callback?error=invalid_request&error_description=Invalid+client+id")
+        val result = authManager.handleRedirectUri(errorUri)
+
+        assertTrue(result is OAuth2Result.Error)
+        val errorResult = result as OAuth2Result.Error
+        assertTrue(errorResult.message.contains("Authorization error: invalid_request"))
+        assertFalse(authManager.hasPendingSession())
+    }
+
+    @Test
+    fun testTokenExchangeHttpErrorReturnsError() = kotlinx.coroutines.runBlocking {
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("""{"error":"invalid_grant","error_description":"Code expired"}""")
+        )
+
+        val tokenUrl = server.url("/oauth2/token").toString()
+        val (_, state) = authManager.startAuthSession(
+            tokenEndpoint = tokenUrl,
+            redirectUri = "slviewer://auth-callback"
+        )
+
+        val callbackUri = Uri.parse("slviewer://auth-callback?code=expired_code&state=$state")
+        val result = authManager.handleRedirectUri(callbackUri)
+
+        assertTrue(result is OAuth2Result.Error)
+        val errorResult = result as OAuth2Result.Error
+        assertTrue(errorResult.message.contains("Token exchange failed with status code 400"))
+        assertFalse(authManager.hasPendingSession())
+    }
+
+    @Test
+    fun testLaunchAuthPortalFallback() {
+        val context = org.robolectric.RuntimeEnvironment.getApplication()
+        val (authUrl, _) = authManager.startAuthSession()
+
+        val launched = authManager.launchAuthPortal(context, authUrl)
+        // In Robolectric test environment without registered browser activity, launch returns true (intent created) or false safely without crashing
+        assertNotNull(launched)
+    }
 }

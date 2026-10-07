@@ -682,7 +682,7 @@ class DrawablePrimStore {
         val isCircularPath = (p.pathCurve and 0x30) != 0
         val profile = p.profileType
         return when {
-            p.pathCurve == PrimShapeParams.PATH_CIRCLE2 && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.TORUS
+            p.pathCurve == PrimShapeParams.PATH_CIRCLE2 && (profile == PrimShapeParams.PROFILE_CIRCLE || profile == PrimShapeParams.PROFILE_HALF_CIRCLE) -> ShapeKind.TORUS
             p.pathCurve == PrimShapeParams.PATH_CIRCLE && (profile == PrimShapeParams.PROFILE_CIRCLE || profile == PrimShapeParams.PROFILE_HALF_CIRCLE) -> ShapeKind.SPHERE
             isCircularPath && profile == PrimShapeParams.PROFILE_SQUARE -> ShapeKind.RING
             p.pathCurve == PrimShapeParams.PATH_LINE && profile == PrimShapeParams.PROFILE_CIRCLE -> ShapeKind.CYLINDER
