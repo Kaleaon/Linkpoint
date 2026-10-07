@@ -1224,7 +1224,6 @@ class LinkpointApp : Application() {
         if (::teleportManager.isInitialized) {
             imManager.teleportManager = teleportManager
         }
-
         // Dedicated Frame-Aligned Message Queue and Ring Buffer Service
         frameAlignedQueueService = com.linkpoint.chat.queue.FrameAlignedMessageQueueService(
             chatManager = chatManager,
