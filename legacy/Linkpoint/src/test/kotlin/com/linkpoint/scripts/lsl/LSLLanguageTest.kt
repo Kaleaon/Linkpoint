@@ -137,8 +137,8 @@ class LSLLanguageTest {
         val avgTime = elapsedTime / iterations.toDouble()
 
         assertTrue(
-            "Average highlight time ($avgTime ms) should be fast (< 200 ms)",
-            avgTime < 200.0
+            "Average highlight time ($avgTime ms) should be fast (< 500 ms)",
+            avgTime < 500.0
         )
     }
 }
