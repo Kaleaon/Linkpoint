@@ -67,23 +67,42 @@ export class EventQueueManager {
         // Reset delay on success
         this.currentDelay = this.baseDelay;
 
-        const text = await response.text();
-        const data = LLSD.parseXML(text);
+        const contentType = (response.headers?.get('content-type') || '').toLowerCase();
+        let data: any;
+
+        if (contentType.includes('application/llsd+binary')) {
+          const buffer = new Uint8Array(await response.arrayBuffer());
+          data = LLSD.parseBinary(buffer);
+        } else if (contentType.includes('application/llsd+notation') || contentType.includes('text/plain')) {
+          const text = await response.text();
+          data = LLSD.parseNotation(text);
+        } else {
+          const text = await response.text();
+          data = LLSD.parseXML(text);
+        }
 
         if (data && data.events) {
           this.enqueueEvents(data.events);
           if (data.id) this.ackId = data.id;
         }
+      } else if (response && (response.status === 502 || response.status === 504)) {
+        // Benign long-poll timeout (HTTP 502 / 504): reset delay immediately without backoff
+        this.currentDelay = this.baseDelay;
+        console.log(`[EventQueue] Benign long-poll timeout (${response.status}). Re-polling immediately.`);
       } else {
-        // Exponential backoff
+        // Exponential backoff for HTTP 500/503 or true network errors
         this.currentDelay = Math.min(this.currentDelay * 2, this.maxDelay);
         console.warn(`[EventQueue] Polling error. Backing off to ${this.currentDelay}ms`);
       }
-    } catch (error) {
-      // Exponential backoff
-      this.currentDelay = Math.min(this.currentDelay * 2, this.maxDelay);
-      console.error(`[EventQueue] Polling exception:`, error);
-      console.warn(`[EventQueue] Backing off to ${this.currentDelay}ms`);
+    } catch (error: any) {
+      if (error?.name === 'TimeoutError' || error?.message?.includes('timeout')) {
+        // Read timeout during long poll: reset delay immediately
+        this.currentDelay = this.baseDelay;
+      } else {
+        this.currentDelay = Math.min(this.currentDelay * 2, this.maxDelay);
+        console.error(`[EventQueue] Polling exception:`, error);
+        console.warn(`[EventQueue] Backing off to ${this.currentDelay}ms`);
+      }
     }
 
     if (this.isPolling) {
