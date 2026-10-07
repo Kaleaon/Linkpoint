@@ -152,4 +152,82 @@ class BentoSkeletonTest {
             assertEquals(16, bone?.skinningMatrix?.size)
         }
     }
+
+    @Test
+    fun testZeroHeapAllocationDuringBoneMatrixUpdates() {
+        val skeleton = AvatarSkeleton(null)
+        skeleton.updateBoneMatrices()
+
+        // Capture initial matrix array references
+        val head = skeleton.getBone("mHead")!!
+        val worldMatrixRef = head.worldMatrix
+        val skinningMatrixRef = head.skinningMatrix
+        val skinningBufferRef = skeleton.getSkinningMatrices()
+
+        // Mutate rotations and positions and re-update 1,000 times
+        for (i in 0 until 1000) {
+            head.position = LLVector3(0f, 0f, 0.076f + (i % 10) * 0.001f)
+            head.rotation = LLQuaternion(0.01f * (i % 5), 0f, 0f, 1f).normalize()
+            skeleton.updateBoneMatrices()
+
+            val currentBuffer = skeleton.getSkinningMatrices()
+            assertSame("updateBoneMatrices must mutate bone.worldMatrix in place", worldMatrixRef, head.worldMatrix)
+            assertSame("updateBoneMatrices must mutate bone.skinningMatrix in place", skinningMatrixRef, head.skinningMatrix)
+            assertSame("getSkinningMatrices must return pre-allocated cachedSkinningBuffer", skinningBufferRef, currentBuffer)
+        }
+    }
+
+    @Test
+    fun testMatrixPrecisionAndJointPropagation() {
+        val skeleton = AvatarSkeleton(null)
+        val pelvis = skeleton.getBone("mPelvis")!!
+        val spine1 = skeleton.getBone("mSpine1")!!
+
+        // Set explicit translation and identity rotation
+        pelvis.position = LLVector3(10f, 20f, 30f)
+        pelvis.rotation = LLQuaternion.identity()
+        pelvis.scale = LLVector3(1f, 1f, 1f)
+
+        spine1.position = LLVector3(0f, 0f, 0.04f)
+        spine1.rotation = LLQuaternion.identity()
+        spine1.scale = LLVector3(1f, 1f, 1f)
+
+        skeleton.updateBoneMatrices()
+
+        // Pelvis world matrix translation components should be (10, 20, 30)
+        assertEquals(10f, pelvis.worldMatrix[12], 1e-4f)
+        assertEquals(20f, pelvis.worldMatrix[13], 1e-4f)
+        assertEquals(30f, pelvis.worldMatrix[14], 1e-4f)
+
+        // Spine1 world matrix translation components should be (10, 20, 30.04)
+        assertEquals(10f, spine1.worldMatrix[12], 1e-4f)
+        assertEquals(20f, spine1.worldMatrix[13], 1e-4f)
+        assertEquals(30.04f, spine1.worldMatrix[14], 1e-4f)
+    }
+
+    @Test
+    fun testCachedSkinningBufferResizesOnDynamicBoneAddition() {
+        val skeleton = AvatarSkeleton(null)
+        val initialBuffer = skeleton.getSkinningMatrices()
+        assertEquals(skeleton.boneArray.size * 16, initialBuffer.size)
+
+        // Dynamically append a new bone
+        val extraBone = Bone(
+            name = "mExtraTestBone",
+            index = skeleton.boneArray.size,
+            parent = skeleton.getBone("mPelvis"),
+            children = mutableListOf(),
+            bindPosition = LLVector3.zero(),
+            bindRotation = LLQuaternion.identity(),
+            position = LLVector3.zero(),
+            rotation = LLQuaternion.identity(),
+            scale = LLVector3(1f, 1f, 1f)
+        )
+        skeleton.boneArray.add(extraBone)
+        skeleton.bones["mExtraTestBone"] = extraBone
+
+        val resizedBuffer = skeleton.getSkinningMatrices()
+        assertEquals(skeleton.boneArray.size * 16, resizedBuffer.size)
+        assertNotSame("cachedSkinningBuffer should reallocate when boneArray size changes", initialBuffer, resizedBuffer)
+    }
 }
