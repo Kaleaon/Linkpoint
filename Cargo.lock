@@ -381,7 +381,6 @@ version = "0.1.0"
 dependencies = [
  "gltf-json",
  "hex",
- "openjpeg-sys",
  "serde",
  "serde_json",
  "wasm-bindgen",
@@ -426,16 +425,6 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
-
-[[package]]
-name = "openjpeg-sys"
-version = "1.0.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92682cb92e7b01e2c020cf8ec12f3374558924bb24621df1112d8a7c93d419ef"
-dependencies = [
- "cc",
- "libc",
-]
 
 [[package]]
 name = "percent-encoding"

@@ -114,8 +114,6 @@ pub fn decode_j2k_to_rgba(data: &[u8]) -> Option<(u32, u32, Vec<u8>)> {
     if data.is_empty() {
         return None;
     }
-    // Perform openjpeg-sys FFI initialization check / validation
-    let _codec_format = openjpeg_sys::OPJ_CODEC_FORMAT::OPJ_CODEC_J2K;
     if let Some(header) = parse_j2k_header(data) {
         let rgba = generate_placeholder_rgba(header.width, header.height);
         Some((header.width, header.height, rgba))
