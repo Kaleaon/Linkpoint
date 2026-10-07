@@ -414,6 +414,36 @@ export function useAppState() {
     [flR, flFocus]
   );
 
+  const flMoveStep = useCallback(
+    (id, dx = 0, dy = 0) => {
+      const r = flR(id);
+      const n = {
+        x: Math.max(0, r.x + dx),
+        y: Math.max(0, r.y + dy),
+        w: r.w,
+        h: r.h,
+      };
+      setFlRect((st) => ({ ...st, [id]: n }));
+      flFocus(id);
+    },
+    [flR, flFocus]
+  );
+
+  const flResizeStep = useCallback(
+    (id, dw = 0, dh = 0) => {
+      const r = flR(id);
+      const n = {
+        x: r.x,
+        y: r.y,
+        w: Math.max(216, r.w + dw),
+        h: Math.max(96, r.h + dh),
+      };
+      setFlRect((st) => ({ ...st, [id]: n }));
+      flFocus(id);
+    },
+    [flR, flFocus]
+  );
+
   const flToggle = useCallback(
     (id) => {
       setFlOpen((open) => {
@@ -591,7 +621,7 @@ export function useAppState() {
       allGrids, openAddGrid, cancelAddGrid, saveCustomGrid, setAddGridName, setAddGridHost,
       setTab, setChip, setTileOk, toggleInvFolder, dismiss, toggleSetting, pin,
       cycleLayout, cyclePalette, setCond, setMenu,
-      flR, flDrag, flFocus, flToggle, flClose,
+      flR, flDrag, flMoveStep, flResizeStep, flFocus, flToggle, flClose,
       hudDrag, toggleHud, setHudPicker, setTarget, setTargetPicker, setNavPeek,
       cf, cTap, cHold, cPress,
       holdStart, holdEnd, endEdit, togglePad, toggleRun, flyUpDown, flyDnDown, flyRelease, addSlot, removeDockSlot,

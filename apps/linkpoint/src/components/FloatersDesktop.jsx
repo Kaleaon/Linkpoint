@@ -10,6 +10,7 @@ import DesktopChrome from "./DesktopChrome.jsx";
 import World3D from "../screens/World3D.jsx";
 import { formatHeading, useCameraState } from "./cameraReadout.js";
 import { deskKind, deskGeometry, floaterStyle, chipStyle } from "../theme/deskStyle.js";
+import useSinglePointerRelocate from "../hooks/useSinglePointerRelocate.js";
 
 // Ported from the `isFloat` block: desktop SL isn't a screen stack, it's N
 // resizable windows over one scene (the `FLOATERS` window model — position,
@@ -77,6 +78,25 @@ export default function FloatersDesktop() {
       actions.notify("Chat error: " + (err.message || String(err)));
     }
     setQuickMsg("");
+  };
+
+  const handleFloaterKeyDown = (id, e) => {
+    const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const step = 32;
+    if (e.shiftKey) {
+      if (e.key === "ArrowUp") actions.flResizeStep(id, 0, -step);
+      else if (e.key === "ArrowDown") actions.flResizeStep(id, 0, step);
+      else if (e.key === "ArrowLeft") actions.flResizeStep(id, -step, 0);
+      else if (e.key === "ArrowRight") actions.flResizeStep(id, step, 0);
+    } else {
+      if (e.key === "ArrowUp") actions.flMoveStep(id, 0, -step);
+      else if (e.key === "ArrowDown") actions.flMoveStep(id, 0, step);
+      else if (e.key === "ArrowLeft") actions.flMoveStep(id, -step, 0);
+      else if (e.key === "ArrowRight") actions.flMoveStep(id, step, 0);
+    }
   };
 
   return (
@@ -147,8 +167,12 @@ export default function FloatersDesktop() {
             }}
           >
             <div
+              tabIndex={0}
+              role="region"
+              aria-label={`${f.title} header. Use arrow keys to move, Shift+arrow keys to resize.`}
+              onKeyDown={(e) => handleFloaterKeyDown(f.id, e)}
               onMouseDown={(e) => actions.flDrag(f.id, e, "move")}
-              style={{ flex: "none", height: G.bar + "px", display: "flex", alignItems: "center", gap: "7px", cursor: "move", userSelect: "none", ...fs.bar }}
+              style={{ flex: "none", height: G.bar + "px", display: "flex", alignItems: "center", gap: "7px", cursor: "move", userSelect: "none", outline: "none", ...fs.bar }}
             >
               {kind === "sweep" && (
                 <span style={{ display: "flex", alignItems: "center", height: "100%", padding: "0 8px", background: act ? V.sec : V.sec2, color: act ? V.bg : V.onsec, borderRadius: "18px 0 10px 0", font: "700 9.5px/1 " + t.dfont, letterSpacing: ".1em", flex: "none", marginRight: "4px" }}>
@@ -157,6 +181,51 @@ export default function FloatersDesktop() {
               )}
               {kind !== "metro" && <Icon name={f.icon} size={13} />}
               <span style={{ flex: 1, minWidth: 0, font: "inherit", letterSpacing: "inherit", textTransform: "inherit", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{f.title}</span>
+
+              {/* Single-pointer move buttons */}
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "2px", flex: "none" }}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={() => actions.flMoveStep(f.id, 0, -32)}
+                  style={{ width: "17px", height: "17px", padding: 0, border: "none", background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.85 }}
+                  aria-label="Move panel up"
+                  title="Move panel up"
+                >
+                  <Icon name="chevron-up" size={11} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => actions.flMoveStep(f.id, 0, 32)}
+                  style={{ width: "17px", height: "17px", padding: 0, border: "none", background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.85 }}
+                  aria-label="Move panel down"
+                  title="Move panel down"
+                >
+                  <Icon name="chevron-down" size={11} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => actions.flMoveStep(f.id, -32, 0)}
+                  style={{ width: "17px", height: "17px", padding: 0, border: "none", background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.85 }}
+                  aria-label="Move panel left"
+                  title="Move panel left"
+                >
+                  <Icon name="chevron-left" size={11} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => actions.flMoveStep(f.id, 32, 0)}
+                  style={{ width: "17px", height: "17px", padding: 0, border: "none", background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.85 }}
+                  aria-label="Move panel right"
+                  title="Move panel right"
+                >
+                  <Icon name="chevron-right" size={11} />
+                </button>
+              </div>
+
               <span
                 onClick={(e) => {
                   e.stopPropagation();
@@ -204,10 +273,79 @@ export default function FloatersDesktop() {
             ) : (
               <div style={{ flex: 1, minHeight: 0, background: V.bg }} />
             )}
+            {/* Single-pointer scale controls next to bottom-right corner grip */}
             <div
-              onMouseDown={(e) => actions.flDrag(f.id, e, "size")}
-              style={{ position: "absolute", right: 0, bottom: 0, width: "15px", height: "15px", cursor: "nwse-resize", background: "linear-gradient(135deg,transparent 0 52%," + fs.grip + " 52% 100%)" }}
-            />
+              style={{
+                position: "absolute",
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "2px",
+                zIndex: 15,
+                background: V.surf,
+                padding: "1px",
+                borderRadius: "3px 0 0 0",
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => actions.flResizeStep(f.id, -32, -32)}
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  padding: 0,
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  lineHeight: "1",
+                  border: "1px solid " + fs.grip,
+                  background: V.surf,
+                  color: V.ink,
+                  borderRadius: "2px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0.9,
+                }}
+                aria-label="Decrease panel size"
+                title="Decrease panel size"
+              >
+                &minus;
+              </button>
+              <button
+                type="button"
+                onClick={() => actions.flResizeStep(f.id, 32, 32)}
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  padding: 0,
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  lineHeight: "1",
+                  border: "1px solid " + fs.grip,
+                  background: V.surf,
+                  color: V.ink,
+                  borderRadius: "2px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0.9,
+                }}
+                aria-label="Increase panel size"
+                title="Increase panel size"
+              >
+                &#43;
+              </button>
+              <div
+                onMouseDown={(e) => actions.flDrag(f.id, e, "size")}
+                style={{ width: "15px", height: "15px", cursor: "nwse-resize", background: "linear-gradient(135deg,transparent 0 52%," + fs.grip + " 52% 100%)" }}
+                title="Resize panel"
+              />
+            </div>
           </div>
         );
       })}
