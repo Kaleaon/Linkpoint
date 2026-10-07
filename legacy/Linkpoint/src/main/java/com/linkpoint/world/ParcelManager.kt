@@ -68,6 +68,11 @@ class ParcelManager(
     private val _currentParcel = MutableStateFlow<ParcelInfo?>(null)
     val currentParcel: StateFlow<ParcelInfo?> = _currentParcel
 
+    // Parcel info replies cache & latest parcel info flow
+    private val parcelInfoReplies = ConcurrentHashMap<UUID, com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData>()
+    private val _latestParcelInfo = MutableStateFlow<com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData?>(null)
+    val latestParcelInfo: StateFlow<com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData?> = _latestParcelInfo
+
     /**
      * Write AgentData block (AgentID + SessionID) with UUIDs in big-endian bytes.
      * Message block fields remain little-endian per SL templates.
@@ -210,11 +215,54 @@ class ParcelManager(
     }
 
     /**
+     * Request parcel info by Parcel ID.
+     */
+    fun requestParcelInfo(parcelId: UUID) {
+        scope.launch {
+            try {
+                // ParcelInfoRequest format: AgentData (32 bytes) + Data block with ParcelID (16 bytes)
+                val payload = ByteBuffer.allocate(48).order(ByteOrder.LITTLE_ENDIAN)
+                writeAgentData(payload)
+                writeUUID(payload, parcelId)
+
+                udpConnection.sendPacket(MessageIdRegistry.PARCEL_INFO_REQUEST, payload.array(), reliable = true)
+                Log.d(TAG, "Requested parcel info for parcelId: $parcelId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to request parcel info for $parcelId", e)
+            }
+        }
+    }
+
+    /**
+     * Request parcel info by string ID or position fallback.
+     */
+    fun requestParcelInfo(parcelIdString: String) {
+        if (parcelIdString.isBlank()) {
+            requestParcelInfo(LLVector3(128f, 128f, 0f))
+            return
+        }
+        try {
+            val uuid = UUID.fromString(parcelIdString)
+            requestParcelInfo(uuid)
+        } catch (_: Exception) {
+            requestParcelInfo(LLVector3(128f, 128f, 0f))
+        }
+    }
+
+    /**
      * Handle ParcelInfoReply message from server.
      */
     fun handleParcelInfoReply(data: com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData) {
         Log.d(TAG, "Received parcel info: ${data.name} (${data.parcelID})")
-        // Cache parcel info - could be used for map display or teleport preview
+        parcelInfoReplies[data.parcelID] = data
+        _latestParcelInfo.value = data
+    }
+
+    /**
+     * Get cached parcel info by UUID.
+     */
+    fun getParcelInfo(parcelId: UUID): com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData? {
+        return parcelInfoReplies[parcelId]
     }
 
     /**
