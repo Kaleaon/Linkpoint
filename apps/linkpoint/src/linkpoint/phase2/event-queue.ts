@@ -71,7 +71,7 @@ export class EventQueueManager {
         let data: any;
 
         if (contentType.includes('application/llsd+binary')) {
-          const buffer = new Uint8Array(await response.arrayBuffer());
+          const buffer = new Uint8Array(await (response as any).arrayBuffer());
           data = LLSD.parseBinary(buffer);
         } else if (contentType.includes('application/llsd+notation') || contentType.includes('text/plain')) {
           const text = await response.text();
