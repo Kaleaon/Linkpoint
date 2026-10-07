@@ -95,6 +95,12 @@ describe("OutfitViewer screen", () => {
     await click(spinningBtn!);
     expect(mounted.host.textContent).toContain("AUTO-SPIN");
 
+    // Turn off Auto-Spin to stop continuous requestAnimationFrame state updates
+    const spinningBtn = buttonByText(mounted.host, /SPINNING/);
+    expect(spinningBtn).toBeTruthy();
+    await click(spinningBtn!);
+    expect(mounted.host.textContent).toContain('AUTO-SPIN');
+
     // Toggle Mesh Wireframe button
     const meshBtn = buttonByText(mounted.host, /MESH/);
     expect(meshBtn).toBeTruthy();
