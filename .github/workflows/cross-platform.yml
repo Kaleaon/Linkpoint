@@ -41,6 +41,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Disable CRLF line ending conversion globally
+        run: git config --global core.autocrlf false || true
       - uses: actions/checkout@v4
       - name: Configure Git line endings and reset working tree
         run: |
@@ -86,6 +88,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Disable CRLF line ending conversion globally
+        run: git config --global core.autocrlf false || true
       - uses: actions/checkout@v4
       - name: Configure Git line endings and reset working tree
         run: |
