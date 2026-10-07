@@ -1,10 +1,1 @@
-{
-  "name": "@linkpoint/viewer-types",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": "./src/index.ts",
-  "dependencies": {
-    "@unified-llsd/typescript": "file:../../../Unified-LLSD/typescript"
-  }
-}
+{"name":"@linkpoint/viewer-types","version":"0.1.0","private":true,"type":"module","exports":"./src/index.ts"}
