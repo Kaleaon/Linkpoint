@@ -19,9 +19,33 @@ function resolve(name) {
   return Cmp;
 }
 
-export default function Icon({ name, size = 18, style, className, strokeWidth, ...rest }) {
+export default function Icon({
+  name,
+  size = 18,
+  style = undefined,
+  className = undefined,
+  strokeWidth = undefined,
+  title = undefined,
+  "aria-label": ariaLabel = undefined,
+  "aria-labelledby": ariaLabelledBy = undefined,
+  "aria-hidden": ariaHidden = undefined,
+  ...rest
+}) {
   const Cmp = resolve(name);
-  if (!Cmp) return <span className={className} style={{ width: size, height: size, display: "inline-block", ...style }} />;
+  const hasAccessibleName = Boolean(title || ariaLabel || ariaLabelledBy);
+  const isHidden = ariaHidden ?? (!hasAccessibleName ? "true" : undefined);
+  const role = rest.role ?? (hasAccessibleName ? "img" : undefined);
+
+  if (!Cmp) {
+    return (
+      <span
+        className={className}
+        style={{ width: size, height: size, display: "inline-block", ...style }}
+        aria-hidden={isHidden}
+      />
+    );
+  }
+
   return (
     <Cmp
       className={className}
@@ -29,7 +53,13 @@ export default function Icon({ name, size = 18, style, className, strokeWidth, .
       height={style?.height ?? size}
       strokeWidth={strokeWidth}
       style={{ display: "inline-flex", flexShrink: 0, ...style }}
+      aria-hidden={isHidden}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      role={role}
       {...rest}
-    />
+    >
+      {title ? <title>{title}</title> : null}
+    </Cmp>
   );
 }
