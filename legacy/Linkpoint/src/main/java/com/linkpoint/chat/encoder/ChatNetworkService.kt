@@ -1,5 +1,8 @@
 package com.linkpoint.chat.encoder
 
+import com.linkpoint.protocol.core.AgentIdentity
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -7,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Dispatcher service for chat channel network communications.
  *
  * Coordinates packet encoding via [ChatPacketEncoder], [IMPacketEncoder],
- * and [GroupMessageEncoder], verifying standard 12-byte headers, sequence state,
+ * and [GroupMessageEncoder], verifying standard 32-byte AgentData headers, sequence state,
  * and routing payloads to registered network dispatch listeners.
  */
 class ChatNetworkService(
@@ -60,19 +63,24 @@ class ChatNetworkService(
     }
 
     /**
-     * Validates that an encoded packet strictly conforms to 12-byte header specifications.
+     * Validates that an encoded packet strictly conforms to standard Second Life 32-byte AgentData header specifications.
      */
     private fun validateHeader(packet: EncodedChatPacket) {
         require(packet.payload.size >= AbstractChatPacketEncoder.HEADER_SIZE) {
             "Packet payload size ${packet.payload.size} is less than header size ${AbstractChatPacketEncoder.HEADER_SIZE}"
         }
-        val headerFlags = packet.payload[0]
-        val typeId = packet.payload[5]
-        require(headerFlags == packet.headerFlags) {
-            "Header flags mismatch: byte 0 (${headerFlags}) != expected (${packet.headerFlags})"
+        val buffer = ByteBuffer.wrap(packet.payload).order(ByteOrder.BIG_ENDIAN)
+        val agentIdMsb = buffer.long
+        val agentIdLsb = buffer.long
+        val sessionIdMsb = buffer.long
+        val sessionIdLsb = buffer.long
+        val agentId = UUID(agentIdMsb, agentIdLsb)
+        val sessionId = UUID(sessionIdMsb, sessionIdLsb)
+        require(agentId != AgentIdentity.ZERO_UUID) {
+            "Header validation failed: AgentID in 32-byte AgentData header is zero UUID"
         }
-        require(typeId == packet.channelTypeId) {
-            "Channel type ID mismatch: byte 5 (${typeId}) != expected (${packet.channelTypeId})"
+        require(sessionId != AgentIdentity.ZERO_UUID) {
+            "Header validation failed: SessionID in 32-byte AgentData header is zero UUID"
         }
     }
 
