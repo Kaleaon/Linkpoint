@@ -143,6 +143,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn test_packed_quaternion() {
         let identity = PackedQuaternion::unpack([0, 0, 0]);
         assert_eq!(identity, [0.0, 0.0, 0.0, 1.0]);
