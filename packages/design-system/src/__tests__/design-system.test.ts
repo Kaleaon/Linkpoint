@@ -243,4 +243,18 @@ describe("@linkpoint/design-system subpath exports & functional requirements", (
       expect(theme).toBeDefined();
     }
   });
+
+  it("Requirement 3: Community themes are exported in PALETTES, themeNames, and loadTheme", async () => {
+    const communityIds = ["stargate-atlantis", "stargate-sg1", "lcars-tng", "metro-cyan"] as const;
+
+    for (const id of communityIds) {
+      expect(themeNames).toContain(id);
+      expect(PALETTES[id]).toBeDefined();
+      expect(PALETTES[id].c).toBeDefined();
+
+      const themeObj = (await loadTheme(id)) as { metadata: { id: string } };
+      expect(themeObj).toBeDefined();
+      expect(themeObj.metadata.id).toBe(id);
+    }
+  });
 });
