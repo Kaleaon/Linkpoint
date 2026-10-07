@@ -544,8 +544,7 @@ export class Graphics3D extends Utils.EventEmitter {
 
   createTexture(name: string, width: number, height: number, rgba: Uint8Array) {
     const gl = this.gl!;
-    const existing = this.textures.get(name) || this.textures.get(name.toLowerCase());
-    if (existing) gl.deleteTexture(existing);
+    this.deleteTexture(name);
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
@@ -575,13 +574,80 @@ export class Graphics3D extends Utils.EventEmitter {
     return name;
   }
 
+  deleteTexture(name: string): boolean {
+    if (!name) return false;
+    const gl = this.gl;
+    const rawKey = String(name);
+    const lowerKey = rawKey.toLowerCase();
+    const prefixedKey = rawKey.startsWith('texture:') ? rawKey : `texture:${rawKey}`;
+    const prefixedLower = prefixedKey.toLowerCase();
+    const strippedKey = rawKey.startsWith('texture:') ? rawKey.slice(8) : rawKey;
+    const strippedLower = strippedKey.toLowerCase();
+
+    const keyCandidates = [
+      rawKey,
+      lowerKey,
+      prefixedKey,
+      prefixedLower,
+      strippedKey,
+      strippedLower,
+    ];
+
+    const texturesToDelete = new Set<any>();
+    for (const key of keyCandidates) {
+      const tex = this.textures.get(key);
+      if (tex) {
+        texturesToDelete.add(tex);
+      }
+    }
+
+    if (texturesToDelete.size > 0) {
+      for (const tex of texturesToDelete) {
+        if (gl) {
+          gl.deleteTexture(tex);
+        }
+      }
+    }
+
+    let removedAny = false;
+    for (const key of keyCandidates) {
+      if (this.textures.has(key)) {
+        this.textures.delete(key);
+        removedAny = true;
+      }
+      this.textureAlpha.delete(key);
+    }
+
+    return removedAny || texturesToDelete.size > 0;
+  }
+
   hasTexture(name: string | undefined | null): boolean {
-    return Boolean(name && (this.textures.has(name) || this.textures.has(String(name).toLowerCase())));
+    if (!name) return false;
+    const str = String(name);
+    const lower = str.toLowerCase();
+    const prefixed = str.startsWith('texture:') ? str : `texture:${str}`;
+    const prefixedLower = prefixed.toLowerCase();
+    return (
+      this.textures.has(str) ||
+      this.textures.has(lower) ||
+      this.textures.has(prefixed) ||
+      this.textures.has(prefixedLower)
+    );
   }
 
   /** True when the named texture has transparent pixels. Unknown textures are opaque. */
   textureHasAlpha(name: string | undefined | null): boolean {
-    return Boolean(name && (this.textureAlpha.get(name) || this.textureAlpha.get(String(name).toLowerCase())));
+    if (!name) return false;
+    const str = String(name);
+    const lower = str.toLowerCase();
+    const prefixed = str.startsWith('texture:') ? str : `texture:${str}`;
+    const prefixedLower = prefixed.toLowerCase();
+    return Boolean(
+      this.textureAlpha.get(str) ||
+      this.textureAlpha.get(lower) ||
+      this.textureAlpha.get(prefixed) ||
+      this.textureAlpha.get(prefixedLower)
+    );
   }
 
   /** Clear only the depth buffer, so a later pass (the HUD) draws over everything already rendered. */
