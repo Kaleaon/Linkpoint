@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Linkpoint.Protocol</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Linkpoint Contributors</Authors>
+    <Company>Linkpoint</Company>
+    <Description>Cross-language protocol bindings, packet decoders, and LLSD capability schemas for Linkpoint.</Description>
+    <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Kaleaon/Linkpoint</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>

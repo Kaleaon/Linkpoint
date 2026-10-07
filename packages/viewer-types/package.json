@@ -1,1 +1,18 @@
-{"name":"@linkpoint/viewer-types","version":"0.1.0","private":true,"type":"module","exports":"./src/index.ts"}
+{
+  "name": "@linkpoint/viewer-types",
+  "version": "0.1.0",
+  "description": "TypeScript type definitions and protocol specifications for Linkpoint viewer",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": "./src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kaleaon/Linkpoint.git",
+    "directory": "packages/viewer-types"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
