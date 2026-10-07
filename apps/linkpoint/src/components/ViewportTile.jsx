@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Icon from "./Icon.jsx";
+import SpatialViewportContainer from "./SpatialViewportContainer.jsx";
 
 /**
  * ViewportTile container for feature screens/routes.
@@ -27,6 +28,14 @@ export default function ViewportTile({
   onToggleDensity = null,
   onDragStart = null,
   onResizeStart = null,
+  onRotate = null,
+  onZoom = null,
+  onReset = null,
+  yaw = 0,
+  pitch = 0,
+  zoom = 1,
+  isSpatialViewport = false,
+  spatialAriaLabel = "",
   children = null,
   style = {},
   className = "",
@@ -260,6 +269,9 @@ export default function ViewportTile({
       {/* Tile Content Area */}
       <div
         className="viewport-tile-body"
+        tabIndex={0}
+        role="region"
+        aria-label={title || id || "Viewport Tile"}
         style={{
           flex: 1,
           minHeight: 0,
@@ -269,9 +281,25 @@ export default function ViewportTile({
           padding: densityPadding,
           background: V.bg,
           position: "relative",
+          outline: "none",
         }}
       >
-        {children}
+        {isSpatialViewport || onRotate || onZoom || onReset ? (
+          <SpatialViewportContainer
+            ariaLabel={spatialAriaLabel || title || id || "3D Viewport Tile"}
+            yaw={yaw}
+            pitch={pitch}
+            zoom={zoom}
+            onRotate={onRotate}
+            onZoom={onZoom}
+            onReset={onReset}
+            style={{ width: "100%", height: "100%", position: "relative" }}
+          >
+            {children}
+          </SpatialViewportContainer>
+        ) : (
+          children
+        )}
       </div>
 
       {/* Floating Window Resize Grip */}
