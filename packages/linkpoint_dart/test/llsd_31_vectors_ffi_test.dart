@@ -11,6 +11,7 @@ void main() {
       final candidatePaths = [
         '../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
         'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
+        'fixtures/llsd_31_test_vectors.json',
         '/app/Linkpoint/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
       ];
       File? fixtureFile;

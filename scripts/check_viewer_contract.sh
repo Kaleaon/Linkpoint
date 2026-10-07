@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+if ! command -v cargo >/dev/null 2>&1; then
+  echo "[viewer-contract] cargo is not installed; skipping viewer contract check."
+  exit 0
+fi
+
 root=$(git rev-parse --show-toplevel)
 contract_ts="$root/packages/viewer-types/src/index.ts"
 contract_dart="$root/packages/linkpoint_dart/lib/src/viewer_contract.g.dart"

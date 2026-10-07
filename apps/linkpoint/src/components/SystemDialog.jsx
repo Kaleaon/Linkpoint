@@ -1,6 +1,6 @@
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
-import { DIALOGS } from "../theme/dialogs.js";
+import { DIALOGS, Z_INDEX } from "../theme/dialogs.js";
 import Icon from "./Icon.jsx";
 import FocusTrap from "./FocusTrap.jsx";
 
@@ -9,14 +9,15 @@ import FocusTrap from "./FocusTrap.jsx";
 // lure, Pay L$, Region restart).
 export default function SystemDialog() {
   const { state, actions } = useApp();
-  const { V, t } = useTheme();
+  const { V, t, Z_INDEX: themeZIndex } = useTheme();
   const dlg = state.dialog && DIALOGS[state.dialog];
   if (!dlg) return null;
 
+  const dialogZIndex = themeZIndex?.SYSTEM_DIALOG ?? Z_INDEX.SYSTEM_DIALOG;
   const btnBase = { flex: "1 1 40%", minHeight: "46px", display: "flex", alignItems: "center", justifyContent: "center", borderWidth: "1px", borderStyle: "solid", borderColor: V.outv, borderRadius: V.rs, background: "transparent", font: "700 11px/1 " + t.font, letterSpacing: ".14em", color: V.ink, textAlign: "center", padding: "0 8px", cursor: "pointer" };
 
   return (
-    <FocusTrap active={true} onEscape={() => actions.setDialog(null)} style={{ position: "absolute", inset: 0, zIndex: 9, background: "rgba(0,0,0,.62)", display: "flex", alignItems: "flex-end" }}>
+    <FocusTrap active={true} onEscape={() => actions.setDialog(null)} style={{ position: "absolute", inset: 0, zIndex: dialogZIndex, background: "rgba(0,0,0,.62)", display: "flex", alignItems: "flex-end" }}>
       <div
         role="dialog"
         aria-modal="true"

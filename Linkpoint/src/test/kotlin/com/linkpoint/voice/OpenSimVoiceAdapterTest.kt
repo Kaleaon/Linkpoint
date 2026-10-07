@@ -1,16 +1,13 @@
 package com.linkpoint.voice
 
-import androidx.test.core.app.ApplicationProvider
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.mockito.Mockito.mock
 
-@RunWith(RobolectricTestRunner::class)
 class OpenSimVoiceAdapterTest {
 
     private val adapter = OpenSimVoiceSignalingAdapter()
@@ -119,7 +116,7 @@ class OpenSimVoiceAdapterTest {
 
     @Test
     fun testVoiceManagerJoinSpatialVoiceOpenSimRouting() = runBlocking {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context = mock(android.content.Context::class.java)
         val capManager = CapabilityManager()
         val voiceManager = VoiceManager(context, capManager)
 

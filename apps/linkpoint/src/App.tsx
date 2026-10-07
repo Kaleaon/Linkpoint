@@ -41,10 +41,10 @@ function Viewer() {
       >
         <div className="viewer-workspace">
           <Shell />
-          <SystemDialog />
           <MacroProgressOverlay />
           <Toast />
         </div>
+        <SystemDialog />
         {state.screen !== "Login" ? <BottomTabs /> : null}
         {state.screen !== "Login" ? <TileNav /> : null}
       </main>

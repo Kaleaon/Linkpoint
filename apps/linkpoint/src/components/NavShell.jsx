@@ -1,5 +1,6 @@
 import { useApp } from "../context/AppContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { Z_INDEX } from "../theme/dialogs.js";
 import RailNav from "./RailNav.jsx";
 import TileNav from "./TileNav.jsx";
 import BottomTabs from "./BottomTabs.jsx";
@@ -11,10 +12,11 @@ import BottomTabs from "./BottomTabs.jsx";
  */
 export default function NavShell({ children }) {
   const { state, actions } = useApp();
-  const { nav, V, t } = useTheme();
+  const { nav, V, t, Z_INDEX: themeZIndex } = useTheme();
 
   const showNav = state.screen !== "Login";
   const isDisconnected = showNav && (state.connectionState === "disconnected" || state.connectionState === "reconnecting");
+  const navBannerZIndex = themeZIndex?.NAV_BANNER ?? Z_INDEX.NAV_BANNER;
 
   const disconnectBanner = isDisconnected ? (
     <div
@@ -32,7 +34,7 @@ export default function NavShell({ children }) {
         fontWeight: 600,
         fontFamily: t?.font || "sans-serif",
         borderBottom: "1px solid rgba(255,255,255,0.2)",
-        zIndex: 999,
+        zIndex: navBannerZIndex,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

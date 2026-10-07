@@ -971,7 +971,7 @@ class LinkpointApp : Application() {
     /**
      * Initialize managers that require agent ID (call after login)
      */
-    fun initializeAgentManagers(agentId: UUID) {
+    fun initializeAgentManagers(agentId: UUID, groupServerUri: String? = null) {
         this.agentId = agentId
 
         // Reset connection state tracking for new session
@@ -982,7 +982,7 @@ class LinkpointApp : Application() {
         friendsManager = FriendsManager(udpConnection, capabilityManager, agentId)
 
         // Initialize groupsManager
-        groupsManager = GroupsManager(udpConnection, capabilityManager, agentId)
+        groupsManager = GroupsManager(udpConnection, capabilityManager, agentId, initialGroupServerUri = groupServerUri)
 
         Log.d(TAG, "Initializing agent-specific managers for $agentId")
 

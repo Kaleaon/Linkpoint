@@ -122,7 +122,7 @@ internal object EacAlphaEncoder {
         var bestBase = 0
         var bestMul = 0
         var bestTable = 0
-        val bestIdx = IntArray(16)
+        var bestBits = 0L
 
         // Multiplier 0 means "all pixels = base"; a normal full search
         // includes it, but we treat the constant-block case explicitly
@@ -158,7 +158,7 @@ internal object EacAlphaEncoder {
                 val mulMax = 15
                 for (mul in mulMin..mulMax) {
                     var err = 0L
-                    val tmpIdx = IntArray(16)
+                    var tmpBits = 0L
                     for (p in 0 until 16) {
                         val target = pixels[p]
                         var bestPxErr = Int.MAX_VALUE
@@ -172,7 +172,7 @@ internal object EacAlphaEncoder {
                                 bestPxIdx = idx
                             }
                         }
-                        tmpIdx[p] = bestPxIdx
+                        tmpBits = (tmpBits shl 3) or (bestPxIdx.toLong() and 0x7L)
                         err += bestPxErr
                         if (err >= bestErr) break // early-out
                     }
@@ -181,16 +181,16 @@ internal object EacAlphaEncoder {
                         bestBase = base
                         bestMul = mul
                         bestTable = tableIdx
-                        System.arraycopy(tmpIdx, 0, bestIdx, 0, 16)
+                        bestBits = tmpBits
                         if (bestErr == 0L) {
-                            writeBlock(out, off, bestBase, bestMul, bestTable, bestIdx)
+                            writeBlock(out, off, bestBase, bestMul, bestTable, bestBits)
                             return
                         }
                     }
                 }
             }
         }
-        writeBlock(out, off, bestBase, bestMul, bestTable, bestIdx)
+        writeBlock(out, off, bestBase, bestMul, bestTable, bestBits)
     }
 
     /**
@@ -204,20 +204,16 @@ internal object EacAlphaEncoder {
         base: Int,
         multiplier: Int,
         tableIdx: Int,
-        indices: IntArray,
+        indicesBits: Long,
     ) {
         out[off] = base.toByte()
         out[off + 1] = (((multiplier and 0x0F) shl 4) or (tableIdx and 0x0F)).toByte()
 
-        // Pack 16 × 3-bit indices into 48 bits, big-endian. Pixel 0 is
+        // Write 48 bits of packed indices, big-endian. Pixel 0 is
         // the most significant 3 bits of byte 2.
-        var bits = 0L
-        for (p in 0 until 16) {
-            bits = (bits shl 3) or (indices[p].toLong() and 0x7L)
-        }
         for (i in 0 until 6) {
             val shift = (5 - i) * 8
-            out[off + 2 + i] = ((bits ushr shift) and 0xFFL).toByte()
+            out[off + 2 + i] = ((indicesBits ushr shift) and 0xFFL).toByte()
         }
     }
 }

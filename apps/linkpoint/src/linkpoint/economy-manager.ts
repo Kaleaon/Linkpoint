@@ -282,6 +282,34 @@ export class EconomyManager extends Utils.EventEmitter {
   /**
    * Save transaction to local cache & memory state, enforcing 30-day retention window.
    */
+  public async recordUploadFee(amount = 10, assetName = 'Texture'): Promise<TransactionRecord> {
+    if (this.balance !== null && typeof this.balance === 'number') {
+      this.balance = Math.max(0, this.balance - amount);
+    }
+    const record: TransactionRecord = {
+      id: `tx_upload_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      agentId: this.activeAgentId,
+      targetId: 'system',
+      targetName: 'Second Life Grid',
+      targetType: 'system',
+      amount,
+      type: 'payment',
+      description: `Texture Upload Fee: ${assetName}`,
+      timestamp: Date.now(),
+      status: 'success',
+    };
+    await this.recordTransaction(record);
+    this.emit('balance_updated', {
+      balance: this.balance,
+      currencySymbol: this.currencySymbol,
+      isZeroCurrency: this.isZeroCurrency,
+    });
+    return record;
+  }
+
+  /**
+   * Save transaction to local cache & memory state, enforcing 30-day retention window.
+   */
   public async recordTransaction(tx: Partial<TransactionRecord>, emitEvent = true): Promise<void> {
     const record: TransactionRecord = {
       id: tx.id || `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,

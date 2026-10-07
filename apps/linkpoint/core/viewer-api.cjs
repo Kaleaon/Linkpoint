@@ -9,8 +9,9 @@ const METHODS = new Set([
   'teleport', 'touchObject', 'sit', 'stand', 'setMovement', 'getBalance', 'payObject',
   'respondScriptDialog', 'acceptLure', 'acceptInventoryOffer', 'declineInventoryOffer', 'acceptGroupInvite', 'declineGroupInvite', 'dismissInteraction',
   'fetchAnimation', 'getMapBlocks', 'getFriends', 'getGroups', 'getInventory', 'getDiagnostics',
-  'getSceneObjects', 'getSceneSnapshot',
+  'getSceneObjects', 'getSceneSnapshot', 'searchDir',
   'wearItem', 'wearOutfit', 'requestMuteList', 'updateMuteListEntry', 'removeMuteListEntry',
+  'getAvatarProfile', 'getAvatarPicks', 'getAvatarGroups',
 ]);
 
 async function callViewer(session, method, params) {

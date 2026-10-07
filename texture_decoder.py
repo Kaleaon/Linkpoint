@@ -13,7 +13,6 @@ import logging
 import os
 import platform
 import struct
-import subprocess
 import threading
 import time
 from typing import Callable, Optional, Dict, Set, Any
@@ -51,7 +50,6 @@ def _get_native_lib():
 
     _NATIVE_LIB_LOADED = True
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    c_source = os.path.join(base_dir, "texture_decoder_native.c")
 
     system = platform.system().lower()
     if "windows" in system:
@@ -61,26 +59,19 @@ def _get_native_lib():
     else:
         lib_name = "libtexture_decoder_native.so"
 
-    lib_path = os.path.join(base_dir, lib_name)
+    candidate_paths = [
+        os.path.join(base_dir, lib_name),
+        os.path.join(base_dir, "builds", "native", lib_name),
+        os.path.join(os.getcwd(), "builds", "native", lib_name),
+    ]
 
-    if not os.path.exists(lib_path) and os.path.exists(c_source):
-        compiler_cmds = [
-            ["gcc", "-O3", "-fopenmp", "-fPIC", "-shared"],
-            ["gcc", "-O3", "-fPIC", "-shared"],
-            ["clang", "-O3", "-fopenmp", "-fPIC", "-shared"],
-            ["clang", "-O3", "-fPIC", "-shared"],
-            ["cc", "-O3", "-fPIC", "-shared"],
-        ]
-        for cmd_prefix in compiler_cmds:
-            try:
-                cmd = cmd_prefix + [c_source, "-o", lib_path]
-                subprocess.check_call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                if os.path.exists(lib_path):
-                    break
-            except Exception:
-                continue
+    lib_path = None
+    for path in candidate_paths:
+        if os.path.exists(path):
+            lib_path = path
+            break
 
-    if os.path.exists(lib_path):
+    if lib_path and os.path.exists(lib_path):
         try:
             lib = ctypes.CDLL(lib_path)
             lib.populate_rgba_buffer.argtypes = [
@@ -151,13 +142,70 @@ def populate_rgba_buffer_wasm(buffer_size: int, seed: int) -> Optional[bytes]:
 
 
 def populate_rgba_buffer_python(buffer_size: int, seed: int) -> bytes:
-    """Fallback Python loop implementation for buffer population with buffer pre-allocation."""
+    """Fallback Python decoder implementation using CFFI byte-buffer memory copies or chunked ctypes operations."""
+    if buffer_size <= 0:
+        return b""
+
+    pattern_size = min(256, buffer_size)
+    pattern = bytearray(pattern_size)
+    for i in range(0, pattern_size, 4):
+        pattern[i] = (seed + i) % 256
+        if i + 1 < pattern_size:
+            pattern[i + 1] = (seed + i * 2) % 256
+        if i + 2 < pattern_size:
+            pattern[i + 2] = (seed + i * 3) % 256
+        if i + 3 < pattern_size:
+            pattern[i + 3] = 255
+
+    tile_size = 1024 * 1024
+    if buffer_size <= tile_size:
+        mult = (buffer_size + pattern_size - 1) // pattern_size
+        return bytes((pattern * mult)[:buffer_size])
+
+    tile_mult = tile_size // pattern_size
+    tile = bytes(pattern * tile_mult)
+    tile_len = len(tile)
+
+    _init_pythonapi()
+    if _PYBYTES_FROM_STRING_AND_SIZE is not None and _PYBYTES_AS_STRING is not None:
+        try:
+            py_bytes = _PYBYTES_FROM_STRING_AND_SIZE(None, buffer_size)
+            buf_ptr = _PYBYTES_AS_STRING(py_bytes)
+            try:
+                import cffi  # type: ignore
+                ffi = cffi.FFI()
+                dst_cffi = ffi.cast("char*", int(ctypes.cast(buf_ptr, ctypes.c_void_p).value))
+                tile_cffi = ffi.from_buffer("char[]", tile)
+                for offset in range(0, buffer_size, tile_len):
+                    chunk_len = min(tile_len, buffer_size - offset)
+                    ffi.memmove(dst_cffi + offset, tile_cffi, chunk_len)
+                return py_bytes
+            except Exception:
+                tile_ctypes = (ctypes.c_char * tile_len).from_buffer_copy(tile)
+                for offset in range(0, buffer_size, tile_len):
+                    chunk_len = min(tile_len, buffer_size - offset)
+                    ctypes.memmove(ctypes.byref(buf_ptr.contents, offset), tile_ctypes, chunk_len)
+                return py_bytes
+        except Exception as e:
+            logger.debug(f"pythonapi direct byte population failed: {e}")
+
+    # Fallback if pythonapi or direct buffer mapping fails
     decoded_bytes = _get_preallocated_buffer(buffer_size)
-    for i in range(0, buffer_size, 4):
-        decoded_bytes[i] = (seed + i) % 256
-        decoded_bytes[i + 1] = (seed + i * 2) % 256
-        decoded_bytes[i + 2] = (seed + i * 3) % 256
-        decoded_bytes[i + 3] = 255
+    try:
+        import cffi  # type: ignore
+        ffi = cffi.FFI()
+        dst_ptr = ffi.from_buffer(decoded_bytes)
+        tile_ptr = ffi.from_buffer(tile)
+        for offset in range(0, buffer_size, tile_len):
+            chunk_len = min(tile_len, buffer_size - offset)
+            ffi.memmove(dst_ptr + offset, tile_ptr, chunk_len)
+    except Exception:
+        dst_ptr = (ctypes.c_char * buffer_size).from_buffer(decoded_bytes)
+        tile_ptr = (ctypes.c_char * tile_len).from_buffer(tile)
+        for offset in range(0, buffer_size, tile_len):
+            chunk_len = min(tile_len, buffer_size - offset)
+            ctypes.memmove(ctypes.byref(dst_ptr, offset), tile_ptr, chunk_len)
+
     return bytes(decoded_bytes[:buffer_size])
 
 

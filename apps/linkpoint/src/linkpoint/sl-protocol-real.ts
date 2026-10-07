@@ -142,7 +142,7 @@ export class SLProtocol extends Utils.EventEmitter {
     if (!this.seedCapability) return;
 
     try {
-      const capsRequest = ['EventQueueGet', 'ChatSessionRequest', 'FetchInventoryDescendents2', 'AgentInventoryService', 'AgentInventoryService3'];
+      const capsRequest = ['EventQueueGet', 'ChatSessionRequest', 'FetchInventoryDescendents2', 'AgentInventoryService', 'AgentInventoryService3', 'NewFileAgentInventory'];
       const response = await corsHandler.makeRequest(this.seedCapability, {
         method: 'POST',
         headers: { 'Content-Type': 'application/llsd+xml' },

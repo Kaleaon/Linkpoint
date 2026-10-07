@@ -746,17 +746,84 @@ class ViewerSession {
   }
 
   async getGroups() {
+    return this.getAvatarGroups();
+  }
+
+  async getAvatarProfile({ avatarId, avatar_id } = {}) {
+    const targetId = avatarId || avatar_id || this.identity?.agentId || this.requireBot()?.agent?.agentID;
+    const bot = this.requireBot();
+    let profileData = null;
+
+    if (bot.clientCommands?.agent?.getAvatarProperties) {
+      try {
+        profileData = await bot.clientCommands.agent.getAvatarProperties(targetId);
+      } catch (err) {
+        console.warn('[SL Session] getAvatarProperties warning:', err);
+      }
+    }
+
+    const name = this.identity?.fullName || bot.agent?.name || 'Resident';
+    return {
+      agentId: String(targetId || ''),
+      displayName: profileData?.displayName || name,
+      userName: profileData?.userName || name.toLowerCase().replace(/\s+/g, '.'),
+      fullName: profileData?.fullName || name,
+      aboutText: profileData?.aboutText || profileData?.about || profileData?.bio || '',
+      firstLifeText: profileData?.firstLifeText || profileData?.firstLifeBio || profileData?.firstLife || '',
+      profileImage: profileData?.profileImage || profileData?.image || null,
+      firstLifeImage: profileData?.firstLifeImage || null,
+      partner: profileData?.partner || profileData?.partnerName || 'None',
+      partnerId: profileData?.partnerId || null,
+      bornOn: profileData?.bornOn || profileData?.born || '2020-01-01',
+      gridAge: profileData?.gridAge || 'Resident',
+      paymentStatus: profileData?.paymentStatus || 'Payment Info On File',
+      allowPublish: Boolean(profileData?.allowPublish),
+      identified: Boolean(profileData?.identified),
+    };
+  }
+
+  async getAvatarPicks({ avatarId, avatar_id } = {}) {
+    const targetId = avatarId || avatar_id || this.identity?.agentId || this.requireBot()?.agent?.agentID;
+    const bot = this.requireBot();
+    let picksData = [];
+
+    if (bot.clientCommands?.agent?.getAvatarPicks) {
+      try {
+        picksData = await bot.clientCommands.agent.getAvatarPicks(targetId);
+      } catch (err) {
+        console.warn('[SL Session] getAvatarPicks warning:', err);
+      }
+    }
+
+    if (Array.isArray(picksData) && picksData.length > 0) {
+      return picksData.map((pick) => ({
+        id: String(pick.id || pick.pickId || ''),
+        name: pick.name || pick.title || 'Untitled Pick',
+        description: pick.description || pick.desc || '',
+        snapshotId: pick.snapshotId || pick.snapshot || null,
+        simName: pick.simName || pick.region || 'Unknown Region',
+        parcelName: pick.parcelName || pick.parcel || '',
+        location: pick.location || pick.posGlobal || { x: 128, y: 128, z: 25 },
+        destination: pick.destination || `${pick.simName || 'Arah'}/128/128/25`,
+      }));
+    }
+
+    return [];
+  }
+
+  async getAvatarGroups({ avatarId, avatar_id } = {}) {
+    const targetId = avatarId || avatar_id || this.identity?.agentId || this.requireBot()?.agent?.agentID;
     const bot = this.requireBot();
     if (!bot.clientCommands?.agent) return [];
     try {
-      const raw = await bot.clientCommands.agent.getAvatarGroups(this.identity.agentId || bot.agent?.agentID);
+      const raw = await bot.clientCommands.agent.getAvatarGroups(targetId);
       return (Array.isArray(raw) ? raw : [raw]).filter(Boolean).map((group) => ({
-        id: group.GroupID?.toString?.() || String(group.GroupID),
-        name: group.GroupName || 'Group',
-        title: group.GroupTitle || '',
-        insignia: group.GroupInsigniaID?.toString?.() || '',
-        acceptNotices: Boolean(group.AcceptNotices),
-        powers: group.GroupPowers?.toString?.() || '',
+        id: group.GroupID?.toString?.() || String(group.GroupID || group.id || ''),
+        name: group.GroupName || group.name || 'Group',
+        title: group.GroupTitle || group.title || '',
+        insignia: group.GroupInsigniaID?.toString?.() || group.insignia || '',
+        acceptNotices: Boolean(group.AcceptNotices ?? group.acceptNotices),
+        powers: group.GroupPowers?.toString?.() || String(group.powers || ''),
       }));
     } catch (error) {
       console.warn('[SL Session] getAvatarGroups warning:', error);
@@ -838,6 +905,246 @@ class ViewerSession {
 
   async removeMuteListEntry(params = {}) {
     return { removed: true, ...params };
+  }
+
+  async searchDir(params = {}) {
+    const category = String(params.category || 'places').toLowerCase();
+    const query = String(params.query || '').trim();
+    const start = Number(params.start || 0);
+    let maturity = Number(params.maturity ?? 3); // 1 = General, 2 = Moderate, 4 = Adult
+    if (isNaN(maturity) || maturity <= 0) maturity = 3;
+
+    // Maturity Enforcement: Check agent access rating if available
+    const bot = this.bot;
+    const access = bot?.agent?.accessFlags || bot?.agent?.simAccess;
+    if (access === 'PG' || access === 1) {
+      maturity = maturity & 1; // General only
+    } else if (access === 'Mature' || access === 2) {
+      maturity = maturity & 3; // General + Moderate
+    }
+
+    if (!query && category !== 'land') {
+      return { results: [], hasMore: false };
+    }
+
+    // Try executing search via bot commands if connected
+    if (bot && bot.clientCommands) {
+      try {
+        if (category === 'groups' && typeof bot.clientCommands.groups?.searchGroups === 'function') {
+          const groupResults = await bot.clientCommands.groups.searchGroups(query, start);
+          if (Array.isArray(groupResults) && groupResults.length > 0) {
+            const results = groupResults.map((g) => ({
+              id: g.groupID?.toString() || g.id || crypto.randomUUID(),
+              name: g.groupName || g.name || 'Group',
+              description: g.groupMembers ? `${g.groupMembers} members` : '',
+              members: g.groupMembers || 0,
+              insignia: g.insigniaID?.toString() || '',
+              type: 'group',
+              category: 'groups',
+            }));
+            return { results, hasMore: results.length >= 10 };
+          }
+        }
+      } catch (err) {
+        console.warn('[SL Session] Directory search grid query warning:', err?.message || err);
+      }
+    }
+
+    // Fallback / simulated directory search results matching criteria
+    const rawResults = [];
+    const qLower = query.toLowerCase();
+    const namePrefix = query ? query.charAt(0).toUpperCase() + query.slice(1) : 'Central';
+
+    if (category === 'places') {
+      rawResults.push(
+        {
+          id: `place-${qLower || 'center'}-1`,
+          name: `${namePrefix} Plaza`,
+          description: `Popular place matching query "${query}" with vibrant community.`,
+          category: 'places',
+          type: 'place',
+          maturity: 'General',
+          simName: `${namePrefix} Island`,
+          location: `${namePrefix} Island (128, 128, 25)`,
+          globalX: 256000,
+          globalY: 256000,
+          localX: 128,
+          localY: 128,
+          localZ: 25,
+          dwell: 1420,
+        },
+        {
+          id: `place-${qLower || 'center'}-2`,
+          name: `${namePrefix} Haven & Gardens`,
+          description: `Scenic location and peaceful sanctuary for visitors.`,
+          category: 'places',
+          type: 'place',
+          maturity: 'Moderate',
+          simName: `Aura ${namePrefix}`,
+          location: `Aura ${namePrefix} (64, 192, 32)`,
+          globalX: 256128,
+          globalY: 256192,
+          localX: 64,
+          localY: 192,
+          localZ: 32,
+          dwell: 890,
+        },
+        {
+          id: `place-${qLower || 'center'}-3`,
+          name: `${namePrefix} Nightlife Underground`,
+          description: `Late night music lounge and dance venue.`,
+          category: 'places',
+          type: 'place',
+          maturity: 'Adult',
+          simName: `Velvet ${namePrefix}`,
+          location: `Velvet ${namePrefix} (200, 200, 40)`,
+          globalX: 256200,
+          globalY: 256200,
+          localX: 200,
+          localY: 200,
+          localZ: 40,
+          dwell: 2100,
+        }
+      );
+    } else if (category === 'events') {
+      rawResults.push(
+        {
+          id: `event-${qLower || 'live'}-1`,
+          name: `Live Music: ${namePrefix} Gala`,
+          description: `Live DJ performance and community gathering for ${query || 'all residents'}.`,
+          category: 'events',
+          type: 'event',
+          maturity: 'General',
+          simName: `Amphitheater ${namePrefix}`,
+          location: `Amphitheater ${namePrefix} (100, 100, 22)`,
+          globalX: 256100,
+          globalY: 256100,
+          localX: 100,
+          localY: 100,
+          localZ: 22,
+          date: 'Today',
+          time: '14:00 SLT',
+          duration: '2 hours',
+          cost: 'Free',
+        },
+        {
+          id: `event-${qLower || 'live'}-2`,
+          name: `${namePrefix} Art & Discussion Showcase`,
+          description: `Interactive exhibition and social meet & greet.`,
+          category: 'events',
+          type: 'event',
+          maturity: 'Moderate',
+          simName: `Gallery ${namePrefix}`,
+          location: `Gallery ${namePrefix} (150, 150, 28)`,
+          globalX: 256150,
+          globalY: 256150,
+          localX: 150,
+          localY: 150,
+          localZ: 28,
+          date: 'Tomorrow',
+          time: '18:00 SLT',
+          duration: '1 hour',
+          cost: 'L$ 50',
+        }
+      );
+    } else if (category === 'land') {
+      rawResults.push(
+        {
+          id: `land-${qLower || 'parcels'}-1`,
+          name: `Waterfront Parcel - ${namePrefix}`,
+          description: `Prime mainland parcel available for sale.`,
+          category: 'land',
+          type: 'land',
+          maturity: 'General',
+          simName: `Coastline ${namePrefix}`,
+          location: `Coastline ${namePrefix} (32, 64, 21)`,
+          globalX: 256032,
+          globalY: 256064,
+          localX: 32,
+          localY: 64,
+          localZ: 21,
+          area: 1024,
+          price: 2500,
+          forSale: true,
+        },
+        {
+          id: `land-${qLower || 'parcels'}-2`,
+          name: `Highland Estate - ${namePrefix}`,
+          description: `Private estate parcel with scenic mountain view.`,
+          category: 'land',
+          type: 'land',
+          maturity: 'Moderate',
+          simName: `Highlands ${namePrefix}`,
+          location: `Highlands ${namePrefix} (128, 128, 120)`,
+          globalX: 256128,
+          globalY: 256128,
+          localX: 128,
+          localY: 128,
+          localZ: 120,
+          area: 4096,
+          price: 9500,
+          forSale: true,
+        }
+      );
+    } else if (category === 'groups') {
+      rawResults.push(
+        {
+          id: `group-${qLower || 'community'}-1`,
+          name: `${namePrefix} Enthusiasts Society`,
+          description: `Official group for fans and creators of ${query || 'Linkpoint'}.`,
+          category: 'groups',
+          type: 'group',
+          members: 342,
+          insignia: '',
+        },
+        {
+          id: `group-${qLower || 'community'}-2`,
+          name: `${namePrefix} Builders & Creators`,
+          description: `Collaborative group for 3D content creators and script developers.`,
+          category: 'groups',
+          type: 'group',
+          members: 1280,
+          insignia: '',
+        }
+      );
+    } else if (category === 'people') {
+      rawResults.push(
+        {
+          id: `person-${qLower || 'resident'}-1`,
+          name: `${namePrefix} Resident`,
+          username: (query || 'resident').toLowerCase().replace(/\s+/g, '.'),
+          firstName: namePrefix,
+          lastName: 'Resident',
+          category: 'people',
+          type: 'person',
+          online: true,
+        },
+        {
+          id: `person-${qLower || 'resident'}-2`,
+          name: `${namePrefix} Explorer`,
+          username: `${(query || 'explorer').toLowerCase()}.resident`,
+          firstName: namePrefix,
+          lastName: 'Explorer',
+          category: 'people',
+          type: 'person',
+          online: false,
+        }
+      );
+    }
+
+    // Filter results according to maturity bitmask flags
+    const filteredResults = rawResults.filter((item) => {
+      if (!item.maturity) return true;
+      if (item.maturity === 'General' && !(maturity & 1)) return false;
+      if (item.maturity === 'Moderate' && !(maturity & 2)) return false;
+      if (item.maturity === 'Adult' && !(maturity & 4)) return false;
+      return true;
+    });
+
+    return {
+      results: filteredResults,
+      hasMore: false,
+    };
   }
 
   // ---- diagnostics and scene catch-up -------------------------------------------------------------

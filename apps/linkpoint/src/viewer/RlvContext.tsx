@@ -106,6 +106,24 @@ export interface ParsedRlvCommand {
   value: string;
 }
 
+export interface RlvNotificationToast {
+  id: string;
+  objectUuid: string;
+  objectName: string;
+  restriction: RlvRestriction;
+  action: 'added' | 'removed';
+  timestamp: number;
+}
+
+export interface RlvPrompt {
+  promptId: string;
+  objectUuid: string;
+  objectName: string;
+  forcedAction: string;
+  command: ParsedRlvCommand;
+  createdAt: number;
+}
+
 /**
  * Parses an RLV command string into single command components.
  * Supports single (@detach=n) and compound (@detach=n|sendchat=n or @detach=n,sendchat=n) command strings.
@@ -125,7 +143,17 @@ export function parseRlvCommandString(rawCommand: string): ParsedRlvCommand[] {
     if (!trimmed) continue;
 
     const equalsIdx = trimmed.indexOf('=');
-    if (equalsIdx < 0) continue;
+    if (equalsIdx < 0) {
+      const colonIdx = trimmed.indexOf(':');
+      if (colonIdx >= 0) {
+        const name = trimmed.substring(0, colonIdx).trim().toLowerCase();
+        const opt = trimmed.substring(colonIdx + 1).trim().toLowerCase();
+        if (opt === 'force') {
+          parsed.push({ name, option: null, value: 'force' });
+        }
+      }
+      continue;
+    }
 
     const cmdPart = trimmed.substring(0, equalsIdx).trim();
     const value = trimmed.substring(equalsIdx + 1).trim().toLowerCase();
@@ -148,18 +176,36 @@ export interface RlvContextValue {
   active: Set<RlvRestriction>;
   /** Map of restrictions grouped by issuing object UUID. */
   objectRestrictions: Map<string, Set<RlvRestriction>>;
+  /** Map of human readable object names by object UUID. */
+  objectNames: Map<string, string>;
+  /** Session trust list of approved object UUIDs for forced actions. */
+  sessionTrust: Set<string>;
+  /** Active interactive prompts awaiting resident approval. */
+  pendingPrompts: RlvPrompt[];
+  /** Active real-time notification toasts for soft restrictions. */
+  toasts: RlvNotificationToast[];
   /** True when this restriction is in force right now. */
   restricted: (r: RlvRestriction) => boolean;
   /** The reason string when restricted, otherwise null — handy for a title. */
   reasonFor: (r: RlvRestriction) => string | null;
   /** Apply or clear a restriction, as an in-world command would. */
-  setRestriction: (r: RlvRestriction, on: boolean, objectUuid?: string) => void;
+  setRestriction: (r: RlvRestriction, on: boolean, objectUuid?: string, objectName?: string) => void;
   /** Parse and process an incoming raw RLV command string from an object. */
-  processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean) => void;
+  processCommand: (rawCommand: string, objectUuid?: string, isOwner?: boolean, objectName?: string) => void;
   /** Clear all restrictions issued by a specific object UUID (e.g. when detached). */
   clearObjectRestrictions: (objectUuid: string) => void;
   /** Clear all restrictions across all objects. */
   clearAllRestrictions: () => void;
+  /** Approve a pending Tier 2 prompt. */
+  approvePrompt: (promptId: string) => void;
+  /** Deny a pending Tier 2 prompt. */
+  denyPrompt: (promptId: string) => void;
+  /** Approve a Tier 2 prompt and add the object to the session trust list. */
+  alwaysAllowPrompt: (promptId: string) => void;
+  /** Clear session trust authorizations (resets on teleport or logout). */
+  clearSessionTrust: () => void;
+  /** Dismiss a notification toast. */
+  dismissToast: (id: string) => void;
 }
 
 export const RlvContext = createContext<RlvContextValue | null>(null);
@@ -174,7 +220,11 @@ export const RlvProvider: React.FC<{
   client?: ViewerClient;
   /** Optional callback for query command replies (useful for testing and script channels). */
   onQueryReply?: (channel: number, reply: string) => void;
-}> = ({ children, initialEnabled = false, initialRestrictions, client, onQueryReply }) => {
+  /** Optional callback when a notification toast is dispatched. */
+  onNotificationToast?: (toast: RlvNotificationToast) => void;
+  /** Optional callback when a Tier 2 forced action is executed. */
+  onForceActionExecute?: (prompt: RlvPrompt) => void;
+}> = ({ children, initialEnabled = false, initialRestrictions, client, onQueryReply, onNotificationToast, onForceActionExecute }) => {
   const [enabled, setEnabled] = useState(initialEnabled);
 
   // Map of objectUuid -> Set<RlvRestriction>
@@ -185,6 +235,21 @@ export const RlvProvider: React.FC<{
     }
     return map;
   });
+
+  // Map of objectUuid -> objectName
+  const [objectNames, setObjectNames] = useState<Map<string, string>>(() => new Map());
+
+  // Set of object UUIDs trusted for forced Tier 2 commands during this session
+  const [sessionTrust, setSessionTrust] = useState<Set<string>>(() => new Set());
+
+  // Interactive prompts pending user confirmation
+  const [pendingPrompts, setPendingPrompts] = useState<RlvPrompt[]>([]);
+
+  // Real-time notification toasts for Tier 1 restrictions
+  const [toasts, setToasts] = useState<RlvNotificationToast[]>([]);
+
+  // Track prompt timers for 30-second timeouts
+  const promptTimersRef = React.useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   // Compute union of active restrictions across all objects
   const active = useMemo(() => {
@@ -204,38 +269,6 @@ export const RlvProvider: React.FC<{
     [enabled, active],
   );
 
-  const setRestriction = useCallback((r: RlvRestriction, on: boolean, objectUuid: string = DEFAULT_RLV_OBJECT_UUID) => {
-    setObjectRestrictions((prev) => {
-      const next = new Map(prev);
-      const currentSet = new Set(next.get(objectUuid) ?? []);
-      if (on) {
-        currentSet.add(r);
-        next.set(objectUuid, currentSet);
-      } else {
-        currentSet.delete(r);
-        if (currentSet.size === 0) {
-          next.delete(objectUuid);
-        } else {
-          next.set(objectUuid, currentSet);
-        }
-      }
-      return next;
-    });
-  }, []);
-
-  const clearObjectRestrictions = useCallback((objectUuid: string) => {
-    setObjectRestrictions((prev) => {
-      if (!prev.has(objectUuid)) return prev;
-      const next = new Map(prev);
-      next.delete(objectUuid);
-      return next;
-    });
-  }, []);
-
-  const clearAllRestrictions = useCallback(() => {
-    setObjectRestrictions(new Map());
-  }, []);
-
   const sendReply = useCallback(
     (channel: number, reply: string) => {
       if (onQueryReply) {
@@ -254,8 +287,153 @@ export const RlvProvider: React.FC<{
     [client, onQueryReply],
   );
 
+  const addNotificationToast = useCallback(
+    (objectUuid: string, objectName: string, restriction: RlvRestriction, action: 'added' | 'removed') => {
+      const toast: RlvNotificationToast = {
+        id: `toast_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        objectUuid,
+        objectName,
+        restriction,
+        action,
+        timestamp: Date.now(),
+      };
+      setToasts((prev) => [toast, ...prev.slice(0, 19)]);
+      if (onNotificationToast) {
+        onNotificationToast(toast);
+      }
+    },
+    [onNotificationToast],
+  );
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const setRestriction = useCallback(
+    (r: RlvRestriction, on: boolean, objectUuid: string = DEFAULT_RLV_OBJECT_UUID, objectName: string = 'Unknown Object') => {
+      setObjectNames((prev) => {
+        const next = new Map(prev);
+        next.set(objectUuid, objectName);
+        return next;
+      });
+
+      setObjectRestrictions((prev) => {
+        const next = new Map(prev);
+        const currentSet = new Set(next.get(objectUuid) ?? []);
+        if (on) {
+          currentSet.add(r);
+          next.set(objectUuid, currentSet);
+          addNotificationToast(objectUuid, objectName, r, 'added');
+        } else {
+          currentSet.delete(r);
+          if (currentSet.size === 0) {
+            next.delete(objectUuid);
+          } else {
+            next.set(objectUuid, currentSet);
+          }
+          addNotificationToast(objectUuid, objectName, r, 'removed');
+        }
+        return next;
+      });
+    },
+    [addNotificationToast],
+  );
+
+  const clearObjectRestrictions = useCallback((objectUuid: string) => {
+    setObjectRestrictions((prev) => {
+      if (!prev.has(objectUuid)) return prev;
+      const next = new Map(prev);
+      next.delete(objectUuid);
+      return next;
+    });
+  }, []);
+
+  const clearAllRestrictions = useCallback(() => {
+    setObjectRestrictions(new Map());
+  }, []);
+
+  const clearSessionTrust = useCallback(() => {
+    setSessionTrust(new Set());
+  }, []);
+
+  const executeForcedActionInternal = useCallback(
+    (prompt: RlvPrompt) => {
+      if (onForceActionExecute) {
+        onForceActionExecute(prompt);
+      }
+    },
+    [onForceActionExecute],
+  );
+
+  const denyPromptInternal = useCallback(
+    (promptId: string, isTimeout: boolean = false) => {
+      // Clear timer
+      const timer = promptTimersRef.current.get(promptId);
+      if (timer) {
+        clearTimeout(timer);
+        promptTimersRef.current.delete(promptId);
+      }
+
+      setPendingPrompts((prev) => {
+        const prompt = prev.find((p) => p.promptId === promptId);
+        if (prompt) {
+          // Send explicit denial reply over script reply channel
+          sendReply(-1812221819, `Denied ${prompt.forcedAction}:force from ${prompt.objectName} (${prompt.objectUuid})`);
+        }
+        return prev.filter((p) => p.promptId !== promptId);
+      });
+    },
+    [sendReply],
+  );
+
+  const approvePrompt = useCallback(
+    (promptId: string) => {
+      const timer = promptTimersRef.current.get(promptId);
+      if (timer) {
+        clearTimeout(timer);
+        promptTimersRef.current.delete(promptId);
+      }
+
+      setPendingPrompts((prev) => {
+        const prompt = prev.find((p) => p.promptId === promptId);
+        if (prompt) {
+          executeForcedActionInternal(prompt);
+        }
+        return prev.filter((p) => p.promptId !== promptId);
+      });
+    },
+    [executeForcedActionInternal],
+  );
+
+  const denyPrompt = useCallback(
+    (promptId: string) => {
+      denyPromptInternal(promptId, false);
+    },
+    [denyPromptInternal],
+  );
+
+  const alwaysAllowPrompt = useCallback(
+    (promptId: string) => {
+      const timer = promptTimersRef.current.get(promptId);
+      if (timer) {
+        clearTimeout(timer);
+        promptTimersRef.current.delete(promptId);
+      }
+
+      setPendingPrompts((prev) => {
+        const prompt = prev.find((p) => p.promptId === promptId);
+        if (prompt) {
+          setSessionTrust((prevTrust) => new Set(prevTrust).add(prompt.objectUuid));
+          executeForcedActionInternal(prompt);
+        }
+        return prev.filter((p) => p.promptId !== promptId);
+      });
+    },
+    [executeForcedActionInternal],
+  );
+
   const processCommand = useCallback(
-    (rawCommand: string, objectUuid: string = DEFAULT_RLV_OBJECT_UUID, isOwner: boolean = true) => {
+    (rawCommand: string, objectUuid: string = DEFAULT_RLV_OBJECT_UUID, isOwner: boolean = true, objectName: string = 'Unknown Object') => {
       if (!isOwner) {
         // TPV constraint: Unowned objects cannot issue restrictions unless authorized
         return;
@@ -263,6 +441,13 @@ export const RlvProvider: React.FC<{
 
       const parsed = parseRlvCommandString(rawCommand);
       if (parsed.length === 0) return;
+
+      // Update object name lookup
+      setObjectNames((prev) => {
+        const next = new Map(prev);
+        next.set(objectUuid, objectName);
+        return next;
+      });
 
       // Group restriction state mutations into a single state update call per command string
       setObjectRestrictions((prev) => {
@@ -276,6 +461,35 @@ export const RlvProvider: React.FC<{
 
         for (const cmd of parsed) {
           const { name, option, value } = cmd;
+
+          // Tier 2 Forced Action Commands: sit:force, tpto:force, detach:force, remoutfit:force
+          const isTier2 = value === 'force' && ['sit', 'tpto', 'detach', 'remoutfit', 'unsit'].includes(name);
+
+          if (isTier2) {
+            const prompt: RlvPrompt = {
+              promptId: `${objectUuid}_${name}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+              objectUuid,
+              objectName,
+              forcedAction: name,
+              command: cmd,
+              createdAt: Date.now(),
+            };
+
+            if (sessionTrust.has(objectUuid)) {
+              // Pre-approved session trust -> execute immediately
+              executeForcedActionInternal(prompt);
+            } else {
+              // Pause execution and display interactive confirmation prompt
+              setPendingPrompts((prevPrompts) => [...prevPrompts, prompt]);
+
+              // Schedule 30-second timeout
+              const timer = setTimeout(() => {
+                denyPromptInternal(prompt.promptId, true);
+              }, 30000);
+              promptTimersRef.current.set(prompt.promptId, timer);
+            }
+            continue;
+          }
 
           // 1. Query commands
           if (name === 'version' || name === 'versionnew' || name === 'versionnum') {
@@ -355,14 +569,15 @@ export const RlvProvider: React.FC<{
             continue;
           }
 
-          // 3. Restriction commands (handles standard restriction command classes)
+          // 3. Restriction commands (handles standard restriction command classes - Tier 1 soft restrictions)
           if (name in RLV_REASONS || isRlvRestriction(name)) {
             const restriction = name as RlvRestriction;
             const map = getMutableMap();
             const currentSet = new Set(map.get(objectUuid) ?? []);
-            if (value === 'n' || value === 'add' || value === 'force') {
+            if (value === 'n' || value === 'add') {
               currentSet.add(restriction);
               map.set(objectUuid, currentSet);
+              addNotificationToast(objectUuid, objectName, restriction, 'added');
             } else if (value === 'y' || value === 'rem') {
               currentSet.delete(restriction);
               if (currentSet.size === 0) {
@@ -370,6 +585,7 @@ export const RlvProvider: React.FC<{
               } else {
                 map.set(objectUuid, currentSet);
               }
+              addNotificationToast(objectUuid, objectName, restriction, 'removed');
             }
           }
         }
@@ -377,15 +593,15 @@ export const RlvProvider: React.FC<{
         return nextMap ?? prev;
       });
     },
-    [active, sendReply],
+    [active, sendReply, sessionTrust, executeForcedActionInternal, denyPromptInternal, addNotificationToast],
   );
 
   useEffect(() => {
     if (app?.chat) {
       app.chat.setRlvHandler({
         enabled,
-        processCommand: (cmd: string, objId?: string, isOwner?: boolean) => {
-          processCommand(cmd, objId, isOwner);
+        processCommand: (cmd: string, objId?: string, isOwner?: boolean, _channel?: number, objName?: string) => {
+          processCommand(cmd, objId, isOwner, objName);
         },
       });
     }
@@ -396,29 +612,55 @@ export const RlvProvider: React.FC<{
     };
   }, [enabled, processCommand]);
 
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      promptTimersRef.current.forEach((timer) => clearTimeout(timer));
+      promptTimersRef.current.clear();
+    };
+  }, []);
+
   const value = useMemo<RlvContextValue>(
     () => ({
       enabled,
       setEnabled,
       active,
       objectRestrictions,
+      objectNames,
+      sessionTrust,
+      pendingPrompts,
+      toasts,
       restricted,
       reasonFor,
       setRestriction,
       processCommand,
       clearObjectRestrictions,
       clearAllRestrictions,
+      approvePrompt,
+      denyPrompt,
+      alwaysAllowPrompt,
+      clearSessionTrust,
+      dismissToast,
     }),
     [
       enabled,
       active,
       objectRestrictions,
+      objectNames,
+      sessionTrust,
+      pendingPrompts,
+      toasts,
       restricted,
       reasonFor,
       setRestriction,
       processCommand,
       clearObjectRestrictions,
       clearAllRestrictions,
+      approvePrompt,
+      denyPrompt,
+      alwaysAllowPrompt,
+      clearSessionTrust,
+      dismissToast,
     ],
   );
 
@@ -469,11 +711,20 @@ export function useRlvSafe(): RlvContextValue {
     setEnabled: () => {},
     active: new Set(),
     objectRestrictions: new Map(),
+    objectNames: new Map(),
+    sessionTrust: new Set(),
+    pendingPrompts: [],
+    toasts: [],
     restricted: () => false,
     reasonFor: () => null,
     setRestriction: () => {},
     processCommand: () => {},
     clearObjectRestrictions: () => {},
     clearAllRestrictions: () => {},
+    approvePrompt: () => {},
+    denyPrompt: () => {},
+    alwaysAllowPrompt: () => {},
+    clearSessionTrust: () => {},
+    dismissToast: () => {},
   };
 }

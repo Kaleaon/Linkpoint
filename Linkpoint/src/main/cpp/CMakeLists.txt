@@ -34,7 +34,6 @@ add_library(
     audio/spatial/SpatialAudioEngine.cpp
     jni/spatial_audio_jni.cpp
     jni/math_jni.cpp
-    audio/voice/VivoxVoiceEngine.cpp
     basis_universal/basisu_transcoder.cpp
     jni/basis_transcoder_jni.cpp
     ${LINKPOINT_ETCPAK_SOURCES}

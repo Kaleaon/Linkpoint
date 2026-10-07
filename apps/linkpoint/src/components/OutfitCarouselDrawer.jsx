@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { Z_INDEX } from "../theme/dialogs.js";
 import { app } from "../linkpoint/app";
 import Icon from "./Icon.jsx";
 
@@ -12,7 +13,8 @@ import Icon from "./Icon.jsx";
  * batch wear triggers, and gesture drag-to-dismiss behavior.
  */
 export default function OutfitCarouselDrawer({ open = false, onClose }) {
-  const { V, t } = useTheme();
+  const { V, t, Z_INDEX: themeZIndex } = useTheme();
+  const drawerZIndex = themeZIndex?.DRAWER ?? Z_INDEX.DRAWER;
   const [query, setQuery] = useState("");
   const [outfits, setOutfits] = useState(() => app.inventory.getSavedOutfits(query));
   const [activeOutfitId, setActiveOutfitId] = useState(() => app.inventory.activeOutfitId || "outfit-1");
@@ -114,7 +116,7 @@ export default function OutfitCarouselDrawer({ open = false, onClose }) {
       style={{
         position: "absolute",
         inset: 0,
-        zIndex: 40,
+        zIndex: drawerZIndex,
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
