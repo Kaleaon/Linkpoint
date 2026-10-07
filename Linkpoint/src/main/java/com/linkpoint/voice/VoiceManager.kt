@@ -59,19 +59,6 @@ class VoiceManager(
         const val MODERATION_PARCEL_OWNER = 1
         const val MODERATION_ESTATE_MANAGER = 2
         const val MODERATION_REGION_OWNER = 4
-
-        private fun logD(msg: String) {
-            try { Log.d(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg") }
-        }
-        private fun logI(msg: String) {
-            try { Log.i(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg") }
-        }
-        private fun logW(msg: String, tr: Throwable? = null) {
-            try { if (tr != null) Log.w(TAG, msg, tr) else Log.w(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg ${tr?.message ?: ""}") }
-        }
-        private fun logE(msg: String, tr: Throwable? = null) {
-            try { if (tr != null) Log.e(TAG, msg, tr) else Log.e(TAG, msg) } catch (_: Throwable) { println("[$TAG] $msg ${tr?.message ?: ""}") }
-        }
     }
 
     private val voiceDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
@@ -132,6 +119,8 @@ class VoiceManager(
     private var inputGain = 1.0f
     private var outputGain = 1.0f
 
+    private val spatialAudioBridge = SpatialAudioBridge()
+
     // OpenSim SIP-to-WebRTC adapter
     private val openSimVoiceSignalingAdapter = OpenSimVoiceSignalingAdapter()
     init {
@@ -171,9 +160,9 @@ class VoiceManager(
             audioSource = peerConnectionFactory?.createAudioSource(audioConstraints)
             localAudioTrack = peerConnectionFactory?.createAudioTrack("localAudio", audioSource)
 
-            logI("[${Thread.currentThread().name}] WebRTC initialized")
+            Log.i(TAG, "[${Thread.currentThread().name}] WebRTC initialized")
         } catch (e: Throwable) {
-            logW("[${Thread.currentThread().name}] Failed to initialize WebRTC: ${e.message}")
+            Log.e(TAG, "[${Thread.currentThread().name}] Failed to initialize WebRTC", e)
         }
     }
 
@@ -252,27 +241,21 @@ class VoiceManager(
     }
 
     /**
-     * Primary entry point for voice connection.
-     *
-     * Queries region capability status and parcel local ID prior to initiating
-     * WebRTC peer connections. Fails gracefully if voice capability is missing
-     * on the current region.
+     * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
+     * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
+     * servers, then builds a [VoiceSession] configured with the
+     * sim-provided ICE servers (instead of the previous hardcoded
+     * Google STUN). The signaling layer that POSTs SDP to the channel
+     * URI is still pending — see the [VoiceSession] class doc.
      */
-    suspend fun connect(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
-        val hasVoiceCap = capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE) ||
-                          capabilityManager.hasCapability(CapabilityManager.CAP_SL_VOICE_WEBRTC) ||
-                          capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE)
-        if (!hasVoiceCap) {
-            logW("Cannot connect voice: Region lacks voice capabilities (ProvisionVoiceAccountRequest missing)")
-            _lastError.value = "Voice capability is not available in this region"
-            return@withContext false
-        }
-        _lastError.value = null
-
-        val targetParcelId = parcelLocalId ?: parcelManager?.currentParcel?.value?.localId
-        joinSpatialVoice(targetParcelId)
-    }
-
+    /**
+     * Join parcel voice. Fetches `ParcelVoiceInfoRequest` for the channel
+     * URI and `ProvisionVoiceAccountRequest` for credentials + ICE
+     * servers, then builds a [VoiceSession] configured with the
+     * sim-provided ICE servers (instead of the previous hardcoded
+     * Google STUN). The signaling layer that POSTs SDP to the channel
+     * URI is still pending — see the [VoiceSession] class doc.
+     */
     /**
      * Join parcel voice for OpenSim regions or legacy non-SL WebRTC channels.
      * Delegates directly to [joinOpenSimVoice] to bypass legacy native Vivox JNI stubs.
@@ -291,7 +274,7 @@ class VoiceManager(
             currentGridKind = gridKind
             currentVoiceConfig = voiceConfig
             activeAdapter = transportAdapterFactory.createAdapter(currentGridKind, currentVoiceConfig)
-            logI("Switched VoiceTransportAdapter to $gridKind (config=$voiceConfig)")
+            Log.i(TAG, "Switched VoiceTransportAdapter to $gridKind (config=$voiceConfig)")
         }
     }
 
@@ -312,7 +295,7 @@ class VoiceManager(
 
         if (!capabilityManager.hasCapability(CapabilityManager.CAP_PARCEL_VOICE) &&
             !capabilityManager.hasCapability(CapabilityManager.CAP_PROVISION_VOICE)) {
-            logW("Parcel voice unavailable: capabilities missing on region")
+            Log.w(TAG, "Parcel voice unavailable: capabilities missing on region")
             _lastError.value = "Voice capability is not available in this region"
             return@withContext false
         }
@@ -322,7 +305,45 @@ class VoiceManager(
         }
         val account = provisionVoiceAccount() // Best-effort credentials on OpenSim
 
-        logI("Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
+        val channelUri = voiceInfo.channelUri.lowercase()
+        val serverUri = voiceInfo.voiceAccountServerUri?.lowercase() ?: ""
+
+        val isMumbleScheme = channelUri.startsWith("mumble://") || channelUri.startsWith("murmur://") ||
+                             serverUri.startsWith("mumble://") || serverUri.startsWith("murmur://")
+
+        if (isMumbleScheme) {
+            Log.i(TAG, "Joining OpenSim Murmur Mumble voice channel: ${voiceInfo.channelUri}")
+            currentParcelSession?.close()
+
+            val mumbleAdapter = MumbleVoiceAdapter(
+                voiceInfo = voiceInfo,
+                accountInfo = account,
+                spatialAudioBridge = spatialAudioBridge
+            )
+            currentParcelSession = mumbleAdapter
+            activeSessions[voiceInfo.channelUri] = mumbleAdapter
+
+            val connected = mumbleAdapter.connect()
+            if (connected) {
+                mumbleAdapter.sendJoin(primary = true)
+                _isConnected.value = true
+                _lastError.value = null
+                Log.i(TAG, "OpenSim Murmur Mumble spatial voice connected successfully")
+                return@withContext true
+            } else {
+                Log.w(TAG, "OpenSim Murmur Mumble spatial voice connect failed")
+                _lastError.value = "Mumble connection failed"
+                mumbleAdapter.close()
+                if (currentParcelSession === mumbleAdapter) {
+                    currentParcelSession = null
+                }
+                activeSessions.remove(voiceInfo.channelUri)
+                _isConnected.value = false
+                return@withContext false
+            }
+        }
+
+        Log.i(TAG, "Joining OpenSim voice channel: ${voiceInfo.channelUri} via OpenSimVoiceSignalingAdapter")
 
         val creds = openSimVoiceSignalingAdapter.parseCredentials(voiceInfo, account)
         val iceServers = if (creds.iceServers.isNotEmpty()) creds.iceServers else defaultWebRtcIceServers()
@@ -331,8 +352,7 @@ class VoiceManager(
 
         val factory = peerConnectionFactory
         if (factory == null) {
-            logW("WebRTC PeerConnectionFactory not initialized for OpenSim voice session")
-            _lastError.value = "WebRTC PeerConnectionFactory not initialized"
+            Log.w(TAG, "WebRTC PeerConnectionFactory not initialized for OpenSim voice session")
             return@withContext false
         }
 
@@ -348,12 +368,10 @@ class VoiceManager(
             session.connect(iceServers)
             session.sendJoin(primary = true)
             _isConnected.value = true
-            _lastError.value = null
-            logI("OpenSim WebRTC spatial voice connected successfully (parcel=$parcelLocalId)")
+            Log.i(TAG, "OpenSim WebRTC spatial voice connected successfully (parcel=$parcelLocalId)")
             true
         } catch (e: Exception) {
-            logW("OpenSim WebRTC spatial voice connect failed: ${e.message}", e)
-            _lastError.value = "WebRTC connection failed: ${e.message}"
+            Log.w(TAG, "OpenSim WebRTC spatial voice connect failed: ${e.message}", e)
             session.close()
             currentWebRtcSession = null
             _isConnected.value = false
@@ -362,9 +380,16 @@ class VoiceManager(
     }
 
     /**
+     * Connect to spatial voice channel. Convenience delegate to [joinSpatialVoice].
+     */
+    suspend fun connect(parcelLocalId: Int? = null): Boolean = joinSpatialVoice(parcelLocalId)
+
+    /**
      * Top-level entry point for spatial voice. Picks the WebRTC flow
      * for WebRTC-enabled regions or OpenSim grids via [VoiceTransportAdapter], and falls back to legacy
      * parcel voice for non-WebRTC regions.
+     *
+     * Bypasses legacy native Vivox C++ JNI stubs completely on 64-bit Android runtimes.
      */
     suspend fun joinSpatialVoice(parcelLocalId: Int? = null): Boolean = withContext(voiceDispatcher) {
         val effectiveConfig = (currentVoiceConfig ?: VoiceConfig()).copy(
@@ -382,7 +407,6 @@ class VoiceManager(
 
         joinParcelVoice()
     }
-
 
     /**
      * `voice_server_type == "webrtc"` from `SimulatorFeatures` is the
@@ -429,7 +453,7 @@ class VoiceManager(
         currentWebRtcSession?.close()
         currentWebRtcSession = null
         _isConnected.value = false
-        logI("[${Thread.currentThread().name}] Left voice channel")
+        Log.i(TAG, "[${Thread.currentThread().name}] Left voice channel")
     }
 
     /**
@@ -439,7 +463,7 @@ class VoiceManager(
         _isMuted.value = muted
         scope.launch {
             localAudioTrack?.setEnabled(!muted)
-            logD("[${Thread.currentThread().name}] Set muted=$muted")
+            Log.d(TAG, "[${Thread.currentThread().name}] Set muted=$muted")
         }
     }
 
@@ -468,7 +492,7 @@ class VoiceManager(
             for (session in activeSessions.values) {
                 session.setOutputGain(outputGain)
             }
-            logD("[${Thread.currentThread().name}] Set output gain to $outputGain")
+            Log.d(TAG, "[${Thread.currentThread().name}] Set output gain to $outputGain")
         }
     }
 
@@ -488,7 +512,7 @@ class VoiceManager(
             // Send offer via IM
             // (Would send through chat/IM system)
 
-            logI("[${Thread.currentThread().name}] Started call to $targetAgentId (offer length=${offer.length})")
+            Log.i(TAG, "[${Thread.currentThread().name}] Started call to $targetAgentId (offer length=${offer.length})")
             true
         }
     }
@@ -504,7 +528,7 @@ class VoiceManager(
             val answer = session.handleOffer(offer)
             // Send answer back
 
-            logI("[${Thread.currentThread().name}] Accepted call $callId (answer length=${answer.length})")
+            Log.i(TAG, "[${Thread.currentThread().name}] Accepted call $callId (answer length=${answer.length})")
             true
         }
     }
@@ -515,7 +539,7 @@ class VoiceManager(
     fun endCall(callId: String) {
         activeSessions[callId]?.disconnect()
         activeSessions.remove(callId)
-        logI("[${Thread.currentThread().name}] Ended call $callId")
+        Log.i(TAG, "[${Thread.currentThread().name}] Ended call $callId")
     }
 
     // =====================================================================
@@ -546,7 +570,7 @@ class VoiceManager(
         _moderationLevel.value = level
         _canModerate.value = level != MODERATION_NONE
 
-        logI("[${Thread.currentThread().name}] Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
+        Log.i(TAG, "[${Thread.currentThread().name}] Moderation permissions updated: level=$level, canModerate=${_canModerate.value}")
     }
 
     /**
@@ -558,7 +582,7 @@ class VoiceManager(
      */
     suspend fun muteParticipant(participantId: UUID): Boolean {
         if (!_canModerate.value) {
-            logW("[${Thread.currentThread().name}] Cannot mute participant: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot mute participant: no moderation permissions")
             return false
         }
 
@@ -571,7 +595,7 @@ class VoiceManager(
         if (success) {
             currentParticipants[participantId] = participant.copy(isMutedByModerator = true)
             _participants.value = currentParticipants
-            logI("[${Thread.currentThread().name}] Muted participant: $participantId")
+            Log.i(TAG, "[${Thread.currentThread().name}] Muted participant: $participantId")
         }
 
         return success
@@ -586,7 +610,7 @@ class VoiceManager(
      */
     suspend fun unmuteParticipant(participantId: UUID): Boolean {
         if (!_canModerate.value) {
-            logW("[${Thread.currentThread().name}] Cannot unmute participant: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot unmute participant: no moderation permissions")
             return false
         }
 
@@ -598,7 +622,7 @@ class VoiceManager(
         if (success) {
             currentParticipants[participantId] = participant.copy(isMutedByModerator = false)
             _participants.value = currentParticipants
-            logI("[${Thread.currentThread().name}] Unmuted participant: $participantId")
+            Log.i(TAG, "[${Thread.currentThread().name}] Unmuted participant: $participantId")
         }
 
         return success
@@ -613,7 +637,7 @@ class VoiceManager(
      */
     suspend fun muteAllParticipants(): Boolean {
         if (!_canModerate.value) {
-            logW("[${Thread.currentThread().name}] Cannot mute all: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot mute all: no moderation permissions")
             return false
         }
 
@@ -626,7 +650,7 @@ class VoiceManager(
                 p.copy(isMutedByModerator = true)
             }
             _participants.value = mutedParticipants
-            logI("[${Thread.currentThread().name}] Muted all participants")
+            Log.i(TAG, "[${Thread.currentThread().name}] Muted all participants")
         }
 
         return success
@@ -640,7 +664,7 @@ class VoiceManager(
      */
     suspend fun unmuteAllParticipants(): Boolean {
         if (!_canModerate.value) {
-            logW("[${Thread.currentThread().name}] Cannot unmute all: no moderation permissions")
+            Log.w(TAG, "[${Thread.currentThread().name}] Cannot unmute all: no moderation permissions")
             return false
         }
 
@@ -653,7 +677,7 @@ class VoiceManager(
                 p.copy(isMutedByModerator = false)
             }
             _participants.value = unmutedParticipants
-            logI("[${Thread.currentThread().name}] Unmuted all participants")
+            Log.i(TAG, "[${Thread.currentThread().name}] Unmuted all participants")
         }
 
         return success
@@ -684,7 +708,7 @@ class VoiceManager(
 
             (response as? LLSDMap)?.getBoolean("success") ?: false
         } catch (e: Exception) {
-            logE("[${Thread.currentThread().name}] Failed to send moderation request", e)
+            Log.e(TAG, "[${Thread.currentThread().name}] Failed to send moderation request", e)
             false
         }
     }
@@ -740,7 +764,7 @@ class VoiceManager(
     private fun createSession(
         channelUri: String,
         iceServerSpecs: List<IceServerSpec> = emptyList()
-    ): VoiceSession {
+    ): InternalVoiceSession {
         // Build the WebRTC IceServer list from the simulator-provided
         // specs, falling back to a public STUN if the sim returned none
         // (legacy Vivox flow or older OpenSim). Hardcoded fallback should
@@ -759,7 +783,7 @@ class VoiceManager(
             sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
         }
 
-        val session = VoiceSession(
+        val session = InternalVoiceSession(
             channelUri = channelUri,
             peerConnection = null,
             dispatcher = voiceDispatcher
@@ -808,7 +832,7 @@ class VoiceManager(
  * were silently dropped — voice could not have established even if SDP
  * had worked.
  */
-private class SessionObserver(private val session: VoiceSession) : PeerConnection.Observer {
+private class SessionObserver(private val session: InternalVoiceSession) : PeerConnection.Observer {
     override fun onSignalingChange(state: PeerConnection.SignalingState) {
         session.onSignalingState(state)
     }
@@ -847,15 +871,15 @@ private class SessionObserver(private val session: VoiceSession) : PeerConnectio
  * and remote ICE ingest/polling) is delegated to a dedicated layer so
  * transport + REST parsing remain separate from peer-connection state.
  */
-internal class VoiceSession(
-    val channelUri: String,
+internal class InternalVoiceSession(
+    override val channelUri: String,
     @Volatile private var peerConnection: PeerConnection?,
     private val dispatcher: CoroutineDispatcher,
     private val signalingOrchestrator: VoiceSignalingOrchestrator = VoiceSignalingOrchestrator(
         transport = HttpVoiceSignalingTransport(),
         codec = JsonVoiceSignalingPayloadCodec()
     )
-) {
+) : com.linkpoint.voice.VoiceSession {
     private var isConnected = false
     private var outputGain = 1.0f
     private var localAudioTrack: org.webrtc.AudioTrack? = null
@@ -900,6 +924,20 @@ internal class VoiceSession(
         android.util.Log.d("VoiceSession", "Remote track arrived: ${receiver.track()?.kind()}")
     }
 
+    override suspend fun connect(iceServers: List<PeerConnection.IceServer>): Boolean {
+        if (iceServers.isNotEmpty()) {
+            updateIceServers(iceServers)
+        }
+        return isConnected()
+    }
+
+    override fun sendJoin(primary: Boolean) {}
+
+    override fun sendPositionUpdate(
+        x: Float, y: Float, z: Float,
+        lookX: Float, lookY: Float, lookZ: Float
+    ) {}
+
     /**
      * Establish the voice session by completing the SDP offer/answer
      * exchange against the simulator's WebRTC voice endpoint.
@@ -922,7 +960,7 @@ internal class VoiceSession(
         signalingJob?.cancel()
         signalingJob = sessionScope.launch {
             try {
-                signalingOrchestrator.connect(this@VoiceSession, uri, credentials, localIceCandidates)
+                signalingOrchestrator.connect(this@InternalVoiceSession, uri, credentials, localIceCandidates)
                 isConnected = true
                 android.util.Log.i("VoiceSession", "Voice signaling complete for $uri")
             } catch (e: Exception) {
@@ -932,7 +970,7 @@ internal class VoiceSession(
         }
     }
 
-    fun disconnect() {
+    override fun disconnect() {
         try {
             signalingJob?.cancel()
             signalingJob = null
@@ -943,6 +981,10 @@ internal class VoiceSession(
         } catch (e: Exception) {
             android.util.Log.e("VoiceSession", "Error during disconnect", e)
         }
+    }
+
+    override fun close() {
+        disconnect()
     }
 
     /**
@@ -1006,7 +1048,7 @@ internal class VoiceSession(
      * Set output audio gain (volume)
      * @param gain Volume multiplier (0.0 = muted, 1.0 = normal, >1.0 = amplified)
      */
-    fun setOutputGain(gain: Float) {
+    override fun setOutputGain(gain: Float) {
         outputGain = gain.coerceIn(0f, 2f)
 
         // Apply gain to received audio tracks via AudioTrack or mixer
@@ -1022,7 +1064,20 @@ internal class VoiceSession(
         android.util.Log.d("VoiceSession", "[${Thread.currentThread().name}] Set output gain to $outputGain")
     }
 
-    fun isConnected(): Boolean = isConnected
+    override fun isConnected(): Boolean = isConnected
+
+    override fun updateIceServers(iceServers: List<PeerConnection.IceServer>): Boolean {
+        val pc = peerConnection ?: return false
+        return try {
+            val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
+                sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+            }
+            pc.setConfiguration(rtcConfig)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 data class VoiceInfo(
