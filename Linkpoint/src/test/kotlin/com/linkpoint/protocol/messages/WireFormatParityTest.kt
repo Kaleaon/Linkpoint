@@ -1,5 +1,6 @@
 package com.linkpoint.protocol.messages
 
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.types.LLVector3
 import org.junit.Assert.assertArrayEquals
@@ -90,7 +91,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 0,                     // IM_NOTHING_SPECIAL
+            dialog = IMType.NOTHING_SPECIAL,                     // IM_NOTHING_SPECIAL
             id = sessionId,
             timestamp = ts,
             fromAgentName = "You",
@@ -136,7 +137,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 0,
+            dialog = IMType.NOTHING_SPECIAL,
             id = sessionId,
             timestamp = 0,
             fromAgentName = "",
@@ -157,7 +158,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 41,            // IM_TYPING_START
+            dialog = IMType.TYPING_START,            // IM_TYPING_START
             id = sessionId,
             timestamp = ts,
             fromAgentName = "",
@@ -198,7 +199,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = groupId,
-            dialog = 15,
+            dialog = IMType.SESSION_GROUP_START,
             id = groupId,
             timestamp = ts,
             fromAgentName = "You",
@@ -237,7 +238,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = groupId,
-            dialog = 17,
+            dialog = IMType.SESSION_SEND,
             id = groupId,
             timestamp = ts,
             fromAgentName = "You",
@@ -275,7 +276,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 0,
+            dialog = IMType.NOTHING_SPECIAL,
             id = sessionId,
             timestamp = ts,
             fromAgentName = "Tëst",
@@ -353,7 +354,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 0,
+            dialog = IMType.NOTHING_SPECIAL,
             id = sessionId,
             timestamp = 0,
             fromAgentName = "Sender",
@@ -379,7 +380,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 17,                  // group session-send
+            dialog = IMType.SESSION_SEND,                  // group session-send
             id = groupId,
             timestamp = 0,
             fromAgentName = "GroupMember",
@@ -403,7 +404,7 @@ class WireFormatParityTest {
             identity = identity,
             fromGroup = false,
             toAgentId = targetId,
-            dialog = 41,                  // IM_TYPING_START
+            dialog = IMType.TYPING_START,                  // IM_TYPING_START
             id = sessionId,
             timestamp = 0,
             fromAgentName = "Cheshyr Pontchartrain",

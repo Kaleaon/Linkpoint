@@ -4,7 +4,7 @@ use super::aabb::AABB;
 use super::chunk::ChunkGrid;
 use super::octree::SpatialEntity;
 use std::sync::mpsc::{Sender, channel};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread::{self, JoinHandle};
 use std::time::Instant;
 
@@ -27,7 +27,7 @@ pub struct SpatialWorkerPool {
 }
 
 impl SpatialWorkerPool {
-    pub fn new(worker_count: usize, grid: Arc<Mutex<ChunkGrid>>) -> Self {
+    pub fn new(worker_count: usize, grid: Arc<RwLock<ChunkGrid>>) -> Self {
         let (task_sender, task_receiver) = channel::<Task>();
         let receiver_arc = Arc::new(Mutex::new(task_receiver));
 
@@ -40,7 +40,7 @@ impl SpatialWorkerPool {
             let handle = thread::spawn(move || {
                 loop {
                     let task = {
-                        let rx = receiver.lock().unwrap();
+                        let Ok(rx) = receiver.lock() else { break };
                         match rx.recv() {
                             Ok(t) => t,
                             Err(_) => break,
@@ -50,11 +50,12 @@ impl SpatialWorkerPool {
                     #[allow(clippy::collapsible_if)]
                     match task {
                         Task::UpdateChunk { chunk_id } => {
-                            let grid = grid_ref.lock().unwrap();
-                            if let Some(chunk_arc) = grid.chunks.get(&chunk_id) {
-                                if let Ok(mut chunk) = chunk_arc.lock() {
-                                    chunk.process_incoming_handoffs();
-                                    chunk.octree.rebalance();
+                            if let Ok(grid) = grid_ref.read() {
+                                if let Some(chunk_arc) = grid.chunks.get(&chunk_id) {
+                                    if let Ok(mut chunk) = chunk_arc.lock() {
+                                        chunk.process_incoming_handoffs();
+                                        chunk.octree.rebalance();
+                                    }
                                 }
                             }
                         }
@@ -62,21 +63,21 @@ impl SpatialWorkerPool {
                             query_bounds_chunk,
                             reply,
                         } => {
-                            let mut batch_results = Vec::with_capacity(query_bounds_chunk.len());
-                            if let Ok(grid) = grid_ref.lock() {
+                            if let Ok(grid) = grid_ref.read() {
+                                let mut batch_results =
+                                    Vec::with_capacity(query_bounds_chunk.len());
                                 for query in &query_bounds_chunk {
                                     batch_results.push(grid.query_aabb(query));
                                 }
-                            } else {
-                                batch_results.resize_with(query_bounds_chunk.len(), Vec::new);
+                                let _ = reply.send(batch_results);
                             }
-                            let _ = reply.send(batch_results);
                         }
                         Task::RebalanceOctree => {
-                            let grid = grid_ref.lock().unwrap();
-                            for chunk_arc in grid.chunks.values() {
-                                if let Ok(mut chunk) = chunk_arc.lock() {
-                                    chunk.octree.rebalance();
+                            if let Ok(grid) = grid_ref.read() {
+                                for chunk_arc in grid.chunks.values() {
+                                    if let Ok(mut chunk) = chunk_arc.lock() {
+                                        chunk.octree.rebalance();
+                                    }
                                 }
                             }
                         }
@@ -157,7 +158,7 @@ mod tests {
 
     #[test]
     fn test_worker_pool_parallel_collisions_and_count() {
-        let grid = Arc::new(Mutex::new(ChunkGrid::new(
+        let grid = Arc::new(RwLock::new(ChunkGrid::new(
             [0.0, 0.0, 0.0],
             [128.0, 128.0, 128.0],
             [64.0, 64.0, 64.0],

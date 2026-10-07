@@ -7,11 +7,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -19,13 +16,30 @@ import org.robolectric.annotation.Config
 class RenderStateManagerTest {
 
     private lateinit var manager: RenderStateManager
-    private lateinit var mockGlSurfaceView: GLSurfaceView
+    private lateinit var fakeGlSurfaceView: FakeGLSurfaceView
+
+    class FakeGLSurfaceView : GLSurfaceView(RuntimeEnvironment.getApplication()) {
+        var requestRenderCount = 0
+        var lastRenderMode = -1
+
+        override fun requestRender() {
+            requestRenderCount++
+        }
+
+        override fun setRenderMode(renderMode: Int) {
+            lastRenderMode = renderMode
+        }
+
+        override fun getRenderMode(): Int {
+            return lastRenderMode
+        }
+    }
 
     @Before
     fun setUp() {
         manager = RenderStateManager()
-        mockGlSurfaceView = mock()
-        manager.attachGlSurfaceView(mockGlSurfaceView)
+        fakeGlSurfaceView = FakeGLSurfaceView()
+        manager.attachGlSurfaceView(fakeGlSurfaceView)
     }
 
     @Test
@@ -105,7 +119,7 @@ class RenderStateManagerTest {
         assertEquals(RenderStateManager.RenderMode.DIRTY_FLAG_OVERLAY, lastNewMode)
 
         // Verify GLSurfaceView mode changed to RENDERMODE_WHEN_DIRTY
-        verify(mockGlSurfaceView).renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        assertEquals(GLSurfaceView.RENDERMODE_WHEN_DIRTY, fakeGlSurfaceView.lastRenderMode)
 
         // GPU power estimate in telemetry is under 0.3W (<0.3W)
         assertTrue(manager.currentMode.estimatedGpuPowerW < 0.3f)
@@ -120,8 +134,8 @@ class RenderStateManagerTest {
         assertFalse(manager.isOverlayActive)
         assertEquals(RenderStateManager.RenderMode.ACTIVE_NAVIGATION_60FPS, manager.currentMode)
 
-        // RENDERMODE_CONTINUOUSLY was called during initial attach and during overlay dismissal
-        verify(mockGlSurfaceView, org.mockito.kotlin.times(2)).renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+        // RENDERMODE_CONTINUOUSLY was set when restoring mode
+        assertEquals(GLSurfaceView.RENDERMODE_CONTINUOUSLY, fakeGlSurfaceView.lastRenderMode)
     }
 
     @Test
@@ -140,12 +154,12 @@ class RenderStateManagerTest {
         })
 
         manager.setFullScreenOverlayActive(true)
-        verify(mockGlSurfaceView, never()).requestRender()
+        val initialRenders = fakeGlSurfaceView.requestRenderCount
 
         // World update or chat message arrives
         manager.invalidateSurface("chat_message_received")
 
-        verify(mockGlSurfaceView).requestRender()
+        assertEquals(initialRenders + 1, fakeGlSurfaceView.requestRenderCount)
         assertEquals("chat_message_received", invalidatedReason)
     }
 

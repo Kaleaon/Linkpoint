@@ -324,12 +324,15 @@ class WorldMap(
                 }
 
                 if (data == null) {
-                    val diskFile = getDiskTileFile(key)
+                    var diskFile = getDiskTileFile(key)
+                    if (diskFile == null || !diskFile.exists()) {
+                        diskFile = getDiskTileFile("$zoom-$x-$y")
+                    }
                     if (diskFile != null && diskFile.exists()) {
                         try {
                             data = diskFile.readBytes()
                         } catch (e: Exception) {
-                            Log.w(TAG, "Failed to read cached tile from disk: $key", e)
+                            Log.w(TAG, "Failed to read cached tile from disk: ${diskFile.name}", e)
                         }
                     }
                 }

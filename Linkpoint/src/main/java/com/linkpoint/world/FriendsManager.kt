@@ -2,12 +2,15 @@ package com.linkpoint.world
 
 import android.os.Parcelable
 import android.util.Log
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
+import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.llsd.*
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
+import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
 import kotlinx.coroutines.*
@@ -284,76 +287,27 @@ class FriendsManager(
 
     /**
      * Send IM to friend via ImprovedInstantMessage protocol.
-     * Uses dialog type 0 (IM_NOTHING_SPECIAL) for regular instant messages.
+     * Uses IMType.NOTHING_SPECIAL for regular instant messages.
      */
     suspend fun sendIM(friendAgentId: UUID, message: String) {
         withContext(Dispatchers.IO) {
             try {
-                // Wire format (LL message_template `ImprovedInstantMessage`,
-                // low-freq 254; Lumiya:
-                // slproto/messages/ImprovedInstantMessage.java PackPayload):
-                //   AgentData:    AgentID(LLUUID), SessionID(LLUUID)
-                //   MessageBlock: FromGroup(BOOL), ToAgentID(LLUUID),
-                //                 ParentEstateID(U32), RegionID(LLUUID),
-                //                 Position(LLVector3), Offline(U8),
-                //                 Dialog(U8), ID(LLUUID), Timestamp(U32),
-                //                 FromAgentName(Variable 1 NUL-term),
-                //                 Message(Variable 2 NUL-term),
-                //                 BinaryBucket(Variable 2)
-                //
-                // Lumiya's stringToVariableUTF (slproto/SLMessage.java line 212)
-                // appends a NUL byte and includes it in the length prefix.
-                // The previous encoder shipped FromAgentName and Message
-                // without the NUL, so the simulator's UTF parser would walk
-                // past the field boundary into adjacent fields.
-
-                val nameRaw = "User".toByteArray(Charsets.UTF_8)
-                val nameBytes = nameRaw + 0.toByte()
-
-                val messageRaw = message.toByteArray(Charsets.UTF_8)
-                val cappedMessage = if (messageRaw.size > 1023) messageRaw.copyOf(1023) else messageRaw
-                val messageBytes = cappedMessage + 0.toByte()
-
-                val payload = ByteBuffer
-                    .allocate(36 /* AgentData */ + 1 /* FromGroup */ + 16 /* ToAgentID */ +
-                              4 /* ParentEstateID */ + 16 /* RegionID */ + 12 /* Position */ +
-                              1 /* Offline */ + 1 /* Dialog */ + 16 /* ID */ + 4 /* Timestamp */ +
-                              1 + nameBytes.size /* FromAgentName V1 */ +
-                              2 + messageBytes.size /* Message V2 */ +
-                              2 /* BinaryBucket length only, empty */)
-                    .order(ByteOrder.LITTLE_ENDIAN)
-
-                // AgentData block
-                payload.putUUID(agentId)
-                payload.putUUID(udpConnection.getSessionId())
-
-                // MessageBlock
-                payload.put(0)  // FromGroup = false
-                payload.putUUID(friendAgentId)  // ToAgentID
-                payload.putInt(0)  // ParentEstateID
-                payload.putUUID(UUID(0, 0))  // RegionID (empty)
-                payload.putFloat(0f)  // Position X
-                payload.putFloat(0f)  // Position Y
-                payload.putFloat(0f)  // Position Z
-                payload.put(0)  // Offline
-                payload.put(0)  // Dialog = IM_NOTHING_SPECIAL (regular IM)
-
-                val transactionId = UUID.randomUUID()
-                payload.putUUID(transactionId)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())
-
-                // FromAgentName (Variable 1, NUL-terminated)
-                payload.put(nameBytes.size.toByte())
-                payload.put(nameBytes)
-
-                // Message (Variable 2, NUL-terminated)
-                payload.putShort(messageBytes.size.toShort())
-                payload.put(messageBytes)
-
-                // BinaryBucket (Variable 2) - empty for regular IM
-                payload.putShort(0)
-
-                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                val identity = AgentIdentity(
+                    agentId = agentId,
+                    sessionId = udpConnection.getSessionId(),
+                    circuitCode = udpConnection.getCircuitCode()
+                )
+                val payload = SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = friendAgentId,
+                    dialog = IMType.NOTHING_SPECIAL,
+                    id = UUID.randomUUID(),
+                    timestamp = (System.currentTimeMillis() / 1000).toInt(),
+                    fromAgentName = "User",
+                    message = message
+                )
+                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload, reliable = true)
                 Log.i(TAG, "Sent IM to friend $friendAgentId")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to send IM to friend", e)
@@ -443,42 +397,23 @@ class FriendsManager(
 
         return withContext(Dispatchers.IO) {
             try {
-                // OfferFriendship via ImprovedInstantMessage
                 val transactionId = UUID.randomUUID()
-                val messageBytes = message.toByteArray(Charsets.UTF_8)
-
-                val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-
-                // AgentData block - UUIDs use big-endian per SL protocol
-                payload.putUUID(agentId)
-                payload.putUUID(udpConnection.getSessionId())
-
-                // MessageBlock
-                payload.put(0)  // FromGroup = false
-                payload.putUUID(targetAgentId)
-                payload.putInt(0)  // ParentEstateID
-                payload.putUUID(UUID(0, 0))  // RegionID (empty)
-                payload.putFloat(0f)  // Position X
-                payload.putFloat(0f)  // Position Y
-                payload.putFloat(0f)  // Position Z
-                payload.put(0)  // Offline
-                payload.put(38)  // Dialog = IM_FRIENDSHIP_OFFERED
-                payload.putUUID(transactionId)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())  // Timestamp
-
-                // FromAgentName
-                val nameBytes = "User".toByteArray(Charsets.UTF_8)
-                payload.put(nameBytes.size.toByte())
-                payload.put(nameBytes)
-
-                // Message
-                payload.putShort(messageBytes.size.toShort())
-                payload.put(messageBytes)
-
-                // BinaryBucket - empty for friendship offer
-                payload.putShort(0)
-
-                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                val identity = AgentIdentity(
+                    agentId = agentId,
+                    sessionId = udpConnection.getSessionId(),
+                    circuitCode = udpConnection.getCircuitCode()
+                )
+                val payload = SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = targetAgentId,
+                    dialog = IMType.FRIENDSHIP_OFFERED,
+                    id = transactionId,
+                    timestamp = (System.currentTimeMillis() / 1000).toInt(),
+                    fromAgentName = "User",
+                    message = message
+                )
+                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload, reliable = true)
                 Log.i(TAG, "✓ Friendship offer sent to $targetAgentId (transaction: $transactionId)")
                 true
             } catch (e: Exception) {
@@ -603,42 +538,22 @@ class FriendsManager(
     suspend fun requestTeleportToFriend(friendAgentId: UUID, message: String = ""): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // TeleportLureRequest via ImprovedInstantMessage with dialog type 22 (IM_LURE_USER)
-                val messageBytes = message.toByteArray(Charsets.UTF_8)
-                val payload = ByteBuffer.allocate(200 + messageBytes.size).order(ByteOrder.LITTLE_ENDIAN)
-
-                // AgentData - UUIDs use big-endian per SL protocol
-                payload.putUUID(agentId)
-                payload.putUUID(udpConnection.getSessionId())
-
-                // MessageBlock
-                payload.put(0)  // FromGroup = false
-                payload.putUUID(friendAgentId)
-                payload.putInt(0)  // ParentEstateID
-                payload.putUUID(UUID(0, 0))  // RegionID (empty)
-                payload.putFloat(0f)  // Position X
-                payload.putFloat(0f)  // Position Y
-                payload.putFloat(0f)  // Position Z
-                payload.put(0)  // Offline
-                payload.put(22)  // Dialog = IM_LURE_USER (teleport request)
-
-                val transactionId = UUID.randomUUID()
-                payload.putUUID(transactionId)
-                payload.putInt((System.currentTimeMillis() / 1000).toInt())
-
-                // FromAgentName
-                val nameBytes = "User".toByteArray(Charsets.UTF_8)
-                payload.put(nameBytes.size.toByte())
-                payload.put(nameBytes)
-
-                // Message
-                payload.putShort(messageBytes.size.toShort())
-                if (messageBytes.isNotEmpty()) payload.put(messageBytes)
-
-                // BinaryBucket - empty
-                payload.putShort(0)
-
-                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload.array().copyOf(payload.position()), reliable = true)
+                val identity = AgentIdentity(
+                    agentId = agentId,
+                    sessionId = udpConnection.getSessionId(),
+                    circuitCode = udpConnection.getCircuitCode()
+                )
+                val payload = SLMessagePackers.packImprovedInstantMessage(
+                    identity = identity,
+                    fromGroup = false,
+                    toAgentId = friendAgentId,
+                    dialog = IMType.LURE_USER,
+                    id = UUID.randomUUID(),
+                    timestamp = (System.currentTimeMillis() / 1000).toInt(),
+                    fromAgentName = "User",
+                    message = message
+                )
+                udpConnection.sendPacket(MessageIdRegistry.IMPROVED_INSTANT_MESSAGE, payload, reliable = true)
                 Log.i(TAG, "Requested teleport to friend $friendAgentId")
                 true
             } catch (e: Exception) {

@@ -15,29 +15,34 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import com.linkpoint.assets.AssetCache
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import java.util.UUID
 
 // AvatarManager and the surrounding scene update flow log via
 // android.util.Log; without Robolectric the Log.println_native JNI
 // stub throws UnsatisfiedLinkError before we reach any assertion.
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class AvatarUpdateFixtureTest {
 
     @Test
     fun `avatar update fixture populates manager and scene state`() = runTest {
+        val context = RuntimeEnvironment.getApplication()
+        val cache = AssetCache(context)
+        val capManager = CapabilityManager()
         val manager = AvatarManager(
-            context = mock<Context>(),
-            meshManager = mock<MeshManager>(),
-            textureManager = mock<TextureManager>(),
-            animationManager = mock<AnimationManager>(),
-            capabilityManager = mock<CapabilityManager>(),
+            context = context,
+            meshManager = MeshManager(context, cache, capManager),
+            textureManager = TextureManager(context, cache, capManager),
+            animationManager = AnimationManager(context, cache),
+            capabilityManager = capManager,
             udpConnection = null
         )
 

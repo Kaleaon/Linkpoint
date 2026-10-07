@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * @see <a href="https://wiki.secondlife.com/wiki/AgentSetAppearance">AgentSetAppearance Message</a>
  */
 class AppearanceManager @JvmOverloads constructor(
-    private val udpConnection: UDPConnectionFixed,
-    private val avatarBaker: AvatarBaker,
+    private val udpConnection: UDPConnectionFixed? = null,
+    private val avatarBaker: AvatarBaker? = null,
     private val capabilityNegotiator: AppearanceCapabilityNegotiator? = null,
     var skeleton: AvatarSkeleton? = null
 ) {
@@ -183,7 +183,7 @@ class AppearanceManager @JvmOverloads constructor(
             }
 
             Log.d(TAG, "  baking 11 channels (head/upper/lower/eyes/skirt/hair/leftarm/leftleg/aux1/aux2/aux3)...")
-            val bakedTextures = avatarBaker.bakeAll(includeBoM = true)
+            val bakedTextures = avatarBaker?.bakeAll(includeBoM = true) ?: emptyMap()
             lastBakedTextureCount = bakedTextures.size
             Log.d(TAG, "  baked ${bakedTextures.size} channels: ${bakedTextures.keys.sorted().joinToString()}")
 
@@ -285,7 +285,7 @@ class AppearanceManager @JvmOverloads constructor(
         Log.d(TAG, "Sending AgentSetAppearance " +
             "(serial=$serial, wearables=$wearableCount, " +
             "textureEntry=${textureEntry.size}B, params=$VISUAL_PARAM_COUNT)")
-        udpConnection.sendPacket(MessageIdRegistry.AGENT_SET_APPEARANCE, payload.array(), reliable = true)
+        udpConnection?.sendPacket(MessageIdRegistry.AGENT_SET_APPEARANCE, payload.array(), reliable = true)
     }
 
     /**
@@ -400,7 +400,7 @@ class AppearanceManager @JvmOverloads constructor(
         }
 
         Log.d(TAG, "Sending AgentIsNowWearing (${wearables.size} wearables)")
-        udpConnection.sendPacket(MessageIdRegistry.AGENT_IS_NOW_WEARING, payload.array(), reliable = true)
+        udpConnection?.sendPacket(MessageIdRegistry.AGENT_IS_NOW_WEARING, payload.array(), reliable = true)
     }
 
     /**

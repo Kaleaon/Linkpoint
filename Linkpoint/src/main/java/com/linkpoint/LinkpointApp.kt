@@ -83,6 +83,7 @@ import com.linkpoint.diagnostics.ScenePopulationDiagnostics
 import com.linkpoint.bom.BakesOnMeshManager
 import com.linkpoint.inventory.LandmarkManager
 import com.linkpoint.media.MediaManager
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.objects.SitManager
 import com.linkpoint.snapshot.SnapshotManager
@@ -472,6 +473,8 @@ class LinkpointApp : Application() {
      */
     lateinit var simulatorFeatures: com.linkpoint.world.SimulatorFeaturesManager
         private set
+    lateinit var renderMaterialsManager: com.linkpoint.render.RenderMaterialsManager
+        private set
     lateinit var udpConnection: UDPConnectionFixed
         private set
 
@@ -796,6 +799,7 @@ class LinkpointApp : Application() {
                 }
             }
         }
+        renderMaterialsManager = com.linkpoint.render.RenderMaterialsManager(capabilityManager)
         udpConnection = UDPConnectionFixed()
 
         // Protocol handler
@@ -807,7 +811,8 @@ class LinkpointApp : Application() {
         filamentCommandConsumer = FilamentRenderCommandConsumer(
             renderManager = renderManager,
             stream = renderCommandStream,
-            scope = applicationScope
+            scope = applicationScope,
+            materialsManager = renderMaterialsManager
         ).also { it.start() }
         gles3CommandConsumer = Gles3RenderCommandConsumer(
             stream = renderCommandStream,
@@ -823,6 +828,9 @@ class LinkpointApp : Application() {
         // Asset system
         assetCache = AssetCache(this, cacheManager)
         textureManager = TextureManager(this, assetCache, capabilityManager)
+        renderMaterialsManager.setTexturePrefetcher { ids ->
+            textureManager.prefetch(ids)
+        }
         meshManager = MeshManager(this, assetCache, capabilityManager)
         animationManager = AnimationManager(this, assetCache)
         soundManager = SoundManager(this, assetCache)
@@ -1737,12 +1745,22 @@ class LinkpointApp : Application() {
                         renderManager.enqueueUpdate(RenderableUpdate.PrimUpdate(update))
                     }
 
-                    // Extract and prefetch textures from the object's TextureEntry
-                    if (::textureManager.isInitialized && update.textureEntry.isNotEmpty()) {
-                        val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
-                        val downloadableIds = textureIds.filter { TextureEntryParser.shouldDownload(it) }
-                        if (downloadableIds.isNotEmpty()) {
-                            textureManager.prefetch(downloadableIds.toList())
+                    // Extract and prefetch textures and materials from the object's TextureEntry
+                    if (update.textureEntry.isNotEmpty()) {
+                        if (::textureManager.isInitialized) {
+                            val textureIds = TextureEntryParser.extractTextureIds(update.textureEntry)
+                            val downloadableIds = textureIds.filter { TextureEntryParser.shouldDownload(it) }
+                            if (downloadableIds.isNotEmpty()) {
+                                textureManager.prefetch(downloadableIds.toList())
+                            }
+                        }
+                        if (::renderMaterialsManager.isInitialized) {
+                            val materialIds = TextureEntryParser.extractMaterialIds(update.textureEntry)
+                            if (materialIds.isNotEmpty()) {
+                                applicationScope.launch {
+                                    renderMaterialsManager.prefetchMaterials(materialIds.toList())
+                                }
+                            }
                         }
                     }
                 }
@@ -5627,7 +5645,7 @@ class LinkpointApp : Application() {
                         fromName = imData.fromAgentName,
                         message = imData.message,
                         sessionId = imData.sessionId,
-                        dialogType = imData.dialog,
+                        dialogType = IMType.fromValue(imData.dialog),
                         timestamp = imData.timestamp,
                         binaryBucket = imData.binaryBucket
                     )
@@ -5914,7 +5932,7 @@ class LinkpointApp : Application() {
 
     fun bindGlesRenderEngine(provider: com.linkpoint.render.lumiya.core.RenderEngineProvider?) {
         if (::gles3CommandConsumer.isInitialized) {
-            gles3CommandConsumer.bindEngine(provider)
+            gles3CommandConsumer.bindEngine(provider, { it.run() }, null, if (::renderMaterialsManager.isInitialized) renderMaterialsManager else null)
         }
     }
 
@@ -5947,7 +5965,8 @@ class LinkpointApp : Application() {
                 }
             }
         } else null
-        gles3CommandConsumer.bindEngine(provider, glThreadExecutor, fetcher)
+        val materialsManagerRef = if (::renderMaterialsManager.isInitialized) renderMaterialsManager else null
+        gles3CommandConsumer.bindEngine(provider, glThreadExecutor, fetcher, materialsManagerRef)
     }
 
     private fun publishRenderCommand(command: SceneRenderCommand): Boolean {

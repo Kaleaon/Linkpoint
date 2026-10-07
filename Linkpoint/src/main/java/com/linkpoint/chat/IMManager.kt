@@ -1,6 +1,7 @@
 package com.linkpoint.chat
 
 import android.util.Log
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.messaging.MessagingDispatcher
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
@@ -42,7 +43,6 @@ class IMManager(
     companion object {
         private const val TAG = "IMManager"
         private const val MAX_SESSION_HISTORY = 200
-
         private fun logDebug(tag: String, msg: String) {
             try { Log.d(tag, msg) } catch (_: Throwable) { println("[$tag] $msg") }
         }
@@ -54,47 +54,6 @@ class IMManager(
         private fun logError(tag: String, msg: String, tr: Throwable? = null) {
             try { if (tr != null) Log.e(tag, msg, tr) else Log.e(tag, msg) } catch (_: Throwable) { println("[$tag] $msg ${tr?.message ?: ""}") }
         }
-        // IM dialog types
-        const val IM_NOTHING_SPECIAL = 0
-        const val IM_MESSAGEBOX = 1
-        const val IM_GROUP_INVITATION = 3
-        const val IM_INVENTORY_OFFERED = 4
-        const val IM_INVENTORY_ACCEPTED = 5
-        const val IM_INVENTORY_DECLINED = 6
-        const val IM_GROUP_VOTE = 7
-        const val IM_GROUP_MESSAGE_DEPRECATED = 8
-        const val IM_TASK_INVENTORY_OFFERED = 9
-        const val IM_TASK_INVENTORY_ACCEPTED = 10
-        const val IM_TASK_INVENTORY_DECLINED = 11
-        const val IM_NEW_USER_DEFAULT = 12
-        const val IM_SESSION_INVITE = 13
-        const val IM_SESSION_P2P_INVITE = 14
-        const val IM_SESSION_GROUP_START = 15
-        const val IM_SESSION_CONFERENCE_START = 16
-        const val IM_SESSION_SEND = 17
-        const val IM_SESSION_LEAVE = 18
-        const val IM_FROM_TASK = 19
-        const val IM_BUSY_AUTO_RESPONSE = 20
-        const val IM_CONSOLE_AND_CHAT_HISTORY = 21
-        const val IM_LURE_USER = 22
-        const val IM_LURE_ACCEPTED = 23
-        const val IM_LURE_DECLINED = 24
-        const val IM_GODLIKE_LURE_USER = 25
-        const val IM_TELEPORT_REQUEST = 26
-        const val IM_GROUP_ELECTION_DEPRECATED = 27
-        const val IM_GOTO_URL = 28
-        const val IM_FROM_TASK_AS_ALERT = 31
-        const val IM_GROUP_NOTICE = 32
-        const val IM_GROUP_NOTICE_INVENTORY_ACCEPTED = 33
-        const val IM_GROUP_NOTICE_INVENTORY_DECLINED = 34
-        const val IM_GROUP_INVITATION_ACCEPT = 35
-        const val IM_GROUP_INVITATION_DECLINE = 36
-        const val IM_GROUP_NOTICE_REQUESTED = 37
-        const val IM_FRIENDSHIP_OFFERED = 38
-        const val IM_FRIENDSHIP_ACCEPTED = 39
-        const val IM_FRIENDSHIP_DECLINED = 40
-        const val IM_TYPING_START = 41
-        const val IM_TYPING_STOP = 42
     }
 
     private val scope = CoroutineScope(MessagingDispatcher.dispatcher + SupervisorJob())
@@ -215,11 +174,12 @@ class IMManager(
         val fromAgentId = UUID.fromString(inviteInfo.getString("from_id") ?: return)
         val fromName = inviteInfo.getString("from_name") ?: "Unknown"
         val message = inviteInfo.getString("message") ?: ""
-        val type = inviteInfo.getInt("dialog") ?: 0
-
-        val sessionType = when (type) {
-            IM_SESSION_GROUP_START -> SessionType.GROUP
-            IM_SESSION_CONFERENCE_START -> SessionType.CONFERENCE
+        val typeInt = inviteInfo.getInt("dialog") ?: 0
+        val dialogType = IMType.fromValue(typeInt)
+        
+        val sessionType = when (dialogType) {
+            IMType.SESSION_GROUP_START -> SessionType.GROUP
+            IMType.SESSION_CONFERENCE_START -> SessionType.CONFERENCE
             else -> SessionType.P2P
         }
 
@@ -325,7 +285,7 @@ class IMManager(
         fromName: String,
         message: String,
         sessionId: UUID,
-        dialogType: Int,
+        dialogType: IMType,
         timestamp: Long,
         binaryBucket: ByteArray = byteArrayOf()
     ) {
@@ -333,17 +293,17 @@ class IMManager(
             val session = sessions.getOrPut(sessionId) {
                 IMSession(
                     sessionId = sessionId,
-                    type = if (dialogType == IM_SESSION_GROUP_START) SessionType.GROUP else SessionType.P2P,
+                    type = if (dialogType == IMType.SESSION_GROUP_START) SessionType.GROUP else SessionType.P2P,
                     name = fromName,
                     participants = mutableListOf(fromAgentId)
                 )
             }
 
             when (dialogType) {
-                IM_TYPING_START -> {
+                IMType.TYPING_START -> {
                     session.typingParticipants = session.typingParticipants + fromAgentId
                 }
-                IM_TYPING_STOP -> {
+                IMType.TYPING_STOP -> {
                     session.typingParticipants = session.typingParticipants - fromAgentId
                 }
                 else -> {
@@ -373,14 +333,14 @@ class IMManager(
         fromName: String,
         message: String,
         sessionId: UUID,
-        dialogType: Int,
+        dialogType: IMType,
         timestamp: Long,
         binaryBucket: ByteArray = byteArrayOf(),
         isOutgoing: Boolean = false
     ): SLChatEvent {
         return try {
             when (dialogType) {
-                IM_FRIENDSHIP_OFFERED -> SLChatEvent.FriendshipOffer(
+                IMType.FRIENDSHIP_OFFERED -> SLChatEvent.FriendshipOffer(
                     sessionId = sessionId,
                     fromAgentId = fromAgentId,
                     fromName = fromName,
@@ -389,7 +349,7 @@ class IMManager(
                     timestamp = timestamp,
                     isOutgoing = isOutgoing
                 )
-                IM_FRIENDSHIP_ACCEPTED, IM_FRIENDSHIP_DECLINED -> SLChatEvent.FriendshipResult(
+                IMType.FRIENDSHIP_ACCEPTED, IMType.FRIENDSHIP_DECLINED -> SLChatEvent.FriendshipResult(
                     sessionId = sessionId,
                     fromAgentId = fromAgentId,
                     fromName = fromName,
@@ -397,9 +357,9 @@ class IMManager(
                     dialogType = dialogType,
                     timestamp = timestamp,
                     isOutgoing = isOutgoing,
-                    isAccepted = dialogType == IM_FRIENDSHIP_ACCEPTED
+                    isAccepted = dialogType == IMType.FRIENDSHIP_ACCEPTED
                 )
-                IM_GROUP_INVITATION -> {
+                IMType.GROUP_INVITATION -> {
                     val joinFee = if (binaryBucket.size >= 4) {
                         try {
                             ByteBuffer.wrap(binaryBucket).order(ByteOrder.BIG_ENDIAN).int
@@ -419,7 +379,7 @@ class IMManager(
                         joinFee = joinFee
                     )
                 }
-                IM_LURE_USER, IM_GODLIKE_LURE_USER -> SLChatEvent.TeleportLure(
+                IMType.LURE_USER, IMType.GODLIKE_LURE_USER -> SLChatEvent.TeleportLure(
                     sessionId = sessionId,
                     fromAgentId = fromAgentId,
                     fromName = fromName,
@@ -430,7 +390,7 @@ class IMManager(
                     lureId = sessionId,
                     regionName = message
                 )
-                IM_INVENTORY_OFFERED, IM_TASK_INVENTORY_OFFERED -> SLChatEvent.InventoryOffer(
+                IMType.INVENTORY_OFFERED, IMType.TASK_INVENTORY_OFFERED -> SLChatEvent.InventoryOffer(
                     sessionId = sessionId,
                     fromAgentId = fromAgentId,
                     fromName = fromName,
@@ -439,7 +399,7 @@ class IMManager(
                     timestamp = timestamp,
                     isOutgoing = isOutgoing
                 )
-                IM_MESSAGEBOX, IM_FROM_TASK_AS_ALERT -> SLChatEvent.System(
+                IMType.MESSAGEBOX, IMType.FROM_TASK_AS_ALERT -> SLChatEvent.System(
                     sessionId = sessionId,
                     fromAgentId = fromAgentId,
                     fromName = fromName,
@@ -485,7 +445,7 @@ class IMManager(
             fromAgentId = agentId,
             fromName = "You",
             message = message,
-            dialogType = IM_SESSION_SEND,
+            dialogType = IMType.SESSION_SEND,
             timestamp = System.currentTimeMillis(),
             isOutgoing = true
         )
@@ -511,7 +471,7 @@ class IMManager(
                         fromAgentId = UUID(0, 0),
                         fromName = "System",
                         message = "Failed to send message — check connection",
-                        dialogType = IM_NOTHING_SPECIAL,
+                        dialogType = IMType.NOTHING_SPECIAL,
                         timestamp = System.currentTimeMillis(),
                         isOutgoing = false
                     )
@@ -526,7 +486,7 @@ class IMManager(
             return
         }
         event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
-        val dialog = if (accept) IM_FRIENDSHIP_ACCEPTED else IM_FRIENDSHIP_DECLINED
+        val dialog = if (accept) IMType.FRIENDSHIP_ACCEPTED else IMType.FRIENDSHIP_DECLINED
         val responseText = if (accept) "Accepted friendship offer" else "Declined friendship offer"
         val payload = SLMessagePackers.packImprovedInstantMessage(
             identity = outboundIdentity(),
@@ -552,7 +512,7 @@ class IMManager(
             return
         }
         event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
-        val dialog = if (accept) IM_GROUP_INVITATION_ACCEPT else IM_GROUP_INVITATION_DECLINE
+        val dialog = if (accept) IMType.GROUP_INVITATION_ACCEPT else IMType.GROUP_INVITATION_DECLINE
         val payload = SLMessagePackers.packImprovedInstantMessage(
             identity = outboundIdentity(),
             fromGroup = false,
@@ -578,7 +538,7 @@ class IMManager(
             return
         }
         event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
-        val dialog = if (accept) IM_LURE_ACCEPTED else IM_LURE_DECLINED
+        val dialog = if (accept) IMType.LURE_ACCEPTED else IMType.LURE_DECLINED
         val payload = SLMessagePackers.packImprovedInstantMessage(
             identity = outboundIdentity(),
             fromGroup = false,
@@ -619,7 +579,7 @@ class IMManager(
             return
         }
         event.actionState = if (accept) CardActionState.ACCEPTED else CardActionState.DECLINED
-        val dialog = if (accept) IM_INVENTORY_ACCEPTED else IM_INVENTORY_DECLINED
+        val dialog = if (accept) IMType.INVENTORY_ACCEPTED else IMType.INVENTORY_DECLINED
         val payload = SLMessagePackers.packImprovedInstantMessage(
             identity = outboundIdentity(),
             fromGroup = false,
@@ -648,7 +608,7 @@ class IMManager(
             identity = outboundIdentity(),
             fromGroup = false,
             toAgentId = targetId,
-            dialog = IM_NOTHING_SPECIAL,
+            dialog = IMType.NOTHING_SPECIAL,
             id = session.sessionId,
             timestamp = (System.currentTimeMillis() / 1000).toInt(),
             fromAgentName = "You",
@@ -677,7 +637,7 @@ class IMManager(
             identity = outboundIdentity(),
             fromGroup = false,
             toAgentId = groupId,
-            dialog = IM_SESSION_GROUP_START,
+            dialog = IMType.SESSION_GROUP_START,
             id = groupId,
             timestamp = (System.currentTimeMillis() / 1000).toInt(),
             fromAgentName = "You",
@@ -697,7 +657,7 @@ class IMManager(
             identity = outboundIdentity(),
             fromGroup = false,
             toAgentId = sessionId,
-            dialog = IM_SESSION_SEND,
+            dialog = IMType.SESSION_SEND,
             id = sessionId,
             timestamp = (System.currentTimeMillis() / 1000).toInt(),
             fromAgentName = "You",
@@ -790,14 +750,14 @@ class IMManager(
     }
 
     fun sendTypingStart(sessionId: UUID) {
-        scope.launch { sendTypingPacket(sessionId, IM_TYPING_START) }
+        scope.launch { sendTypingPacket(sessionId, IMType.TYPING_START) }
     }
 
     fun sendTypingStop(sessionId: UUID) {
-        scope.launch { sendTypingPacket(sessionId, IM_TYPING_STOP) }
+        scope.launch { sendTypingPacket(sessionId, IMType.TYPING_STOP) }
     }
 
-    private fun sendTypingPacket(sessionId: UUID, dialog: Int) {
+    private fun sendTypingPacket(sessionId: UUID, dialog: IMType) {
         try {
             val session = sessions[sessionId] ?: return
             val targetId = if (session.type == SessionType.P2P && session.participants.isNotEmpty()) {

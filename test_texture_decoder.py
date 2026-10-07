@@ -384,11 +384,28 @@ class TestTextureDecoder(unittest.TestCase):
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
         self.assertEqual(dec.status, "fallback")
-        self.assertLess(
-            elapsed_ms,
-            5.0,
-            f"Fallback processing took {elapsed_ms:.3f}ms, expected < 5.0ms",
-        )
+        self.assertLess(elapsed_ms, 5.0, f"Fallback processing took {elapsed_ms:.3f}ms, expected < 5.0ms")
+
+    def test_multichannel_and_compressed_decoding(self):
+        # KTX2 compressed texture header
+        ktx2_header = b"\xabKTX 20\xbb\r\n\x1a\n" + b"\x00" * 32
+        event = threading.Event()
+        results = []
+
+        def callback(decoded: DecodedTexture):
+            results.append(decoded)
+            event.set()
+
+        self.decoder.request_decode("norm_1", ktx2_header, callback=callback, channel="NORMAL")
+        completed = event.wait(timeout=2.0)
+
+        self.assertTrue(completed)
+        self.assertEqual(len(results), 1)
+        decoded = results[0]
+        self.assertEqual(decoded.texture_id, "norm_1")
+        self.assertEqual(decoded.format, "KTX2")
+        self.assertEqual(decoded.channel, "NORMAL")
+        self.assertEqual(decoded.status, "success")
 
 
 if __name__ == "__main__":

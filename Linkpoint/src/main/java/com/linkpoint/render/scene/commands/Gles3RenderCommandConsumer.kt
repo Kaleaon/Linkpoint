@@ -46,6 +46,7 @@ class Gles3RenderCommandConsumer(
     private var lumiya: LumiyaRenderer? = null
     private var glThreadExecutor: (Runnable) -> Unit = { it.run() }
     private var textureFetcher: TextureFetcher? = null
+    private var materialsManager: com.linkpoint.render.RenderMaterialsManager? = null
     private var consumeJob: Job? = null
 
     private val terrainHeightmap = FloatArray(REGION_SIZE * REGION_SIZE)
@@ -81,7 +82,8 @@ class Gles3RenderCommandConsumer(
     fun bindEngine(
         provider: RenderEngineProvider?,
         glThreadExecutor: (Runnable) -> Unit = { it.run() },
-        textureFetcher: TextureFetcher? = null
+        textureFetcher: TextureFetcher? = null,
+        materialsManager: com.linkpoint.render.RenderMaterialsManager? = null
     ) {
         val wasUnbound = this.engineProvider == null
         val fetcherWasUnbound = this.textureFetcher == null
@@ -89,6 +91,7 @@ class Gles3RenderCommandConsumer(
         this.lumiya = provider as? LumiyaRenderer
         this.glThreadExecutor = glThreadExecutor
         this.textureFetcher = textureFetcher
+        this.materialsManager = materialsManager
 
         if (provider != null && wasUnbound) {
             replayPendingCommands()
@@ -353,6 +356,46 @@ class Gles3RenderCommandConsumer(
                 }
             }
         }
+
+        val materialIds = try {
+            TextureEntryParser.extractMaterialIds(textureEntry)
+        } catch (t: Throwable) {
+            emptySet()
+        }
+        val matManager = materialsManager
+        if (matManager != null && materialIds.isNotEmpty()) {
+            for (matId in materialIds) {
+                val descriptor = matManager.getMaterialDescriptor(matId) ?: continue
+                bindMaterialTextures(primId, descriptor, fetcher, lumiyaRef)
+            }
+        }
+    }
+
+    private fun bindMaterialTextures(
+        primId: Long,
+        descriptor: com.linkpoint.render.materials.MaterialDescriptor,
+        fetcher: TextureFetcher,
+        lumiyaRef: LumiyaRenderer
+    ) {
+        fun fetchAndBind(
+            ref: com.linkpoint.render.materials.MaterialDescriptor.TextureRef?,
+            semantic: TextureFormatPolicy.TextureSemantic
+        ) {
+            if (ref == null || !ref.isDownloadable || ref.resolvedId == UUID(0L, 0L)) return
+            fetcher.fetch(ref.resolvedId) { bitmap ->
+                if (bitmap != null) {
+                    runOnGl {
+                        lumiyaRef.uploadTextureForPrim(primId, ref.resolvedId, bitmap, semantic)
+                    }
+                }
+            }
+        }
+
+        fetchAndBind(descriptor.baseColorTexture, TextureFormatPolicy.TextureSemantic.ALBEDO)
+        fetchAndBind(descriptor.normalTexture, TextureFormatPolicy.TextureSemantic.NORMAL)
+        fetchAndBind(descriptor.metallicRoughnessTexture, TextureFormatPolicy.TextureSemantic.METALLIC_ROUGHNESS)
+        fetchAndBind(descriptor.emissiveTexture, TextureFormatPolicy.TextureSemantic.EMISSIVE)
+        fetchAndBind(descriptor.occlusionTexture, TextureFormatPolicy.TextureSemantic.OCCLUSION)
     }
 
     /**

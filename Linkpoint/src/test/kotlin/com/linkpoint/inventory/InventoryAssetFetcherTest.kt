@@ -155,21 +155,33 @@ class InventoryAssetFetcherTest {
         assertEquals(AssetType.TEXTURE.value, receivedType)
     }
 
+    private class FakeCronetHttpClient(
+        private val available: Boolean,
+        private val result: CronetResult = CronetResult.EngineUnavailable
+    ) : CronetHttpClient(null) {
+        override val isAvailable: Boolean get() = available
+
+        override suspend fun get(
+            url: String,
+            headers: Map<String, String>,
+            timeoutMs: Long
+        ): CronetResult = result
+    }
+
     @Test
     fun testFetchAssetViaCronetSuccess() = runTest {
         val testAssetId = UUID.randomUUID()
         val testUrl = "https://asset-cdn.glb.agni.lindenlab.com/asset/$testAssetId"
         val sampleData = byteArrayOf(1, 2, 3, 4, 5)
-        val cronetClient = mock<CronetHttpClient>()
-        cronetClient.stub {
-            on { isAvailable } doReturn true
-            onBlocking { get(any(), any(), any()) } doReturn CronetResult.Success(
+        val cronetClient = FakeCronetHttpClient(
+            available = true,
+            result = CronetResult.Success(
                 code = 200,
                 body = sampleData,
                 protocol = "h3",
                 proxy = null
             )
-        }
+        )
 
         val fetcher = InventoryAssetFetcher(cronetClient)
         val result = fetcher.fetchAssetWithResult(testAssetId, testUrl)
@@ -187,16 +199,15 @@ class InventoryAssetFetcherTest {
         val testAssetId = UUID.randomUUID()
         val testUrl = "https://asset-cdn.glb.agni.lindenlab.com/asset/$testAssetId"
         val sampleData = byteArrayOf(10, 20, 30)
-        val cronetClient = mock<CronetHttpClient>()
-        cronetClient.stub {
-            on { isAvailable } doReturn true
-            onBlocking { get(any(), any(), any()) } doReturn CronetResult.Success(
+        val cronetClient = FakeCronetHttpClient(
+            available = true,
+            result = CronetResult.Success(
                 code = 200,
                 body = sampleData,
                 protocol = "h3",
                 proxy = null
             )
-        }
+        )
 
         val fetcher = InventoryAssetFetcher(cronetClient)
         val latch = CountDownLatch(1)
@@ -230,9 +241,7 @@ class InventoryAssetFetcherTest {
     @Test
     fun testFallbackWhenCronetUninitialized() = runTest {
         val testAssetId = UUID.randomUUID()
-        val cronetClient = mock<CronetHttpClient> {
-            on { isAvailable } doReturn false
-        }
+        val cronetClient = FakeCronetHttpClient(available = false)
 
         val fetcher = InventoryAssetFetcher(cronetClient)
         val result = fetcher.fetchAssetWithResult(testAssetId, "https://invalid.local/asset")

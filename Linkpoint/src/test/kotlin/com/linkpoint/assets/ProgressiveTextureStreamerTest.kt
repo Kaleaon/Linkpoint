@@ -118,9 +118,15 @@ class ProgressiveTextureStreamerTest {
 
     @Test
     fun testRequirement3_seamlessTextureSwapWithoutShaderRebuild() {
-        val mockResourceManager = mock(GLResourceManager::class.java)
-        var nextHandle = 101
-        `when`(mockResourceManager.createTexture()).thenAnswer { nextHandle++ }
+        class FakeGLResourceManager : GLResourceManager() {
+            var nextHandle = 101
+            val deletedHandles = mutableListOf<Int>()
+            override fun createTexture(): Int = nextHandle++
+            override fun deleteTexture(handle: Int) {
+                deletedHandles.add(handle)
+            }
+        }
+        val mockResourceManager = FakeGLResourceManager()
 
         val textureCache = GLTextureCache(mockResourceManager)
         val textureId = UUID.randomUUID()
@@ -140,7 +146,7 @@ class ProgressiveTextureStreamerTest {
         assertEquals("Cache size must remain 1 after replacement", 1, textureCache.size)
 
         // Verify old placeholder handle was deleted
-        verify(mockResourceManager).deleteTexture(101)
+        assertTrue("Old placeholder handle should be deleted", mockResourceManager.deletedHandles.contains(101))
     }
 
     @Test
