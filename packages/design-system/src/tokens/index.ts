@@ -1070,6 +1070,10 @@ export type LayoutKey = keyof typeof LAYOUTS & string;
 export type PaletteKey = keyof typeof PALETTES & string;
 export type DeviceKey = keyof typeof DEVICES & string;
 
+export type DensityMode = "compact" | "standard" | "comfortable";
+export type LayoutMode = "grid" | "list" | "rail" | "split";
+export type BreakpointPreset = "mobile" | "tablet" | "desktop";
+
 /**
  * Compute combined theme tokens given a layout key and palette key,
  * applying embedded WCAG 2.2 contrast enforcement.
@@ -1077,14 +1081,23 @@ export type DeviceKey = keyof typeof DEVICES & string;
 export function computeThemeTokens(
   layoutKey: string,
   paletteKey: string,
-  options: { dense?: boolean; customColors?: Partial<PaletteColors> } = {}
+  options: {
+    dense?: boolean;
+    density?: DensityMode;
+    layoutMode?: LayoutMode;
+    customColors?: Partial<PaletteColors>;
+  } = {}
 ): ThemeTokens {
   const L = LAYOUTS[layoutKey] || LAYOUTS.terminal;
   const base = PALETTES[paletteKey] || PALETTES.ink;
   const c = options.customColors ? { ...base.c, ...options.customColors } : { ...base.c };
   const s = { ...L.s };
-  if (options.dense) {
-    s.pad = "8px";
+  
+  const density = options.density || (options.dense ? "compact" : "standard");
+  if (density === "compact") {
+    s.pad = "6px";
+  } else if (density === "comfortable") {
+    s.pad = "18px";
   }
 
   const V: ThemeTokens = { font: L.font, dfont: L.dfont, ...c, ...s };
