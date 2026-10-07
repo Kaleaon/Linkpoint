@@ -1,7 +1,7 @@
 package com.linkpoint.render.lumiya.drawable
 
 import android.opengl.GLES32
-import android.opengl.Matrix
+import com.linkpoint.render.math.GlMatrix as Matrix
 import com.linkpoint.protocol.messages.PrimShapeParams
 import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
