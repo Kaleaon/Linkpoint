@@ -8,7 +8,7 @@ describe('SlidingWindowSyncQueue', () => {
     queue = new SlidingWindowSyncQueue();
   });
 
-  it('limits active concurrent network requests to 3 parallel workers', async () => {
+  it('limits active concurrent network requests to 3 parallel workers by default', async () => {
     let activeStreamCount = 0;
     let maxObservedStreams = 0;
 
@@ -31,9 +31,106 @@ describe('SlidingWindowSyncQueue', () => {
 
     await Promise.all(promises);
 
-    expect(maxObservedStreams).toBe(3); // Criterion 2 assertion
+    expect(maxObservedStreams).toBe(3);
     expect(queue.getActiveCount()).toBe(0);
     expect(queue.getQueuedCount()).toBe(0);
+  });
+
+  it('adjusts max concurrency dynamically based on grid kind and network connection type', () => {
+    // Unconfigured defaults to DEFAULT_MAX_CONCURRENCY
+    expect(queue.getMaxConcurrency()).toBe(3);
+
+    // Set Second Life on Unmetered Wi-Fi
+    queue.setGridKind('secondlife');
+    queue.setNetworkType('unmetered');
+    expect(queue.getMaxConcurrency()).toBe(64);
+
+    // Switch to Second Life on Metered Cellular
+    queue.setNetworkType('metered');
+    expect(queue.getMaxConcurrency()).toBe(16);
+
+    // Switch to OpenSim on Metered Cellular
+    queue.setGridKind('opensim');
+    expect(queue.getMaxConcurrency()).toBe(4);
+
+    // Switch to OpenSim on Unmetered Wi-Fi
+    queue.setNetworkType('unmetered');
+    expect(queue.getMaxConcurrency()).toBe(10);
+  });
+
+  it('triggers dynamic backoff on HTTP 503 / timeouts and recovers on successful downloads', () => {
+    queue.setGridKind('opensim');
+    queue.setNetworkType('unmetered');
+    expect(queue.getMaxConcurrency()).toBe(10);
+
+    // Simulate HTTP 503 error
+    queue.recordError(503);
+    expect(queue.getMaxConcurrency()).toBe(5);
+
+    // Simulate server timeout
+    queue.recordTimeout();
+    expect(queue.getMaxConcurrency()).toBe(2);
+
+    // Simulate another timeout (floor is 1)
+    queue.recordTimeout();
+    expect(queue.getMaxConcurrency()).toBe(1);
+
+    // Successful fast responses recover concurrency back to base limit
+    for (let i = 0; i < 10; i++) {
+      queue.recordSuccess();
+    }
+    expect(queue.getMaxConcurrency()).toBe(10);
+  });
+
+  it('prioritizes avatar textures ahead of frustum and background textures', async () => {
+    const executionOrder: string[] = [];
+
+    // Saturate queue workers
+    queue.setGridKind('opensim');
+    const blockers = Array.from({ length: 10 }, (_, i) =>
+      queue.enqueue(
+        `blocker_${i}`,
+        async () => {
+          await new Promise((res) => setTimeout(res, 30));
+          executionOrder.push(`blocker_${i}`);
+        },
+        'HIGH'
+      )
+    );
+
+    // Enqueue background texture
+    const bg = queue.enqueue(
+      'bg_texture',
+      async () => { executionOrder.push('bg_texture'); },
+      'LOW',
+      { inFrustum: false }
+    );
+
+    // Enqueue frustum texture
+    const frustum = queue.enqueue(
+      'frustum_texture',
+      async () => { executionOrder.push('frustum_texture'); },
+      'HIGH',
+      { inFrustum: true }
+    );
+
+    // Enqueue avatar texture (should execute before frustum and background textures)
+    const avatar = queue.enqueue(
+      'avatar_baked_head',
+      async () => { executionOrder.push('avatar_baked_head'); },
+      'HIGH',
+      { isAvatarTexture: true }
+    );
+
+    await Promise.all([...blockers, bg, frustum, avatar]);
+
+    const avatarIndex = executionOrder.indexOf('avatar_baked_head');
+    const frustumIndex = executionOrder.indexOf('frustum_texture');
+    const bgIndex = executionOrder.indexOf('bg_texture');
+
+    expect(avatarIndex).toBeGreaterThan(-1);
+    expect(avatarIndex).toBeLessThan(frustumIndex);
+    expect(frustumIndex).toBeLessThan(bgIndex);
   });
 
   it('prioritizes viewport-visible folders ahead of background off-screen folders', async () => {
@@ -68,7 +165,7 @@ describe('SlidingWindowSyncQueue', () => {
     const bg2Index = executionOrder.indexOf('bg_folder_2');
 
     expect(visibleIndex).toBeGreaterThan(-1);
-    expect(visibleIndex).toBeLessThan(bg1Index); // Criterion 3 assertion
+    expect(visibleIndex).toBeLessThan(bg1Index);
     expect(visibleIndex).toBeLessThan(bg2Index);
   });
 
@@ -102,7 +199,7 @@ describe('SlidingWindowSyncQueue', () => {
     queue.setBatteryStatus(0.1, false);
 
     expect(queue.getIsThrottled()).toBe(true);
-    expect(queue.getMaxConcurrency()).toBe(1); // Throttled to 1 worker
+    expect(queue.getMaxConcurrency()).toBe(1);
 
     // Simulate battery plugging in / charging
     queue.setBatteryStatus(0.1, true);
