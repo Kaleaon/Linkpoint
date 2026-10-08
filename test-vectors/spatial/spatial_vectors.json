@@ -1,0 +1,55 @@
+{
+  "version": "1.0",
+  "description": "Canonical cross-language test vectors for spatial vector codecs (Vector3U16, Vector3U8), packed quaternions, RegionHandshake, and ObjectUpdate",
+  "vector3_u16": [
+    {
+      "name": "zero_point",
+      "u16": [0, 0, 0],
+      "min": [-128.0, -128.0, -128.0],
+      "max": [128.0, 128.0, 128.0],
+      "expected_float": [-128.0, -128.0, -128.0]
+    },
+    {
+      "name": "mid_point",
+      "u16": [32767, 32767, 32767],
+      "min": [-128.0, -128.0, -128.0],
+      "max": [128.0, 128.0, 128.0],
+      "expected_float": [0.0, 0.0, 0.0]
+    },
+    {
+      "name": "max_point",
+      "u16": [65535, 65535, 65535],
+      "min": [-128.0, -128.0, -128.0],
+      "max": [128.0, 128.0, 128.0],
+      "expected_float": [128.0, 128.0, 128.0]
+    }
+  ],
+  "vector3_u8": [
+    {
+      "name": "zero_point",
+      "u8": [0, 0, 0],
+      "min": [0.0, 0.0, 0.0],
+      "max": [255.0, 255.0, 255.0],
+      "expected_float": [0.0, 0.0, 0.0]
+    },
+    {
+      "name": "max_point",
+      "u8": [255, 255, 255],
+      "min": [0.0, 0.0, 0.0],
+      "max": [255.0, 255.0, 255.0],
+      "expected_float": [255.0, 255.0, 255.0]
+    }
+  ],
+  "packed_quaternion": [
+    {
+      "name": "identity_quaternion",
+      "i16": [0, 0, 0],
+      "expected_quaternion": [0.0, 0.0, 0.0, 1.0]
+    },
+    {
+      "name": "z_rotation_90deg",
+      "i16": [0, 0, 23170],
+      "expected_quaternion": [0.0, 0.0, 0.7071, 0.7071]
+    }
+  ]
+}

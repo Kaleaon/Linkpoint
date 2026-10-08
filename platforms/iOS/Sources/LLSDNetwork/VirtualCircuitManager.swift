@@ -1,15 +1,12 @@
 import Foundation
-
+#if canImport(Network)
+import Network
+#endif
 #if canImport(Combine)
 import Combine
 #endif
 
-#if canImport(Network)
-import Network
-#endif
-
-public struct IncomingPacket: Identifiable {
-    public let id = UUID()
+public struct IncomingPacket: Sendable {
     public let header: PacketHeader
     public let messageID: UInt32
     public let payload: Data
@@ -25,10 +22,11 @@ public struct IncomingPacket: Identifiable {
     }
 }
 
-public class VirtualCircuitManager {
-    public var currentSequenceNumber: UInt32 = 0
-    private var pendingAcks: Set<UInt32> = []
-    private var receivedSequenceNumbers: Set<UInt32> = []
+public final class VirtualCircuitManager: @unchecked Sendable {
+    public private(set) var currentSequenceNumber: UInt32 = 0
+    public private(set) var unackedPackets: [UInt32: Data] = [:]
+    public private(set) var receivedSequenceNumbers: Set<UInt32> = []
+    public private(set) var pendingAcks: Set<UInt32> = []
 
     #if canImport(Combine)
     private let packetSubject = PassthroughSubject<IncomingPacket, Never>()
@@ -46,54 +44,39 @@ public class VirtualCircuitManager {
 
     #if canImport(Network)
     private var connection: NWConnection?
-    private var listener: NWListener?
     #endif
 
     public init() {}
 
+    #if canImport(Network)
     public func connect(host: String, port: UInt16) {
-        #if canImport(Network)
-        let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(host), port: NWEndpoint.Port(integerLiteral: port))
-        let nwConn = NWConnection(to: endpoint, using: .udp)
-        self.connection = nwConn
+        let nwHost = NWEndpoint.Host(host)
+        let nwPort = NWEndpoint.Port(rawValue: port)!
+        let conn = NWConnection(host: nwHost, port: nwPort, using: .udp)
+        self.connection = conn
 
-        nwConn.stateUpdateHandler = { state in
+        conn.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                self.startReceiving()
+                break
+            case .failed(let err):
+                print("VirtualCircuit UDP connection failed: \(err)")
             default:
                 break
             }
         }
-        nwConn.start(queue: .global())
-        #endif
-    }
-
-    public func startListener(port: UInt16) throws {
-        #if canImport(Network)
-        guard let nwPort = NWEndpoint.Port(rawValue: port) else { return }
-        let nwListener = try NWListener(using: .udp, on: nwPort)
-        self.listener = nwListener
-
-        nwListener.newConnectionHandler = { [weak self] newConn in
-            newConn.start(queue: .global())
-            self?.receiveFromConnection(newConn)
-        }
-        nwListener.start(queue: .global())
-        #endif
-    }
-
-    private func startReceiving() {
-        #if canImport(Network)
-        guard let conn = connection else { return }
+        conn.start(queue: .global())
         receiveFromConnection(conn)
-        #endif
     }
 
-    #if canImport(Network)
+    public func disconnect() {
+        connection?.cancel()
+        connection = nil
+    }
+
     private func receiveFromConnection(_ conn: NWConnection) {
-        conn.receiveMessage { [weak self] content, context, isComplete, error in
-            if let data = content {
+        conn.receive(minimumIncompleteLength: 1, maximumLength: 65535) { [weak self] content, _, _, error in
+            if let data = content, !data.isEmpty {
                 self?.processIncomingData(data)
             }
             if error == nil {
@@ -116,24 +99,8 @@ public class VirtualCircuitManager {
             decompressedPayload = payloadData
         }
 
-        // Extract message ID (first 1-4 bytes depending on frequency)
-        let messageID: UInt32
-        if decompressedPayload.count >= 4 {
-            let msgBytes = decompressedPayload.subdata(in: 0..<4)
-            let rawMsg = msgBytes.withUnsafeBytes { $0.load(as: UInt32.self) }
-            messageID = UInt32(bigEndian: rawMsg)
-        } else if decompressedPayload.count >= 1 {
-            messageID = UInt32(decompressedPayload[0])
-        } else {
-            messageID = 0
-        }
-
-        let body: Data
-        if decompressedPayload.count >= 4 {
-            body = decompressedPayload.subdata(in: 4..<decompressedPayload.endIndex)
-        } else {
-            body = Data()
-        }
+        let messageID = header.messageId
+        let body = decompressedPayload
 
         // Reliability tracking
         receivedSequenceNumbers.insert(header.sequenceNumber)
@@ -160,17 +127,14 @@ public class VirtualCircuitManager {
         var flags: PacketHeaderFlags = []
         if reliable { flags.insert(.reliable) }
 
-        var header = PacketHeader(flags: flags, sequenceNumber: currentSequenceNumber)
-
         let compressedBody = Zerocode.compress(payload)
-        if compressedBody.count < payload.count {
-            header.flags.insert(.zerocoded)
-        }
+        let useZerocode = compressedBody.count < payload.count
+        if useZerocode { flags.insert(.zerocoded) }
+
+        let header = PacketHeader(flags: flags, sequenceNumber: currentSequenceNumber, messageId: messageID)
 
         var packetData = header.serialize()
-        var msgBig = messageID.bigEndian
-        withUnsafeBytes(of: &msgBig) { packetData.append(contentsOf: $0) }
-        packetData.append(header.flags.contains(.zerocoded) ? compressedBody : payload)
+        packetData.append(useZerocode ? compressedBody : payload)
 
         #if canImport(Network)
         if let conn = connection {
@@ -178,7 +142,15 @@ public class VirtualCircuitManager {
         }
         #endif
 
+        if reliable {
+            unackedPackets[currentSequenceNumber] = packetData
+        }
+
         return packetData
+    }
+
+    public func acknowledgePacket(sequenceNumber: UInt32) {
+        unackedPackets.removeValue(forKey: sequenceNumber)
     }
 
     public func pendingAckCount() -> Int {
