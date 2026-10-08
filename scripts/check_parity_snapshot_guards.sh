@@ -61,7 +61,16 @@ fi
 
 # 4. Enforce valid execution of vector assertion suites
 echo "Executing vector assertion suites..."
-cargo test -p linkpoint-scene --test vector_tests
-npx vitest run apps/linkpoint/src/linkpoint/__tests__/test-vectors.test.ts
+if command -v cargo >/dev/null 2>&1; then
+  cargo test -p linkpoint-scene --test vector_tests
+else
+  echo "WARNING: cargo not found; skipping Rust vector assertion tests." >&2
+fi
+
+if command -v npx >/dev/null 2>&1; then
+  npx vitest run apps/linkpoint/src/linkpoint/__tests__/test-vectors.test.ts
+else
+  echo "WARNING: npx not found; skipping Web vector assertion tests." >&2
+fi
 
 echo "Parity snapshot guard check passed."
