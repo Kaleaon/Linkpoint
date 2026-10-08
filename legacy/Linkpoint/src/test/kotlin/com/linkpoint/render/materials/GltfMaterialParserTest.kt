@@ -1,7 +1,10 @@
 package com.linkpoint.render.materials
 
+import com.linkpoint.protocol.llsd.LLSDArray
 import com.linkpoint.protocol.llsd.LLSDMap
+import com.linkpoint.protocol.llsd.LLSDReal
 import com.linkpoint.protocol.llsd.LLSDString
+import com.linkpoint.protocol.llsd.LLSDUUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -173,5 +176,75 @@ class GltfMaterialParserTest {
 
         assertEquals(0.0f, descriptor.metallicFactor, 0.001f)
         assertEquals(1.0f, descriptor.roughnessFactor, 0.001f)
+    }
+
+    @Test
+    fun testParseLlsdTexturesSubMapAndFlatAliases() {
+        val baseColorUuid = UUID.randomUUID()
+        val normalUuid = UUID.randomUUID()
+        val mrUuid = UUID.randomUUID()
+        val emissiveUuid = UUID.randomUUID()
+        val occlusionUuid = UUID.randomUUID()
+
+        val llsd = LLSDMap().apply {
+            this["BaseColor"] = LLSDArray().apply {
+                add(LLSDReal(0.5))
+                add(LLSDReal(0.6))
+                add(LLSDReal(0.7))
+                add(LLSDReal(0.9))
+            }
+            this["Metallic"] = LLSDReal(0.4)
+            this["Roughness"] = LLSDReal(0.6)
+            this["Textures"] = LLSDMap().apply {
+                this["BaseColor"] = LLSDUUID(baseColorUuid)
+                this["Normal"] = LLSDString(normalUuid.toString())
+                this["MetallicRoughness"] = LLSDUUID(mrUuid)
+                this["Emissive"] = LLSDUUID(emissiveUuid)
+                this["Occlusion"] = LLSDUUID(occlusionUuid)
+            }
+        }
+
+        val descriptor = GltfMaterialParser.parseLlsd(llsd)
+
+        assertEquals(0.5f, descriptor.baseColor.x, 0.001f)
+        assertEquals(0.6f, descriptor.baseColor.y, 0.001f)
+        assertEquals(0.7f, descriptor.baseColor.z, 0.001f)
+        assertEquals(0.9f, descriptor.baseColor.w, 0.001f)
+
+        assertEquals(0.4f, descriptor.metallicFactor, 0.001f)
+        assertEquals(0.6f, descriptor.roughnessFactor, 0.001f)
+
+        assertNotNull(descriptor.baseColorTexture)
+        assertEquals(baseColorUuid, descriptor.baseColorTexture?.resolvedId)
+
+        assertNotNull(descriptor.normalTexture)
+        assertEquals(normalUuid, descriptor.normalTexture?.resolvedId)
+
+        assertNotNull(descriptor.metallicRoughnessTexture)
+        assertEquals(mrUuid, descriptor.metallicRoughnessTexture?.resolvedId)
+
+        assertNotNull(descriptor.emissiveTexture)
+        assertEquals(emissiveUuid, descriptor.emissiveTexture?.resolvedId)
+
+        assertNotNull(descriptor.occlusionTexture)
+        assertEquals(occlusionUuid, descriptor.occlusionTexture?.resolvedId)
+    }
+
+    @Test
+    fun testPbrMaterialDecoderDelegation() {
+        val baseUuid = UUID.randomUUID()
+        val llsd = LLSDMap().apply {
+            this["base_color_texture"] = LLSDUUID(baseUuid)
+            this["metallic"] = LLSDReal(0.7)
+            this["roughness"] = LLSDReal(0.2)
+        }
+
+        @Suppress("DEPRECATION")
+        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsd)
+
+        assertEquals(0.7f, descriptor.metallicFactor, 0.001f)
+        assertEquals(0.2f, descriptor.roughnessFactor, 0.001f)
+        assertNotNull(descriptor.baseColorTexture)
+        assertEquals(baseUuid, descriptor.baseColorTexture?.resolvedId)
     }
 }

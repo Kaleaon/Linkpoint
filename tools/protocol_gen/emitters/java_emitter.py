@@ -1,12 +1,15 @@
 import os
 from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 def _format_java_int(num: int) -> str:
     if num > 2147483647:
         return str(num - 4294967296)
     return str(num)
+
 
 class JavaEmitter(BaseEmitter):
     def __init__(self):
@@ -21,10 +24,7 @@ class JavaEmitter(BaseEmitter):
         proto_file = os.path.join(out_dir, "GeneratedProtocol.java")
         llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.java")
 
-        results = {
-            proto_file: proto_code,
-            llsd_file: llsd_code
-        }
+        results = {proto_file: proto_code, llsd_file: llsd_code}
 
         for path, content in results.items():
             with open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -42,11 +42,17 @@ class JavaEmitter(BaseEmitter):
         out.append("import java.util.Map;\n")
 
         out.append("public class GeneratedProtocol {")
-        out.append(f'    public static final String TEMPLATE_VERSION = "{ast.version}";')
-        out.append("    public static final Map<String, Integer> REGISTERED_MESSAGES = new HashMap<>();\n")
+        out.append(
+            f'    public static final String TEMPLATE_VERSION = "{ast.version}";'
+        )
+        out.append(
+            "    public static final Map<String, Integer> REGISTERED_MESSAGES = new HashMap<>();\n"
+        )
         out.append("    static {")
         for msg in ast.messages:
-            out.append(f'        REGISTERED_MESSAGES.put("{msg.name}", {_format_java_int(msg.message_number)});')
+            out.append(
+                f'        REGISTERED_MESSAGES.put("{msg.name}", {_format_java_int(msg.message_number)});'
+            )
         out.append("    }\n")
 
         out.append("""    public static byte[] decompressZerocoded(byte[] src) {
