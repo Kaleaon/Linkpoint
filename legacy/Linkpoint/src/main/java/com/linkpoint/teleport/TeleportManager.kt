@@ -348,7 +348,7 @@ class TeleportManager(
                 identity = AgentIdentity(agentId, sessionId),
                 fromGroup = false,
                 toAgentId = lure.senderId,
-                dialog = 24, // IM_LURE_DECLINED
+                dialog = com.linkpoint.linden.llmessage.IMType.LURE_DECLINED, // 24
                 id = lure.lureId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
                 fromAgentName = "You",
