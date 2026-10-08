@@ -14,6 +14,8 @@ exclude = ["apps/linkpoint/src-tauri", "LLSD-KOTLIN/src/main/rust", "crates/quic
 version = "0.1.0"
 edition = "2024"
 license = "LGPL-3.0-only"
+repository = "https://github.com/Kaleaon/Linkpoint"
+homepage = "https://github.com/Kaleaon/Linkpoint"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }

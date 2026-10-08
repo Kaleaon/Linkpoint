@@ -264,6 +264,9 @@ jobs:
       - name: Grant execute permissions
         run: chmod +x legacy/Linkpoint/tools/protocol/*.sh legacy/Linkpoint/tools/protocol/*.py 2>/dev/null || true
 
+      - name: Run protocol generator unit tests
+        run: PYTHONPATH=. python3 tools/protocol_gen/tests/test_generator.py
+
       - name: Run protocol conformance suite
         run: legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
@@ -304,10 +307,48 @@ jobs:
           cd packages/linkpoint_dart
           flutter test
 
-  ci-status:
-    name: Task 7 - CI Status & Coverage Quality Gate
+  swift:
+    name: Task 7 - Swift iOS Engine Verification
+    runs-on: macos-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Swift Package Tests
+        run: |
+          cd platforms/iOS
+          swift test
+
+  csharp:
+    name: Task 8 - C# .NET Protocol Verification
     runs-on: ubuntu-latest
-    needs: [pre-commit, android, web, rust, protocol, dart]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Run C# .NET Protocol Tests
+        run: |
+          cd platforms/dotnet
+          dotnet run --project Linkpoint.Protocol.Tests/Linkpoint.Protocol.Tests.csproj
+
+      - name: Pack NuGet Package
+        run: |
+          cd platforms/dotnet
+          dotnet pack -c Release Linkpoint.Protocol/Linkpoint.Protocol.csproj
+
+  ci-status:
+    name: Task 9 - CI Status & Coverage Quality Gate
+    runs-on: ubuntu-latest
+    needs: [pre-commit, android, web, rust, protocol, dart, swift, csharp]
     if: "!cancelled()"
     permissions:
       contents: read
@@ -346,8 +387,10 @@ jobs:
           RUST_RESULT: ${{ needs.rust.result }}
           PROTOCOL_RESULT: ${{ needs.protocol.result }}
           DART_RESULT: ${{ needs.dart.result }}
+          SWIFT_RESULT: ${{ needs.swift.result }}
+          CSHARP_RESULT: ${{ needs.csharp.result }}
         run: |
-          if [[ "$PRE_COMMIT_RESULT" != "success" || "$ANDROID_RESULT" != "success" || "$WEB_RESULT" != "success" || "$RUST_RESULT" != "success" || "$PROTOCOL_RESULT" != "success" || "$DART_RESULT" != "success" ]]; then
+          if [[ "$PRE_COMMIT_RESULT" != "success" || "$ANDROID_RESULT" != "success" || "$WEB_RESULT" != "success" || "$RUST_RESULT" != "success" || "$PROTOCOL_RESULT" != "success" || "$DART_RESULT" != "success" || "$SWIFT_RESULT" != "success" || "$CSHARP_RESULT" != "success" ]]; then
             echo "One or more required CI build jobs failed."
             exit 1
           fi
