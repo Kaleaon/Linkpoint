@@ -8,6 +8,7 @@ import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.teleport.TeleportLure
 import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.teleport.TeleportResult
+import com.linkpoint.linden.llmessage.IMType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -62,7 +63,7 @@ class IMManagerTest {
             fromAgentId = senderId,
             fromName = "Sender Resident",
             message = "Come join me!",
-            dialogType = IMManager.IM_LURE_USER,
+            dialogType = IMType.LURE_USER,
             timestamp = System.currentTimeMillis(),
             isOutgoing = false,
             lureId = lureId,
@@ -99,7 +100,7 @@ class IMManagerTest {
         buf.get() // offline
 
         val dialog = buf.get().toInt()
-        assertEquals(IMManager.IM_LURE_ACCEPTED, dialog)
+        assertEquals(IMType.LURE_ACCEPTED.value, dialog)
 
         val expectedLure = TeleportLure(
             lureId = lureId,
@@ -127,7 +128,7 @@ class IMManagerTest {
             fromAgentId = senderId,
             fromName = "Sender Resident",
             message = "Come join me!",
-            dialogType = IMManager.IM_LURE_USER,
+            dialogType = IMType.LURE_USER,
             timestamp = System.currentTimeMillis(),
             isOutgoing = false,
             lureId = lureId,
@@ -160,6 +161,6 @@ class IMManagerTest {
         buf.int; buf.getUUID(); buf.float; buf.float; buf.float; buf.get()
 
         val dialog = buf.get().toInt()
-        assertEquals(IMManager.IM_LURE_DECLINED, dialog)
+        assertEquals(IMType.LURE_DECLINED.value, dialog)
     }
 }

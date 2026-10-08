@@ -19,6 +19,13 @@ class AvatarSkeleton(context: Context?) {
     companion object {
         private const val TAG = "AvatarSkeleton"
 
+        private val IDENTITY_MATRIX = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+        )
+
         // Standard SL bone names (133 Bento joints)
         val BONE_NAMES = arrayOf(
             // Base joints (26)
@@ -75,6 +82,8 @@ class AvatarSkeleton(context: Context?) {
     val bones = mutableMapOf<String, Bone>()
     val boneArray = mutableListOf<Bone>()
     private var rootBone: Bone? = null
+    private val scratchLocalMatrix = FloatArray(16)
+    private var cachedSkinningBuffer = FloatArray(0)
 
     init {
         if (context != null) {
@@ -465,55 +474,64 @@ class AvatarSkeleton(context: Context?) {
 
     /** Recompute every bone's worldMatrix + skinningMatrix from the rest pose. */
     fun updateBoneMatrices() {
-        rootBone?.let { calculateBoneMatrix(it, FloatArray(16).apply {
-            this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f
-        }) }
+        rootBone?.let { calculateBoneMatrix(it, IDENTITY_MATRIX) }
     }
 
     private fun calculateBoneMatrix(bone: Bone, parentMatrix: FloatArray) {
-        // Local transform
-        val localMatrix = FloatArray(16)
-
         // Scale
         val s = bone.scale
-        // Rotation
-        val r = bone.rotation
         // Translation
         val t = bone.position
 
         // Create matrix: T * R * S
-        bone.rotation.toMatrix(localMatrix)
-        localMatrix[12] = t.x
-        localMatrix[13] = t.y
-        localMatrix[14] = t.z
+        bone.rotation.toMatrix(scratchLocalMatrix)
+        scratchLocalMatrix[12] = t.x
+        scratchLocalMatrix[13] = t.y
+        scratchLocalMatrix[14] = t.z
 
         // Apply scale
-        localMatrix[0] *= s.x; localMatrix[1] *= s.x; localMatrix[2] *= s.x
-        localMatrix[4] *= s.y; localMatrix[5] *= s.y; localMatrix[6] *= s.y
-        localMatrix[8] *= s.z; localMatrix[9] *= s.z; localMatrix[10] *= s.z
+        scratchLocalMatrix[0] *= s.x; scratchLocalMatrix[1] *= s.x; scratchLocalMatrix[2] *= s.x
+        scratchLocalMatrix[4] *= s.y; scratchLocalMatrix[5] *= s.y; scratchLocalMatrix[6] *= s.y
+        scratchLocalMatrix[8] *= s.z; scratchLocalMatrix[9] *= s.z; scratchLocalMatrix[10] *= s.z
 
         // Multiply with parent
-        bone.worldMatrix = multiplyMatrices(parentMatrix, localMatrix)
+        multiplyMatrices(parentMatrix, scratchLocalMatrix, bone.worldMatrix)
 
         // Skinning matrix = worldMatrix * inverseBindMatrix
-        bone.skinningMatrix = multiplyMatrices(bone.worldMatrix, bone.inverseBindMatrix)
+        multiplyMatrices(bone.worldMatrix, bone.inverseBindMatrix, bone.skinningMatrix)
 
-        // Recursively update children
-        bone.children.forEach { calculateBoneMatrix(it, bone.worldMatrix) }
+        // Recursively update children using indexed loop
+        val children = bone.children
+        for (i in 0 until children.size) {
+            calculateBoneMatrix(children[i], bone.worldMatrix)
+        }
     }
 
-    private fun multiplyMatrices(a: FloatArray, b: FloatArray): FloatArray {
-        val result = FloatArray(16)
-        for (i in 0..3) {
-            for (j in 0..3) {
-                result[i * 4 + j] =
-                    a[i * 4 + 0] * b[0 + j] +
-                    a[i * 4 + 1] * b[4 + j] +
-                    a[i * 4 + 2] * b[8 + j] +
-                    a[i * 4 + 3] * b[12 + j]
-            }
-        }
-        return result
+    private fun multiplyMatrices(a: FloatArray, b: FloatArray, out: FloatArray) {
+        val v0 = a[0] * b[0] + a[4] * b[1] + a[8] * b[2] + a[12] * b[3]
+        val v1 = a[1] * b[0] + a[5] * b[1] + a[9] * b[2] + a[13] * b[3]
+        val v2 = a[2] * b[0] + a[6] * b[1] + a[10] * b[2] + a[14] * b[3]
+        val v3 = a[3] * b[0] + a[7] * b[1] + a[11] * b[2] + a[15] * b[3]
+
+        val v4 = a[0] * b[4] + a[4] * b[5] + a[8] * b[6] + a[12] * b[7]
+        val v5 = a[1] * b[4] + a[5] * b[5] + a[9] * b[6] + a[13] * b[7]
+        val v6 = a[2] * b[4] + a[6] * b[5] + a[10] * b[6] + a[14] * b[7]
+        val v7 = a[3] * b[4] + a[7] * b[5] + a[11] * b[6] + a[15] * b[7]
+
+        val v8 = a[0] * b[8] + a[4] * b[9] + a[8] * b[10] + a[12] * b[11]
+        val v9 = a[1] * b[8] + a[5] * b[9] + a[9] * b[10] + a[13] * b[11]
+        val v10 = a[2] * b[8] + a[6] * b[9] + a[10] * b[10] + a[14] * b[11]
+        val v11 = a[3] * b[8] + a[7] * b[9] + a[11] * b[10] + a[15] * b[11]
+
+        val v12 = a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12] * b[15]
+        val v13 = a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13] * b[15]
+        val v14 = a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14] * b[15]
+        val v15 = a[3] * b[12] + a[7] * b[13] + a[11] * b[14] + a[15] * b[15]
+
+        out[0] = v0; out[1] = v1; out[2] = v2; out[3] = v3
+        out[4] = v4; out[5] = v5; out[6] = v6; out[7] = v7
+        out[8] = v8; out[9] = v9; out[10] = v10; out[11] = v11
+        out[12] = v12; out[13] = v13; out[14] = v14; out[15] = v15
     }
 
     /**
@@ -544,11 +562,14 @@ class AvatarSkeleton(context: Context?) {
      * Get skinning matrices for GPU
      */
     fun getSkinningMatrices(): FloatArray {
-        val result = FloatArray(boneArray.size * 16)
-        boneArray.forEachIndexed { index, bone ->
-            bone.skinningMatrix.copyInto(result, index * 16)
+        val requiredSize = boneArray.size * 16
+        if (cachedSkinningBuffer.size != requiredSize) {
+            cachedSkinningBuffer = FloatArray(requiredSize)
         }
-        return result
+        for (i in 0 until boneArray.size) {
+            boneArray[i].skinningMatrix.copyInto(cachedSkinningBuffer, i * 16)
+        }
+        return cachedSkinningBuffer
     }
 }
 
