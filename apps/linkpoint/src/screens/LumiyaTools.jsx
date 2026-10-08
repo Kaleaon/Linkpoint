@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { app } from "../linkpoint/app.ts";
 import { GRIDS } from "../theme/constants.js";
 import Icon from "../components/Icon.jsx";
+import AudioPlayer from "../components/AudioPlayer.jsx";
 
 function Empty({ icon, children }) {
   return <div className="honest-empty"><Icon name={icon} size={30} /><p>{children}</p></div>;
@@ -22,7 +23,7 @@ export function GridsScreen() {
 export function MediaScreen() {
   const [url, setUrl] = useState("");
   const [active, setActive] = useState("");
-  return <div className="tool-page"><h2>Streaming media</h2><div className="inline-tool"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="HTTPS audio stream URL" /><button onClick={() => setActive(url.trim())} disabled={!/^https:\/\//i.test(url.trim())}>Play</button></div>{active ? <audio className="media-player" src={active} controls autoPlay onError={() => setActive("")} /> : <Empty icon="radio">Enter an HTTPS stream supplied by the current parcel or broadcaster.</Empty>}</div>;
+  return <div className="tool-page"><h2>Streaming media</h2><div className="inline-tool"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="HTTPS audio stream URL" /><button onClick={() => setActive(url.trim())} disabled={!/^https:\/\//i.test(url.trim())}>Play</button></div>{active ? <AudioPlayer src={active} onError={() => setActive("")} /> : <Empty icon="radio">Enter an HTTPS stream supplied by the current parcel or broadcaster.</Empty>}</div>;
 }
 
 export function NotecardsScreen() {
@@ -198,11 +199,8 @@ export function ParcelScreen() {
         </div>
         {streamError ? <small style={{ color: "#e53935", marginTop: 4 }}>{streamError}</small> : null}
         {activeStream && isValidUrl && isPlaying ? (
-          <audio
-            className="media-player"
+          <AudioPlayer
             src={activeStream}
-            controls
-            autoPlay
             onError={() => {
               setStreamError("Stream error: unable to play audio stream.");
               setIsPlaying(false);
