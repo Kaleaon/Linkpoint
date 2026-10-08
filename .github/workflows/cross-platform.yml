@@ -61,7 +61,9 @@ jobs:
           python-version: "3.11"
       - name: Set up Rust toolchain
         if: matrix.os == 'ubuntu-latest'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+        with:
+          toolchain: stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -111,6 +113,7 @@ jobs:
           python-version: "3.11"
       - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
         with:
+          toolchain: stable
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
       - uses: taiki-e/install-action@wasm-bindgen-cli
