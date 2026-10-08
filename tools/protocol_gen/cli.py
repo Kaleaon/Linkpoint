@@ -16,13 +16,21 @@ DEFAULT_TEMPLATE_PATH = "schemas/protocol/message_template.msg"
 DEFAULT_LLSD_DIR = "schemas/protocol/llsd"
 
 DEFAULT_TARGET_OUT_DIRS = {
-    "kotlin": "Linkpoint/src/main/java/com/linkpoint/protocol/generated",
+    "kotlin": (
+        "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/generated"
+        if os.path.exists("legacy/Linkpoint")
+        else "Linkpoint/src/main/java/com/linkpoint/protocol/generated"
+    ),
     "rust": "crates/linkpoint-protocol/src/generated",
     "dart": "packages/viewer-dart/lib/src/generated",
     "typescript": "packages/viewer-types/src/generated",
     "python": "tools/protocol_gen/generated/python",
     "c": "crates/linkpoint-protocol/c_include/generated",
-    "java": "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated",
+    "java": (
+        "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
+        if os.path.exists("legacy/Linkpoint")
+        else "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
+    ),
 }
 
 
