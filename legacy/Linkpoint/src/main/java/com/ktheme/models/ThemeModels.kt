@@ -44,7 +44,10 @@ data class ColorScheme(
     val scrim: String = "#000000",
     val inverseSurface: String = onSurface,
     val inverseOnSurface: String = surface,
-    val inversePrimary: String = primary
+    val inversePrimary: String = primary,
+    val axisX: String = "#FF6B6B",
+    val axisY: String = "#7CFFD8",
+    val axisZ: String = "#6DE8FF"
 )
 
 @Serializable
