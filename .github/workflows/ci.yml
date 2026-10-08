@@ -111,6 +111,15 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
 
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm ci
+
       - name: Validate parity snapshot clean-tree guards
         run: bash scripts/check_parity_snapshot_guards.sh
 
