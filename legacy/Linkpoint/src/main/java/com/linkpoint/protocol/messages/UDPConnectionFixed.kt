@@ -10,6 +10,9 @@ import com.linkpoint.network.NetworkLogger
 import com.linkpoint.protocol.core.AgentIdentity
 import com.linkpoint.protocol.circuit.LinkpointConstants
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.TopographyNetworkSerializer
+import com.linkpoint.world.topography.WorldTopographyProjection
 import com.linkpoint.utils.SessionLogRecorder
 import com.linkpoint.protocol.messages.diagnostics.PacketDiagnosticsRecorder
 import com.linkpoint.protocol.messages.diagnostics.DiagnosticsConstants
@@ -119,6 +122,7 @@ open class UDPConnectionFixed(
     private val reliabilitySupervisor: ReliabilitySupervisor = ReliabilitySupervisor(),
     private val packetDiagnosticsRecorder: PacketDiagnosticsRecorder<PacketHistoryEntry> = PacketDiagnosticsRecorder()
 ) {
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
 
     companion object {
         private const val TAG = "UDPConnectionFixed"
@@ -2506,10 +2510,13 @@ open class UDPConnectionFixed(
 
         // State (0 = standing)
         payload.put(0.toByte())
-        // Camera center (adjusted for active virtual tile offset and global region space)
-        payload.putFloat(agentGlobalX)
-        payload.putFloat(agentGlobalY)
-        payload.putFloat(agentGlobalZ)
+        // Camera center (converted from local manifold coordinates into Cartesian server space)
+        val cartesianPos = TopographyNetworkSerializer.toCartesianProtocolPacket(
+            agentGlobalX, agentGlobalY, agentGlobalZ, topographyProjection
+        )
+        payload.putFloat(cartesianPos[0])
+        payload.putFloat(cartesianPos[1])
+        payload.putFloat(cartesianPos[2])
         // Camera look-at direction (looking forward)
         payload.putFloat(1f)
         payload.putFloat(0f)

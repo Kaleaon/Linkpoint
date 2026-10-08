@@ -136,4 +136,115 @@ class TopographyIntegrationTest {
         val aliveParticle = source.particles.firstOrNull { it.alive }
         assertNotNull("Particle should emit and update", aliveParticle)
     }
+
+    @Test
+    fun testObjectManagerIncomingUpdateTopographyConversion() {
+        val udpConn = mock(UDPConnectionFixed::class.java)
+        val objectManager = com.linkpoint.objects.ObjectManager(udpConn)
+        val radius = 1000f
+        val ringworld = RingworldTopographyProjection(radius = radius)
+        objectManager.topographyProjection = ringworld
+
+        val quarterX = (Math.PI / 2.0 * radius).toFloat()
+        // Cartesian position corresponding to local (quarterX, 100f, 10f)
+        val cartesianCoords = ringworld.projectToCartesian(quarterX, 100f, 10f)
+        val cartesianPos = com.linkpoint.protocol.types.LLVector3(cartesianCoords[0], cartesianCoords[1], cartesianCoords[2])
+
+        val fullId = java.util.UUID.randomUUID()
+        val updateData = com.linkpoint.protocol.messages.ObjectUpdateData(
+            localId = 5001,
+            fullId = fullId,
+            parentId = 0,
+            position = cartesianPos,
+            rotation = com.linkpoint.protocol.types.LLQuaternion.identity(),
+            velocity = com.linkpoint.protocol.types.LLVector3.zero(),
+            scale = com.linkpoint.protocol.types.LLVector3.one(),
+            pcode = 9, material = 0, clickAction = 0, updateFlags = 0,
+            textureEntry = ByteArray(0), hoverText = "",
+            hoverTextColor = com.linkpoint.protocol.types.LLColor4(0f, 0f, 0f, 0f),
+            mediaUrl = ""
+        )
+
+        objectManager.handleObjectUpdate(updateData)
+
+        val obj = objectManager.getObject(5001)
+        assertNotNull("Object should be added to ObjectManager", obj)
+        assertEquals(quarterX, obj!!.position.x, 0.5f)
+        assertEquals(100f, obj.position.y, 0.5f)
+        assertEquals(10f, obj.position.z, 0.5f)
+    }
+
+    @Test
+    fun testObjectManagerTerseUpdateTopographyConversion() {
+        val udpConn = mock(UDPConnectionFixed::class.java)
+        val objectManager = com.linkpoint.objects.ObjectManager(udpConn)
+        val sphere = SphericalTopographyProjection(radius = 1000f)
+        objectManager.topographyProjection = sphere
+
+        val fullId = java.util.UUID.randomUUID()
+        val initData = com.linkpoint.protocol.messages.ObjectUpdateData(
+            localId = 5002, fullId = fullId, parentId = 0,
+            position = com.linkpoint.protocol.types.LLVector3.zero(),
+            rotation = com.linkpoint.protocol.types.LLQuaternion.identity(),
+            velocity = com.linkpoint.protocol.types.LLVector3.zero(),
+            scale = com.linkpoint.protocol.types.LLVector3.one(),
+            pcode = 9, material = 0, clickAction = 0, updateFlags = 0,
+            textureEntry = ByteArray(0), hoverText = "",
+            hoverTextColor = com.linkpoint.protocol.types.LLColor4(0f, 0f, 0f, 0f), mediaUrl = ""
+        )
+        objectManager.handleObjectUpdate(initData)
+
+        val cartesianCoords = sphere.projectToCartesian(100f, -50f, 15f)
+        val terseData = com.linkpoint.protocol.messages.TerseUpdateData(
+            localId = 5002,
+            isAvatar = false,
+            position = com.linkpoint.protocol.types.LLVector3(cartesianCoords[0], cartesianCoords[1], cartesianCoords[2]),
+            velocity = com.linkpoint.protocol.types.LLVector3.zero(),
+            acceleration = com.linkpoint.protocol.types.LLVector3.zero(),
+            rotation = com.linkpoint.protocol.types.LLQuaternion.identity(),
+            angularVelocity = com.linkpoint.protocol.types.LLVector3.zero()
+        )
+
+        objectManager.handleTerseUpdate(terseData)
+
+        val obj = objectManager.getObject(5002)
+        assertNotNull(obj)
+        assertEquals(100f, obj!!.position.x, 1f)
+        assertEquals(-50f, obj.position.y, 1f)
+        assertEquals(15f, obj.position.z, 1f)
+    }
+
+    @Test
+    fun testAvatarLocomotionGroundingOnRingworldAndSpherical() {
+        val controller = AvatarController()
+        val ringworld = RingworldTopographyProjection(radius = 1000f)
+        controller.topographyProjection = ringworld
+
+        // Teleport avatar to ground level on Ringworld (local Z = 0)
+        controller.teleport(com.badlogic.gdx.math.Vector3(100f, 100f, 0f))
+        val input = InputState(moveX = 1f, moveY = 0f)
+
+        // Run locomotion updates
+        for (i in 0 until 10) {
+            controller.fixedUpdate(dt = 0.016f, input = input, topography = ringworld)
+            assertTrue("Avatar position.z should stay grounded at local z=0 and not fall through terrain", controller.position.z >= 0f)
+        }
+    }
+
+    @Test
+    fun testAvatarPositionReconciliationSpatialInterpolation() {
+        val controller = AvatarController()
+        val ringworld = RingworldTopographyProjection(radius = 1000f)
+        controller.topographyProjection = ringworld
+
+        controller.teleport(com.badlogic.gdx.math.Vector3(100f, 100f, 0f))
+        val targetServerLocalPos = com.badlogic.gdx.math.Vector3(110f, 100f, 0f)
+
+        // Perform reconciliation step over short dt
+        controller.reconcilePosition(targetServerLocalPos, dt = 0.016f, smoothingFactor = 0.5f, topography = ringworld)
+
+        // Position should smoothly interpolate towards target without snapping immediately to 110f
+        assertTrue("Position X should move towards 110f", controller.position.x > 100f)
+        assertTrue("Position X should smoothly interpolate without snapping", controller.position.x < 110f)
+    }
 }
