@@ -3,11 +3,13 @@
 pub mod aabb;
 pub mod chunk;
 pub mod octree;
+pub mod topography;
 pub mod worker;
 
 pub use aabb::AABB;
 pub use chunk::{ChunkGrid, ChunkId, SpatialChunk};
 pub use octree::{Octree, SpatialEntity};
+pub use topography::{TopographyNetworkSerializer, TopographyType};
 pub use worker::SpatialWorkerPool;
 
 use std::sync::{Arc, RwLock};

@@ -1,4 +1,7 @@
-use linkpoint_scene::spatial::{AABB, ChunkGrid, ChunkId, Octree, SpatialEntity, SpatialManager};
+use linkpoint_scene::spatial::{
+    AABB, ChunkGrid, ChunkId, Octree, SpatialEntity, SpatialManager, TopographyNetworkSerializer,
+    TopographyType,
+};
 use std::time::Instant;
 
 #[test]
@@ -382,4 +385,111 @@ fn test_aabb_extended_methods() {
     // Ray misses box
     let miss = box1.ray_intersects([0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
     assert!(miss.is_none());
+}
+
+#[test]
+fn test_topography_projections_and_network_serializer() {
+    let topo_ring = TopographyType::Ringworld {
+        radius: 1000.0,
+        width: 256.0,
+    };
+    let local_pos = [100.0, 50.0, 10.0];
+
+    let cartesian = TopographyNetworkSerializer::to_cartesian_protocol_packet(local_pos, topo_ring);
+    let restored =
+        TopographyNetworkSerializer::from_cartesian_protocol_packet(cartesian, topo_ring);
+
+    assert!((local_pos[0] - restored[0]).abs() < 1e-3);
+    assert!((local_pos[1] - restored[1]).abs() < 1e-3);
+    assert!((local_pos[2] - restored[2]).abs() < 1e-3);
+
+    // Boundary wrapping and clamping
+    let circumference = 2.0 * std::f32::consts::PI * 1000.0;
+    let overbound_pos = [circumference + 50.0, 30.0, 0.0];
+    let wrapped = topo_ring.wrap_or_clamp_boundary(overbound_pos);
+    assert!((wrapped[0] - 50.0).abs() < 1e-3);
+
+    let topo_sph = TopographyType::Spherical { radius: 500.0 };
+    let spherical_overbound = [circumference + 10.0, 2000.0, 0.0];
+    let wrapped_sph = topo_sph.wrap_or_clamp_boundary(spherical_overbound);
+    let max_lat = 2.0 * std::f32::consts::PI * 500.0 * 0.25;
+    assert!((wrapped_sph[1] - max_lat).abs() < 1e-3);
+}
+
+#[test]
+fn test_geodesic_distance_metrics() {
+    let topo_ring = TopographyType::Ringworld {
+        radius: 1000.0,
+        width: 256.0,
+    };
+    let circumference = 2.0 * std::f32::consts::PI * 1000.0;
+    let p1 = [10.0, 20.0];
+    let p2 = [circumference - 10.0, 20.0];
+
+    let dist = topo_ring.surface_geodesic_distance(p1, p2);
+    assert!((dist - 20.0).abs() < 1e-3); // 10.0 + 10.0 wrapped x distance
+
+    let topo_sph = TopographyType::Spherical { radius: 500.0 };
+    let sp1 = [0.0, 0.0];
+    let sp2 = [0.0, 100.0];
+    let sph_dist = topo_sph.surface_geodesic_distance(sp1, sp2);
+    assert!((sph_dist - 100.0).abs() < 1e-2);
+}
+
+#[test]
+fn test_horizon_culling() {
+    let topo_sph = TopographyType::Spherical { radius: 100.0 };
+    let camera_local = [0.0, 0.0, 10.0]; // 10m altitude
+    let target_near = [0.0, 20.0, 0.0]; // Near target
+    let target_far = [0.0, 200.0, 0.0]; // Target over the horizon
+
+    assert!(!topo_sph.is_beyond_horizon(camera_local, target_near, 2.0));
+    assert!(topo_sph.is_beyond_horizon(camera_local, target_far, 2.0));
+}
+
+#[test]
+fn test_non_planar_octree_tight_depth_and_range_queries() {
+    let bounds = AABB::new([0.0, 0.0, 0.0], [256.0, 256.0, 100.0]);
+    let topo_ring = TopographyType::Ringworld {
+        radius: 1000.0,
+        width: 256.0,
+    };
+
+    let mut octree = Octree::new(bounds, 8, 16).with_topography(topo_ring);
+
+    // Insert 1000 clustered entities in local manifold space
+    for i in 0..1000 {
+        let x = (i % 50) as f32 * 2.0 + 10.0;
+        let y = (i / 50) as f32 * 2.0 + 10.0;
+        let z = 5.0;
+        let entity = SpatialEntity::new(
+            format!("ring_obj_{}", i),
+            AABB::new([x - 0.5, y - 0.5, z - 0.5], [x + 0.5, y + 0.5, z + 0.5]),
+            [x, y, z],
+        );
+        octree.insert(entity);
+    }
+
+    assert_eq!(octree.count, 1000);
+    let depth = octree.max_depth();
+    assert!(
+        (4..=6).contains(&depth),
+        "Octree depth should stay within level 4 to 6 for local manifold coordinates, got {}",
+        depth
+    );
+
+    // Test geodesic query
+    let center = [15.0, 15.0];
+    let geodesic_results = octree.query_geodesic(center, 10.0);
+    assert!(!geodesic_results.is_empty());
+    for entity in &geodesic_results {
+        let dist =
+            topo_ring.surface_geodesic_distance(center, [entity.position[0], entity.position[1]]);
+        assert!(dist <= 10.0 + 1.0);
+    }
+
+    // Test horizon culled query
+    let query_bounds = AABB::new([0.0, 0.0, 0.0], [200.0, 200.0, 50.0]);
+    let culled_results = octree.query_horizon_culled([15.0, 15.0, 10.0], &query_bounds);
+    assert!(!culled_results.is_empty());
 }

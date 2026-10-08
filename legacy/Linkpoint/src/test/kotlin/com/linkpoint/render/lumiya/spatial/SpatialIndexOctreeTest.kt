@@ -1,5 +1,7 @@
 package com.linkpoint.render.lumiya.spatial
 
+import com.linkpoint.world.topography.RingworldTopographyProjection
+import com.linkpoint.world.topography.SphericalTopographyProjection
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -215,5 +217,31 @@ class SpatialIndexOctreeTest {
         index.clear()
         val afterClearAvailable = pool.availableCount()
         assertTrue("Clearing spatial index must recycle nodes back into node pool", afterClearAvailable >= initialAvailable)
+    }
+
+    @Test
+    fun `non-planar octree maintains tight depth 4 to 6 and supports geodesic queries`() {
+        val pool = OctreeNodePool(2048)
+        val ringProj = RingworldTopographyProjection(radius = 1000f)
+        val index = SpatialIndex(pool, topographyProjection = ringProj)
+
+        // Populate 1,000 objects in dense clusters
+        for (i in 1..1000) {
+            val posX = (i % 50) * 2f + 10f
+            val posY = (i / 50) * 2f + 10f
+            val posZ = 5f
+            index.insert(SpatialEntry(id = i.toLong(), posX = posX, posY = posY, posZ = posZ, halfExtentX = 0.5f, halfExtentY = 0.5f, halfExtentZ = 0.5f))
+        }
+
+        val maxDepth = index.getMaxDepth()
+        assertTrue("Octree depth ($maxDepth) for dense ringworld scene must stay between 4 and 6", maxDepth in 4..6)
+
+        // Query geodesic range
+        val geodesicResults = index.queryGeodesicRange(centerX = 15f, centerY = 15f, centerZ = 5f, maxGeodesicDistance = 10f)
+        assertTrue("Geodesic query should return visible objects", geodesicResults.isNotEmpty())
+        for (e in geodesicResults) {
+            val dist = ringProj.calculateGeodesicDistance(15f, 15f, e.posX, e.posY)
+            assertTrue("Object distance $dist must be within geodesic range", dist <= 10f + maxOf(e.halfExtentX, e.halfExtentY))
+        }
     }
 }
