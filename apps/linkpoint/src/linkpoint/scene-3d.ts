@@ -47,7 +47,7 @@ export class Scene3D extends Utils.EventEmitter {
   private terrainLoaded = false;
   private terrainHeights: number[] | null = null;
   private terrainSize = 0;
-  private terrainMaterials: (TerrainParams & { textureNames: string[] }) | null = null;
+  private terrainMaterials: (TerrainParams & { textureNames: string[]; normalTextureNames?: string[]; normalNames?: string[] }) | null = null;
   private terrainCompositionReady = false;
 
   // Sky, water and culling. Sky/water resources are created in init().
@@ -257,7 +257,7 @@ export class Scene3D extends Utils.EventEmitter {
       const a = y * (cells + 1) + x, b = a + 1, c = a + cells + 1, d = c + 1;
       indices.push(a, b, c, b, d, c);
     }
-    this.graphics.createMesh('terrain', vertices, indices, normals, texCoords);
+    this.graphics.createMesh('terrain', vertices, indices, normals, texCoords, tangentsFor({ vertices, indices, normals, texCoords }));
     this.terrainLoaded = true;
     this.terrainHeights = Array.from(heights, Number);
     this.terrainSize = size;
@@ -270,7 +270,7 @@ export class Scene3D extends Utils.EventEmitter {
    * measured against per-corner start heights and ranges (SW, SE, NW, NE). `textureNames` are the
    * graphics texture names of the four layers; any not loaded yet show a fallback colour.
    */
-  setTerrainMaterials(materials: TerrainParams & { textureNames: string[] }) {
+  setTerrainMaterials(materials: TerrainParams & { textureNames: string[]; normalTextureNames?: string[]; normalNames?: string[] }) {
     if (!materials || materials.startHeights?.length < 4 || materials.heightRanges?.length < 4) return false;
     this.terrainMaterials = materials;
     this.buildTerrainComposition();
@@ -720,15 +720,20 @@ export class Scene3D extends Utils.EventEmitter {
 
     if (this.terrainTextured && this.terrainMaterials) {
       const names = this.terrainMaterials.textureNames;
+      const normalNames = this.terrainMaterials.normalTextureNames || this.terrainMaterials.normalNames || [];
       const use = [0, 1, 2, 3].map((i) => (this.graphics.hasTexture(names[i]) ? 1 : 0));
       const detail: Record<string, any> = {};
       for (let i = 0; i < TERRAIN_LAYERS; i++) {
         detail[`uDetail${i}Name`] = names[i];
+        detail[`uDetailNormal${i}Name`] = normalNames[i] || '';
         detail[`uFallback${i}`] = new Float32Array(FALLBACK_LAYER_COLORS[i]);
       }
       this.graphics.drawMesh('terrain', 'terrain', {
         uModelMatrix: modelMatrix, uViewMatrix: viewMatrix, uProjectionMatrix: projectionMatrix, uNormalMatrix: normalMatrix,
         uLightPos: new Float32Array(light.position), uLightColor: new Float32Array(light.color), uAmbientColor: new Float32Array(this.ambientColor),
+        uSkyColor: new Float32Array(this.skyUniforms.skyColor),
+        uHazeHorizon: this.skyUniforms.hazeHorizon,
+        uHazeColor: new Float32Array(this.skyUniforms.hazeColor),
         uCompositionName: 'terrain:composition', uDetailUse: new Float32Array(use),
         uTileScale: this.terrainSize > 1 ? 256 / DETAIL_TILE_METRES : 16,
         ...detail,

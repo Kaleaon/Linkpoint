@@ -239,8 +239,10 @@ export class WorldViewer extends Utils.EventEmitter {
     if (!m || !this.scene3d) return;
     if (Number.isFinite(m.waterHeight)) this.scene3d.setWaterHeight(m.waterHeight);
     if (Array.isArray(m.startHeights) && Array.isArray(m.heightRanges)) {
+      const normalIds = m.normalTextureIds || m.normalIds || [];
       this.scene3d.setTerrainMaterials({
         textureNames: (m.textureIds || []).map((id: string | null) => (id ? `texture:${id}` : '')),
+        normalTextureNames: normalIds.map((id: string | null) => (id ? `texture:${id}` : '')),
         startHeights: m.startHeights.map(Number), heightRanges: m.heightRanges.map(Number),
         origin: [Number(m.origin?.[0]) || 0, Number(m.origin?.[1]) || 0],
       });
