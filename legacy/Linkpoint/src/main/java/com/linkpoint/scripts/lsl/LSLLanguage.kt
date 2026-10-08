@@ -9,15 +9,9 @@ import androidx.compose.ui.text.font.FontWeight
 /**
  * LSL (Linden Scripting Language) syntax definition for Jetpack Compose.
  *
- * Provides full syntax highlighting for Second Life scripts including:
- * - All 350+ LSL functions (llSay, llGetPos, etc.)
- * - All 60+ events (state_entry, touch_start, etc.)
- * - All 400+ constants (STATUS_PHYSICS, CHANGED_INVENTORY, etc.)
- * - Types (integer, float, string, key, vector, rotation, list)
- * - Keywords (if, else, for, while, return, state, jump, default)
- * - Comments (single-line // and multi-line /* */)
- * - Strings with escape sequences
- * - Numbers (integers, floats, hex)
+ * Framework adapter providing full syntax highlighting for Second Life scripts in Compose UI.
+ * Delegates canonical token sets, color palette values, pattern definitions,
+ * autocomplete suggestions, and range calculation to [LSLTokenRegistry].
  *
  * Based on Firestorm's LSL editor implementation.
  */
@@ -26,72 +20,30 @@ object LSLLanguage {
     // ==================== COLORS ====================
 
     object Colors {
-        val KEYWORD = Color(0xFFCC7832)      // Orange for keywords
-        val TYPE = Color(0xFF6897BB)          // Blue for types
-        val FUNCTION = Color(0xFFFFC66D)      // Yellow for functions
-        val EVENT = Color(0xFFB389CB)         // Purple for events
-        val CONSTANT = Color(0xFF9876AA)      // Purple for constants
-        val STRING = Color(0xFF6A8759)        // Green for strings
-        val COMMENT = Color(0xFF808080)       // Gray for comments
-        val NUMBER = Color(0xFF6897BB)        // Blue for numbers
-        val OPERATOR = Color(0xFFA9B7C6)      // Light gray for operators
-        val DEFAULT = Color(0xFFA9B7C6)       // Default text color
-        val STATE = Color(0xFFFF6B68)         // Red for state names
-        val DEPRECATED = Color(0xFFFF0000)    // Red for deprecated
-        val BACKGROUND = Color(0xFF1E1E1E)   // Dark background
-        val LINE_NUMBER = Color(0xFF606366)  // Line number color
+        val KEYWORD = Color(LSLTokenRegistry.Colors.KEYWORD)
+        val TYPE = Color(LSLTokenRegistry.Colors.TYPE)
+        val FUNCTION = Color(LSLTokenRegistry.Colors.FUNCTION)
+        val EVENT = Color(LSLTokenRegistry.Colors.EVENT)
+        val CONSTANT = Color(LSLTokenRegistry.Colors.CONSTANT)
+        val STRING = Color(LSLTokenRegistry.Colors.STRING)
+        val COMMENT = Color(LSLTokenRegistry.Colors.COMMENT)
+        val NUMBER = Color(LSLTokenRegistry.Colors.NUMBER)
+        val OPERATOR = Color(LSLTokenRegistry.Colors.OPERATOR)
+        val DEFAULT = Color(LSLTokenRegistry.Colors.DEFAULT)
+        val STATE = Color(LSLTokenRegistry.Colors.STATE)
+        val DEPRECATED = Color(LSLTokenRegistry.Colors.DEPRECATED)
+        val BACKGROUND = Color(LSLTokenRegistry.Colors.BACKGROUND)
+        val LINE_NUMBER = Color(LSLTokenRegistry.Colors.LINE_NUMBER)
     }
 
-    // ==================== KEYWORDS ====================
+    // ==================== TOKEN SETS ====================
 
-    val KEYWORDS = setOf(
-        "if", "else", "for", "while", "do", "jump", "return", "state",
-        "default", "event", "TRUE", "FALSE"
-    )
-
-    // ==================== TYPES ====================
-
-    val TYPES = setOf(
-        "integer", "float", "string", "key", "vector", "rotation", "quaternion", "list"
-    )
-
-    // ==================== EVENTS ====================
-
-    val EVENTS = setOf(
-        "touch_start", "touch", "touch_end",
-        "state_entry", "state_exit",
-        "sensor", "no_sensor", "timer", "listen", "money",
-        "collision_start", "collision", "collision_end",
-        "land_collision_start", "land_collision", "land_collision_end",
-        "at_target", "not_at_target", "at_rot_target", "not_at_rot_target",
-        "control", "run_time_permissions", "attach", "dataserver",
-        "link_message", "moving_start", "moving_end", "object_rez",
-        "on_rez", "changed", "email", "http_response", "http_request",
-        "remote_data", "experience_permissions", "experience_permissions_denied",
-        "transaction_result", "path_update"
-    )
-
-    // ==================== CONSTANTS ====================
-    // (Using the same constants from LSLSyntax.kt)
-
-    val CONSTANTS = LSLSyntax.CONSTANTS
-
-    // ==================== FUNCTIONS ====================
-    // (Using the same functions from LSLSyntax.kt)
-
-    val FUNCTIONS = LSLSyntax.FUNCTIONS
-
-    // ==================== DEPRECATED FUNCTIONS ====================
-
-    val DEPRECATED_FUNCTIONS = LSLSyntax.DEPRECATED_FUNCTIONS
-
-    // ==================== REGEX PATTERNS ====================
-
-    private val multiLineCommentRegex = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL)
-    private val singleLineCommentRegex = Regex("//.*")
-    private val stringRegex = Regex("\"([^\"\\\\]|\\\\.)*\"")
-    private val numberRegex = Regex("\\b(0x[0-9A-Fa-f]+|\\d+\\.?\\d*([eE][+-]?\\d+)?|\\d*\\.\\d+([eE][+-]?\\d+)?)\\b")
-    private val identifierRegex = Regex("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")
+    val KEYWORDS: Set<String> get() = LSLTokenRegistry.KEYWORDS
+    val TYPES: Set<String> get() = LSLTokenRegistry.TYPES
+    val EVENTS: Set<String> get() = LSLTokenRegistry.EVENTS
+    val CONSTANTS: Set<String> get() = LSLTokenRegistry.CONSTANTS
+    val FUNCTIONS: Set<String> get() = LSLTokenRegistry.FUNCTIONS
+    val DEPRECATED_FUNCTIONS: Set<String> get() = LSLTokenRegistry.DEPRECATED_FUNCTIONS
 
     /**
      * Highlight LSL code and return an AnnotatedString with syntax highlighting.
@@ -101,7 +53,7 @@ object LSLLanguage {
 
         // 1. Highlight multi-line comments first (highest priority)
         val multiLineCommentRanges = mutableListOf<IntRange>()
-        multiLineCommentRegex.findAll(code).forEach { match ->
+        LSLTokenRegistry.Patterns.MULTI_LINE_COMMENT_REGEX.findAll(code).forEach { match ->
             builder.addStyle(
                 SpanStyle(color = Colors.COMMENT, fontStyle = FontStyle.Italic),
                 match.range.first,
@@ -111,12 +63,12 @@ object LSLLanguage {
         }
 
         // Merge multi-line comment ranges before matching single-line comments
-        var styledRanges = mergeRanges(multiLineCommentRanges)
+        var styledRanges = LSLTokenRegistry.mergeRanges(multiLineCommentRanges)
 
         // 2. Highlight single-line comments
         val singleLineCommentRanges = mutableListOf<IntRange>()
-        singleLineCommentRegex.findAll(code).forEach { match ->
-            if (!isInStyledRange(match.range.first, styledRanges)) {
+        LSLTokenRegistry.Patterns.SINGLE_LINE_COMMENT_REGEX.findAll(code).forEach { match ->
+            if (!LSLTokenRegistry.isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
                     SpanStyle(color = Colors.COMMENT, fontStyle = FontStyle.Italic),
                     match.range.first,
@@ -127,12 +79,12 @@ object LSLLanguage {
         }
 
         // Merge all comment ranges (multi-line + single-line) before matching strings
-        styledRanges = mergeRanges(styledRanges + singleLineCommentRanges)
+        styledRanges = LSLTokenRegistry.mergeRanges(styledRanges + singleLineCommentRanges)
 
         // 3. Highlight strings
         val stringRanges = mutableListOf<IntRange>()
-        stringRegex.findAll(code).forEach { match ->
-            if (!isInStyledRange(match.range.first, styledRanges)) {
+        LSLTokenRegistry.Patterns.STRING_REGEX.findAll(code).forEach { match ->
+            if (!LSLTokenRegistry.isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
                     SpanStyle(color = Colors.STRING),
                     match.range.first,
@@ -143,11 +95,11 @@ object LSLLanguage {
         }
 
         // Merge comment and string ranges before matching numbers and identifiers
-        styledRanges = mergeRanges(styledRanges + stringRanges)
+        styledRanges = LSLTokenRegistry.mergeRanges(styledRanges + stringRanges)
 
         // 4. Highlight numbers (hex and decimal)
-        numberRegex.findAll(code).forEach { match ->
-            if (!isInStyledRange(match.range.first, styledRanges)) {
+        LSLTokenRegistry.Patterns.NUMBER_REGEX.findAll(code).forEach { match ->
+            if (!LSLTokenRegistry.isInStyledRange(match.range.first, styledRanges)) {
                 builder.addStyle(
                     SpanStyle(color = Colors.NUMBER),
                     match.range.first,
@@ -157,17 +109,17 @@ object LSLLanguage {
         }
 
         // 5. Highlight identifiers (keywords, types, functions, events, constants)
-        identifierRegex.findAll(code).forEach { match ->
-            if (!isInStyledRange(match.range.first, styledRanges)) {
+        LSLTokenRegistry.Patterns.IDENTIFIER_REGEX.findAll(code).forEach { match ->
+            if (!LSLTokenRegistry.isInStyledRange(match.range.first, styledRanges)) {
                 val word = match.value
-                val style = when {
-                    word in KEYWORDS -> SpanStyle(color = Colors.KEYWORD, fontWeight = FontWeight.Bold)
-                    word in TYPES -> SpanStyle(color = Colors.TYPE, fontWeight = FontWeight.Bold)
-                    word in EVENTS -> SpanStyle(color = Colors.EVENT, fontWeight = FontWeight.Bold)
-                    word in DEPRECATED_FUNCTIONS -> SpanStyle(color = Colors.DEPRECATED, fontStyle = FontStyle.Italic)
-                    word in FUNCTIONS -> SpanStyle(color = Colors.FUNCTION)
-                    word in CONSTANTS -> SpanStyle(color = Colors.CONSTANT)
-                    else -> null
+                val style = when (LSLTokenRegistry.getTokenType(word)) {
+                    LSLTokenType.KEYWORD -> SpanStyle(color = Colors.KEYWORD, fontWeight = FontWeight.Bold)
+                    LSLTokenType.TYPE -> SpanStyle(color = Colors.TYPE, fontWeight = FontWeight.Bold)
+                    LSLTokenType.EVENT -> SpanStyle(color = Colors.EVENT, fontWeight = FontWeight.Bold)
+                    LSLTokenType.DEPRECATED_FUNCTION -> SpanStyle(color = Colors.DEPRECATED, fontStyle = FontStyle.Italic)
+                    LSLTokenType.FUNCTION -> SpanStyle(color = Colors.FUNCTION)
+                    LSLTokenType.CONSTANT -> SpanStyle(color = Colors.CONSTANT)
+                    LSLTokenType.UNKNOWN -> null
                 }
 
                 style?.let {
@@ -183,80 +135,21 @@ object LSLLanguage {
      * Merges overlapping or adjacent IntRanges into a sorted list of disjoint ranges.
      */
     internal fun mergeRanges(ranges: List<IntRange>): List<IntRange> {
-        if (ranges.isEmpty()) return emptyList()
-        val sorted = ranges.sortedWith(compareBy({ it.first }, { it.last }))
-        val merged = mutableListOf<IntRange>()
-        var current = sorted[0]
-
-        for (i in 1 until sorted.size) {
-            val next = sorted[i]
-            if (next.first <= current.last + 1) {
-                current = current.first..maxOf(current.last, next.last)
-            } else {
-                merged.add(current)
-                current = next
-            }
-        }
-        merged.add(current)
-        return merged
+        return LSLTokenRegistry.mergeRanges(ranges)
     }
 
     /**
      * Binary search to check if a position falls within any range in a sorted list of disjoint IntRanges.
      */
     internal fun isInStyledRange(position: Int, ranges: List<IntRange>): Boolean {
-        if (ranges.isEmpty()) return false
-
-        var low = 0
-        var high = ranges.size - 1
-
-        while (low <= high) {
-            val mid = (low + high) ushr 1
-            val range = ranges[mid]
-
-            when {
-                position < range.first -> high = mid - 1
-                position > range.last -> low = mid + 1
-                else -> return true
-            }
-        }
-
-        return false
+        return LSLTokenRegistry.isInStyledRange(position, ranges)
     }
 
     /**
      * Get autocomplete suggestions for the given prefix.
      */
     fun getAutocompleteSuggestions(prefix: String): List<AutocompleteSuggestion> {
-        if (prefix.length < 2) return emptyList()
-
-        val suggestions = mutableListOf<AutocompleteSuggestion>()
-        val prefixLower = prefix.lowercase()
-
-        // Functions
-        FUNCTIONS.filter { it.lowercase().startsWith(prefixLower) }
-            .take(10)
-            .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.FUNCTION)) }
-
-        // Events
-        EVENTS.filter { it.lowercase().startsWith(prefixLower) }
-            .take(5)
-            .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.EVENT)) }
-
-        // Constants
-        CONSTANTS.filter { it.lowercase().startsWith(prefixLower) }
-            .take(5)
-            .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.CONSTANT)) }
-
-        // Keywords
-        KEYWORDS.filter { it.lowercase().startsWith(prefixLower) }
-            .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.KEYWORD)) }
-
-        // Types
-        TYPES.filter { it.lowercase().startsWith(prefixLower) }
-            .forEach { suggestions.add(AutocompleteSuggestion(it, SuggestionType.TYPE)) }
-
-        return suggestions.sortedBy { it.text }
+        return LSLTokenRegistry.getAutocompleteSuggestions(prefix)
     }
 
     /**
