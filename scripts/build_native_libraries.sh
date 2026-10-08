@@ -47,7 +47,7 @@ elif [ -f "target/x86_64-unknown-linux-gnu/release/liblinkpoint_protocol.so" ]; 
 fi
 
 echo "=== Compiling Texture Decoder Native Library ==="
-C_SRC="${ROOT_DIR}/texture_decoder_native.c"
+C_SRC="${ROOT_DIR}/legacy/texture_decoder_native.c"
 if [ -f "${C_SRC}" ]; then
     CC_CMD=""
     if command -v gcc >/dev/null 2>&1; then

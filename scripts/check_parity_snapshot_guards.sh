@@ -41,8 +41,8 @@ done
 
 # 3. Test vector loader suite presence across platforms
 REQUIRED_LOADER_SUITES=(
-  "Linkpoint/src/test/kotlin/com/linkpoint/vectors/SharedTestVectorSuiteTest.kt"
-  "LLSD-KOTLIN/src/test/kotlin/lindenlab/llsd/vectors/SharedTestVectorSuiteTest.kt"
+  "legacy/Linkpoint/src/test/kotlin/com/linkpoint/vectors/SharedTestVectorSuiteTest.kt"
+  "legacy/LLSD-KOTLIN/src/test/kotlin/lindenlab/llsd/vectors/SharedTestVectorSuiteTest.kt"
   "crates/linkpoint-scene/tests/vector_tests.rs"
   "apps/linkpoint/src/linkpoint/__tests__/test-vectors.test.ts"
 )
