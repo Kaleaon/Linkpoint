@@ -272,9 +272,52 @@ function samePosition(vertices, firstColumn, lastColumn, columns, rows) {
   return true;
 }
 
-async function decodeJPEG2000(buffer) {
-  const decoded = await decodePixels(buffer);
-  return { width: decoded.width, height: decoded.height, rgba: decoded.data.toString('base64') };
+const textureLRUCache = new Map();
+const textureLRUOrder = [];
+const TEXTURE_CACHE_LIMIT = 128;
+
+function getCachedTexture(assetId) {
+  if (!assetId) return null;
+  const key = String(assetId).toLowerCase();
+  if (textureLRUCache.has(key)) {
+    const idx = textureLRUOrder.indexOf(key);
+    if (idx !== -1) textureLRUOrder.splice(idx, 1);
+    textureLRUOrder.push(key);
+    return textureLRUCache.get(key);
+  }
+  return null;
 }
 
-module.exports = { computeNormals, decodeLLMesh, normalizeLLMesh, decodeGLTFMaterial, normalizeGLTFMaterial, decodeSculpt, decodeJPEG2000 };
+function setCachedTexture(assetId, result) {
+  if (!assetId) return;
+  const key = String(assetId).toLowerCase();
+  textureLRUCache.set(key, result);
+  const idx = textureLRUOrder.indexOf(key);
+  if (idx !== -1) textureLRUOrder.splice(idx, 1);
+  textureLRUOrder.push(key);
+
+  while (textureLRUCache.size > TEXTURE_CACHE_LIMIT && textureLRUOrder.length > 0) {
+    const evictedKey = textureLRUOrder.shift();
+    if (evictedKey) textureLRUCache.delete(evictedKey);
+  }
+}
+
+async function decodeJPEG2000(buffer, assetId = null) {
+  if (assetId) {
+    const cached = getCachedTexture(assetId);
+    if (cached) return cached;
+  }
+  const decoded = await decodePixels(buffer);
+  const result = { width: decoded.width, height: decoded.height, rgba: decoded.data.toString('base64') };
+  if (assetId) {
+    setCachedTexture(assetId, result);
+  }
+  return result;
+}
+
+function clearTextureCache() {
+  textureLRUCache.clear();
+  textureLRUOrder.length = 0;
+}
+
+module.exports = { computeNormals, decodeLLMesh, normalizeLLMesh, decodeGLTFMaterial, normalizeGLTFMaterial, decodeSculpt, decodeJPEG2000, clearTextureCache };
