@@ -28,39 +28,22 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
         && data[6] == 0x20
         && data[7] == 0x20
     {
-        let mut pos = 0;
-        while pos + 8 <= data.len() {
-            let box_len =
-                u32::from_be_bytes([data[pos], data[pos + 1], data[pos + 2], data[pos + 3]])
-                    as usize;
-            let box_type =
-                u32::from_be_bytes([data[pos + 4], data[pos + 5], data[pos + 6], data[pos + 7]]);
-
-            if box_len < 8 {
-                break;
-            }
-
-            let next_pos = match pos.checked_add(box_len) {
-                Some(p) if p <= data.len() => p,
-                _ => break, // Truncated or overflowed payload boundary
-            };
-
-            if box_type == 0x69686472 && pos + 16 <= data.len() {
-                // 'ihdr'
+        for pos in 0..data.len().saturating_sub(12) {
+            if &data[pos..pos + 4] == b"ihdr" {
                 let height = u32::from_be_bytes([
+                    data[pos + 4],
+                    data[pos + 5],
+                    data[pos + 6],
+                    data[pos + 7],
+                ]);
+                let width = u32::from_be_bytes([
                     data[pos + 8],
                     data[pos + 9],
                     data[pos + 10],
                     data[pos + 11],
                 ]);
-                let width = u32::from_be_bytes([
-                    data[pos + 12],
-                    data[pos + 13],
-                    data[pos + 14],
-                    data[pos + 15],
-                ]);
-                let components = if pos + 18 <= data.len() {
-                    u16::from_be_bytes([data[pos + 16], data[pos + 17]]) as u32
+                let components = if pos + 14 <= data.len() {
+                    u16::from_be_bytes([data[pos + 12], data[pos + 13]]) as u32
                 } else {
                     4
                 };
@@ -68,12 +51,10 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
                     return Some(J2KHeaderInfo {
                         width,
                         height,
-                        components,
+                        components: if components > 0 { components } else { 4 },
                     });
                 }
             }
-
-            pos = next_pos;
         }
     }
 
@@ -127,6 +108,18 @@ pub fn parse_j2k_header(data: &[u8]) -> Option<J2KHeaderInfo> {
     }
 
     None
+}
+
+pub fn decode_j2k_to_rgba(data: &[u8]) -> Option<(u32, u32, Vec<u8>)> {
+    if data.is_empty() {
+        return None;
+    }
+    if let Some(header) = parse_j2k_header(data) {
+        let rgba = generate_placeholder_rgba(header.width, header.height);
+        Some((header.width, header.height, rgba))
+    } else {
+        None
+    }
 }
 
 pub fn calculate_discard_level(width: u32, height: u32, target_max_dim: u32) -> u32 {

@@ -9,6 +9,7 @@ let package = Package(
     ],
     products: [
         .library(name: "LLSD", targets: ["LLSD"]),
+        .library(name: "LLSDAssets", targets: ["LLSDAssets"]),
         .library(name: "LLSDXMLRPC", targets: ["LLSDXMLRPC"]),
         .library(name: "LLSDNetwork", targets: ["LLSDNetwork"]),
         .library(name: "LinkpointiOS", targets: ["LinkpointiOS"])
@@ -20,6 +21,10 @@ let package = Package(
             dependencies: []
         ),
         .target(
+            name: "LLSDAssets",
+            dependencies: ["LLSD"]
+        ),
+        .target(
             name: "LLSDXMLRPC",
             dependencies: ["LLSD"]
         ),
@@ -29,11 +34,15 @@ let package = Package(
         ),
         .target(
             name: "LinkpointiOS",
-            dependencies: ["LLSD", "LLSDXMLRPC", "LLSDNetwork"]
+            dependencies: ["LLSD", "LLSDAssets", "LLSDXMLRPC", "LLSDNetwork"]
         ),
         .testTarget(
             name: "LLSDTests",
             dependencies: ["LLSD"]
+        ),
+        .testTarget(
+            name: "LLSDAssetsTests",
+            dependencies: ["LLSDAssets"]
         ),
         .testTarget(
             name: "XMLRPCTests",
