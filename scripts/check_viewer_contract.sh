@@ -9,7 +9,7 @@ fi
 root=$(git rev-parse --show-toplevel)
 contract_ts="$root/packages/viewer-types/src/index.ts"
 contract_dart="$root/packages/linkpoint_dart/lib/src/viewer_contract.g.dart"
-contract_kt="$root/Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt"
+contract_kt="$root/legacy/Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt"
 
 before_ts=$(mktemp)
 before_dart=$(mktemp)

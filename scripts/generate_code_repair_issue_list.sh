@@ -19,7 +19,7 @@ issues = []
 
 # 1) Java decompilation stubs that require smali reconstruction.
 stub_re = re.compile(r'Method not decompiled: ([^(]+)\((.*?)\):([^\"]+)')
-for java_file in sorted((repo / 'lumiya_decompiled_source').rglob('*.java')):
+for java_file in sorted((repo / 'legacy' / 'lumiya_decompiled_source').rglob('*.java')):
     text = java_file.read_text(errors='ignore')
     for m in stub_re.finditer(text):
         method_qual = m.group(1)
