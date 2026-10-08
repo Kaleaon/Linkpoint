@@ -109,7 +109,7 @@ jobs:
             ndk;26.3.11579264
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew Linkpoint/gradlew 2>/dev/null || true
+        run: chmod +x legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
 
       - name: Validate parity snapshot clean-tree guards
         run: bash scripts/check_parity_snapshot_guards.sh
@@ -124,34 +124,34 @@ jobs:
           bash scripts/ui/check-migration-matrix.sh
 
       - name: Run unit tests and lint
-        run: ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace
+        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
 
       - name: Run Roborazzi Visual Snapshot Verification
-        run: ./gradlew verifyRoborazziDebug
+        run: (cd legacy && ./gradlew verifyRoborazziDebug)
 
       - name: Upload Roborazzi Visual Diffs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: roborazzi-diffs
-          path: Linkpoint/build/outputs/roborazzi/
+          path: legacy/Linkpoint/build/outputs/roborazzi/
 
       - name: Assemble Debug build
-        run: ./gradlew :Linkpoint:assembleDebug --stacktrace
+        run: (cd legacy && ./gradlew :Linkpoint:assembleDebug --stacktrace)
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         if: success()
         with:
           name: linkpoint-debug-${{ github.sha }}
-          path: Linkpoint/build/outputs/apk/*/debug/*.apk
+          path: legacy/Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
 
       - name: Upload Android coverage report
         uses: actions/upload-artifact@v4
         with:
           name: android-coverage
-          path: Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
           if-no-files-found: ignore
 
   web:
@@ -262,10 +262,10 @@ jobs:
           python-version: "3.11"
 
       - name: Grant execute permissions
-        run: chmod +x Linkpoint/tools/protocol/*.sh Linkpoint/tools/protocol/*.py 2>/dev/null || true
+        run: chmod +x legacy/Linkpoint/tools/protocol/*.sh legacy/Linkpoint/tools/protocol/*.py 2>/dev/null || true
 
       - name: Run protocol conformance suite
-        run: Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
+        run: legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
   dart:
     name: Task 6 - Dart Package Verification

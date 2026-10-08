@@ -33,7 +33,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 LINKPOINT_ROOT="$(cd -- "${SCRIPT_DIR}/../.." &> /dev/null && pwd)"
-REPO_ROOT="$(cd -- "${LINKPOINT_ROOT}/.." &> /dev/null && pwd)"
+REPO_ROOT="$(cd -- "${LINKPOINT_ROOT}/../.." &> /dev/null && pwd)"
 REPORTS_DIR="${LINKPOINT_ROOT}/build/reports/protocol"
 
 skip_gradle=0
@@ -73,7 +73,7 @@ if [[ ${skip_gradle} -eq 0 ]]; then
   if [[ -z "${GRADLE_CMD}" ]]; then
     if command -v gradle >/dev/null 2>&1; then
       GRADLE_CMD="gradle"
-    elif [[ -x "${REPO_ROOT}/gradlew" ]]; then
+    elif [[ -x "${LINKPOINT_ROOT}/../gradlew" ]]; then
       GRADLE_CMD="./gradlew"
     else
       log "missing gradle executable or wrapper"; exit 2
