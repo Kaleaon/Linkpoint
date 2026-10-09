@@ -235,7 +235,8 @@ class LLSD {
       buffer.write('<uri>${_escapeXml(value.value)}</uri>');
     } else if (value is LLSDBinary) {
       buffer.write(
-          '<binary encoding="base64">${base64.encode(value.value)}</binary>');
+        '<binary encoding="base64">${base64.encode(value.value)}</binary>',
+      );
     } else if (value is LLSDArray) {
       buffer.write('<array>');
       for (final item in value.value) {
@@ -456,9 +457,11 @@ class _XmlReader {
         return LLSDURI(_unescapeXml(content.trim()));
       case 'binary':
         content = content.trim();
-        return LLSDBinary(content.isEmpty
-            ? Uint8List(0)
-            : base64.decode(content.replaceAll(RegExp(r'\s+'), '')));
+        return LLSDBinary(
+          content.isEmpty
+              ? Uint8List(0)
+              : base64.decode(content.replaceAll(RegExp(r'\s+'), '')),
+        );
       default:
         return const LLSDUndef();
     }
