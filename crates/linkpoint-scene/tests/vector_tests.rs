@@ -294,7 +294,11 @@ fn test_multi_lod_vectors() {
             );
 
             let lod = select_lod(px, None);
-            assert_eq!(lod, case.expected.selected_lod, "{}: selected_lod", case.name);
+            assert_eq!(
+                lod, case.expected.selected_lod,
+                "{}: selected_lod",
+                case.name
+            );
         }
     }
 }
@@ -324,7 +328,11 @@ fn test_submesh_vectors() {
                 case.name
             );
             for (idx, sub) in case.expected.submeshes.iter().enumerate() {
-                assert_eq!(sub.material_index, idx, "{}: material index match", case.name);
+                assert_eq!(
+                    sub.material_index, idx,
+                    "{}: material index match",
+                    case.name
+                );
                 assert!(sub.vertex_count > 0, "{}: vertex count > 0", case.name);
                 assert!(sub.index_count > 0, "{}: index count > 0", case.name);
             }

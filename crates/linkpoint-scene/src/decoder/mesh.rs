@@ -16,11 +16,23 @@ pub fn calculate_projected_pixel_coverage(
     fov_rad: f32,
     screen_height_px: f32,
 ) -> f32 {
-    let safe_radius = if bounding_radius <= 0.0 { 0.5 } else { bounding_radius };
-    let safe_distance = if distance_meters <= 0.001 { 0.001 } else { distance_meters };
+    let safe_radius = if bounding_radius <= 0.0 {
+        0.5
+    } else {
+        bounding_radius
+    };
+    let safe_distance = if distance_meters <= 0.001 {
+        0.001
+    } else {
+        distance_meters
+    };
     let safe_fov = fov_rad.clamp(0.01, std::f32::consts::PI - 0.01);
     let tan_half_fov = (safe_fov / 2.0).tan();
-    let safe_tan = if tan_half_fov <= 0.0001 { 0.57735 } else { tan_half_fov };
+    let safe_tan = if tan_half_fov <= 0.0001 {
+        0.57735
+    } else {
+        tan_half_fov
+    };
 
     (safe_radius * screen_height_px) / (safe_distance * safe_tan)
 }
@@ -46,7 +58,9 @@ pub fn parse_binary_mesh_header(data: &[u8]) -> Result<ParsedMeshHeader, String>
     }
 
     let is_llm = data.starts_with(b"Linden Binary Mesh 1.0");
-    let is_llsd = data.starts_with(b"<?llsd/binary?>") || data.starts_with(b"[\x00\x00\x00") || data.starts_with(b"{\x00\x00\x00");
+    let is_llsd = data.starts_with(b"<?llsd/binary?>")
+        || data.starts_with(b"[\x00\x00\x00")
+        || data.starts_with(b"{\x00\x00\x00");
 
     if !is_llm && !is_llsd {
         return Err("Unrecognized binary mesh header magic".into());
@@ -100,7 +114,11 @@ pub fn parse_binary_mesh_header(data: &[u8]) -> Result<ParsedMeshHeader, String>
     }
 
     Ok(ParsedMeshHeader {
-        magic: if is_llm { "Linden Binary Mesh 1.0".into() } else { "LLSD Binary Mesh".into() },
+        magic: if is_llm {
+            "Linden Binary Mesh 1.0".into()
+        } else {
+            "LLSD Binary Mesh".into()
+        },
         vertex_count,
         index_count,
         materials,

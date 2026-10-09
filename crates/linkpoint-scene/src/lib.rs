@@ -97,7 +97,11 @@ pub struct SimulatorObject {
 }
 
 impl SceneEntity {
-    pub fn from_binary_mesh_header(id: impl Into<String>, header_data: &[u8], transform: Transform) -> Self {
+    pub fn from_binary_mesh_header(
+        id: impl Into<String>,
+        header_data: &[u8],
+        transform: Transform,
+    ) -> Self {
         let (kind, materials) = if let Ok(header) = parse_binary_mesh_header(header_data) {
             (EntityKind::Mesh, header.materials)
         } else {
