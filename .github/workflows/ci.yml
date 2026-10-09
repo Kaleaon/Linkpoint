@@ -60,14 +60,10 @@ jobs:
       - name: Run Ruff format check
         run: ruff format --check scripts/ tools/
 
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Fetch Dart dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
 
       - name: Cache pre-commit environments
         uses: actions/cache@v4
@@ -288,6 +284,11 @@ jobs:
 
       - name: Build native protocol shared library
         run: cargo build -p linkpoint-protocol --release
+
+      - name: Fetch Dart dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
 
       - name: Verify Dart formatting
         run: |
