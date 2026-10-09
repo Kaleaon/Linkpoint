@@ -22,6 +22,15 @@ export interface NoticeCalendarEntry {
   addedAt: number;
 }
 
+export interface NoticeAttachmentEntry {
+  hasAttachment: boolean;
+  attachmentName: string | null;
+  attachmentItemId: string | null;
+  attachmentType: number | null;
+  attachmentOwnerId: string | null;
+  savedToInventoryAt: number | null;
+}
+
 export interface SavedNotice {
   id: string;
   groupId: string | null;
@@ -31,6 +40,8 @@ export interface SavedNotice {
   /** When the notice arrived (ms). */
   timestamp: number;
   calendar: NoticeCalendarEntry | null;
+  attachment?: NoticeAttachmentEntry | null;
+  hasAttachment?: boolean;
 }
 
 export interface GroupNoticeCacheEntry {
@@ -52,6 +63,16 @@ function sanitize(raw: any): SavedNotice | null {
         addedAt: raw.calendar.addedAt,
       }
     : null;
+  const attachment = raw.attachment && typeof raw.attachment === 'object'
+    ? {
+        hasAttachment: Boolean(raw.attachment.hasAttachment),
+        attachmentName: typeof raw.attachment.attachmentName === 'string' ? raw.attachment.attachmentName : null,
+        attachmentItemId: typeof raw.attachment.attachmentItemId === 'string' ? raw.attachment.attachmentItemId : null,
+        attachmentType: typeof raw.attachment.attachmentType === 'number' ? raw.attachment.attachmentType : null,
+        attachmentOwnerId: typeof raw.attachment.attachmentOwnerId === 'string' ? raw.attachment.attachmentOwnerId : null,
+        savedToInventoryAt: typeof raw.attachment.savedToInventoryAt === 'number' ? raw.attachment.savedToInventoryAt : null,
+      }
+    : null;
   return {
     id: raw.id.trim().slice(0, 100),
     groupId: typeof raw.groupId === 'string' && raw.groupId ? raw.groupId.slice(0, 100) : null,
@@ -60,6 +81,8 @@ function sanitize(raw: any): SavedNotice | null {
     from: text(raw.from, 120, 'Resident'),
     timestamp: Number.isFinite(raw.timestamp) ? raw.timestamp : Date.now(),
     calendar,
+    attachment,
+    hasAttachment: Boolean(raw.hasAttachment || attachment?.hasAttachment),
   };
 }
 
