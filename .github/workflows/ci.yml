@@ -246,6 +246,8 @@ jobs:
 
       - name: Set up Rust cache
         uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "v3-rust-cache"
         continue-on-error: true
 
       - name: Check Rust formatting
