@@ -47,11 +47,14 @@ class LLSDConformanceTest {
         // the build system uses Gradle's resource layout or a manual
         // classpath. Fall back to the source tree for direct IDE runs.
         val res = javaClass.classLoader.getResource("llsd-conformance/vectors")
-        if (res != null) {
-            File(res.toURI())
-        } else {
-            File("src/test/resources/llsd-conformance/vectors")
-        }
+        val candidates = listOf(
+            res?.let { File(it.toURI()) },
+            File("src/test/resources/llsd-conformance/vectors"),
+            File("legacy/Linkpoint/src/test/resources/llsd-conformance/vectors"),
+            File("Linkpoint/src/test/resources/llsd-conformance/vectors")
+        )
+        candidates.firstOrNull { it != null && it.exists() && it.isDirectory }
+            ?: File("src/test/resources/llsd-conformance/vectors")
     }
 
     @Test
