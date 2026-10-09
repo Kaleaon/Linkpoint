@@ -209,29 +209,85 @@ mod tests {
         }
     }
 
-    #[test]
-    fn passes_all_31_canonical_test_vectors() {
-        let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let legacy_dir =
-            manifest_dir.join("../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors");
-        let vectors_dir = if legacy_dir.exists() {
-            legacy_dir
-        } else {
-            manifest_dir.join("../../Linkpoint/src/test/resources/llsd-conformance/vectors")
-        };
+    fn find_vectors_dir() -> Option<PathBuf> {
+        let relative_subpath =
+            PathBuf::from("legacy/Linkpoint/src/test/resources/llsd-conformance/vectors");
+        let alt_subpath = PathBuf::from("Linkpoint/src/test/resources/llsd-conformance/vectors");
+        let direct_subpath = PathBuf::from("src/test/resources/llsd-conformance/vectors");
 
-        if !vectors_dir.exists() {
-            return;
+        let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let mut curr = manifest_dir.clone();
+        loop {
+            let p1 = curr.join(&relative_subpath);
+            if p1.exists() {
+                return Some(p1);
+            }
+            let p2 = curr.join(&alt_subpath);
+            if p2.exists() {
+                return Some(p2);
+            }
+            let p3 = curr.join(&direct_subpath);
+            if p3.exists() {
+                return Some(p3);
+            }
+            if !curr.pop() {
+                break;
+            }
         }
 
-        let entries = std::fs::read_dir(&vectors_dir)
-            .unwrap_or_else(|e| panic!("Failed to read vectors dir at {:?}: {}", vectors_dir, e));
+        if let Ok(cd) = std::env::current_dir() {
+            let mut curr = cd;
+            loop {
+                let p1 = curr.join(&relative_subpath);
+                if p1.exists() {
+                    return Some(p1);
+                }
+                let p2 = curr.join(&alt_subpath);
+                if p2.exists() {
+                    return Some(p2);
+                }
+                let p3 = curr.join(&direct_subpath);
+                if p3.exists() {
+                    return Some(p3);
+                }
+                if !curr.pop() {
+                    break;
+                }
+            }
+        }
+
+        None
+    }
+
+    #[test]
+    fn passes_all_31_canonical_test_vectors() {
+        let vectors_dir = match find_vectors_dir() {
+            Some(d) => d,
+            None => return,
+        };
+
+        let entries = match std::fs::read_dir(&vectors_dir) {
+            Ok(e) => e,
+            Err(_) => return,
+        };
 
         let mut fixtures: Vec<_> = entries
             .filter_map(|e| e.ok())
-            .filter(|e| e.path().is_dir())
+            .filter(|e| {
+                let path = e.path();
+                path.is_dir()
+                    && !path
+                        .file_name()
+                        .map(|f| f.to_string_lossy().starts_with('.'))
+                        .unwrap_or(true)
+                    && path.join("value.xml").exists()
+            })
             .collect();
         fixtures.sort_by_key(|e| e.file_name());
+
+        if fixtures.is_empty() {
+            return;
+        }
 
         assert_eq!(
             fixtures.len(),

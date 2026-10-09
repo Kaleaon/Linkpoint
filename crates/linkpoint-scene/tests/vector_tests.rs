@@ -4,39 +4,35 @@ use std::fs;
 use std::path::PathBuf;
 
 fn find_vector_file(relative_subpath: &str) -> PathBuf {
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let subpath: PathBuf = relative_subpath.split(&['/', '\\'][..]).collect();
 
-    let mut candidates = Vec::new();
-
-    if let Some(crates_dir) = manifest_dir.parent() {
-        if let Some(root_dir) = crates_dir.parent() {
-            candidates.push(root_dir.join("test-vectors").join(&subpath));
-        }
-        candidates.push(crates_dir.join("test-vectors").join(&subpath));
-    }
-    candidates.push(manifest_dir.join("test-vectors").join(&subpath));
-
-    candidates.push(
-        PathBuf::from("..")
-            .join("..")
-            .join("test-vectors")
-            .join(&subpath),
-    );
-    candidates.push(PathBuf::from("..").join("test-vectors").join(&subpath));
-    candidates.push(PathBuf::from("test-vectors").join(&subpath));
-
-    candidates.push(PathBuf::from("/app/Linkpoint/test-vectors").join(&subpath));
-    candidates.push(PathBuf::from("C:\\app\\Linkpoint\\test-vectors").join(&subpath));
-
-    for candidate in &candidates {
+    // 1. Search upwards from CARGO_MANIFEST_DIR
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let mut curr = manifest_dir.clone();
+    loop {
+        let candidate = curr.join("test-vectors").join(&subpath);
         if candidate.exists() {
-            return candidate.clone();
+            return candidate;
         }
-        if let Ok(canonical) = candidate.canonicalize() {
-            return canonical;
+        if !curr.pop() {
+            break;
         }
     }
+
+    // 2. Search upwards from current working directory
+    if let Ok(cd) = std::env::current_dir() {
+        let mut curr = cd;
+        loop {
+            let candidate = curr.join("test-vectors").join(&subpath);
+            if candidate.exists() {
+                return candidate;
+            }
+            if !curr.pop() {
+                break;
+            }
+        }
+    }
+
     panic!("Vector file missing for subpath: {}", relative_subpath);
 }
 

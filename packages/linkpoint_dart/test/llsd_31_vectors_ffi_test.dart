@@ -4,15 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/src/ffi.dart';
 
 File? _findFixtureFile() {
-  final candidates = [
-    '../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    '../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    '/app/Linkpoint/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-  ];
-  for (final path in candidates) {
-    final file = File(path);
-    if (file.existsSync()) return file;
+  const relPath =
+      'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json';
+  var curr = Directory.current;
+  for (var i = 0; i < 10; i++) {
+    final cand = File('${curr.path}/$relPath');
+    if (cand.existsSync()) return cand;
+    final parent = curr.parent;
+    if (parent.path == curr.path) break;
+    curr = parent;
   }
   return null;
 }

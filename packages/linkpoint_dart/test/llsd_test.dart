@@ -37,32 +37,41 @@ void main() {
     test(
       'Passes all 31 canonical LLSD test vectors in XML and Binary formats',
       () {
-        var vectorsDir = Directory(
-          '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
-        );
-        if (!vectorsDir.existsSync()) {
-          vectorsDir = Directory(
-            '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
-          );
+        Directory? vectorsDir;
+        final candidateSubpaths = [
+          'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+          'Linkpoint/src/test/resources/llsd-conformance/vectors',
+          'src/test/resources/llsd-conformance/vectors',
+        ];
+
+        var curr = Directory.current;
+        for (var i = 0; i < 10; i++) {
+          for (final subpath in candidateSubpaths) {
+            final cand = Directory('${curr.path}/$subpath');
+            if (cand.existsSync()) {
+              vectorsDir = cand;
+              break;
+            }
+          }
+          if (vectorsDir != null) break;
+          final parent = curr.parent;
+          if (parent.path == curr.path) break;
+          curr = parent;
         }
-        if (!vectorsDir.existsSync()) {
-          vectorsDir = Directory(
-            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
-          );
-        }
-        if (!vectorsDir.existsSync()) {
-          vectorsDir = Directory(
-            'Linkpoint/src/test/resources/llsd-conformance/vectors',
-          );
-        }
+
         expect(
-          vectorsDir.existsSync(),
+          vectorsDir != null && vectorsDir.existsSync(),
           isTrue,
           reason: 'Vectors directory must exist',
         );
 
-        final subdirs = vectorsDir.listSync().whereType<Directory>().toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
+        final subdirs =
+            vectorsDir!.listSync().whereType<Directory>().where((d) {
+          final name = d.path.split(RegExp(r'[/\\]')).last;
+          return !name.startsWith('.') &&
+              File('${d.path}/value.xml').existsSync();
+        }).toList()
+              ..sort((a, b) => a.path.compareTo(b.path));
 
         expect(
           subdirs.length,

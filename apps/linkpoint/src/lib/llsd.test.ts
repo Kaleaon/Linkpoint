@@ -373,18 +373,45 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
   }
 
   it('passes all 31 canonical test vectors in XML and Binary formats', () => {
-    let vectorsDir = path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
-    if (!fs.existsSync(vectorsDir)) {
-      vectorsDir = path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+    function findLlsdVectorsDir(): string {
+      const candidatePaths = [
+        path.join('legacy', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('src', 'test', 'resources', 'llsd-conformance', 'vectors')
+      ];
+
+      let current = __dirname;
+      for (let i = 0; i < 10; i++) {
+        for (const rel of candidatePaths) {
+          const cand = path.join(current, rel);
+          if (fs.existsSync(cand)) return cand;
+        }
+        const parent = path.dirname(current);
+        if (parent === current) break;
+        current = parent;
+      }
+
+      current = process.cwd();
+      for (let i = 0; i < 10; i++) {
+        for (const rel of candidatePaths) {
+          const cand = path.join(current, rel);
+          if (fs.existsSync(cand)) return cand;
+        }
+        const parent = path.dirname(current);
+        if (parent === current) break;
+        current = parent;
+      }
+
+      return path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
     }
-    if (!fs.existsSync(vectorsDir)) {
-      vectorsDir = path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors');
-    }
+
+    const vectorsDir = findLlsdVectorsDir();
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
     const subdirs = fs.readdirSync(vectorsDir)
+      .filter(name => !name.startsWith('.'))
       .map(name => path.join(vectorsDir, name))
-      .filter(p => fs.statSync(p).isDirectory())
+      .filter(p => fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'value.xml')))
       .sort();
 
     expect(subdirs.length).toBe(31);
