@@ -36,14 +36,14 @@ repos:
 
       - id: dart-format
         name: dart format (packages/linkpoint_dart)
-        entry: bash -c 'cd packages/linkpoint_dart && dart format --output=none --set-exit-if-changed .'
+        entry: bash -c 'cd packages/linkpoint_dart && flutter pub get && dart format --output=none --set-exit-if-changed .'
         language: system
         files: '^packages/linkpoint_dart/'
         pass_filenames: false
 
       - id: flutter-analyze
         name: flutter analyze (packages/linkpoint_dart)
-        entry: bash -c 'cd packages/linkpoint_dart && flutter analyze'
+        entry: bash -c 'cd packages/linkpoint_dart && flutter pub get && flutter analyze'
         language: system
         files: '^packages/linkpoint_dart/'
         pass_filenames: false

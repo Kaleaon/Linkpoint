@@ -23,17 +23,17 @@ cp "$contract_kt" "$before_kt"
 
 cargo run --quiet -p linkpoint-core --example generate_contract
 
-diff -u --strip-trailing-cr "$before_ts" "$contract_ts" || {
+diff -u <(tr -d '\r' < "$before_ts") <(tr -d '\r' < "$contract_ts") || {
   echo "Generated TS viewer contract is stale. Run: cargo run -p linkpoint-core --example generate_contract" >&2
   exit 1
 }
 
-diff -u --strip-trailing-cr "$before_dart" "$contract_dart" || {
+diff -u <(tr -d '\r' < "$before_dart") <(tr -d '\r' < "$contract_dart") || {
   echo "Generated Dart viewer contract is stale. Run: cargo run -p linkpoint-core --example generate_contract" >&2
   exit 1
 }
 
-diff -u --strip-trailing-cr "$before_kt" "$contract_kt" || {
+diff -u <(tr -d '\r' < "$before_kt") <(tr -d '\r' < "$contract_kt") || {
   echo "Generated Kotlin viewer contract is stale. Run: cargo run -p linkpoint-core --example generate_contract" >&2
   exit 1
 }
