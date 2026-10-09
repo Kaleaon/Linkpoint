@@ -289,6 +289,11 @@ jobs:
       - name: Build native protocol shared library
         run: cargo build -p linkpoint-protocol --release
 
+      - name: Get Flutter dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
+
       - name: Verify Dart formatting
         run: |
           cd packages/linkpoint_dart

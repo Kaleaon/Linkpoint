@@ -3,25 +3,26 @@ import {
   SkinningPaletteUBO,
   AvatarSkeletonState,
   BENTO_MAX_PALETTE_JOINTS,
-  MATRIX_4X4_FLOATS,
+  DQ_FLOATS_PER_JOINT,
   UBO_PALETTE_SIZE_BYTES,
 } from '../avatar-skeleton-state';
 import { AvatarMeshRenderer, SkinnedMeshData } from '../avatar-mesh-renderer';
 import { AVATAR_SKINNING_VERT_SHADER, AVATAR_SKINNING_VERT_SHADER_LEGACY } from '../avatar_skinning.vert';
 import { compose, skinPoint } from '../avatar-skeleton';
+import { DualQuaternion } from '../dual-quaternion';
 
 describe('GPU Skeletal Mesh Skinning with UBOs', () => {
   describe('SkinningPaletteUBO', () => {
-    it('initializes to 128 identity 4x4 matrices in std140 layout', () => {
+    it('initializes to 128 identity dual quaternions in std140 layout (8 floats / 32 bytes per joint)', () => {
       const ubo = new SkinningPaletteUBO(BENTO_MAX_PALETTE_JOINTS);
       const buffer = ubo.getUboBuffer();
 
-      expect(buffer.length).toBe(128 * MATRIX_4X4_FLOATS);
+      expect(buffer.length).toBe(128 * DQ_FLOATS_PER_JOINT);
       expect(buffer.byteLength).toBe(UBO_PALETTE_SIZE_BYTES);
 
-      // Check first matrix is identity
+      // Check first matrix reconstructed from DQ is identity
       const m0 = ubo.getJointMatrix(0);
-      expect(Array.from(m0)).toEqual([
+      expect(Array.from(m0).map((v) => Math.round(v))).toEqual([
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
@@ -30,7 +31,7 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
 
       // Check 127th matrix is identity
       const m127 = ubo.getJointMatrix(127);
-      expect(Array.from(m127)).toEqual([
+      expect(Array.from(m127).map((v) => Math.round(v))).toEqual([
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
@@ -45,16 +46,16 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
       ubo.updateJointMatrix(42, customMatrix);
       const retrieved = ubo.getJointMatrix(42);
 
-      expect(retrieved[12]).toBe(5);
-      expect(retrieved[13]).toBe(10);
-      expect(retrieved[14]).toBe(-15);
-      expect(retrieved[15]).toBe(1);
+      expect(retrieved[12]).toBeCloseTo(5, 4);
+      expect(retrieved[13]).toBeCloseTo(10, 4);
+      expect(retrieved[14]).toBeCloseTo(-15, 4);
+      expect(retrieved[15]).toBeCloseTo(1, 4);
 
       // Unmodified joint remains identity
       const unedited = ubo.getJointMatrix(41);
-      expect(unedited[12]).toBe(0);
-      expect(unedited[13]).toBe(0);
-      expect(unedited[14]).toBe(0);
+      expect(unedited[12]).toBeCloseTo(0, 4);
+      expect(unedited[13]).toBeCloseTo(0, 4);
+      expect(unedited[14]).toBeCloseTo(0, 4);
     });
 
     it('bulk updates matrices for Bento joint palettes', () => {
@@ -67,11 +68,11 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
 
       ubo.setJointMatrices(matrices);
 
-      expect(ubo.getJointMatrix(0)[12]).toBe(0);
-      expect(ubo.getJointMatrix(10)[12]).toBe(10);
-      expect(ubo.getJointMatrix(10)[13]).toBe(20);
-      expect(ubo.getJointMatrix(10)[14]).toBe(30);
-      expect(ubo.getJointMatrix(127)[12]).toBe(127);
+      expect(ubo.getJointMatrix(0)[12]).toBeCloseTo(0, 4);
+      expect(ubo.getJointMatrix(10)[12]).toBeCloseTo(10, 4);
+      expect(ubo.getJointMatrix(10)[13]).toBeCloseTo(20, 4);
+      expect(ubo.getJointMatrix(10)[14]).toBeCloseTo(30, 4);
+      expect(ubo.getJointMatrix(127)[12]).toBeCloseTo(127, 4);
     });
   });
 
@@ -90,8 +91,8 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
       const p0 = state.getPaletteUbo(0);
       const p1 = state.getPaletteUbo(1);
 
-      expect(p0.getJointMatrix(50)[12]).toBe(50);
-      expect(p1.getJointMatrix(20)[12]).toBe(148); // 128 + 20 = 148th joint
+      expect(p0.getJointMatrix(50)[12]).toBeCloseTo(50, 4);
+      expect(p1.getJointMatrix(20)[12]).toBeCloseTo(148, 4); // 128 + 20 = 148th joint
     });
   });
 
@@ -272,20 +273,22 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
   describe('Vertex Shader Source Verification', () => {
     it('includes SkinningPaletteBlock UBO uniform block and skinning attributes', () => {
       expect(AVATAR_SKINNING_VERT_SHADER).toContain('layout(std140) uniform SkinningPaletteBlock');
-      expect(AVATAR_SKINNING_VERT_SHADER).toContain('in vec4 a_bone_indices;');
-      expect(AVATAR_SKINNING_VERT_SHADER).toContain('in vec4 a_bone_weights;');
-      expect(AVATAR_SKINNING_VERT_SHADER).toContain('mat4 u_joint_matrices[128];');
+      expect(AVATAR_SKINNING_VERT_SHADER).toContain('a_bone_indices;');
+      expect(AVATAR_SKINNING_VERT_SHADER).toContain('a_bone_weights;');
+      expect(AVATAR_SKINNING_VERT_SHADER).toContain('vec4 u_joint_dq_real[128];');
+      expect(AVATAR_SKINNING_VERT_SHADER).toContain('vec4 u_joint_dq_dual[128];');
     });
 
     it('provides legacy fallback shader', () => {
       expect(AVATAR_SKINNING_VERT_SHADER_LEGACY).toContain('attribute vec4 a_bone_indices;');
       expect(AVATAR_SKINNING_VERT_SHADER_LEGACY).toContain('attribute vec4 a_bone_weights;');
-      expect(AVATAR_SKINNING_VERT_SHADER_LEGACY).toContain('uniform mat4 u_joint_matrices[110];');
+      expect(AVATAR_SKINNING_VERT_SHADER_LEGACY).toContain('uniform vec4 u_joint_dq_real[110];');
+      expect(AVATAR_SKINNING_VERT_SHADER_LEGACY).toContain('uniform vec4 u_joint_dq_dual[110];');
     });
   });
 
-  describe('CPU vs GPU Linear Blend Skinning Parity', () => {
-    it('matches vertex position and normal transformation parity between CPU skinPoint and GPU LBS formula', () => {
+  describe('CPU vs GPU Dual Quaternion Skinning Parity', () => {
+    it('matches vertex position transformation parity between CPU skinPoint and GPU DQS formula', () => {
       const p: [number, number, number] = [1.2, -0.5, 3.4];
       const joints = [0, 1, 2, 3];
       const weights = [0.5, 0.3, 0.2, 0.0];
@@ -297,28 +300,13 @@ describe('GPU Skeletal Mesh Skinning with UBOs', () => {
 
       const matrices = [m0, m1, m2, m3];
 
-      // CPU reference skinning calculation
+      // CPU skinning calculation (DQS)
       const cpuSkinnedPos = skinPoint(p, joints, weights, matrices);
 
-      // GPU Linear Blend Skinning formula simulation
-      // skinnedPos = sum(weight_i * (M_i * vec4(pos, 1.0)).xyz)
-      const gpuSkinnedPos: [number, number, number] = [0, 0, 0];
-      let totalWeight = 0;
-
-      for (let i = 0; i < 4; i++) {
-        const w = weights[i];
-        if (w <= 0) continue;
-        const m = matrices[joints[i]];
-        totalWeight += w;
-
-        const x = m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12];
-        const y = m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13];
-        const z = m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14];
-
-        gpuSkinnedPos[0] += w * x;
-        gpuSkinnedPos[1] += w * y;
-        gpuSkinnedPos[2] += w * z;
-      }
+      // GPU DQS simulation
+      const dqs = matrices.map((m) => DualQuaternion.fromMatrix(m));
+      const blendedDq = DualQuaternion.blend(dqs, weights);
+      const gpuSkinnedPos = blendedDq.transformPoint(p);
 
       expect(Math.abs(cpuSkinnedPos[0] - gpuSkinnedPos[0])).toBeLessThan(1e-5);
       expect(Math.abs(cpuSkinnedPos[1] - gpuSkinnedPos[1])).toBeLessThan(1e-5);

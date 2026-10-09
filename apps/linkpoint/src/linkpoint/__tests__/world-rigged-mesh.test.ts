@@ -63,10 +63,11 @@ describe('rigged mesh in the world', () => {
     });
     const rig = scene.objects.get('rig');
     expect(rig.skin).toBeInstanceOf(Float32Array);
-    expect(rig.skin).toHaveLength(110 * 12);
-    // identity inverse bind: joint 0 (mPelvis) is lifted to the pelvis rest height (z = 1.067)
-    expect(rig.skin[3]).toBeCloseTo(0, 5);
-    expect(rig.skin[11]).toBeCloseTo(1.067, 2);
+    expect(rig.skin).toHaveLength(110 * 8);
+    // identity inverse bind: joint 0 (mPelvis) real part (0,0,0,1), dual part z (0.5 * 1.067 = 0.5335)
+    expect(rig.skin[0]).toBeCloseTo(0, 5);
+    expect(rig.skin[3]).toBeCloseTo(1, 5);
+    expect(rig.skin[6]).toBeCloseTo(0.5335, 2);
     // the mesh uses the avatar's feet-anchored root transform, not the attachment offset
     expect(rig.position).toEqual([10, 20, 29.05]);
     expect(rig.scale).toEqual([1, 1, 1]);
@@ -86,9 +87,9 @@ describe('rigged mesh in the world', () => {
     protocol.emit('scene:object-add', { id: 'rig', localId: 2, parentId: 1, assetId: 'mesh-3', position: [0, 0, 0], rotation: [0, 0, 0, 1], scale: [1, 1, 1] });
     const geometry = (z: number) => ({ parts: [{ vertices: [0, 0, 0, 1, 0, 0, 0, 1, 0], indices: [0, 1, 2] }], skin: { jointNames: ['mHead'], bindShapeMatrix: [...identity.slice(0, 14), z, 1], inverseBindMatrices: [identity] } });
     protocol.emit('scene:asset-ready', { assetId: 'mesh-3', geometry: geometry(0) });
-    const before = scene.objects.get('rig').skin[11];
+    const before = scene.objects.get('rig').skin[6]; // dual.z component
     protocol.emit('scene:asset-ready', { assetId: 'mesh-3', geometry: geometry(1) });
-    expect(scene.objects.get('rig').skin[11]).toBeCloseTo(before + 1, 3);
+    expect(scene.objects.get('rig').skin[6]).toBeCloseTo(before + 0.5, 3); // z delta 1 => dual.z delta 0.5
   });
 });
 
@@ -109,23 +110,26 @@ describe('animated rigged mesh in the world', () => {
       assetId: 'mesh-9',
       geometry: { parts: [{ vertices: [0, 0, 0, 1, 0, 0, 0, 1, 0], indices: [0, 1, 2] }], skin: { jointNames: ['mTorso'], bindShapeMatrix: identity, inverseBindMatrices: [identity] } },
     });
-    const rest = Array.from(scene.objects.get('rig').skin.slice(0, 12)) as number[];
-    // rest: identity rotation, torso 0.084 above the pelvis (1.067)
-    expect(rest[0]).toBeCloseTo(1, 4);
+    const rest = Array.from(scene.objects.get('rig').skin.slice(0, 8)) as number[];
+    // rest real part: identity rotation (0, 0, 0, 1)
+    expect(rest[0]).toBeCloseTo(0, 4);
+    expect(rest[3]).toBeCloseTo(1, 4);
 
     protocol.emit('scene:animations', { kind: 'avatar', id: 'avatar', animations: [{ id: 'turn', seq: 1 }] });
     await flush();
     t = 1;
     (world as any).updateAnimatedSkins();
-    const posed = Array.from(scene.objects.get('rig').skin.slice(0, 12)) as number[];
-    expect(posed[0]).toBeCloseTo(0, 3);   // x axis now maps to +Y: row0 = (0, -1, 0, ..)
-    expect(posed[1]).toBeCloseTo(-1, 3);
-    expect(posed[4]).toBeCloseTo(1, 3);
+    const posed = Array.from(scene.objects.get('rig').skin.slice(0, 8)) as number[];
+    // 90 degrees rotation about Z -> real part (0, 0, SQRT1_2, SQRT1_2)
+    expect(posed[0]).toBeCloseTo(0, 3);
+    expect(posed[1]).toBeCloseTo(0, 3);
+    expect(posed[2]).toBeCloseTo(Math.SQRT1_2, 3);
+    expect(posed[3]).toBeCloseTo(Math.SQRT1_2, 3);
 
     protocol.emit('scene:animations', { kind: 'avatar', id: 'avatar', animations: [] });
     t = 5; // well past the 0.5 s ease-out
     (world as any).updateAnimatedSkins();
-    expect(Array.from(scene.objects.get('rig').skin.slice(0, 12))).toEqual(rest);
+    expect(Array.from(scene.objects.get('rig').skin.slice(0, 8))).toEqual(rest);
   });
 
   it('treats an animated object as its own subject', async () => {
@@ -141,7 +145,7 @@ describe('animated rigged mesh in the world', () => {
     await flush();
     t = 1;
     (world as any).updateAnimatedSkins();
-    expect(scene.objects.get('animesh').skin[1]).toBeCloseTo(-1, 3);
+    expect(scene.objects.get('animesh').skin[2]).toBeCloseTo(Math.SQRT1_2, 3);
     expect(scene.objects.get('animesh').position).toEqual([4, 5, 6]);
   });
 });
