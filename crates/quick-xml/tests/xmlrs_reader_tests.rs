@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use quick_xml::events::{BytesStart, Event};
 use quick_xml::{Reader, Result};
 use std::borrow::Cow;

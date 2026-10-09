@@ -13,11 +13,15 @@ void main() {
 
       final xml = LLSD.serializeXml(map);
       expect(
-          xml,
-          contains(
-              '<key>agent_id</key><uuid>00000000-0000-0000-0000-000000000000</uuid>'));
-      expect(xml,
-          contains('<key>region_name</key><string>Welcome Island</string>'));
+        xml,
+        contains(
+          '<key>agent_id</key><uuid>00000000-0000-0000-0000-000000000000</uuid>',
+        ),
+      );
+      expect(
+        xml,
+        contains('<key>region_name</key><string>Welcome Island</string>'),
+      );
       expect(xml, contains('<key>online</key><boolean>true</boolean>'));
     });
 
@@ -30,54 +34,99 @@ void main() {
       expect((mapVal['online'] as LLSDBoolean).value, true);
     });
 
-    test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
-        () {
-      var vectorsDir = Directory(
-          '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
-      if (!vectorsDir.existsSync()) {
-        vectorsDir =
-            Directory('Linkpoint/src/test/resources/llsd-conformance/vectors');
-      }
-      expect(vectorsDir.existsSync(), isTrue,
-          reason: 'Vectors directory must exist');
+    test(
+      'Passes all 31 canonical LLSD test vectors in XML and Binary formats',
+      () {
+        Directory? vectorsDir;
+        final candidateSubpaths = [
+          'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+          'Linkpoint/src/test/resources/llsd-conformance/vectors',
+          'src/test/resources/llsd-conformance/vectors',
+        ];
 
-      final subdirs = vectorsDir.listSync().whereType<Directory>().toList()
-        ..sort((a, b) => a.path.compareTo(b.path));
+        var curr = Directory.current;
+        for (var i = 0; i < 10; i++) {
+          for (final subpath in candidateSubpaths) {
+            final cand = Directory('${curr.path}/$subpath');
+            if (cand.existsSync()) {
+              vectorsDir = cand;
+              break;
+            }
+          }
+          if (vectorsDir != null) break;
+          final parent = curr.parent;
+          if (parent.path == curr.path) break;
+          curr = parent;
+        }
 
-      expect(subdirs.length, equals(31),
-          reason: 'Expected 31 test vector directories');
+        expect(
+          vectorsDir != null && vectorsDir.existsSync(),
+          isTrue,
+          reason: 'Vectors directory must exist',
+        );
 
-      for (final fixtureDir in subdirs) {
-        final fixtureName = fixtureDir.path.split(Platform.pathSeparator).last;
-        final xmlFile = File('${fixtureDir.path}/value.xml');
-        final binFile = File('${fixtureDir.path}/value.bin');
+        final subdirs =
+            vectorsDir!.listSync().whereType<Directory>().where((d) {
+          final name = d.path.split(RegExp(r'[/\\]')).last;
+          return !name.startsWith('.') &&
+              File('${d.path}/value.xml').existsSync();
+        }).toList()
+              ..sort((a, b) => a.path.compareTo(b.path));
 
-        expect(xmlFile.existsSync(), isTrue,
-            reason: 'value.xml must exist for $fixtureName');
-        expect(binFile.existsSync(), isTrue,
-            reason: 'value.bin must exist for $fixtureName');
+        expect(
+          subdirs.length,
+          equals(31),
+          reason: 'Expected 31 test vector directories',
+        );
 
-        final xmlString = xmlFile.readAsStringSync();
-        final binBytes = binFile.readAsBytesSync();
+        for (final fixtureDir in subdirs) {
+          final fixtureName =
+              fixtureDir.path.split(Platform.pathSeparator).last;
+          final xmlFile = File('${fixtureDir.path}/value.xml');
+          final binFile = File('${fixtureDir.path}/value.bin');
 
-        final fromXml = LLSD.parseXml(xmlString);
-        final fromBin = LLSD.parseBinary(binBytes);
+          expect(
+            xmlFile.existsSync(),
+            isTrue,
+            reason: 'value.xml must exist for $fixtureName',
+          );
+          expect(
+            binFile.existsSync(),
+            isTrue,
+            reason: 'value.bin must exist for $fixtureName',
+          );
 
-        expect(fromXml, equals(fromBin),
-            reason: 'XML <-> BIN tree mismatch for $fixtureName');
+          final xmlString = xmlFile.readAsStringSync();
+          final binBytes = binFile.readAsBytesSync();
 
-        // Round-trip check
-        final reXml = LLSD.serializeXml(fromXml);
-        final reBin = LLSD.serializeBinary(fromXml);
+          final fromXml = LLSD.parseXml(xmlString);
+          final fromBin = LLSD.parseBinary(binBytes);
 
-        final reFromXml = LLSD.parseXml(reXml);
-        final reFromBin = LLSD.parseBinary(reBin);
+          expect(
+            fromXml,
+            equals(fromBin),
+            reason: 'XML <-> BIN tree mismatch for $fixtureName',
+          );
 
-        expect(reFromXml, equals(fromXml),
-            reason: 'XML round-trip mismatch for $fixtureName');
-        expect(reFromBin, equals(fromXml),
-            reason: 'BIN round-trip mismatch for $fixtureName');
-      }
-    });
+          // Round-trip check
+          final reXml = LLSD.serializeXml(fromXml);
+          final reBin = LLSD.serializeBinary(fromXml);
+
+          final reFromXml = LLSD.parseXml(reXml);
+          final reFromBin = LLSD.parseBinary(reBin);
+
+          expect(
+            reFromXml,
+            equals(fromXml),
+            reason: 'XML round-trip mismatch for $fixtureName',
+          );
+          expect(
+            reFromBin,
+            equals(fromXml),
+            reason: 'BIN round-trip mismatch for $fixtureName',
+          );
+        }
+      },
+    );
   });
 }

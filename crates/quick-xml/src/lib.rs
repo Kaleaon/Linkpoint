@@ -1,3 +1,4 @@
+#![allow(clippy::all)]
 //! High performance XML reader/writer.
 //!
 //! ## Description

@@ -3,16 +3,22 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 function findVectorFile(relativePath: string): string {
-  const candidates = [
-    path.resolve(__dirname, '../../../../../test-vectors', relativePath),
-    path.resolve(__dirname, '../../../../test-vectors', relativePath),
-    path.resolve('/app/Linkpoint/test-vectors', relativePath),
-    path.resolve(process.cwd(), 'test-vectors', relativePath)
-  ];
-  for (const c of candidates) {
-    if (fs.existsSync(c)) {
-      return c;
-    }
+  const normRel = relativePath.replace(/[\/\\]/g, path.sep);
+  let current = __dirname;
+  for (let i = 0; i < 10; i++) {
+    const candidate = path.join(current, 'test-vectors', normRel);
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  current = process.cwd();
+  for (let i = 0; i < 10; i++) {
+    const candidate = path.join(current, 'test-vectors', normRel);
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
   }
   throw new Error(`Test vector file not found for ${relativePath}`);
 }

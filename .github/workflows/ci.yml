@@ -111,6 +111,18 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
 
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm ci
+
       - name: Validate parity snapshot clean-tree guards
         run: bash scripts/check_parity_snapshot_guards.sh
 
@@ -219,6 +231,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -229,6 +246,8 @@ jobs:
 
       - name: Set up Rust cache
         uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "v3-rust-cache"
         continue-on-error: true
 
       - name: Check Rust formatting
@@ -267,6 +286,9 @@ jobs:
       - name: Run protocol conformance suite
         run: legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
+      - name: Run Python protocol generator unit tests
+        run: python3 -m unittest discover -s tools/protocol_gen/tests -p "test_*.py"
+
   dart:
     name: Task 6 - Dart Package Verification
     runs-on: ubuntu-latest
@@ -292,6 +314,7 @@ jobs:
       - name: Verify Dart formatting
         run: |
           cd packages/linkpoint_dart
+          flutter pub get
           dart format --output=none --set-exit-if-changed .
 
       - name: Run Flutter analyze
