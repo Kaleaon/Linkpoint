@@ -6,42 +6,42 @@ import SwiftUI
 public enum GeneratedTokens {
     public enum Color {
         public enum Status {
-            public static let online = Color(red: 0.298039, green: 0.686275, blue: 0.313725, opacity: 1.0)
-            public static let offline = Color(red: 0.956863, green: 0.262745, blue: 0.211765, opacity: 1.0)
-            public static let degraded = Color(red: 1.0, green: 0.596078, blue: 0.0, opacity: 1.0)
-            public static let unknown = Color(red: 0.619608, green: 0.619608, blue: 0.619608, opacity: 1.0)
-            public static let success = Color(red: 0.486275, green: 1.0, blue: 0.847059, opacity: 1.0)
-            public static let warning = Color(red: 1.0, green: 0.835294, blue: 0.427451, opacity: 1.0)
-            public static let unsaved = Color(red: 1.0, green: 0.596078, blue: 0.0, opacity: 1.0)
+            public static let online = SwiftUI.Color(red: 0.298039, green: 0.686275, blue: 0.313725, opacity: 1.0)
+            public static let offline = SwiftUI.Color(red: 0.956863, green: 0.262745, blue: 0.211765, opacity: 1.0)
+            public static let degraded = SwiftUI.Color(red: 1.0, green: 0.596078, blue: 0.0, opacity: 1.0)
+            public static let unknown = SwiftUI.Color(red: 0.619608, green: 0.619608, blue: 0.619608, opacity: 1.0)
+            public static let success = SwiftUI.Color(red: 0.486275, green: 1.0, blue: 0.847059, opacity: 1.0)
+            public static let warning = SwiftUI.Color(red: 1.0, green: 0.835294, blue: 0.427451, opacity: 1.0)
+            public static let unsaved = SwiftUI.Color(red: 1.0, green: 0.596078, blue: 0.0, opacity: 1.0)
         }
         public enum Editor {
-            public static let appbarBackground = Color(red: 0.145098, green: 0.145098, blue: 0.14902, opacity: 1.0)
-            public static let background = Color(red: 0.117647, green: 0.117647, blue: 0.117647, opacity: 1.0)
-            public static let panelBackground = Color(red: 0.176471, green: 0.176471, blue: 0.176471, opacity: 1.0)
-            public static let divider = Color(red: 0.235294, green: 0.235294, blue: 0.235294, opacity: 1.0)
-            public static let text = Color(red: 0.831373, green: 0.831373, blue: 0.831373, opacity: 1.0)
-            public static let textMuted = Color(red: 0.690196, green: 0.690196, blue: 0.690196, opacity: 1.0)
-            public static let textDim = Color(red: 0.501961, green: 0.501961, blue: 0.501961, opacity: 1.0)
+            public static let appbarBackground = SwiftUI.Color(red: 0.145098, green: 0.145098, blue: 0.14902, opacity: 1.0)
+            public static let background = SwiftUI.Color(red: 0.117647, green: 0.117647, blue: 0.117647, opacity: 1.0)
+            public static let panelBackground = SwiftUI.Color(red: 0.176471, green: 0.176471, blue: 0.176471, opacity: 1.0)
+            public static let divider = SwiftUI.Color(red: 0.235294, green: 0.235294, blue: 0.235294, opacity: 1.0)
+            public static let text = SwiftUI.Color(red: 0.831373, green: 0.831373, blue: 0.831373, opacity: 1.0)
+            public static let textMuted = SwiftUI.Color(red: 0.690196, green: 0.690196, blue: 0.690196, opacity: 1.0)
+            public static let textDim = SwiftUI.Color(red: 0.501961, green: 0.501961, blue: 0.501961, opacity: 1.0)
         }
         public enum Scene {
-            public static let background = Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 1.0)
-            public static let shadow = Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 0.533333)
+            public static let background = SwiftUI.Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 1.0)
+            public static let shadow = SwiftUI.Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 0.533333)
         }
         public enum Aurora {
-            public static let color1 = Color(red: 0.427451, green: 0.909804, blue: 1.0, opacity: 0.219608)
-            public static let color2 = Color(red: 0.54902, green: 0.486275, blue: 1.0, opacity: 0.219608)
-            public static let color3 = Color(red: 0.486275, green: 1.0, blue: 0.847059, opacity: 0.156863)
+            public static let color1 = SwiftUI.Color(red: 0.427451, green: 0.909804, blue: 1.0, opacity: 0.219608)
+            public static let color2 = SwiftUI.Color(red: 0.54902, green: 0.486275, blue: 1.0, opacity: 0.219608)
+            public static let color3 = SwiftUI.Color(red: 0.486275, green: 1.0, blue: 0.847059, opacity: 0.156863)
         }
         public enum Glass {
-            public static let background = Color(red: 0.062745, green: 0.109804, blue: 0.2, opacity: 0.54902)
-            public static let stroke = Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.078431)
+            public static let background = SwiftUI.Color(red: 0.062745, green: 0.109804, blue: 0.2, opacity: 0.54902)
+            public static let stroke = SwiftUI.Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.078431)
         }
-        public static let coordColor = Color(red: 0.709804, green: 0.780392, blue: 0.913725, opacity: 1.0)
-        public static let onSurfaceDim = Color(red: 0.709804, green: 0.780392, blue: 0.913725, opacity: 1.0)
-        public static let outlineSubtle = Color(red: 0.2, green: 0.262745, blue: 0.392157, opacity: 1.0)
-        public static let unreadBadge = Color(red: 0.427451, green: 0.909804, blue: 1.0, opacity: 1.0)
-        public static let onUnreadBadge = Color(red: 0.011765, green: 0.129412, blue: 0.164706, opacity: 1.0)
-        public static let hudBackground = Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 0.666667)
-        public static let hudStroke = Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.2)
+        public static let coordColor = SwiftUI.Color(red: 0.709804, green: 0.780392, blue: 0.913725, opacity: 1.0)
+        public static let onSurfaceDim = SwiftUI.Color(red: 0.709804, green: 0.780392, blue: 0.913725, opacity: 1.0)
+        public static let outlineSubtle = SwiftUI.Color(red: 0.2, green: 0.262745, blue: 0.392157, opacity: 1.0)
+        public static let unreadBadge = SwiftUI.Color(red: 0.427451, green: 0.909804, blue: 1.0, opacity: 1.0)
+        public static let onUnreadBadge = SwiftUI.Color(red: 0.011765, green: 0.129412, blue: 0.164706, opacity: 1.0)
+        public static let hudBackground = SwiftUI.Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 0.666667)
+        public static let hudStroke = SwiftUI.Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.2)
     }
 }
