@@ -29,6 +29,8 @@ pub struct ColorTokens {
     pub on_unread_badge: RgbaColor,
     pub hud_background: RgbaColor,
     pub hud_stroke: RgbaColor,
+    pub brand: BrandTokens,
+    pub ui: UiTokens,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -70,6 +72,27 @@ pub struct AuroraTokens {
 pub struct GlassTokens {
     pub background: RgbaColor,
     pub stroke: RgbaColor,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BrandTokens {
+    pub primary: RgbaColor,
+    pub secondary: RgbaColor,
+    pub accent: RgbaColor,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct UiTokens {
+    pub text: RgbaColor,
+    pub text_muted: RgbaColor,
+    pub text_secondary: RgbaColor,
+    pub background: RgbaColor,
+    pub surface: RgbaColor,
+    pub card_background: RgbaColor,
+    pub error: RgbaColor,
+    pub disabled: RgbaColor,
+    pub shadow: RgbaColor,
+    pub viewport_placeholder: RgbaColor,
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tokens {
@@ -116,5 +139,22 @@ pub const GENERATED_TOKENS: Tokens = Tokens {
         on_unread_badge: RgbaColor::new(0.011765, 0.129412, 0.164706, 1.0),
         hud_background: RgbaColor::new(0.0, 0.0, 0.0, 0.666667),
         hud_stroke: RgbaColor::new(1.0, 1.0, 1.0, 0.2),
+        brand: BrandTokens {
+            primary: RgbaColor::new(0.0, 0.478431, 1.0, 1.0),
+            secondary: RgbaColor::new(0.345098, 0.337255, 0.839216, 1.0),
+            accent: RgbaColor::new(0.686275, 0.321569, 0.870588, 1.0),
+        },
+        ui: UiTokens {
+            text: RgbaColor::new(1.0, 1.0, 1.0, 1.0),
+            text_muted: RgbaColor::new(0.921569, 0.921569, 0.960784, 0.6),
+            text_secondary: RgbaColor::new(0.556863, 0.556863, 0.576471, 1.0),
+            background: RgbaColor::new(0.0, 0.0, 0.0, 1.0),
+            surface: RgbaColor::new(0.109804, 0.109804, 0.117647, 1.0),
+            card_background: RgbaColor::new(0.172549, 0.172549, 0.180392, 1.0),
+            error: RgbaColor::new(1.0, 0.231373, 0.188235, 1.0),
+            disabled: RgbaColor::new(0.556863, 0.556863, 0.576471, 1.0),
+            shadow: RgbaColor::new(0.0, 0.0, 0.0, 0.101961),
+            viewport_placeholder: RgbaColor::new(0.556863, 0.556863, 0.576471, 0.301961),
+        },
     },
 };

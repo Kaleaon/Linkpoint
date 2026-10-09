@@ -43,6 +43,23 @@ export const GENERATED_TOKENS = {
     onUnreadBadge: "#03212A",
     hudBackground: "#000000AA",
     hudStroke: "#FFFFFF33",
+    brand: {
+      primary: "#007AFF",
+      secondary: "#5856D6",
+      accent: "#AF52DE",
+    },
+    ui: {
+      text: "#FFFFFF",
+      textMuted: "#EBEBF599",
+      textSecondary: "#8E8E93",
+      background: "#000000",
+      surface: "#1C1C1E",
+      cardBackground: "#2C2C2E",
+      error: "#FF3B30",
+      disabled: "#8E8E93",
+      shadow: "#0000001A",
+      viewportPlaceholder: "#8E8E934D",
+    },
   },
 } as const;
 
