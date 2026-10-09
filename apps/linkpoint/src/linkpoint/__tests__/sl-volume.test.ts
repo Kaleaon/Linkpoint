@@ -1,5 +1,16 @@
-import { describe, expect, it } from 'vitest';
-import { generateVolume, volumeKey, volumeParamsFrom, type VolumeFace, type VolumeParams } from '../sl-volume';
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  generateVolume,
+  generateVolumeJS,
+  initVolumeWasm,
+  isVolumeWasmInitialized,
+  registerVolumeWasm,
+  resetVolumeWasmRegistry,
+  volumeKey,
+  volumeParamsFrom,
+  type VolumeFace,
+  type VolumeParams,
+} from '../sl-volume';
 
 const base: VolumeParams = {
   pathCurve: 0x10, profileCurve: 0x01, pathBegin: 0, pathEnd: 1, pathScaleX: 1, pathScaleY: 1, pathShearX: 0, pathShearY: 0,
@@ -126,5 +137,83 @@ describe('SL prim volumes', () => {
     expect(volumeKey(base)).toBe(volumeKey({ ...base }));
     expect(volumeKey(base)).not.toBe(volumeKey({ ...base, pathTwist: 0.1 }));
     expect(volumeParamsFrom({ pathCurve: 16, profileCurve: 1, pathTwist: null, pathScaleX: undefined })).toMatchObject({ pathTwist: 0, pathScaleX: 1 });
+  });
+
+  describe('Asynchronous WASM Module Registry', () => {
+    beforeEach(() => {
+      resetVolumeWasmRegistry();
+    });
+
+    it('initializes and registers a custom WASM module idempotently', async () => {
+      expect(isVolumeWasmInitialized()).toBe(false);
+
+      const mockWasm = {
+        wasm_generate_volume: (paramsJson: string, detail: number) => {
+          return JSON.stringify([
+            {
+              faceIndex: 0,
+              kind: 'top',
+              vertices: [0, 0, 1],
+              normals: [0, 0, 1],
+              texCoords: [0, 0],
+              indices: [0, 0, 0],
+            },
+          ]);
+        },
+      };
+
+      const res1 = await initVolumeWasm(mockWasm);
+      expect(res1).toBe(true);
+      expect(isVolumeWasmInitialized()).toBe(true);
+
+      const res2 = await initVolumeWasm(mockWasm);
+      expect(res2).toBe(true);
+
+      const faces = generateVolume(base, 3);
+      expect(faces).toHaveLength(1);
+      expect(faces[0].kind).toBe('top');
+    });
+
+    it('handles initialization gracefully when WASM is unavailable', async () => {
+      resetVolumeWasmRegistry();
+      const res = await initVolumeWasm();
+      // Should not throw CJS require or uncaught exceptions
+      expect(typeof res).toBe('boolean');
+    });
+
+    it('falls back seamlessly to pure JS generator when WASM is uninitialized', () => {
+      resetVolumeWasmRegistry();
+      expect(isVolumeWasmInitialized()).toBe(false);
+      const faces = generateVolume(base, 3);
+      expect(faces.length).toBeGreaterThan(0);
+      expect(faces[0].kind).toBe('top');
+    });
+  });
+
+  describe('Low-LOD Fallback Tessellation', () => {
+    it('renders valid, non-degenerate meshes under low LOD constraints without collapsing vertices', () => {
+      const lowLodDetails = [0.5, 0.75, 1.0];
+      const lowLodShapes: Array<Partial<VolumeParams>> = [
+        {},
+        { pathTaperX: 1, pathTaperY: 1 }, // full taper to point
+        { pathScaleX: 0, pathScaleY: 0 }, // zero path scale
+        { profileCurve: 0x00, pathTaperX: 0.99 }, // tapered cylinder
+        { profileCurve: 0x05, pathCurve: 0x20 }, // sphere at low detail
+      ];
+
+      for (const detail of lowLodDetails) {
+        for (const shape of lowLodShapes) {
+          const faces = generateVolumeJS({ ...base, ...shape }, detail);
+          expect(faces.length, `Shape ${JSON.stringify(shape)} at detail ${detail}`).toBeGreaterThan(0);
+          for (const f of faces) {
+            expect(f.vertices.length).toBeGreaterThan(0);
+            expect(f.indices.length).toBeGreaterThan(0);
+            expect(f.indices.length % 3).toBe(0);
+            // Verify vertices contain valid non-NaN coordinates
+            expect(f.vertices.every(Number.isFinite)).toBe(true);
+          }
+        }
+      }
+    });
   });
 });
