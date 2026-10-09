@@ -3,7 +3,39 @@ import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const sharp = require('sharp');
-const { computeNormals, decodeJPEG2000, decodeSculpt, normalizeLLMesh, normalizeGLTFMaterial } = require('../../../core/sl-asset-decoder.cjs');
+const { computeNormals, decodeJPEG2000, decodeLLMesh, decodeSculpt, normalizeLLMesh, normalizeGLTFMaterial } = require('../../../core/sl-asset-decoder.cjs');
+
+describe('Pre-processed Unified-LLSD mesh geometry decoding', () => {
+  it('decodes pre-partitioned geometry payloads directly with explicit LOD thresholds', async () => {
+    const payload = JSON.stringify({
+      format: 'unified-llsd-mesh-v1',
+      selected_lod: 'high_lod',
+      lod_thresholds: {
+        high_threshold: 200.0,
+        medium_threshold: 80.0,
+        low_threshold: 20.0,
+        lowest_threshold: 4.0
+      },
+      submeshes: [
+        {
+          material_index: 0,
+          indices: [0, 1, 2],
+          positions: [0, 0, 0, 1, 0, 0, 0, 1, 0],
+          normals: [0, 0, 1, 0, 0, 1, 0, 0, 1],
+          tex_coords: [0, 0, 1, 0, 0, 1]
+        }
+      ]
+    });
+
+    const mesh = await decodeLLMesh(Buffer.from(payload));
+    expect(mesh.format).toBe('unified-llsd-mesh-v1');
+    expect(mesh.selectedLod).toBe('high_lod');
+    expect(mesh.parts).toHaveLength(1);
+    expect(mesh.parts[0].materialIndex).toBe(0);
+    expect(mesh.parts[0].indices).toEqual([0, 1, 2]);
+    expect(mesh.lodThresholds.highThreshold).toBe(200.0);
+  });
+});
 
 describe('Second Life glTF PBR materials', () => {
   it('normalizes metallic-roughness effects and SL texture asset references', () => {
