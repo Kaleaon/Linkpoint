@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const sharp = require('sharp');
-const { computeNormals, decodeJPEG2000, decodeSculpt, normalizeLLMesh, normalizeGLTFMaterial } = require('../../../core/sl-asset-decoder.cjs');
+const { computeNormals, calculateProjectedPixelCoverage, selectLOD, decodeJPEG2000, decodeSculpt, normalizeLLMesh, normalizeGLTFMaterial } = require('../../../core/sl-asset-decoder.cjs');
 
 describe('Second Life glTF PBR materials', () => {
   it('normalizes metallic-roughness effects and SL texture asset references', () => {
@@ -25,6 +25,21 @@ describe('Second Life glTF PBR materials', () => {
     expect(material.textures.baseColor).toMatchObject({ textureId: 'base-id', offset: [.1, .2], scale: [2, 3], rotation: .4 });
     expect(material.textures.normal.textureId).toBe('normal-id');
     expect(material.textures.metallicRoughness.textureId).toBe('orm-id');
+  });
+});
+
+describe('screen-area LOD selection', () => {
+  it('calculates projected pixel coverage correctly based on camera FOV and distance', () => {
+    const px = calculateProjectedPixelCoverage(1.0, 5.0, Math.PI / 3, 1080);
+    expect(px).toBeCloseTo(374.12, 1);
+  });
+
+  it('selects LOD level based on screen area thresholds', () => {
+    const lods = { high_lod: [{}], medium_lod: [{}], low_lod: [{}], lowest_lod: [{}] };
+    expect(selectLOD(lods, { distance: 5.0, boundingRadius: 1.0 })).toBe('high_lod');
+    expect(selectLOD(lods, { distance: 15.0, boundingRadius: 1.0 })).toBe('medium_lod');
+    expect(selectLOD(lods, { distance: 50.0, boundingRadius: 1.0 })).toBe('low_lod');
+    expect(selectLOD(lods, { distance: 200.0, boundingRadius: 1.0 })).toBe('lowest_lod');
   });
 });
 
