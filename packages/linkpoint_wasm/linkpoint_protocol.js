@@ -2,7 +2,7 @@
 import initWasm from "./linkpoint_protocol_bg.wasm?init";
 import { __wbg_set_wasm } from "./linkpoint_protocol_bg.js";
 
-if (typeof initWasm === 'function') {
+if (typeof initWasm === "function") {
   initWasm().then((exports) => {
     __wbg_set_wasm(exports);
   }).catch(() => {});

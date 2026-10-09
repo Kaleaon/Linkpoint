@@ -26,6 +26,26 @@ else
     cp target/wasm32-unknown-unknown/release/linkpoint_protocol.wasm "${OUT_DIR}/linkpoint_protocol_bg.wasm"
 fi
 
+JS_FILE="${OUT_DIR}/linkpoint_protocol.js"
+if [ -f "${JS_FILE}" ]; then
+    node -e '
+      const fs = require("fs");
+      const p = process.argv[1];
+      let content = fs.readFileSync(p, "utf8");
+      if (content.includes("import * as wasm from \"./linkpoint_protocol_bg.wasm\";")) {
+        content = content.replace(
+          /import \* as wasm from "\.\/linkpoint_protocol_bg\.wasm";/g,
+          "import initWasm from \"./linkpoint_protocol_bg.wasm?init\";"
+        );
+        content = content.replace(
+          /__wbg_set_wasm\(wasm\);/g,
+          "if (typeof initWasm === \"function\") {\n  initWasm().then((exports) => {\n    __wbg_set_wasm(exports);\n  }).catch(() => {});\n}"
+        );
+        fs.writeFileSync(p, content);
+      }
+    ' "${JS_FILE}"
+fi
+
 WASM_FILE="${OUT_DIR}/linkpoint_protocol_bg.wasm"
 if [ ! -f "${WASM_FILE}" ]; then
     WASM_FILE="${OUT_DIR}/linkpoint_protocol.wasm"
