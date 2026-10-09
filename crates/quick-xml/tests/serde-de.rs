@@ -1,4 +1,4 @@
-#![allow(clippy::all)]
+#![allow(clippy::all, deprecated, warnings)]
 
 use quick_xml::de::Deserializer;
 use quick_xml::utils::ByteBuf;
