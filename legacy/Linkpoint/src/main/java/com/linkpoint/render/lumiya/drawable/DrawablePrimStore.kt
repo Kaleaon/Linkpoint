@@ -8,7 +8,6 @@ import com.linkpoint.render.lumiya.core.LumiyaRenderContext
 import com.linkpoint.render.lumiya.glres.GLBufferManager
 import com.linkpoint.render.materials.GlesMaterialTranslator
 import com.linkpoint.render.materials.MaterialDescriptor
-import com.linkpoint.render.materials.MaterialDescriptor.UvTransform.Companion.IDENTITY_MATRIX
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -25,7 +24,7 @@ class DrawablePrimStore {
     }
 
     /** Per-face material data. Populated from TextureEntryParser.parseFull. */
-    class FaceMaterial(
+    data class FaceMaterial(
         var textureId: UUID = NULL_UUID,
         var textureHandle: Int = 0,
         var normalHandle: Int = 0,
@@ -36,83 +35,16 @@ class DrawablePrimStore {
         var colorG: Float = 1f,
         var colorB: Float = 1f,
         var colorA: Float = 1f,
-        scaleS: Float = 1f,
-        scaleT: Float = 1f,
-        offsetS: Float = 0f,
-        offsetT: Float = 0f,
-        rotation: Float = 0f,
+        var scaleS: Float = 1f,
+        var scaleT: Float = 1f,
+        var offsetS: Float = 0f,
+        var offsetT: Float = 0f,
+        var rotation: Float = 0f,
         var metallicFactor: Float = 0f,
         var roughnessFactor: Float = 0.5f,
         var descriptor: MaterialDescriptor? = null,
         var glow: Float = 0f
-    ) {
-        @Volatile
-        var isDirty: Boolean = true
-            private set
-
-        var scaleS: Float = scaleS
-            set(value) {
-                if (field != value) {
-                    field = value
-                    isDirty = true
-                }
-            }
-
-        var scaleT: Float = scaleT
-            set(value) {
-                if (field != value) {
-                    field = value
-                    isDirty = true
-                }
-            }
-
-        var offsetS: Float = offsetS
-            set(value) {
-                if (field != value) {
-                    field = value
-                    isDirty = true
-                }
-            }
-
-        var offsetT: Float = offsetT
-            set(value) {
-                if (field != value) {
-                    field = value
-                    isDirty = true
-                }
-            }
-
-        var rotation: Float = rotation
-            set(value) {
-                if (field != value) {
-                    field = value
-                    isDirty = true
-                }
-            }
-
-        private val matrixBuffer = FloatArray(16)
-        @Volatile
-        private var cachedMatrix: FloatArray = IDENTITY_MATRIX
-
-        fun getMatrix(): FloatArray {
-            if (isDirty) {
-                synchronized(matrixBuffer) {
-                    if (isDirty) {
-                        if (scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f) {
-                            cachedMatrix = IDENTITY_MATRIX
-                        } else {
-                            MaterialDescriptor.UvTransform.computeMatrix(
-                                scaleS, scaleT, offsetS, offsetT, rotation, matrixBuffer
-                            )
-                            cachedMatrix = matrixBuffer
-                        }
-                        isDirty = false
-                    }
-                }
-            }
-            return cachedMatrix
-        }
-    }
+    )
 
     /** Per-prim instance snapshot data. */
     data class PrimInstance(

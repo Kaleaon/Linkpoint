@@ -17,9 +17,7 @@ class GridStatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: isConnected
-          ? GeneratedTokens.color.status.online
-          : GeneratedTokens.color.status.offline,
+      color: isConnected ? GeneratedTokens.color.status.online : GeneratedTokens.color.status.offline,
       child: Row(
         children: [
           Icon(
