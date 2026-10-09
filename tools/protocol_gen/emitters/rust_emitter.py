@@ -117,7 +117,7 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
 
         # LLSD capability structs
         out.append("// Generated LLSD Capability Schemas")
-        for schema in ast.llsd_schemas:
+        for schema in sorted(ast.llsd_schemas, key=lambda s: s.title):
             struct_name = f"{schema.title}Capabilities"
             out.append("#[derive(Debug, Clone, Default)]")
             out.append(f"pub struct {struct_name} {{")

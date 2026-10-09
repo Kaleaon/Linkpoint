@@ -224,7 +224,7 @@ export async function createBabylonRenderer(canvas: HTMLCanvasElement): Promise<
         pbr.emissiveColor = new Color3(materialAttr.emissiveColor[0], materialAttr.emissiveColor[1], materialAttr.emissiveColor[2]);
       }
 
-      const createSafeTexture = (uri: string) => {
+      const createSafeTexture = (uri: string, gammaSpace = true) => {
         let hasFalledBack = false;
         const fallbackToPlaceholder = () => {
           if (hasFalledBack) return;
@@ -250,6 +250,7 @@ export async function createBabylonRenderer(canvas: HTMLCanvasElement): Promise<
             undefined,
             fallbackToPlaceholder
           );
+          (tex as any).gammaSpace = gammaSpace;
           if ((tex as any).onErrorObservable) {
             (tex as any).onErrorObservable.add(fallbackToPlaceholder);
           }
@@ -260,6 +261,7 @@ export async function createBabylonRenderer(canvas: HTMLCanvasElement): Promise<
           hasFalledBack = true;
           const placeholderUri = getPlaceholderTextureUri();
           tex = new Texture(placeholderUri, scene);
+          (tex as any).gammaSpace = gammaSpace;
           applyTextureTransform(tex, materialAttr.textureTransform);
           record.textures.push(tex);
           return tex;
@@ -267,16 +269,16 @@ export async function createBabylonRenderer(canvas: HTMLCanvasElement): Promise<
       };
 
       if (materialAttr.baseColorTextureUri) {
-        pbr.baseTexture = createSafeTexture(materialAttr.baseColorTextureUri);
+        pbr.baseTexture = createSafeTexture(materialAttr.baseColorTextureUri, true);
       }
       if (materialAttr.normalMapUri) {
-        pbr.normalTexture = createSafeTexture(materialAttr.normalMapUri);
+        pbr.normalTexture = createSafeTexture(materialAttr.normalMapUri, false);
       }
       if (materialAttr.metallicRoughnessTextureUri) {
-        pbr.metallicRoughnessTexture = createSafeTexture(materialAttr.metallicRoughnessTextureUri);
+        pbr.metallicRoughnessTexture = createSafeTexture(materialAttr.metallicRoughnessTextureUri, false);
       }
       if (materialAttr.emissiveTextureUri) {
-        pbr.emissiveTexture = createSafeTexture(materialAttr.emissiveTextureUri);
+        pbr.emissiveTexture = createSafeTexture(materialAttr.emissiveTextureUri, true);
       }
 
       record.material = pbr;
