@@ -35,7 +35,7 @@ export default function ThemeStudio() {
             <div style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "8px", opacity: 0.8 }}>
               Layout & Viewport Controls
             </div>
-            
+
             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
               <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "11px" }}>
                 <span>Layout Mode</span>
