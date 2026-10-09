@@ -83,13 +83,66 @@ function decodeSubmesh(submesh, materialIndex) {
   return { materialIndex, vertices, normals, texCoords, indices, ...decodeWeights(submesh.weights, vertexCount) };
 }
 
-function normalizeLLMesh(mesh) {
+/**
+ * Compute screen pixel footprint (coverage diameter) of an object's bounding sphere.
+ * Formula: projectedPixels = (boundingRadius * screenHeightPx) / (distance * tan(fov / 2))
+ */
+function calculateProjectedPixelCoverage(boundingRadius = 0.5, distanceMeters = 10.0, fovRad = Math.PI / 3, screenHeightPx = 1080) {
+  const safeRadius = boundingRadius <= 0 ? 0.5 : boundingRadius;
+  const safeDistance = distanceMeters <= 0.001 ? 0.001 : distanceMeters;
+  const safeFov = Math.max(0.01, Math.min(Math.PI - 0.01, fovRad));
+  const tanHalfFov = Math.tan(safeFov / 2);
+  const safeTan = tanHalfFov <= 0.0001 ? 0.57735 : tanHalfFov;
+  return (safeRadius * screenHeightPx) / (safeDistance * safeTan);
+}
+
+/**
+ * Select LOD level based on screen-space pixel area calculations.
+ */
+function selectLOD(lods, options = {}) {
+  const highThreshold = options.highThreshold ?? 200.0;
+  const mediumThreshold = options.mediumThreshold ?? 80.0;
+  const lowThreshold = options.lowThreshold ?? 20.0;
+  const lowestThreshold = options.lowestThreshold ?? 4.0;
+
+  let projectedPixels = options.projectedPixels;
+  if (projectedPixels === undefined && options.distance !== undefined) {
+    projectedPixels = calculateProjectedPixelCoverage(
+      options.boundingRadius ?? 0.5,
+      options.distance,
+      options.fovRad ?? Math.PI / 3,
+      options.screenHeightPx ?? 1080
+    );
+  }
+
+  let preferredOrder;
+  if (projectedPixels !== undefined) {
+    if (projectedPixels >= highThreshold) {
+      preferredOrder = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'];
+    } else if (projectedPixels >= mediumThreshold) {
+      preferredOrder = ['medium_lod', 'high_lod', 'low_lod', 'lowest_lod'];
+    } else if (projectedPixels >= lowThreshold) {
+      preferredOrder = ['low_lod', 'medium_lod', 'lowest_lod', 'high_lod'];
+    } else {
+      preferredOrder = ['lowest_lod', 'low_lod', 'medium_lod', 'high_lod'];
+    }
+  } else if (options.targetLod) {
+    preferredOrder = [options.targetLod, 'high_lod', 'medium_lod', 'low_lod', 'lowest_lod'];
+  } else {
+    preferredOrder = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'];
+  }
+
+  const selectedName = preferredOrder.find((name) => lods[name] && lods[name].length > 0);
+  return selectedName || null;
+}
+
+function normalizeLLMesh(mesh, options = {}) {
   const lods = {};
   for (const name of ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod']) {
     const parts = (mesh.lodLevels?.[name] || []).map(decodeSubmesh).filter(Boolean);
     if (parts.length) lods[name] = parts;
   }
-  const selectedLod = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'].find((name) => lods[name]);
+  const selectedLod = selectLOD(lods, options);
   if (!selectedLod) throw new Error('LLMesh contains no renderable LOD');
   const parts = lods[selectedLod];
   const skin = mesh.skin ? {
@@ -277,4 +330,4 @@ async function decodeJPEG2000(buffer) {
   return { width: decoded.width, height: decoded.height, rgba: decoded.data.toString('base64') };
 }
 
-module.exports = { computeNormals, decodeLLMesh, normalizeLLMesh, decodeGLTFMaterial, normalizeGLTFMaterial, decodeSculpt, decodeJPEG2000 };
+module.exports = { computeNormals, calculateProjectedPixelCoverage, selectLOD, decodeLLMesh, normalizeLLMesh, decodeGLTFMaterial, normalizeGLTFMaterial, decodeSculpt, decodeJPEG2000 };
