@@ -12,7 +12,7 @@ import { estimatedSunHour, windlightEnvironment } from './windlight';
 import { AvatarSkeleton, jointPositionOverrides, skinMatrices, type MeshSkin } from './avatar-skeleton';
 import { parseAnimation, type JointPose } from './avatar-animation';
 import { packJointRows } from './skinning';
-import { generateVolume, volumeKey, volumeParamsFrom, type VolumeFace } from './sl-volume';
+import { generateVolume, initVolumeWasm, volumeKey, volumeParamsFrom, type VolumeFace } from './sl-volume';
 import { AvatarAnimator, bundledAnimationLoader } from './avatar-animator';
 import { BODY_PARTS, bodyPartRows, bodyPartSkin, bodyPartVertexSkin, loadBodyParts, type BodyPartGeometry } from './avatar-body';
 import { HUD_POINTS, HUD_SIZE, isHudPoint, type HudInfo } from './hud';
@@ -651,6 +651,12 @@ export class WorldViewer extends Utils.EventEmitter {
         }
       }
       for (const texture of this.decodedTextures.values()) this.applyTexture(texture);
+      try {
+        await initVolumeWasm();
+      } catch (_err) {
+        // Fall back to pure JS volume generator if WASM module initialization fails
+      }
+      if (stale()) return;
       await this.loadScene();
       if (stale()) return;
       for (const object of this.sceneObjects.values()) {
