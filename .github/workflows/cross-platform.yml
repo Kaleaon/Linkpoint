@@ -61,7 +61,9 @@ jobs:
           python-version: "3.11"
       - name: Set up Rust toolchain
         if: matrix.os == 'ubuntu-latest'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -109,8 +111,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: stable
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
       - uses: taiki-e/install-action@wasm-bindgen-cli
@@ -135,7 +138,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
       - uses: subosito/flutter-action@v2
