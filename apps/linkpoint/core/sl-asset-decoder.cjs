@@ -189,7 +189,7 @@ async function decodePixels(buffer) {
     return { data: result.data, width: result.info.width, height: result.info.height, channels: result.info.channels };
   } catch {
     const image = new JpxImage();
-    image.parse(new Uint8Array(buffer));
+    image.parse(Buffer.from(buffer));
     const rgba = Buffer.alloc(image.width * image.height * 4, 255);
     for (const tile of image.tiles) for (let y = 0; y < tile.height; y++) for (let x = 0; x < tile.width; x++) {
       const source = (y * tile.width + x) * image.componentsCount;
