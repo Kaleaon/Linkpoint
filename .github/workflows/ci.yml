@@ -307,6 +307,7 @@ jobs:
       - name: Verify Dart formatting
         run: |
           cd packages/linkpoint_dart
+          flutter pub get
           dart format --output=none --set-exit-if-changed .
 
       - name: Run Flutter analyze
