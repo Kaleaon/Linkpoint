@@ -7,9 +7,9 @@
  */
 
 export { AVATAR_SKINNING_VERT_SHADER, AVATAR_SKINNING_VERT_SHADER_LEGACY } from './avatar_skinning.vert';
-export { SkinningPaletteUBO, AvatarSkeletonState, BENTO_MAX_PALETTE_JOINTS } from './avatar-skeleton-state';
-export { AvatarMeshRenderer } from './avatar-mesh-renderer';
-export type { SkinnedMeshData, RenderSubmeshPartition } from './avatar-mesh-renderer';
+export { SkinningPaletteUBO, VisualParamUBO, AvatarSkeletonState, BENTO_MAX_PALETTE_JOINTS, MAX_ACTIVE_MORPH_TARGETS } from './avatar-skeleton-state';
+export { AvatarMeshRenderer, createMorphTargetDataTexture } from './avatar-mesh-renderer';
+export type { SkinnedMeshData, RenderSubmeshPartition, MorphTargetData } from './avatar-mesh-renderer';
 
 /** Joints in the largest rigs Second Life accepts. */
 export const SL_MAX_RIGGED_JOINTS = 110;
