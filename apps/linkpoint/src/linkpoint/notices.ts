@@ -11,7 +11,9 @@ import { Utils } from './utils';
 import type { SLConnectionFull } from './sl-connection-full';
 
 export const NOTICES_STORAGE_KEY = 'linkpoint.notices.v1';
+export const GROUP_NOTICES_CACHE_KEY = 'linkpoint.group_notices_cache.v1';
 export const MAX_NOTICES = 200;
+export const NOTICE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
 
 export interface NoticeCalendarEntry {
   /** Google Calendar event id, or null when it was saved as a file only. */
@@ -29,6 +31,12 @@ export interface SavedNotice {
   /** When the notice arrived (ms). */
   timestamp: number;
   calendar: NoticeCalendarEntry | null;
+}
+
+export interface GroupNoticeCacheEntry {
+  groupId: string;
+  notices: SavedNotice[];
+  timestamp: number;
 }
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
@@ -57,6 +65,8 @@ function sanitize(raw: any): SavedNotice | null {
 
 export class NoticeStore extends Utils.EventEmitter {
   private notices = new Map<string, SavedNotice>();
+  private groupCaches = new Map<string, GroupNoticeCacheEntry>();
+  private historyUnavailableGroups = new Set<string>();
   private counter = 0;
   /** A notice another screen asked the calendar to open; read once with `takeFocus`. */
   private focusId: string | null = null;
@@ -83,6 +93,27 @@ export class NoticeStore extends Utils.EventEmitter {
       const notice = sanitize(raw);
       if (notice) this.notices.set(notice.id, notice);
     }
+
+    try {
+      const rawGroupCache = this.storage?.getItem(GROUP_NOTICES_CACHE_KEY);
+      if (rawGroupCache) {
+        const parsedGroupCache = JSON.parse(rawGroupCache);
+        if (parsedGroupCache && typeof parsedGroupCache === 'object') {
+          for (const [gid, entry] of Object.entries(parsedGroupCache)) {
+            if (entry && typeof entry === 'object' && Array.isArray((entry as any).notices)) {
+              const cleanNotices = (entry as any).notices.map(sanitize).filter(Boolean) as SavedNotice[];
+              this.groupCaches.set(gid, {
+                groupId: gid,
+                notices: cleanNotices,
+                timestamp: Number((entry as any).timestamp) || Date.now(),
+              });
+            }
+          }
+        }
+      }
+    } catch {
+      // ignore storage parsing error
+    }
   }
 
   /** Persist. Storage can be full or blocked; the notice stays available this session either way. */
@@ -92,7 +123,73 @@ export class NoticeStore extends Utils.EventEmitter {
     } catch {
       this.emit('storage_error', 'Notices could not be saved on this device.');
     }
+    this.saveGroupCaches();
     this.emit('notices_changed', this.list());
+  }
+
+  private saveGroupCaches() {
+    try {
+      const obj: Record<string, any> = {};
+      for (const [gid, entry] of this.groupCaches.entries()) {
+        obj[gid] = entry;
+      }
+      this.storage?.setItem(GROUP_NOTICES_CACHE_KEY, JSON.stringify(obj));
+    } catch {
+      // ignore storage error
+    }
+  }
+
+  /** Retrieve cached notices for a group along with TTL validity (default 5 min). */
+  getGroupCache(groupId: string, ttlMs: number = NOTICE_TTL_MS): { valid: boolean; notices: SavedNotice[]; timestamp: number } | null {
+    const entry = this.groupCaches.get(groupId);
+    if (!entry) return null;
+    const now = Date.now();
+    const valid = (now - entry.timestamp) < ttlMs;
+    return {
+      valid,
+      notices: entry.notices,
+      timestamp: entry.timestamp,
+    };
+  }
+
+  /** Store group notices in the 5-minute TTL cache and persist to localStorage. */
+  setGroupCache(groupId: string, notices: SavedNotice[], timestamp: number = Date.now()): void {
+    const cleanNotices = notices.map(sanitize).filter(Boolean) as SavedNotice[];
+    const entry: GroupNoticeCacheEntry = {
+      groupId,
+      notices: cleanNotices,
+      timestamp,
+    };
+    this.groupCaches.set(groupId, entry);
+    for (const notice of cleanNotices) {
+      if (notice && notice.id && !this.notices.has(notice.id)) {
+        this.notices.set(notice.id, notice);
+      }
+    }
+    this.save();
+    this.emit('group_cache_updated', { groupId, entry });
+  }
+
+  isGroupCacheValid(groupId: string, ttlMs: number = NOTICE_TTL_MS): boolean {
+    const cache = this.getGroupCache(groupId, ttlMs);
+    return Boolean(cache && cache.valid);
+  }
+
+  /** Set whether notice history is unavailable for a group (e.g. after dual-transport failure). */
+  setHistoryUnavailable(groupId: string, unavailable: boolean): void {
+    if (unavailable) {
+      this.historyUnavailableGroups.add(groupId);
+    } else {
+      this.historyUnavailableGroups.delete(groupId);
+    }
+    this.emit('notice_history_status', { groupId, unavailable, isAnyUnavailable: this.isHistoryUnavailable() });
+  }
+
+  isHistoryUnavailable(groupId?: string): boolean {
+    if (groupId) {
+      return this.historyUnavailableGroups.has(groupId);
+    }
+    return this.historyUnavailableGroups.size > 0;
   }
 
   /** Ask the calendar screen to open this notice next. */
