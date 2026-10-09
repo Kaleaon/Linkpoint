@@ -1,3 +1,4 @@
+#![allow(clippy::all)]
 #![allow(unused)]
 
 use quick_xml::events::Event;

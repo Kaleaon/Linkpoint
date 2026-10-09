@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use quick_xml::se::to_string;
 use regex::Regex;
 use serde::Serialize;

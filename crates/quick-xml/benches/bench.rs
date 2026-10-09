@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use criterion::{self, criterion_group, criterion_main, Criterion};
 use pretty_assertions::assert_eq;
 use quick_xml::events::Event;
@@ -118,7 +120,11 @@ fn bytes_text_unescaped(c: &mut Criterion) {
             }
             assert_eq!(count, 1550, "Overall tag count in ./tests/sample_rss.xml");
 
-            let expected_nbtxt = if SAMPLE.contains(&b'\r') { 67661 } else { 66277 };
+            let expected_nbtxt = if SAMPLE.contains(&b'\r') {
+                67661
+            } else {
+                66277
+            };
             assert_eq!(
                 nbtxt, expected_nbtxt,
                 "Overall length (in bytes) of all text contents of ./tests/sample_rss.xml"
@@ -146,7 +152,11 @@ fn bytes_text_unescaped(c: &mut Criterion) {
             }
             assert_eq!(count, 1550, "Overall tag count in ./tests/sample_rss.xml");
 
-            let expected_nbtxt = if SAMPLE.contains(&b'\r') { 50334 } else { 50261 };
+            let expected_nbtxt = if SAMPLE.contains(&b'\r') {
+                50334
+            } else {
+                50261
+            };
             assert_eq!(
                 nbtxt, expected_nbtxt,
                 "Overall length (in bytes) of all text contents of ./tests/sample_rss.xml"

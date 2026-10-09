@@ -1,4 +1,5 @@
 //! This example demonstrate how custom entities can be extracted from the DOCTYPE!,
+#![allow(clippy::single_match, clippy::needless_borrow)]
 //! and later use to decode text and attribute values.
 //!
 //! NB: this example is deliberately kept simple:

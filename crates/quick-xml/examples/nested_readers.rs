@@ -1,3 +1,5 @@
+#![allow(clippy::single_match, clippy::collapsible_match)]
+
 use pretty_assertions::assert_eq;
 use quick_xml::events::Event;
 use quick_xml::Reader;

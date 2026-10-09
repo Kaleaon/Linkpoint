@@ -267,6 +267,9 @@ jobs:
       - name: Run protocol conformance suite
         run: legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
+      - name: Run Python protocol generator unit tests
+        run: python3 -m unittest discover -s tools/protocol_gen/tests -p "test_*.py"
+
   dart:
     name: Task 6 - Dart Package Verification
     runs-on: ubuntu-latest
