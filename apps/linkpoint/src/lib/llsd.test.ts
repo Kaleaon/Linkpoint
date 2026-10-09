@@ -377,6 +377,9 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
     if (!fs.existsSync(vectorsDir)) {
       vectorsDir = path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors');
     }
+    if (!fs.existsSync(vectorsDir)) {
+      vectorsDir = path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+    }
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
     const subdirs = fs.readdirSync(vectorsDir)
