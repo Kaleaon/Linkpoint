@@ -222,14 +222,15 @@ jobs:
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
           components: rustfmt, clippy, llvm-tools-preview
-
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
 
       - name: Set up Rust cache
         uses: Swatinem/rust-cache@v2
         continue-on-error: true
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
 
       - name: Check Rust formatting
         run: cargo fmt --all --check
