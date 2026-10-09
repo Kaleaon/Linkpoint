@@ -83,7 +83,7 @@ describe('base avatar body meshes', () => {
   it('produces uniform rows sized to the GPU joint budget', () => {
     const g = parseBodyPart(bytes('upperBody'), meta.upperBody);
     const rows = bodyPartRows(skeleton, bodyPartSkin(skeleton, g), skeleton.worldMatrices(), 110);
-    expect(rows).toHaveLength(110 * 12);
+    expect(rows).toHaveLength(110 * 8);
   });
 
   it('loads all parts through a fetcher', async () => {

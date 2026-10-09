@@ -1,25 +1,23 @@
 /**
  * AvatarSkeletonState & SkinningPaletteUBO
  *
- * Manages Bento skeleton joint matrix palettes and Uniform Buffer Objects (UBO)
- * for GPU linear blend skinning. Supports up to 128 4x4 transformation matrices per palette.
+ * Manages Bento skeleton joint dual quaternion palettes and Uniform Buffer Objects (UBO)
+ * for GPU Dual Quaternion Skinning (DQS). Supports up to 128 joint dual quaternion pairs per palette.
  */
 
-export const BENTO_MAX_PALETTE_JOINTS = 128;
-export const MATRIX_4X4_FLOATS = 16;
-export const MATRIX_4X4_BYTES = MATRIX_4X4_FLOATS * 4; // 64 bytes per 4x4 matrix in std140
-export const UBO_PALETTE_SIZE_FLOATS = BENTO_MAX_PALETTE_JOINTS * MATRIX_4X4_FLOATS; // 2048 floats
-export const UBO_PALETTE_SIZE_BYTES = UBO_PALETTE_SIZE_FLOATS * 4; // 8192 bytes
+import { DualQuaternion } from './dual-quaternion';
 
-const IDENTITY_MATRIX = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-]);
+export const BENTO_MAX_PALETTE_JOINTS = 128;
+export const DQ_FLOATS_PER_JOINT = 8;
+export const MATRIX_4X4_FLOATS = 16;
+export const UBO_PALETTE_SIZE_FLOATS = BENTO_MAX_PALETTE_JOINTS * DQ_FLOATS_PER_JOINT; // 1024 floats (128 real vec4 + 128 dual vec4)
+export const UBO_PALETTE_SIZE_BYTES = UBO_PALETTE_SIZE_FLOATS * 4; // 4096 bytes
+
+const REAL_OFFSET = 0; // floats 0..511 for u_joint_dq_real[128]
+const DUAL_OFFSET = 512; // floats 512..1023 for u_joint_dq_dual[128]
 
 /**
- * Uniform Buffer Object manager for Bento joint matrix palettes.
+ * Uniform Buffer Object manager for Bento joint dual quaternion palettes.
  * Maintains std140 layout Float32Array data for GPU upload.
  */
 export class SkinningPaletteUBO {
@@ -27,58 +25,83 @@ export class SkinningPaletteUBO {
   private isDirty = true;
 
   constructor(maxJoints: number = BENTO_MAX_PALETTE_JOINTS) {
-    this.buffer = new Float32Array(maxJoints * MATRIX_4X4_FLOATS);
+    this.buffer = new Float32Array(maxJoints * DQ_FLOATS_PER_JOINT);
     this.resetToIdentity();
   }
 
-  /** Reset all matrix slots in the palette to 4x4 identity matrices. */
+  /** Reset all joint slots in the palette to identity dual quaternions. */
   resetToIdentity(): void {
-    const totalJoints = Math.floor(this.buffer.length / MATRIX_4X4_FLOATS);
+    const totalJoints = Math.floor(this.buffer.length / DQ_FLOATS_PER_JOINT);
+    const dualStart = totalJoints * 4;
+
     for (let i = 0; i < totalJoints; i++) {
-      this.buffer.set(IDENTITY_MATRIX, i * MATRIX_4X4_FLOATS);
+      const realOffset = i * 4;
+      const dualOffset = dualStart + i * 4;
+
+      this.buffer[realOffset] = 0;
+      this.buffer[realOffset + 1] = 0;
+      this.buffer[realOffset + 2] = 0;
+      this.buffer[realOffset + 3] = 1.0;
+
+      this.buffer[dualOffset] = 0;
+      this.buffer[dualOffset + 1] = 0;
+      this.buffer[dualOffset + 2] = 0;
+      this.buffer[dualOffset + 3] = 0;
     }
     this.isDirty = true;
   }
 
-  /** Set a single joint transformation matrix at jointIndex. */
+  /** Set a single joint transformation at jointIndex (converts matrix to dual quaternion). */
   updateJointMatrix(jointIndex: number, matrix: ArrayLike<number>): void {
-    const offset = jointIndex * MATRIX_4X4_FLOATS;
-    if (offset + MATRIX_4X4_FLOATS > this.buffer.length) return;
+    const totalJoints = Math.floor(this.buffer.length / DQ_FLOATS_PER_JOINT);
+    if (jointIndex < 0 || jointIndex >= totalJoints) return;
 
-    if (matrix.length >= MATRIX_4X4_FLOATS) {
-      for (let i = 0; i < MATRIX_4X4_FLOATS; i++) {
-        this.buffer[offset + i] = matrix[i];
-      }
-    } else {
-      this.buffer.set(IDENTITY_MATRIX, offset);
-    }
+    const dq = matrix && matrix.length >= 16 ? DualQuaternion.fromMatrix(matrix) : DualQuaternion.identity();
+    const realOffset = jointIndex * 4;
+    const dualOffset = totalJoints * 4 + jointIndex * 4;
+
+    this.buffer[realOffset] = dq.real[0];
+    this.buffer[realOffset + 1] = dq.real[1];
+    this.buffer[realOffset + 2] = dq.real[2];
+    this.buffer[realOffset + 3] = dq.real[3];
+
+    this.buffer[dualOffset] = dq.dual[0];
+    this.buffer[dualOffset + 1] = dq.dual[1];
+    this.buffer[dualOffset + 2] = dq.dual[2];
+    this.buffer[dualOffset + 3] = dq.dual[3];
+
     this.isDirty = true;
   }
 
   /** Bulk update joint transformation matrices for the palette. */
   setJointMatrices(matrices: ArrayLike<number>[]): void {
-    const maxJoints = Math.floor(this.buffer.length / MATRIX_4X4_FLOATS);
+    const maxJoints = Math.floor(this.buffer.length / DQ_FLOATS_PER_JOINT);
     const count = Math.min(matrices.length, maxJoints);
 
     for (let i = 0; i < count; i++) {
-      const m = matrices[i];
-      if (m && m.length >= MATRIX_4X4_FLOATS) {
-        this.buffer.set(m as ArrayLike<number>, i * MATRIX_4X4_FLOATS);
-      } else {
-        this.buffer.set(IDENTITY_MATRIX, i * MATRIX_4X4_FLOATS);
-      }
+      this.updateJointMatrix(i, matrices[i]);
     }
-    // Any remaining unused slots stay identity
     for (let i = count; i < maxJoints; i++) {
-      this.buffer.set(IDENTITY_MATRIX, i * MATRIX_4X4_FLOATS);
+      this.updateJointMatrix(i, []);
     }
     this.isDirty = true;
   }
 
-  /** Get joint matrix at jointIndex as a Float32Array slice. */
+  /** Get joint dual quaternion components at jointIndex. */
+  getJointDualQuaternion(jointIndex: number): DualQuaternion {
+    const totalJoints = Math.floor(this.buffer.length / DQ_FLOATS_PER_JOINT);
+    const realOffset = jointIndex * 4;
+    const dualOffset = totalJoints * 4 + jointIndex * 4;
+
+    const real = this.buffer.subarray(realOffset, realOffset + 4);
+    const dual = this.buffer.subarray(dualOffset, dualOffset + 4);
+    return new DualQuaternion(real, dual);
+  }
+
+  /** Get joint matrix at jointIndex reconstructed from dual quaternion. */
   getJointMatrix(jointIndex: number): Float32Array {
-    const offset = jointIndex * MATRIX_4X4_FLOATS;
-    return this.buffer.slice(offset, offset + MATRIX_4X4_FLOATS);
+    const dq = this.getJointDualQuaternion(jointIndex);
+    return dq.toMatrix();
   }
 
   /** Return the Float32Array buffer backing the UBO. */
@@ -115,7 +138,7 @@ export class SkinningPaletteUBO {
 
 /**
  * AvatarSkeletonState
- * Maintains joint matrix palettes for Bento avatar skeletons and handles palette splitting
+ * Maintains joint dual quaternion palettes for Bento avatar skeletons and handles palette splitting
  * when skeleton joint count exceeds 128 joints.
  */
 export class AvatarSkeletonState {
