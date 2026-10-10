@@ -1,5 +1,6 @@
 package com.linkpoint.teleport
 
+import com.linkpoint.linden.llmessage.IMType
 import android.util.Log
 import com.linkpoint.core.RegionInfo
 import com.linkpoint.protocol.capabilities.CapabilityManager
@@ -348,7 +349,7 @@ class TeleportManager(
                 identity = AgentIdentity(agentId, sessionId),
                 fromGroup = false,
                 toAgentId = lure.senderId,
-                dialog = 24, // IM_LURE_DECLINED
+                dialog = IMType.LURE_DECLINED, // 24
                 id = lure.lureId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
                 fromAgentName = "You",
