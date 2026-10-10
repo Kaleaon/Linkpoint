@@ -85,8 +85,8 @@ export function bodyPartVertexSkin(geometry: BodyPartGeometry) {
 }
 
 /** Packed uniform rows for one part given the avatar's current world joint matrices. */
-export function bodyPartRows(skeleton: AvatarSkeleton, skin: MeshSkin, world: Mat4[], maxJoints: number): Float32Array {
-  return packJointRows(skinMatrices(skeleton, skin, world), maxJoints);
+export function bodyPartRows(skeleton: AvatarSkeleton, skin: MeshSkin, world: Mat4[], maxJoints: number, target?: Float32Array): Float32Array {
+  return packJointRows(skinMatrices(skeleton, skin, world), maxJoints, target);
 }
 
 export async function loadBodyParts(baseUrl = `${assetBase()}avatar/`, fetcher: typeof fetch = (input, init) => fetch(input, init)): Promise<Map<string, BodyPartGeometry>> {
