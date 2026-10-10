@@ -22,9 +22,9 @@ class PythonEmitter(BaseEmitter):
     def _generate_python_code(self, ast: ProtocolAST) -> str:
         out = []
         out.append(self.get_header_warning("#"))
-        out.append("import struct")
         out.append("from dataclasses import dataclass, field")
-        out.append("from typing import Optional, List, Dict, Any\n")
+        out.append("from typing import Dict, List, Optional")
+        out.append("import struct\n")
 
         out.append(f'TEMPLATE_VERSION = "{ast.version}"\n')
 
