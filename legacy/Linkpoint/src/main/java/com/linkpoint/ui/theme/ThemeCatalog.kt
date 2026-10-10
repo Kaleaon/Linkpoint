@@ -81,12 +81,19 @@ object ThemeCatalog {
                 File("legacy/Linkpoint/src/main/assets/themes"),
                 File("Linkpoint/src/main/assets/themes"),
                 File("packages/design-system/themes"),
+                File("packages/design-system/themes/community"),
                 File("Linkpoint/packages/design-system/themes"),
+                File("Linkpoint/packages/design-system/themes/community"),
                 File("../packages/design-system/themes"),
+                File("../packages/design-system/themes/community"),
+                File("../../packages/design-system/themes"),
+                File("../../packages/design-system/themes/community"),
                 File("ktheme-pr/themes/community"),
                 File("legacy/ktheme-pr/themes/community"),
                 File("Linkpoint/ktheme-pr/themes/community"),
-                File("../ktheme-pr/themes/community")
+                File("../ktheme-pr/themes/community"),
+                File("../legacy/ktheme-pr/themes/community"),
+                File("../../legacy/ktheme-pr/themes/community")
             )
 
             for (dir in possibleDirs) {

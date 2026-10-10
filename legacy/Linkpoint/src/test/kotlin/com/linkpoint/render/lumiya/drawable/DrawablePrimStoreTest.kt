@@ -1,5 +1,7 @@
 package com.linkpoint.render.lumiya.drawable
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import com.linkpoint.protocol.messages.PrimShapeParams
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -12,6 +14,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@RunWith(RobolectricTestRunner::class)
 class DrawablePrimStoreTest {
 
     private lateinit var store: DrawablePrimStore
