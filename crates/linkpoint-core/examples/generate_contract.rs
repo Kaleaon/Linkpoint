@@ -16,7 +16,11 @@ fn main() {
     }
     fs::write(dart_target, DART_CONTRACT).expect("write generated Dart Viewer contract");
 
-    let kt_target = root.join("Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt");
+    let kt_target = if root.join("legacy/Linkpoint").exists() {
+        root.join("legacy/Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt")
+    } else {
+        root.join("Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt")
+    };
     if let Some(parent) = kt_target.parent() {
         let _ = fs::create_dir_all(parent);
     }
