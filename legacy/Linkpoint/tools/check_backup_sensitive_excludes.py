@@ -4,8 +4,12 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 RULE_FILES = [
-    Path("Linkpoint/src/main/res/xml/backup_rules.xml"),
-    Path("Linkpoint/src/main/res/xml/data_extraction_rules.xml"),
+    Path("legacy/Linkpoint/src/main/res/xml/backup_rules.xml")
+    if Path("legacy/Linkpoint/src/main/res/xml/backup_rules.xml").exists()
+    else Path("Linkpoint/src/main/res/xml/backup_rules.xml"),
+    Path("legacy/Linkpoint/src/main/res/xml/data_extraction_rules.xml")
+    if Path("legacy/Linkpoint/src/main/res/xml/data_extraction_rules.xml").exists()
+    else Path("Linkpoint/src/main/res/xml/data_extraction_rules.xml"),
 ]
 REQ = {
     ("sharedpref", "com_linkpoint_mfa_hashes.xml"),

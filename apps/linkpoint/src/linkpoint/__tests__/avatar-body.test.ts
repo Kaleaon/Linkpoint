@@ -86,6 +86,15 @@ describe('base avatar body meshes', () => {
     expect(rows).toHaveLength(110 * 12);
   });
 
+  it('writes into provided target buffer when bodyPartRows is called', () => {
+    const g = parseBodyPart(bytes('upperBody'), meta.upperBody);
+    const target = new Float32Array(110 * 12);
+    target.fill(1234);
+    const rows = bodyPartRows(skeleton, bodyPartSkin(skeleton, g), skeleton.worldMatrices(), 110, target);
+    expect(rows).toBe(target);
+    expect(rows[0]).not.toBe(1234);
+  });
+
   it('loads all parts through a fetcher', async () => {
     const fetcher = (async (url: string) => {
       const file = url.replace('/avatar/', '');
