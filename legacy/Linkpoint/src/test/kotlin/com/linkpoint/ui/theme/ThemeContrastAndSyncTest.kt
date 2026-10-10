@@ -128,20 +128,20 @@ class ThemeContrastAndSyncTest {
 
     private fun loadAllThemeJsons(): List<ThemeJson> {
         val root = findRepoRoot()
-        val designSystemPath = root.resolve("packages/design-system/themes")
-        val communityPath = root.resolve("ktheme-pr/themes/community")
+        val candidatePaths = listOf(
+            root.resolve("packages/design-system/themes"),
+            root.resolve("packages/design-system/themes/community"),
+            root.resolve("ktheme-pr/themes/community"),
+            root.resolve("legacy/ktheme-pr/themes/community")
+        )
 
-        val jsonFiles = mutableListOf<Path>()
+        val jsonFiles = mutableSetOf<Path>()
 
-        if (Files.isDirectory(designSystemPath)) {
-            Files.list(designSystemPath).use { stream ->
-                stream.filter { it.toString().endsWith(".json") }.forEach { jsonFiles.add(it) }
-            }
-        }
-
-        if (Files.isDirectory(communityPath)) {
-            Files.list(communityPath).use { stream ->
-                stream.filter { it.toString().endsWith(".json") }.forEach { jsonFiles.add(it) }
+        for (dir in candidatePaths) {
+            if (Files.isDirectory(dir)) {
+                Files.list(dir).use { stream ->
+                    stream.filter { Files.isRegularFile(it) && it.toString().endsWith(".json") }.forEach { jsonFiles.add(it) }
+                }
             }
         }
 
