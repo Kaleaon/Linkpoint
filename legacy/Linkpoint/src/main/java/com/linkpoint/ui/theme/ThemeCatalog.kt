@@ -78,10 +78,12 @@ object ThemeCatalog {
         if (themeMap.isEmpty()) {
             val possibleDirs = listOf(
                 File("src/main/assets/themes"),
+                File("legacy/Linkpoint/src/main/assets/themes"),
                 File("Linkpoint/src/main/assets/themes"),
                 File("packages/design-system/themes"),
                 File("Linkpoint/packages/design-system/themes"),
                 File("../packages/design-system/themes"),
+                File("legacy/ktheme-pr/themes/community"),
                 File("ktheme-pr/themes/community"),
                 File("Linkpoint/ktheme-pr/themes/community"),
                 File("../ktheme-pr/themes/community")
