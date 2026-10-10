@@ -98,6 +98,8 @@ class UiCoverageValidatorTest {
         if (Files.exists(direct)) return direct
         val nested = root.resolve("Linkpoint").resolve(relativePath)
         if (Files.exists(nested)) return nested
+        val legacyNested = root.resolve("legacy/Linkpoint").resolve(relativePath)
+        if (Files.exists(legacyNested)) return legacyNested
         error("Unable to resolve source path: $relativePath")
     }
 
@@ -105,6 +107,8 @@ class UiCoverageValidatorTest {
         val root = findRepoRoot()
         val direct = root.resolve(relativePath)
         if (Files.exists(direct)) return direct
+        val legacyDirect = root.resolve("legacy").resolve(relativePath)
+        if (Files.exists(legacyDirect)) return legacyDirect
         error("Unable to resolve project path: $relativePath")
     }
 

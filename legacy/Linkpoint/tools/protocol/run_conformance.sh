@@ -71,10 +71,12 @@ require_tool sha1sum
 GRADLE_CMD="${GRADLE_BIN:-}"
 if [[ ${skip_gradle} -eq 0 ]]; then
   if [[ -z "${GRADLE_CMD}" ]]; then
-    if command -v gradle >/dev/null 2>&1; then
-      GRADLE_CMD="gradle"
-    elif [[ -x "${LINKPOINT_ROOT}/../gradlew" ]]; then
+    if [[ -x "${LINKPOINT_ROOT}/gradlew" ]]; then
       GRADLE_CMD="./gradlew"
+    elif [[ -x "${LINKPOINT_ROOT}/../gradlew" ]]; then
+      GRADLE_CMD="../gradlew"
+    elif command -v gradle >/dev/null 2>&1; then
+      GRADLE_CMD="gradle"
     else
       log "missing gradle executable or wrapper"; exit 2
     fi
