@@ -84,6 +84,8 @@ def main():
         "--android-report",
         type=Path,
         default=Path(
+            "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        ) if Path("legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml").exists() else Path(
             "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         ),
     )

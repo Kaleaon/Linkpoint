@@ -120,7 +120,12 @@ class DrawablePrimStore {
     /** Per-prim instance snapshot data. */
     data class PrimInstance(
         val id: Long,
-        val modelMatrix: FloatArray = FloatArray(16).also { Matrix.setIdentityM(it, 0) },
+        val modelMatrix: FloatArray = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+        ),
         var shape: ShapeKind = ShapeKind.BOX,
         var hollow: Boolean = false,
         var scaleX: Float = 1f, var scaleY: Float = 1f, var scaleZ: Float = 1f,
@@ -133,7 +138,56 @@ class DrawablePrimStore {
 
     companion object {
         private val NULL_UUID = UUID(0L, 0L)
-        private val IDENTITY_TEX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+        private val IDENTITY_TEX = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+        )
+
+        private fun setIdentityM(m: FloatArray, offset: Int) {
+            java.util.Arrays.fill(m, offset, offset + 16, 0f)
+            m[offset] = 1f
+            m[offset + 5] = 1f
+            m[offset + 10] = 1f
+            m[offset + 15] = 1f
+        }
+
+        private fun translateM(m: FloatArray, offset: Int, x: Float, y: Float, z: Float) {
+            for (i in 0..3) {
+                m[offset + 12 + i] += m[offset + i] * x + m[offset + 4 + i] * y + m[offset + 8 + i] * z
+            }
+        }
+
+        private fun scaleM(m: FloatArray, offset: Int, x: Float, y: Float, z: Float) {
+            for (i in 0..3) {
+                m[offset + i] *= x
+                m[offset + 4 + i] *= y
+                m[offset + 8 + i] *= z
+            }
+        }
+
+        private fun multiplyMM(
+            result: FloatArray, resultOffset: Int,
+            lhs: FloatArray, lhsOffset: Int,
+            rhs: FloatArray, rhsOffset: Int
+        ) {
+            for (i in 0..3) {
+                val rhsI0 = rhs[rhsOffset + i * 4]
+                val rhsI1 = rhs[rhsOffset + i * 4 + 1]
+                val rhsI2 = rhs[rhsOffset + i * 4 + 2]
+                val rhsI3 = rhs[rhsOffset + i * 4 + 3]
+
+                result[resultOffset + i * 4] =
+                    lhs[lhsOffset] * rhsI0 + lhs[lhsOffset + 4] * rhsI1 + lhs[lhsOffset + 8] * rhsI2 + lhs[lhsOffset + 12] * rhsI3
+                result[resultOffset + i * 4 + 1] =
+                    lhs[lhsOffset + 1] * rhsI0 + lhs[lhsOffset + 5] * rhsI1 + lhs[lhsOffset + 9] * rhsI2 + lhs[lhsOffset + 13] * rhsI3
+                result[resultOffset + i * 4 + 2] =
+                    lhs[lhsOffset + 2] * rhsI0 + lhs[lhsOffset + 6] * rhsI1 + lhs[lhsOffset + 10] * rhsI2 + lhs[lhsOffset + 14] * rhsI3
+                result[resultOffset + i * 4 + 3] =
+                    lhs[lhsOffset + 3] * rhsI0 + lhs[lhsOffset + 7] * rhsI1 + lhs[lhsOffset + 11] * rhsI2 + lhs[lhsOffset + 15] * rhsI3
+            }
+        }
 
         const val GLOW_THRESHOLD = 0.005f
         private const val DEFAULT_INITIAL_CAPACITY = 256
@@ -163,7 +217,7 @@ class DrawablePrimStore {
     private var slotIsTransparent = BooleanArray(capacity)
     private var slotModelMatrices = FloatArray(capacity * 16).also {
         for (i in 0 until capacity) {
-            Matrix.setIdentityM(it, i * 16)
+            setIdentityM(it, i * 16)
         }
     }
 
@@ -300,7 +354,7 @@ class DrawablePrimStore {
         slotModelMatrices = FloatArray(newCap * 16)
         System.arraycopy(oldModelMat, 0, slotModelMatrices, 0, capacity * 16)
         for (i in capacity until newCap) {
-            Matrix.setIdentityM(slotModelMatrices, i * 16)
+            setIdentityM(slotModelMatrices, i * 16)
         }
 
         slotFaceCount = slotFaceCount.copyOf(newCap)
@@ -349,9 +403,9 @@ class DrawablePrimStore {
     fun addPrim(id: Long, posX: Float, posY: Float, posZ: Float) {
         val slot = getOrAllocateSlot(id)
         val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
-        Matrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
+        setIdentityM(slotModelMatrices, offset)
+        translateM(slotModelMatrices, offset, posX, posY, posZ)
+        scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
     }
 
     fun upsertPrim(
@@ -386,14 +440,14 @@ class DrawablePrimStore {
         }
 
         val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
+        setIdentityM(slotModelMatrices, offset)
+        translateM(slotModelMatrices, offset, posX, posY, posZ)
         if (rotation != null && rotation.size >= 16) {
             val tmp = FloatArray(16)
-            Matrix.multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
+            multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
             System.arraycopy(tmp, 0, slotModelMatrices, offset, 16)
         }
-        Matrix.scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
+        scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
 
         applyTextureEntry(slot, shape, slotHollow[slot], textureEntry)
     }
