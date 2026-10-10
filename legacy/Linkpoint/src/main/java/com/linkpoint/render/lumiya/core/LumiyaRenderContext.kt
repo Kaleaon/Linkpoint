@@ -142,7 +142,7 @@ class LumiyaRenderContext(private val glThreadGuard: ((String) -> Unit)? = null)
 
     lateinit var resourceManager: GLResourceManager
         private set
-    lateinit var frustumCuller: FrustumCuller
+    var frustumCuller: FrustumCuller = FrustumCuller()
         private set
     /**
      * UUID-keyed LRU texture cache. Producers (Object/Layer/Asset

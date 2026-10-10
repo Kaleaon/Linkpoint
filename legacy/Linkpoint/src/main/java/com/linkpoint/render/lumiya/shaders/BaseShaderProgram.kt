@@ -15,6 +15,14 @@ abstract class BaseShaderProgram {
 
     companion object {
         private const val TAG = "ShaderProgram"
+
+        @Volatile
+        var activeProgramHandle: Int = 0
+            private set
+
+        fun resetActiveProgram() {
+            activeProgramHandle = 0
+        }
     }
 
     /** GL program handle (0 = not compiled). */
@@ -47,11 +55,17 @@ abstract class BaseShaderProgram {
     protected abstract fun onBind()
 
     fun use() {
-        GLES32.glUseProgram(handle)
+        if (handle != 0 && handle != activeProgramHandle) {
+            GLES32.glUseProgram(handle)
+            activeProgramHandle = handle
+        }
     }
 
     fun destroy() {
         if (handle != 0) {
+            if (handle == activeProgramHandle) {
+                activeProgramHandle = 0
+            }
             GLES32.glDeleteProgram(handle)
             handle = 0
         }
