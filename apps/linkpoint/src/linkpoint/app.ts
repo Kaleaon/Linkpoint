@@ -211,6 +211,14 @@ export class LinkpointApp {
     }
     return this.friends.getFriends();
   }
+
+  async clearTextureCache() {
+    const { localCache } = await import('./local-cache');
+    await localCache.clearTextureCache();
+    if (this.world) {
+      this.world.clearTextureCache();
+    }
+  }
 }
 
 export const app = new LinkpointApp();

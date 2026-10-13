@@ -192,8 +192,33 @@ export default function CacheScreen() {
     }
   };
 
+  const handleClearTextureCache = async () => {
+    if (typeof window !== "undefined" && typeof window.confirm === "function") {
+      if (!window.confirm("Are you sure you want to clear the texture cache? Textures will be re-downloaded as needed.")) return;
+    }
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      if (app && typeof app.clearTextureCache === "function") {
+        await app.clearTextureCache();
+      } else {
+        await localCache.clearTextureCache();
+      }
+      setMessage("Texture cache cleared successfully.");
+      actions.notify("Texture cache cleared");
+      await refreshStats();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Clear texture cache failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleClearCache = async () => {
-    if (!confirm("Are you sure you want to clear the local/flashdrive cache?")) return;
+    if (typeof window !== "undefined" && typeof window.confirm === "function") {
+      if (!window.confirm("Are you sure you want to clear the local/flashdrive cache?")) return;
+    }
     setBusy(true);
     try {
       await localCache.clearCache(agentId);
@@ -421,12 +446,15 @@ export default function CacheScreen() {
           />
         </div>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-          <button type="button" onClick={handleRebuildFromGrid} disabled={busy} style={{ ...btnStyle(false), flex: 1, borderColor: V.pri, color: V.pri }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 6 }}>
+          <button type="button" onClick={handleRebuildFromGrid} disabled={busy} style={{ ...btnStyle(false), flex: "1 1 180px", borderColor: V.pri, color: V.pri }}>
             <Icon name="refresh-cw" size={14} /> REBUILD FROM GRID (FORCE)
           </button>
-          <button type="button" onClick={handleClearCache} disabled={busy} style={{ ...btnStyle(false), flex: 1, color: V.err, borderColor: V.err }}>
-            <Icon name="trash-2" size={14} /> CLEAR CACHE
+          <button type="button" onClick={handleClearTextureCache} disabled={busy} style={{ ...btnStyle(false), flex: "1 1 180px", color: V.err, borderColor: V.err }}>
+            <Icon name="image" size={14} /> CLEAR TEXTURE CACHE
+          </button>
+          <button type="button" onClick={handleClearCache} disabled={busy} style={{ ...btnStyle(false), flex: "1 1 180px", color: V.err, borderColor: V.err }}>
+            <Icon name="trash-2" size={14} /> CLEAR ALL CACHE
           </button>
         </div>
       </div>

@@ -190,4 +190,42 @@ describe('WorldViewer LRU Eviction & Scene Reference Fallback', () => {
     // Verify gl.deleteTexture was called for evicted TEX-1
     expect(mockGl.deleteTexture).toHaveBeenCalled();
   });
+
+  it('purges all decoded textures when WorldViewer.clearTextureCache is called', () => {
+    const mockProtocol = { connected: true, on: vi.fn() };
+    const world = new WorldViewer(mockProtocol);
+    const decodedTextures = (world as any).decodedTextures as TextureCache;
+
+    const rgbaB64 = btoa(String.fromCharCode(255, 255, 255, 255));
+    (world as any).applyTexture({ assetId: 'TEX-10', rgba: rgbaB64, width: 1, height: 1 });
+    (world as any).applyTexture({ assetId: 'TEX-20', rgba: rgbaB64, width: 1, height: 1 });
+
+    expect(decodedTextures.size).toBe(2);
+
+    const spy = vi.fn();
+    world.on('textures_cleared', spy);
+
+    world.clearTextureCache();
+
+    expect(decodedTextures.size).toBe(0);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('localCache.clearTextureCache', () => {
+  it('clears texture entries and emits cache_cleared event', async () => {
+    const { localCache } = await import('../local-cache');
+
+    await localCache.saveTexture('tex-uuid-1', 'data:image/png;base64,abc');
+    await localCache.saveTexture('tex-uuid-2', 'data:image/png;base64,def');
+
+    const spy = vi.fn();
+    localCache.on('cache_cleared', spy);
+
+    await localCache.clearTextureCache();
+
+    const tex1 = await localCache.getTexture('tex-uuid-1');
+    expect(tex1).toBeNull();
+    expect(spy).toHaveBeenCalledWith({ type: 'textures' });
+  });
 });
