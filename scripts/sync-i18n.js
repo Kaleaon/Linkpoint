@@ -18,7 +18,10 @@ const rootDir = path.resolve(__dirname, '..');
 const webLocalesDir = path.join(rootDir, 'apps/linkpoint/src/locales');
 
 // Determine Android res directory
-let androidResDir = path.join(rootDir, 'Linkpoint/src/main/res');
+let androidResDir = path.join(rootDir, 'legacy/Linkpoint/src/main/res');
+if (!fs.existsSync(androidResDir)) {
+  androidResDir = path.join(rootDir, 'Linkpoint/src/main/res');
+}
 if (!fs.existsSync(androidResDir)) {
   androidResDir = path.join(rootDir, 'app/src/main/res');
 }
