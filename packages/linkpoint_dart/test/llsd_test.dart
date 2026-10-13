@@ -33,7 +33,15 @@ void main() {
     test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
         () {
       var vectorsDir = Directory(
-          '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
+          '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+      if (!vectorsDir.existsSync()) {
+        vectorsDir = Directory(
+            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+      }
+      if (!vectorsDir.existsSync()) {
+        vectorsDir = Directory(
+            '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
+      }
       if (!vectorsDir.existsSync()) {
         vectorsDir =
             Directory('Linkpoint/src/test/resources/llsd-conformance/vectors');
