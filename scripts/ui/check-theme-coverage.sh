@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+THEME_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
 
 if [[ ! -f "$THEME_FILE" ]]; then
   echo "❌ Theme catalog file not found: $THEME_FILE"
@@ -19,8 +19,8 @@ theme_file = sys.argv[1]
 text = Path(theme_file).read_text(encoding='utf-8')
 
 central_dir = Path("packages/design-system/themes")
-community_dir = Path("ktheme-pr/themes/community")
-assets_dir = Path("Linkpoint/src/main/assets/themes")
+community_dirs = [Path("packages/design-system/themes/community"), Path("ktheme-pr/themes/community"), Path("legacy/ktheme-pr/themes/community")]
+assets_dir = Path("legacy/Linkpoint/src/main/assets/themes")
 
 errors = []
 
@@ -115,7 +115,12 @@ if kt_contrast_failures:
     errors.append('WCAG AA contrast failure in BuiltInThemes.kt')
 
 # 3. JSON Theme Schema, Token Integrity & Contrast Validation
-json_patterns = ['packages/design-system/themes/*.json', 'ktheme-pr/themes/community/*.json']
+json_patterns = [
+    'packages/design-system/themes/*.json',
+    'packages/design-system/themes/community/*.json',
+    'ktheme-pr/themes/community/*.json',
+    'legacy/ktheme-pr/themes/community/*.json'
+]
 json_files = []
 for pat in json_patterns:
     json_files.extend(glob.glob(pat))
@@ -246,7 +251,10 @@ if sync_errors:
 # 5. Asset coverage check (if assets directory exists)
 if assets_dir.exists():
     central_files = sorted(list(central_dir.glob("*.json"))) if central_dir.exists() else []
-    community_files = sorted(list(community_dir.glob("*.json"))) if community_dir.exists() else []
+    community_files = []
+    for cdir in community_dirs:
+        if cdir.exists():
+            community_files.extend(list(cdir.glob("*.json")))
     repo_files = central_files + community_files
     asset_file_names = {f.name for f in assets_dir.glob("*.json")}
     missing_in_assets = [str(rf) for rf in repo_files if rf.name not in asset_file_names]
