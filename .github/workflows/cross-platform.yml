@@ -41,11 +41,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Configure Git line endings
-        run: |
-          git config --system core.autocrlf false || true
-          git config --global core.autocrlf false
       - uses: actions/checkout@v4
+        with:
+          autocrlf: false
       - name: Renormalize line endings
         run: |
           git config core.autocrlf false
@@ -88,11 +86,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Configure Git line endings
-        run: |
-          git config --system core.autocrlf false || true
-          git config --global core.autocrlf false
       - uses: actions/checkout@v4
+        with:
+          autocrlf: false
       - name: Renormalize line endings
         run: |
           git config core.autocrlf false
