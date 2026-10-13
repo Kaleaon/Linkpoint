@@ -160,6 +160,7 @@ const BASIC_FRAGMENT_SHADER = `
 export class Graphics3D extends Utils.EventEmitter {
   public canvas: HTMLCanvasElement;
   public gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
+  public isContextLost: boolean = false;
   private programs: Map<string, any> = new Map();
   /** Joint matrices the skinned program can hold (limited by the GPU's vertex uniform vectors). */
   maxJoints = 0;
@@ -169,6 +170,53 @@ export class Graphics3D extends Utils.EventEmitter {
   private textureAlpha: Map<string, boolean> = new Map();
   private renderTargets: Map<string, { framebuffer: WebGLFramebuffer; depth: WebGLRenderbuffer; width: number; height: number }> = new Map();
   private clearColor: [number, number, number, number] = [0.53, 0.81, 0.92, 1];
+
+  private handleContextLost = (event: Event) => {
+    event.preventDefault();
+    this.isContextLost = true;
+    this.emit('contextlost');
+  };
+
+  private handleContextRestored = async () => {
+    this.programs.clear();
+    this.meshes.clear();
+    this.textures.clear();
+    this.textureAlpha.clear();
+    this.renderTargets.clear();
+
+    const gl = this.gl;
+    if (!gl) return;
+
+    try {
+      this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+      this.maxVertexAttributes = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+
+      this.extensions.anisotropic = gl.getExtension('EXT_texture_filter_anisotropic');
+      this.extensions.depthTexture = gl.getExtension('WEBGL_depth_texture');
+      this.extensions.floatTexture = gl.getExtension('OES_texture_float');
+      this.extensions.vao = gl.getExtension('OES_vertex_array_object');
+      this.extensions.uintIndices = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext
+        ? true
+        : gl.getExtension('OES_element_index_uint');
+
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      gl.frontFace(gl.CCW);
+      gl.depthFunc(gl.LEQUAL);
+      gl.clearColor(...this.clearColor);
+
+      await this.createDefaultShaders();
+
+      this.createTexture('__white', 1, 1, new Uint8Array([255, 255, 255, 255]));
+      this.createTexture('__normal', 1, 1, new Uint8Array([128, 128, 255, 255]));
+    } catch (err) {
+      console.warn('Failed to re-initialize WebGL context after restoration:', err);
+    }
+
+    this.isContextLost = false;
+    this.emit('contextrestored');
+  };
 
   // Rendering state
   public drawCalls: number = 0;
@@ -247,6 +295,9 @@ export class Graphics3D extends Utils.EventEmitter {
     // behind by the previous draw call.
     this.createTexture('__white', 1, 1, new Uint8Array([255, 255, 255, 255]));
     this.createTexture('__normal', 1, 1, new Uint8Array([128, 128, 255, 255]));
+
+    this.canvas.addEventListener('webglcontextlost', this.handleContextLost);
+    this.canvas.addEventListener('webglcontextrestored', this.handleContextRestored);
 
     this.emit('initialized');
     return true;
@@ -370,7 +421,8 @@ export class Graphics3D extends Utils.EventEmitter {
    * Create mesh
    */
   createMesh(name: string, vertices: number[], indices: number[], normals?: number[], texCoords?: number[], tangents?: number[], skin?: { joints: number[]; weights: number[] }) {
-    const gl = this.gl!;
+    if (this.isContextLost || !this.gl) return null;
+    const gl = this.gl;
     const previous = this.meshes.get(name);
     if (previous) this.deleteMesh(previous);
     let maxIndex = 0;
@@ -483,7 +535,8 @@ export class Graphics3D extends Utils.EventEmitter {
    * Draw mesh
    */
   drawMesh(meshName: string, programName: string, uniforms: any, options: DrawOptions = {}) {
-    const gl = this.gl!;
+    if (this.isContextLost || !this.gl) return;
+    const gl = this.gl;
     const mesh = this.meshes.get(meshName) || this.meshes.get(meshName.toLowerCase());
     const programInfo = this.programs.get(programName);
 
@@ -543,7 +596,8 @@ export class Graphics3D extends Utils.EventEmitter {
   }
 
   createTexture(name: string, width: number, height: number, rgba: Uint8Array) {
-    const gl = this.gl!;
+    if (this.isContextLost || !this.gl) return name;
+    const gl = this.gl;
     this.deleteTexture(name);
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -652,6 +706,7 @@ export class Graphics3D extends Utils.EventEmitter {
 
   /** Clear only the depth buffer, so a later pass (the HUD) draws over everything already rendered. */
   clearDepth() {
+    if (this.isContextLost || !this.gl) return;
     const gl = this.gl;
     if (!gl) return;
     gl.depthMask(true);
@@ -659,8 +714,9 @@ export class Graphics3D extends Utils.EventEmitter {
   }
 
   createRenderTarget(name: string, width = 256, height = 256) {
+    if (this.isContextLost || !this.gl) return name;
     if (this.renderTargets.has(name)) return name;
-    const gl = this.gl!;
+    const gl = this.gl;
     const texture = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
@@ -683,6 +739,7 @@ export class Graphics3D extends Utils.EventEmitter {
   }
 
   beginRenderTarget(name: string) {
+    if (this.isContextLost || !this.gl) return false;
     const target = this.renderTargets.get(name);
     if (!target) return false;
     const gl = this.gl!;
@@ -693,7 +750,8 @@ export class Graphics3D extends Utils.EventEmitter {
   }
 
   endRenderTarget() {
-    const gl = this.gl!;
+    if (this.isContextLost || !this.gl) return;
+    const gl = this.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
@@ -783,7 +841,8 @@ export class Graphics3D extends Utils.EventEmitter {
   }
 
   clear(color?: number[]) {
-    const gl = this.gl!;
+    if (this.isContextLost || !this.gl) return;
+    const gl = this.gl;
     if (color) this.setClearColor(color);
     gl.clearColor(...this.clearColor);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -821,6 +880,10 @@ export class Graphics3D extends Utils.EventEmitter {
    * Cleanup
    */
   destroy() {
+    if (this.canvas) {
+      this.canvas.removeEventListener('webglcontextlost', this.handleContextLost);
+      this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestored);
+    }
     const gl = this.gl;
     if (!gl) return;
 
