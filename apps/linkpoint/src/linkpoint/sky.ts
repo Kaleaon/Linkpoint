@@ -69,8 +69,11 @@ export function readVec3(value: unknown, fallback: Vec3): Vec3 {
     else if ('r' in o) channels = [o.r, o.g, o.b];
   }
   if (!channels || channels.length < 3) return [...fallback] as Vec3;
-  const numbers = channels.slice(0, 3).map(Number);
-  return numbers.every(Number.isFinite) ? (numbers as Vec3) : ([...fallback] as Vec3);
+  const numbers = channels.slice(0, 3).map((v, i) => {
+    const num = Number(v);
+    return Number.isFinite(num) ? num : fallback[i];
+  });
+  return numbers as Vec3;
 }
 
 /** Read a scalar from a number or the first element of a vector. */
