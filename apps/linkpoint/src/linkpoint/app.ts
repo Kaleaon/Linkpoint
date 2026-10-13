@@ -15,6 +15,7 @@ import { ContactsStore } from './contacts';
 import { NoticeStore } from './notices';
 import { Utils } from './utils';
 import { slBridge } from './sl-bridge';
+import { localCache } from './local-cache';
 
 // Phase 2 Modules
 import { EventQueueManager } from './phase2/event-queue';
@@ -210,6 +211,13 @@ export class LinkpointApp {
       console.warn('[LinkpointApp] loadFriends warning:', err);
     }
     return this.friends.getFriends();
+  }
+
+  async clearTextureCache() {
+    await localCache.clearTextureCache();
+    if (this.world) {
+      this.world.clearTextureCache();
+    }
   }
 }
 

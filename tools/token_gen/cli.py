@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import sys
-import os
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 
 # Add project root to sys.path
@@ -12,6 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
     import jinja2
+
     HAS_JINJA2 = True
 except ImportError:
     HAS_JINJA2 = False
@@ -264,7 +264,9 @@ def render_rust_fallback(tokens_data: dict) -> str:
             if isinstance(val, dict) and "value" not in val:
                 snake_key = to_snake_case(key)
                 pascal_key = to_pascal_case(key)
-                sub_inst = _render_struct_inst(f"{pascal_key}Tokens", val, indent_level + 1)
+                sub_inst = _render_struct_inst(
+                    f"{pascal_key}Tokens", val, indent_level + 1
+                )
                 inst_lines.append(f"{indent}    {snake_key}: {sub_inst},")
             elif isinstance(val, dict) and "value" in val:
                 snake_key = to_snake_case(key)
@@ -326,7 +328,9 @@ def resolve_targets(target_arg: str) -> list[str]:
     valid_targets = set(DEFAULT_TARGET_FILES.keys())
     for t in raw_targets:
         if t not in valid_targets:
-            print(f"Error: Unknown target '{t}'. Valid targets: {list(valid_targets) + ['all']}")
+            print(
+                f"Error: Unknown target '{t}'. Valid targets: {list(valid_targets) + ['all']}"
+            )
             sys.exit(1)
     return raw_targets
 
@@ -365,7 +369,9 @@ def cmd_generate(args):
         out_path.parent.mkdir(parents=True, exist_ok=True)
         with open(out_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(content)
-        print(f"[{target.upper()}] Generated {out_path.relative_to(PROJECT_ROOT) if out_path.is_relative_to(PROJECT_ROOT) else out_path}")
+        print(
+            f"[{target.upper()}] Generated {out_path.relative_to(PROJECT_ROOT) if out_path.is_relative_to(PROJECT_ROOT) else out_path}"
+        )
         generated_count += 1
 
     print(f"\nSuccessfully generated tokens for {generated_count} target(s).")
@@ -398,21 +404,39 @@ def cmd_check(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Linkpoint Workspace Token Generator CLI")
+    parser = argparse.ArgumentParser(
+        description="Linkpoint Workspace Token Generator CLI"
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Generate subcommand
-    p_gen = subparsers.add_parser("generate", help="Generate token bindings for target languages")
-    p_gen.add_argument("--tokens", default=DEFAULT_TOKENS_PATH, help="Path to source tokens.json")
+    p_gen = subparsers.add_parser(
+        "generate", help="Generate token bindings for target languages"
+    )
+    p_gen.add_argument(
+        "--tokens", default=DEFAULT_TOKENS_PATH, help="Path to source tokens.json"
+    )
     p_gen.add_argument("--output-dir", default=None, help="Custom output directory")
-    p_gen.add_argument("--target", default="all", help="Target languages (typescript,kotlin,dart,rust,all)")
+    p_gen.add_argument(
+        "--target",
+        default="all",
+        help="Target languages (typescript,kotlin,dart,rust,all)",
+    )
     p_gen.set_defaults(func=cmd_generate)
 
     # Check subcommand
-    p_chk = subparsers.add_parser("check", help="Verify generated token bindings against source JSON")
-    p_chk.add_argument("--tokens", default=DEFAULT_TOKENS_PATH, help="Path to source tokens.json")
+    p_chk = subparsers.add_parser(
+        "check", help="Verify generated token bindings against source JSON"
+    )
+    p_chk.add_argument(
+        "--tokens", default=DEFAULT_TOKENS_PATH, help="Path to source tokens.json"
+    )
     p_chk.add_argument("--output-dir", default=None, help="Custom output directory")
-    p_chk.add_argument("--target", default="all", help="Target languages (typescript,kotlin,dart,rust,all)")
+    p_chk.add_argument(
+        "--target",
+        default="all",
+        help="Target languages (typescript,kotlin,dart,rust,all)",
+    )
     p_chk.set_defaults(func=cmd_check)
 
     args = parser.parse_args()
