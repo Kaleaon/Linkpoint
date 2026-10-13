@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet, VecDeque};
 use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -26,7 +26,8 @@ struct Pending {
 pub struct ReliableUdp {
     next: u32,
     pending: BTreeMap<u32, Pending>,
-    received: BTreeSet<u32>,
+    received_set: HashSet<u32>,
+    received_order: VecDeque<u32>,
     pending_acks: BTreeSet<u32>,
     base_timeout: Duration,
     max_attempts: u8,
@@ -43,7 +44,8 @@ impl ReliableUdp {
         Self {
             next: 0,
             pending: BTreeMap::new(),
-            received: BTreeSet::new(),
+            received_set: HashSet::new(),
+            received_order: VecDeque::new(),
             pending_acks: BTreeSet::new(),
             base_timeout,
             max_attempts,
@@ -78,13 +80,14 @@ impl ReliableUdp {
     /// Returns `true` once for a newly received reliable sequence and `false`
     /// for retransmitted duplicates. A bounded window avoids unbounded growth.
     pub fn accept_incoming(&mut self, sequence: u32) -> bool {
-        let fresh = self.received.insert(sequence);
+        let fresh = self.received_set.insert(sequence);
         if fresh {
+            self.received_order.push_back(sequence);
             self.pending_acks.insert(sequence);
-        }
-        while self.received.len() > 4096 {
-            if let Some(oldest) = self.received.first().copied() {
-                self.received.remove(&oldest);
+            while self.received_order.len() > 4096 {
+                if let Some(oldest) = self.received_order.pop_front() {
+                    self.received_set.remove(&oldest);
+                }
             }
         }
         fresh
@@ -161,5 +164,45 @@ mod tests {
         assert!(!udp.accept_incoming(8));
         assert_eq!(udp.take_ack_batch(10), vec![8]);
         assert!(udp.take_ack_batch(10).is_empty());
+    }
+
+    #[test]
+    fn sequence_rollover_preserves_zero_and_rejects_duplicates() {
+        let mut udp = ReliableUdp::default();
+        let start_seq = u32::MAX - 100;
+        for seq in start_seq..=u32::MAX {
+            assert!(udp.accept_incoming(seq));
+        }
+        // Rollover across u32::MAX to 0 and 1
+        assert!(udp.accept_incoming(0));
+        assert!(udp.accept_incoming(1));
+
+        // Duplicate sequence 0 must be rejected as duplicate
+        assert!(!udp.accept_incoming(0));
+        assert!(!udp.accept_incoming(u32::MAX));
+    }
+
+    #[test]
+    fn fifo_eviction_evicts_oldest_arrival_not_smallest_value() {
+        let mut udp = ReliableUdp::default();
+        let start_seq = u32::MAX - 100;
+        // Insert 4096 sequences starting near u32::MAX wrapping around 0
+        for i in 0..4096 {
+            let seq = start_seq.wrapping_add(i as u32);
+            assert!(udp.accept_incoming(seq));
+        }
+        // Sequence 0 was inserted earlier and is still in window -> rejected as duplicate
+        assert!(!udp.accept_incoming(0));
+
+        // Insert 100 more sequence numbers to push start_seq..=(start_seq + 99) out of the window
+        for i in 4096..(4096 + 100) {
+            let seq = start_seq.wrapping_add(i as u32);
+            assert!(udp.accept_incoming(seq));
+        }
+
+        // The oldest sequence (start_seq) was evicted, so accepting it now succeeds
+        assert!(udp.accept_incoming(start_seq));
+        // Sequence 0 arrived later than start_seq so it remains in window and is rejected as duplicate
+        assert!(!udp.accept_incoming(0));
     }
 }

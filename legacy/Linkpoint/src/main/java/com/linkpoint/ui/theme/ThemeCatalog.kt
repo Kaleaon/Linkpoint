@@ -76,20 +76,29 @@ object ThemeCatalog {
 
         // 2. Fallback to file paths if asset loading didn't find themes (e.g. JVM tests)
         if (themeMap.isEmpty()) {
-            val possibleDirs = listOf(
+            val root = findRepoRoot()
+            val possibleDirs = listOfNotNull(
                 File("src/main/assets/themes"),
                 File("Linkpoint/src/main/assets/themes"),
+                File("legacy/Linkpoint/src/main/assets/themes"),
                 File("packages/design-system/themes"),
                 File("Linkpoint/packages/design-system/themes"),
                 File("../packages/design-system/themes"),
+                File("../../packages/design-system/themes"),
                 File("ktheme-pr/themes/community"),
+                File("legacy/ktheme-pr/themes/community"),
                 File("Linkpoint/ktheme-pr/themes/community"),
-                File("../ktheme-pr/themes/community")
+                File("../ktheme-pr/themes/community"),
+                File("../../legacy/ktheme-pr/themes/community"),
+                root?.let { File(it, "legacy/Linkpoint/src/main/assets/themes") },
+                root?.let { File(it, "packages/design-system/themes") },
+                root?.let { File(it, "legacy/ktheme-pr/themes") },
+                root?.let { File(it, "ktheme-pr/themes") }
             )
 
             for (dir in possibleDirs) {
                 if (dir.exists() && dir.isDirectory) {
-                    dir.listFiles { f -> f.isFile && f.name.endsWith(".json") }?.sortedBy { it.name }?.forEach { file ->
+                    dir.walkTopDown().filter { f -> f.isFile && f.name.endsWith(".json") }.sortedBy { it.name }.forEach { file ->
                         try {
                             val theme = json.decodeFromString<Theme>(file.readText())
                             if (theme.metadata.id.isNotBlank() && !themeMap.containsKey(theme.metadata.id)) {
@@ -163,5 +172,14 @@ object ThemeCatalog {
     fun resetCache() {
         cachedKthemes = null
         cachedThemePacks = null
+    }
+
+    private fun findRepoRoot(): File? {
+        var current = File("").absoluteFile
+        repeat(6) {
+            if (File(current, ".git").exists()) return current
+            current = current.parentFile ?: return@repeat
+        }
+        return null
     }
 }
