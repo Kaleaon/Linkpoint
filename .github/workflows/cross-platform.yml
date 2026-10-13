@@ -42,8 +42,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-        with:
-          autocrlf: false
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -81,8 +79,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-        with:
-          autocrlf: false
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
