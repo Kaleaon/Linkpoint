@@ -614,6 +614,36 @@ export class WorldViewer extends Utils.EventEmitter {
     try {
       const graphics = new Graphics3D(canvas);
       this.graphics3d = graphics;
+      if (typeof (graphics as any)?.on === 'function') {
+        graphics.on('contextrestored', async () => {
+          if (!this.scene3d) return;
+          this.scene3d.createDefaultPrimitives();
+          this.scene3d.createEnvironmentMeshes();
+          if (this.scene3d.showGrid) this.scene3d.createGrid();
+
+          this.applyEnvironment();
+          this.applyTerrainMaterials();
+          if (this.terrain) this.scene3d.setTerrain(this.terrain.heights, this.terrain.size);
+          if (this.displayedHud) this.scene3d.setDisplayedHud(this.displayedHud.id, this.displayedHud.size);
+
+          this.installBodyMeshes(this.scene3d);
+
+          for (const [assetId, geometry] of this.decodedAssets) {
+            const meshes = this.scene3d.addAssetMesh(assetId, geometry);
+            for (const object of this.sceneObjects.values()) {
+              if (object.assetId === assetId) object.decodedMeshes = meshes;
+            }
+          }
+          for (const texture of this.decodedTextures.values()) this.applyTexture(texture);
+          for (const object of this.sceneObjects.values()) {
+            if (object.assetId && !object.decodedMeshes && this.decodedAssets.has(object.assetId)) {
+              const geometry = this.decodedAssets.get(object.assetId);
+              object.decodedMeshes = this.scene3d.addAssetMesh(object.assetId, geometry);
+            }
+            this.applySceneObject(object);
+          }
+        });
+      }
       await graphics.init();
       if (stale()) return;
 
@@ -716,7 +746,7 @@ export class WorldViewer extends Utils.EventEmitter {
   public startRendering() {
     if (this.animationId !== null) return;
     const render = (time: number) => {
-      if (this.use3D && this.scene3d && this.camera3d) {
+      if (this.use3D && this.scene3d && this.camera3d && !this.graphics3d?.isContextLost) {
         if (!this.environment && Date.now() - this.fallbackSkyAt > WorldViewer.FALLBACK_SKY_REFRESH_MS) this.applyEnvironment();
         this.camera3d.updateMatrices();
         this.updateAnimatedSkins();
