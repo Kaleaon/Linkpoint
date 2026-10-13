@@ -400,4 +400,3 @@ describe('EnvironmentPresetSelector UI component', () => {
     expect(WindlightPresetSelector).toBe(EnvironmentPresetSelector);
   });
 });
-

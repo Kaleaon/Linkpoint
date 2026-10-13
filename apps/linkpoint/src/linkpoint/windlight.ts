@@ -663,4 +663,3 @@ export const EnvironmentPresetSelector: React.FC<EnvironmentPresetSelectorProps>
 };
 
 export const WindlightPresetSelector = EnvironmentPresetSelector;
-
