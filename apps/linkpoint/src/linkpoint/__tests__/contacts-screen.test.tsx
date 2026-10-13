@@ -225,4 +225,45 @@ describe('Contacts screen', () => {
       expect(mounted.host.querySelector('[role="alert"]')?.textContent).toContain('Popup closed');
     });
   });
+
+  describe('Friend Online Alerts', () => {
+    it('toggles online alerts on and off for a friend/contact', async () => {
+      mounted = await mountScreen(ContactsScreen);
+      await seedFriends();
+      await saveAll(mounted.host);
+
+      // Open detail for Pat Resident
+      await click(row(mounted.host, 'Pat Resident'));
+
+      expect(mounted.host.textContent).toContain('FRIEND ONLINE ALERTS');
+      expect(mounted.host.textContent).toContain('Online alerts are OFF for this friend');
+
+      const enableBtn = buttonByText(mounted.host, 'ENABLE ONLINE ALERT');
+      expect(enableBtn).toBeTruthy();
+      expect(enableBtn?.getAttribute('aria-pressed')).toBe('false');
+
+      // Click to enable online alert
+      await click(enableBtn);
+      await flush();
+
+      expect(app.friends.getOnlineAlert(friends[0].id)).toBe(true);
+      expect(mounted.host.textContent).toContain('Online alert enabled for Pat Resident.');
+      expect(mounted.host.textContent).toContain('Online alerts are ON for this friend');
+
+      const disableBtn = buttonByText(mounted.host, 'DISABLE ONLINE ALERT');
+      expect(disableBtn).toBeTruthy();
+      expect(disableBtn?.getAttribute('aria-pressed')).toBe('true');
+
+      // Verify ALERT badge appears in the contact row
+      expect(row(mounted.host, 'Pat Resident').textContent).toContain('ALERT');
+
+      // Click to disable online alert
+      await click(disableBtn);
+      await flush();
+
+      expect(app.friends.getOnlineAlert(friends[0].id)).toBe(false);
+      expect(mounted.host.textContent).toContain('Online alert disabled for Pat Resident.');
+      expect(mounted.host.textContent).toContain('Online alerts are OFF for this friend');
+    });
+  });
 });
