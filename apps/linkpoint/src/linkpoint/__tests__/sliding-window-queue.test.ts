@@ -110,4 +110,73 @@ describe('SlidingWindowSyncQueue', () => {
     expect(queue.getIsThrottled()).toBe(false);
     expect(queue.getMaxConcurrency()).toBe(3);
   });
+
+  it('rejects pending enqueued task promises when clearQueue is called', async () => {
+    // Fill all 3 active streams with slow tasks
+    const active1 = queue.enqueue('active_1', () => new Promise((res) => setTimeout(res, 100)));
+    const active2 = queue.enqueue('active_2', () => new Promise((res) => setTimeout(res, 100)));
+    const active3 = queue.enqueue('active_3', () => new Promise((res) => setTimeout(res, 100)));
+
+    // Enqueue 3 pending tasks (these will wait in queue)
+    const pending1 = queue.enqueue('pending_1', async () => 'result_1');
+    const pending2 = queue.enqueue('pending_2', async () => 'result_2');
+    const pending3 = queue.enqueue('pending_3', async () => 'result_3');
+
+    expect(queue.getActiveCount()).toBe(3);
+    expect(queue.getQueuedCount()).toBe(3);
+
+    let clearedEventPayload: any = null;
+    queue.on('queue_cleared', (payload) => {
+      clearedEventPayload = payload;
+    });
+
+    // Clear queue with cancellation reason
+    const reasonMessage = 'Region teleport in progress';
+    queue.clearQueue(reasonMessage);
+
+    expect(queue.getQueuedCount()).toBe(0);
+    expect(clearedEventPayload).not.toBeNull();
+    expect(clearedEventPayload.cancelledCount).toBe(3);
+    expect(clearedEventPayload.reason).toBeInstanceOf(Error);
+    expect(clearedEventPayload.reason.message).toBe(reasonMessage);
+
+    // Pending promises must reject with cancellation error
+    await expect(pending1).rejects.toThrow(reasonMessage);
+    await expect(pending2).rejects.toThrow(reasonMessage);
+    await expect(pending3).rejects.toThrow(reasonMessage);
+
+    // Active tasks finish normally
+    await Promise.all([active1, active2, active3]);
+    expect(queue.getActiveCount()).toBe(0);
+  });
+
+  it('executes clearQueue safely on an empty queue', async () => {
+    let clearedEventPayload: any = null;
+    queue.on('queue_cleared', (payload) => {
+      clearedEventPayload = payload;
+    });
+
+    queue.clearQueue();
+
+    expect(queue.getQueuedCount()).toBe(0);
+    expect(clearedEventPayload).not.toBeNull();
+    expect(clearedEventPayload.cancelledCount).toBe(0);
+    expect(clearedEventPayload.reason).toBeInstanceOf(Error);
+    expect(clearedEventPayload.reason.message).toBe('Queue cleared');
+  });
+
+  it('supports passing Error instances or strings or no args to clearQueue', async () => {
+    // Fill 3 active worker streams
+    const a1 = queue.enqueue('a1', () => new Promise((res) => setTimeout(res, 50)));
+    const a2 = queue.enqueue('a2', () => new Promise((res) => setTimeout(res, 50)));
+    const a3 = queue.enqueue('a3', () => new Promise((res) => setTimeout(res, 50)));
+
+    const customError = new Error('Session disconnected');
+    const pending = queue.enqueue('pending', async () => 'data');
+
+    queue.clearQueue(customError);
+
+    await expect(pending).rejects.toThrow('Session disconnected');
+    await Promise.all([a1, a2, a3]);
+  });
 });
