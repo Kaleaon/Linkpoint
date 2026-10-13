@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/linkpoint_dart.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   group('LLSD Serialization & Conformance Tests', () {
@@ -32,33 +33,34 @@ void main() {
 
     test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
         () {
-      var vectorsDir = Directory(
-          '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
-      if (!vectorsDir.existsSync()) {
-        vectorsDir = Directory(
-            '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
-      }
-      if (!vectorsDir.existsSync()) {
-        vectorsDir = Directory(
-            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
-      }
-      if (!vectorsDir.existsSync()) {
-        vectorsDir =
-            Directory('Linkpoint/src/test/resources/llsd-conformance/vectors');
-      }
-      expect(vectorsDir.existsSync(), isTrue,
-          reason: 'Vectors directory must exist');
+      final relativeCandidates = [
+        path.join('..', '..', 'legacy', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('..', '..', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('legacy', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+      ];
 
-      final subdirs = vectorsDir.listSync().whereType<Directory>().toList()
+      Directory? vectorsDir;
+      for (final candidate in relativeCandidates) {
+        final d = Directory(candidate);
+        if (d.existsSync()) {
+          vectorsDir = d;
+          break;
+        }
+      }
+
+      expect(vectorsDir, isNotNull, reason: 'Vectors directory must exist');
+
+      final subdirs = vectorsDir!.listSync().whereType<Directory>().toList()
         ..sort((a, b) => a.path.compareTo(b.path));
 
       expect(subdirs.length, equals(31),
           reason: 'Expected 31 test vector directories');
 
       for (final fixtureDir in subdirs) {
-        final fixtureName = fixtureDir.path.split(Platform.pathSeparator).last;
-        final xmlFile = File('${fixtureDir.path}/value.xml');
-        final binFile = File('${fixtureDir.path}/value.bin');
+        final fixtureName = path.basename(fixtureDir.path);
+        final xmlFile = File(path.join(fixtureDir.path, 'value.xml'));
+        final binFile = File(path.join(fixtureDir.path, 'value.bin'));
 
         expect(xmlFile.existsSync(), isTrue,
             reason: 'value.xml must exist for $fixtureName');
