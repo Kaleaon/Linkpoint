@@ -19,10 +19,100 @@ export function GridsScreen() {
   return <div className="tool-page"><h2>Login grids</h2>{grids.map((grid) => <section className="runtime-card" key={grid.key || grid.host}><strong>{grid.label}</strong><small>{grid.host}</small></section>)}</div>;
 }
 
+export function StreamAudioPlayer({ src, autoPlay = true, controls = true, className = "media-player", style, onError }) {
+  const [error, setError] = useState(null);
+  const [retryKey, setRetryKey] = useState(0);
+
+  useEffect(() => {
+    setError(null);
+  }, [src]);
+
+  const handleAudioError = (e) => {
+    const diagnosticMsg = "Stream playback failed. Please check network connectivity, CORS policy, or stream URL format.";
+    setError(diagnosticMsg);
+    if (onError) {
+      onError(diagnosticMsg);
+    }
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    setRetryKey((prev) => prev + 1);
+  };
+
+  return (
+    <div className="stream-audio-player" style={{ marginTop: 8, width: "100%", ...style }}>
+      {error ? (
+        <div
+          className="stream-audio-error-banner"
+          style={{
+            padding: "10px 12px",
+            borderRadius: 6,
+            backgroundColor: "rgba(229, 57, 53, 0.15)",
+            border: "1px solid rgba(229, 57, 53, 0.5)",
+            color: "#e53935",
+            fontSize: 13,
+            lineHeight: 1.4,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            marginBottom: 8,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+            <Icon name="radio" size={16} />
+            <span>Audio Stream Error</span>
+          </div>
+          <p style={{ margin: 0, opacity: 0.9 }}>{error}</p>
+          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            <button
+              type="button"
+              onClick={handleRetry}
+              style={{
+                padding: "4px 12px",
+                borderRadius: 4,
+                border: "1px solid rgba(229, 57, 53, 0.6)",
+                background: "rgba(229, 57, 53, 0.2)",
+                color: "inherit",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
+      <audio
+        key={retryKey}
+        className={className}
+        src={src}
+        controls={controls}
+        autoPlay={autoPlay}
+        onError={handleAudioError}
+        style={{ width: "100%" }}
+      />
+    </div>
+  );
+}
+
 export function MediaScreen() {
   const [url, setUrl] = useState("");
   const [active, setActive] = useState("");
-  return <div className="tool-page"><h2>Streaming media</h2><div className="inline-tool"><input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="HTTPS audio stream URL" /><button onClick={() => setActive(url.trim())} disabled={!/^https:\/\//i.test(url.trim())}>Play</button></div>{active ? <audio className="media-player" src={active} controls autoPlay onError={() => setActive("")} /> : <Empty icon="radio">Enter an HTTPS stream supplied by the current parcel or broadcaster.</Empty>}</div>;
+  return (
+    <div className="tool-page">
+      <h2>Streaming media</h2>
+      <div className="inline-tool">
+        <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="HTTPS audio stream URL" />
+        <button onClick={() => setActive(url.trim())} disabled={!/^https:\/\//i.test(url.trim())}>Play</button>
+      </div>
+      {active ? (
+        <StreamAudioPlayer src={active} />
+      ) : (
+        <Empty icon="radio">Enter an HTTPS stream supplied by the current parcel or broadcaster.</Empty>
+      )}
+    </div>
+  );
 }
 
 export function NotecardsScreen() {
@@ -198,16 +288,9 @@ export function ParcelScreen() {
         </div>
         {streamError ? <small style={{ color: "#e53935", marginTop: 4 }}>{streamError}</small> : null}
         {activeStream && isValidUrl && isPlaying ? (
-          <audio
-            className="media-player"
+          <StreamAudioPlayer
             src={activeStream}
-            controls
-            autoPlay
-            onError={() => {
-              setStreamError("Stream error: unable to play audio stream.");
-              setIsPlaying(false);
-            }}
-            style={{ marginTop: 8, width: "100%" }}
+            onError={(msg) => setStreamError(msg)}
           />
         ) : null}
       </section>

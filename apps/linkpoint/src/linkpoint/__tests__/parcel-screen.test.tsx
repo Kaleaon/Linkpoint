@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { app } from "../app";
-import { ParcelScreen, parseParcelFlags } from "../../screens/LumiyaTools.jsx";
+import { MediaScreen, ParcelScreen, parseParcelFlags } from "../../screens/LumiyaTools.jsx";
 import { mountScreen, unmount, type Mounted } from "./ui-helpers.tsx";
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -134,5 +134,92 @@ describe("ParcelScreen Component & Reactive World Store", () => {
 
     const newPlayBtn = Array.from(mounted.host.querySelectorAll("button")).find((btn) => btn.textContent === "Play");
     expect(newPlayBtn).toBeDefined();
+  });
+
+  it("displays diagnostic banner and retry control on audio error in ParcelScreen, and clicking Retry restarts playback", async () => {
+    app.world.region = {
+      name: "Club Region",
+      parcel: {
+        id: 5,
+        name: "Club Stream",
+        description: "DJ Stream",
+        area: 2048,
+        musicUrl: "https://dj.example/live",
+      },
+    };
+
+    mounted = await mountScreen(() => <ParcelScreen />);
+    const playBtn = Array.from(mounted.host.querySelectorAll("button")).find((btn) => btn.textContent === "Play");
+    expect(playBtn).toBeDefined();
+
+    await act(async () => {
+      playBtn?.click();
+    });
+
+    const audioEl = mounted.host.querySelector("audio");
+    expect(audioEl).not.toBeNull();
+
+    await act(async () => {
+      audioEl?.dispatchEvent(new Event("error"));
+    });
+
+    expect(mounted.host.textContent).toContain("Audio Stream Error");
+    expect(mounted.host.textContent).toContain("Stream playback failed");
+    expect(mounted.host.textContent).toContain("check network connectivity");
+
+    const retryBtn = Array.from(mounted.host.querySelectorAll("button")).find((btn) => btn.textContent === "Retry");
+    expect(retryBtn).toBeDefined();
+
+    await act(async () => {
+      retryBtn?.click();
+    });
+
+    expect(mounted.host.textContent).not.toContain("Audio Stream Error");
+    const reloadedAudioEl = mounted.host.querySelector("audio");
+    expect(reloadedAudioEl).not.toBeNull();
+  });
+
+  it("MediaScreen displays StreamAudioPlayer with error banner and retry controls on audio error without unmounting", async () => {
+    mounted = await mountScreen(() => <MediaScreen />);
+    const input = mounted.host.querySelector("input[type='url']") as HTMLInputElement;
+    expect(input).not.toBeNull();
+
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    )?.set;
+
+    await act(async () => {
+      nativeInputValueSetter?.call(input, "https://stream.example/live.mp3");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    const playBtn = Array.from(mounted.host.querySelectorAll("button")).find((btn) => btn.textContent === "Play");
+    expect(playBtn).toBeDefined();
+
+    await act(async () => {
+      playBtn?.click();
+    });
+
+    const audioEl = mounted.host.querySelector("audio");
+    expect(audioEl).not.toBeNull();
+
+    await act(async () => {
+      audioEl?.dispatchEvent(new Event("error"));
+    });
+
+    expect(mounted.host.textContent).toContain("Audio Stream Error");
+    expect(mounted.host.textContent).toContain("Stream playback failed");
+
+    const retryBtn = Array.from(mounted.host.querySelectorAll("button")).find((btn) => btn.textContent === "Retry");
+    expect(retryBtn).toBeDefined();
+
+    await act(async () => {
+      retryBtn?.click();
+    });
+
+    expect(mounted.host.textContent).not.toContain("Audio Stream Error");
+    const reloadedAudioEl = mounted.host.querySelector("audio");
+    expect(reloadedAudioEl).not.toBeNull();
   });
 });
