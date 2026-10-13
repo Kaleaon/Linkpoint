@@ -15,6 +15,7 @@ import { ContactsStore } from './contacts';
 import { NoticeStore } from './notices';
 import { Utils } from './utils';
 import { slBridge } from './sl-bridge';
+import { localCache } from './local-cache';
 
 // Phase 2 Modules
 import { EventQueueManager } from './phase2/event-queue';
@@ -213,7 +214,6 @@ export class LinkpointApp {
   }
 
   async clearTextureCache() {
-    const { localCache } = await import('./local-cache');
     await localCache.clearTextureCache();
     if (this.world) {
       this.world.clearTextureCache();
