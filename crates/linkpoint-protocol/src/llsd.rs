@@ -215,7 +215,8 @@ mod tests {
         let mut vectors_dir =
             manifest_dir.join("../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors");
         if !vectors_dir.exists() {
-            vectors_dir = manifest_dir.join("../../Linkpoint/src/test/resources/llsd-conformance/vectors");
+            vectors_dir =
+                manifest_dir.join("../../Linkpoint/src/test/resources/llsd-conformance/vectors");
         }
 
         if !vectors_dir.exists() {
