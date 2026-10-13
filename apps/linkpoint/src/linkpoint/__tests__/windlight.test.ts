@@ -1,12 +1,37 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import React, { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
 import {
   WindlightDay, getDefaultWindlightDay, parseWindlightPreset, presetToSkyFrame, sunDirection,
   estimatedSunHour, sunPhaseToSunHour, windlightEnvironment, WINDLIGHT_HOUR_TABLE, SL_DAY_SECONDS,
+  WINDLIGHT_PRESETS, getWindlightPresetOption, selectEnvironmentPreset, WindlightPresetManager,
+  useWindlightPreset, EnvironmentPresetSelector, WindlightPresetSelector,
+  type ViewerServiceProtocol,
 } from '../windlight';
 import { computeSkyUniforms } from '../sky';
+
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
+async function renderComponent(element: React.ReactElement) {
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  await act(async () => {
+    root.render(element);
+  });
+  return {
+    host,
+    cleanup: async () => {
+      await act(async () => {
+        root.unmount();
+      });
+      host.remove();
+    },
+  };
+}
 
 const xml = (name: string) => readFileSync(resolve(__dirname, '../../assets/windlight', `${name}.xml`), 'utf8');
 
@@ -129,5 +154,249 @@ describe('sunPhaseToSunHour conversion', () => {
     expect(sunPhaseToSunHour(NaN)).toBe(0);
     expect(sunPhaseToSunHour(Infinity)).toBe(0);
     expect(sunPhaseToSunHour(null as any)).toBe(0);
+  });
+});
+
+describe('Environment preset options catalog', () => {
+  it('defines region default and 8 day cycle presets', () => {
+    expect(WINDLIGHT_PRESETS).toHaveLength(9);
+    expect(WINDLIGHT_PRESETS[0].id).toBe('region-default');
+    expect(WINDLIGHT_PRESETS[0].hour).toBeNull();
+    expect(WINDLIGHT_PRESETS[1].id).toBe('A-12AM');
+    expect(WINDLIGHT_PRESETS[5].id).toBe('A-12PM');
+    expect(WINDLIGHT_PRESETS[5].hour).toBe(0.5);
+  });
+
+  it('looks up preset options by id case-insensitively', () => {
+    expect(getWindlightPresetOption('a-12pm')?.id).toBe('A-12PM');
+    expect(getWindlightPresetOption('REGION-DEFAULT')?.id).toBe('region-default');
+    expect(getWindlightPresetOption('non-existent')).toBeUndefined();
+    expect(getWindlightPresetOption('')).toBeUndefined();
+  });
+});
+
+describe('selectEnvironmentPreset and protocol dispatching', () => {
+  it('selects a valid preset and calculates sky frame', async () => {
+    const result = await selectEnvironmentPreset('A-12PM');
+    expect(result.selectedPresetId).toBe('A-12PM');
+    expect(result.isCustomOverride).toBe(true);
+    expect(result.activeHour).toBe(0.5);
+    expect(result.isConnected).toBe(true);
+    expect(result.error).toBeNull();
+    expect(result.preset).not.toBeNull();
+    expect(result.skyFrame).not.toBeNull();
+  });
+
+  it('binds to protocol.setEnvironment method when provided', async () => {
+    const mockSetEnv = vi.fn().mockResolvedValue(true);
+    const protocol: ViewerServiceProtocol = {
+      connected: true,
+      setEnvironment: mockSetEnv,
+    };
+
+    const result = await selectEnvironmentPreset('A-6AM', protocol);
+    expect(mockSetEnv).toHaveBeenCalledWith('A-6AM', 0.25);
+    expect(result.selectedPresetId).toBe('A-6AM');
+    expect(result.isConnected).toBe(true);
+    expect(result.error).toBeNull();
+  });
+
+  it('binds to protocol.dispatch method when setEnvironment is not present', async () => {
+    const mockDispatch = vi.fn().mockResolvedValue(true);
+    const protocol: ViewerServiceProtocol = {
+      connected: true,
+      dispatch: mockDispatch,
+    };
+
+    await selectEnvironmentPreset('A-6PM', protocol);
+    expect(mockDispatch).toHaveBeenCalledWith('ENVIRONMENT_PRESET_CHANGE', { presetId: 'A-6PM', hour: 0.75 });
+  });
+
+  it('binds to protocol.send method when setEnvironment and dispatch are not present', async () => {
+    const mockSend = vi.fn().mockResolvedValue(true);
+    const protocol: ViewerServiceProtocol = {
+      connected: true,
+      send: mockSend,
+    };
+
+    await selectEnvironmentPreset('A-3PM', protocol);
+    expect(mockSend).toHaveBeenCalledWith('set_environment', { presetId: 'A-3PM', hour: 0.625 });
+  });
+
+  it('handles disconnected network sessions gracefully and provides local preview', async () => {
+    const protocol: ViewerServiceProtocol = {
+      connected: false,
+    };
+
+    const result = await selectEnvironmentPreset('A-12AM', protocol);
+    expect(result.isConnected).toBe(false);
+    expect(result.error).toContain('Disconnected from simulator');
+    expect(result.selectedPresetId).toBe('A-12AM');
+    expect(result.skyFrame).not.toBeNull();
+  });
+
+  it('handles transient protocol call failures gracefully', async () => {
+    const protocol: ViewerServiceProtocol = {
+      connected: true,
+      setEnvironment: vi.fn().mockRejectedValue(new Error('Network RPC Timeout')),
+    };
+
+    const result = await selectEnvironmentPreset('A-12PM', protocol);
+    expect(result.error).toContain('Network RPC Timeout');
+    expect(result.selectedPresetId).toBe('A-12PM');
+    expect(result.skyFrame).not.toBeNull();
+  });
+
+  it('falls back to region-default for empty or invalid preset IDs', async () => {
+    const result = await selectEnvironmentPreset('');
+    expect(result.selectedPresetId).toBe('region-default');
+    expect(result.isCustomOverride).toBe(false);
+    expect(result.activeHour).toBeNull();
+  });
+});
+
+describe('WindlightPresetManager state management', () => {
+  it('manages state changes and notifies subscribers', async () => {
+    const manager = new WindlightPresetManager('region-default');
+    expect(manager.getState().selectedPresetId).toBe('region-default');
+
+    const listener = vi.fn();
+    const unsubscribe = manager.subscribe(listener);
+
+    await manager.selectPreset('A-12PM');
+    expect(listener).toHaveBeenCalled();
+    expect(manager.getState().selectedPresetId).toBe('A-12PM');
+    expect(manager.getState().activeHour).toBe(0.5);
+
+    unsubscribe();
+  });
+
+  it('supports custom sun hour adjustment and reset to region default', async () => {
+    const manager = new WindlightPresetManager('A-12PM');
+    await manager.setCustomSunHour(0.75);
+    expect(manager.getState().activeHour).toBe(0.75);
+
+    await manager.resetToRegionDefault();
+    expect(manager.getState().selectedPresetId).toBe('region-default');
+    expect(manager.getState().isCustomOverride).toBe(false);
+  });
+
+  it('clears error state when clearError is called', async () => {
+    const manager = new WindlightPresetManager('region-default');
+    const protocol: ViewerServiceProtocol = { connected: false };
+    await manager.selectPreset('A-6AM', protocol);
+    expect(manager.getState().error).not.toBeNull();
+
+    manager.clearError();
+    expect(manager.getState().error).toBeNull();
+  });
+});
+
+describe('EnvironmentPresetSelector UI component', () => {
+  it('renders preset selector controls and accessibility attributes', async () => {
+    const { host, cleanup } = await renderComponent(
+      createElement(EnvironmentPresetSelector, { currentPresetId: 'region-default' })
+    );
+
+    const group = host.querySelector('.environment-preset-selector');
+    expect(group).not.toBeNull();
+    expect(group?.getAttribute('aria-label')).toBe('Environment Preset Selector');
+    expect(group?.getAttribute('role')).toBe('group');
+
+    const select = host.querySelector('#windlight-preset-select') as HTMLSelectElement;
+    expect(select).not.toBeNull();
+    expect(select.value).toBe('region-default');
+
+    const radioGroup = host.querySelector('[role="radiogroup"]');
+    expect(radioGroup).not.toBeNull();
+
+    const buttons = host.querySelectorAll('button[role="radio"]');
+    expect(buttons.length).toBe(9);
+
+    await cleanup();
+  });
+
+  it('handles user preset selection and triggers onPresetChange callback', async () => {
+    const onPresetChange = vi.fn();
+    const { host, cleanup } = await renderComponent(
+      createElement(EnvironmentPresetSelector, {
+        currentPresetId: 'region-default',
+        onPresetChange,
+      })
+    );
+
+    const noonButton = Array.from(host.querySelectorAll('button[role="radio"]')).find(
+      (b) => b.textContent?.includes('Noon')
+    ) as HTMLButtonElement;
+
+    expect(noonButton).not.toBeUndefined();
+
+    await act(async () => {
+      noonButton.click();
+    });
+
+    expect(onPresetChange).toHaveBeenCalledWith('A-12PM', expect.objectContaining({
+      selectedPresetId: 'A-12PM',
+      activeHour: 0.5,
+    }));
+
+    await cleanup();
+  });
+
+  it('displays error alert when disconnected and allows user dismissal', async () => {
+    const protocol: ViewerServiceProtocol = { connected: false };
+    const { host, cleanup } = await renderComponent(
+      createElement(EnvironmentPresetSelector, {
+        protocol,
+        currentPresetId: 'A-6AM',
+      })
+    );
+
+    const alert = host.querySelector('[role="alert"]');
+    expect(alert).not.toBeNull();
+    expect(alert?.textContent).toContain('Disconnected from simulator');
+
+    const dismissBtn = host.querySelector('.environment-preset-dismiss-btn') as HTMLButtonElement;
+    expect(dismissBtn).not.toBeNull();
+
+    await act(async () => {
+      dismissBtn.click();
+    });
+
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+
+    await cleanup();
+  });
+
+  it('renders sun hour slider when custom preset is selected and handles slider change', async () => {
+    const onPresetChange = vi.fn();
+    const { host, cleanup } = await renderComponent(
+      createElement(EnvironmentPresetSelector, {
+        currentPresetId: 'A-12PM',
+        onPresetChange,
+        showHourSlider: true,
+      })
+    );
+
+    const slider = host.querySelector('#windlight-hour-slider') as HTMLInputElement;
+    expect(slider).not.toBeNull();
+    expect(slider.value).toBe('0.5');
+
+    await act(async () => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      nativeSetter?.call(slider, '0.75');
+      slider.dispatchEvent(new Event('input', { bubbles: true }));
+      slider.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(onPresetChange).toHaveBeenCalledWith('A-12PM', expect.objectContaining({
+      activeHour: 0.75,
+    }));
+
+    await cleanup();
+  });
+
+  it('exports WindlightPresetSelector as an alias', () => {
+    expect(WindlightPresetSelector).toBe(EnvironmentPresetSelector);
   });
 });
