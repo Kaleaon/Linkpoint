@@ -81,9 +81,9 @@ def test_microservices(agent_id):
     try:
         req_user = urllib.request.urlopen(url, context=ctx, timeout=5)
         user_data = json.loads(req_user.read().decode("utf-8"))
-        assert (
-            user_data.get("PrincipalID") == agent_id
-        ), f"User account data mismatch: {user_data}"
+        assert user_data.get("PrincipalID") == agent_id, (
+            f"User account data mismatch: {user_data}"
+        )
         log("✅ UserAccount microservice routing & lookup passed!")
     except urllib.error.HTTPError as e:
         if e.code == 404:
