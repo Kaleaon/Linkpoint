@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONTACTS_STORAGE_KEY, ContactsStore, MAX_CONTACTS, MAX_NOTE_LENGTH, MAX_PHOTO_CHARS, normalizeLink } from '../contacts';
+import { FriendsExtended } from '../phase2/friends-extended';
 
 const PHOTO = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
 const friends = [{ id: 'a-1', name: 'Pat Resident' }, { id: 'b-2', name: 'Sam Linden' }];
@@ -191,5 +192,40 @@ describe('backup and restore', () => {
     store.saveFriends(friends);
     for (const text of ['nonsense', '{}', '[]', '{"contacts":"x"}']) expect(() => store.importJson(text)).toThrow(/not a Linkpoint contacts backup/);
     expect(store.size).toBe(2);
+  });
+});
+
+describe('FriendsExtended refresh', () => {
+  it('fetches friends from protocol, replaces friends in store, emits events, and returns updated list', async () => {
+    const rawFriends = [
+      { id: 'f-1', name: 'Pat Resident', online: true, rightsHasMask: 3, rightsGivenMask: 4 },
+      { id: 'f-2', name: 'Sam Linden', online: false },
+    ];
+    const protocol = {
+      fetchFriends: vi.fn().mockResolvedValue(rawFriends),
+      emit: vi.fn(),
+    };
+    const friendsExt = new FriendsExtended(protocol);
+    const loadedHandler = vi.fn();
+    friendsExt.on('friends_loaded', loadedHandler);
+
+    const result = await friendsExt.refresh();
+
+    expect(protocol.fetchFriends).toHaveBeenCalledTimes(1);
+    expect(protocol.emit).toHaveBeenCalledWith('friends_loaded', rawFriends);
+    expect(loadedHandler).toHaveBeenCalledWith(rawFriends);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({ id: 'f-1', name: 'Pat Resident', onlineStatus: 'online' });
+    expect(result[0].permissions).toEqual({ canSeeOnline: true, canSeeOnMap: true, canModifyObjects: true });
+    expect(result[1]).toMatchObject({ id: 'f-2', name: 'Sam Linden', onlineStatus: 'offline' });
+  });
+
+  it('returns current friends list if protocol has no fetchFriends or returns non-array', async () => {
+    const friendsExt = new FriendsExtended({});
+    expect(await friendsExt.refresh()).toEqual([]);
+
+    const noArrayProtocol = { fetchFriends: vi.fn().mockResolvedValue(null) };
+    const friendsExt2 = new FriendsExtended(noArrayProtocol);
+    expect(await friendsExt2.refresh()).toEqual([]);
   });
 });
