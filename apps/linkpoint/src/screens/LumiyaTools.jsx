@@ -19,7 +19,7 @@ export function GridsScreen() {
   return <div className="tool-page"><h2>Login grids</h2>{grids.map((grid) => <section className="runtime-card" key={grid.key || grid.host}><strong>{grid.label}</strong><small>{grid.host}</small></section>)}</div>;
 }
 
-export function StreamAudioPlayer({ src, autoPlay = true, controls = true, className = "media-player", style, onError }) {
+export function StreamAudioPlayer({ src, autoPlay = true, controls = true, className = "media-player", style, onError, onRetry }) {
   const [error, setError] = useState(null);
   const [retryKey, setRetryKey] = useState(0);
 
@@ -38,6 +38,9 @@ export function StreamAudioPlayer({ src, autoPlay = true, controls = true, class
   const handleRetry = () => {
     setError(null);
     setRetryKey((prev) => prev + 1);
+    if (onRetry) {
+      onRetry();
+    }
   };
 
   return (
@@ -291,6 +294,7 @@ export function ParcelScreen() {
           <StreamAudioPlayer
             src={activeStream}
             onError={(msg) => setStreamError(msg)}
+            onRetry={() => setStreamError("")}
           />
         ) : null}
       </section>
