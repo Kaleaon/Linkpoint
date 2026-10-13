@@ -6,10 +6,30 @@ import 'package:path/path.dart' as path;
 
 File? _findFixtureFile() {
   final candidateParts = [
-    ['..', '..', 'crates', 'linkpoint-protocol', 'fixtures', 'llsd_31_test_vectors.json'],
-    ['..', 'crates', 'linkpoint-protocol', 'fixtures', 'llsd_31_test_vectors.json'],
+    [
+      '..',
+      '..',
+      'crates',
+      'linkpoint-protocol',
+      'fixtures',
+      'llsd_31_test_vectors.json'
+    ],
+    [
+      '..',
+      'crates',
+      'linkpoint-protocol',
+      'fixtures',
+      'llsd_31_test_vectors.json'
+    ],
     ['crates', 'linkpoint-protocol', 'fixtures', 'llsd_31_test_vectors.json'],
-    ['/app', 'Linkpoint', 'crates', 'linkpoint-protocol', 'fixtures', 'llsd_31_test_vectors.json'],
+    [
+      '/app',
+      'Linkpoint',
+      'crates',
+      'linkpoint-protocol',
+      'fixtures',
+      'llsd_31_test_vectors.json'
+    ],
   ];
   for (final parts in candidateParts) {
     final filePath = path.joinAll(parts);

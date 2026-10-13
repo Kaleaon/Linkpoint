@@ -34,10 +34,14 @@ void main() {
     test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
         () {
       final relativeCandidates = [
-        path.join('..', '..', 'legacy', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
-        path.join('..', '..', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
-        path.join('legacy', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
-        path.join('Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('..', '..', 'legacy', 'Linkpoint', 'src', 'test', 'resources',
+            'llsd-conformance', 'vectors'),
+        path.join('..', '..', 'Linkpoint', 'src', 'test', 'resources',
+            'llsd-conformance', 'vectors'),
+        path.join('legacy', 'Linkpoint', 'src', 'test', 'resources',
+            'llsd-conformance', 'vectors'),
+        path.join('Linkpoint', 'src', 'test', 'resources', 'llsd-conformance',
+            'vectors'),
       ];
 
       Directory? vectorsDir;
