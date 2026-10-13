@@ -373,7 +373,10 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
   }
 
   it('passes all 31 canonical test vectors in XML and Binary formats', () => {
-    let vectorsDir = path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors');
+    let vectorsDir = path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+    if (!fs.existsSync(vectorsDir)) {
+      vectorsDir = path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+    }
     if (!fs.existsSync(vectorsDir)) {
       vectorsDir = path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors');
     }

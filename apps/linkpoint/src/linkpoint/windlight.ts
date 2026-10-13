@@ -15,6 +15,7 @@
  * own environment. They are not a live reading of the region's sky.
  */
 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { LLSD } from './llsd';
 import a12am from '../assets/windlight/A-12AM.xml?raw';
 import a3am from '../assets/windlight/A-3AM.xml?raw';
@@ -208,3 +209,458 @@ export function estimatedSunHour(nowMs: number): number {
 export function windlightEnvironment(hour: number) {
   return { currentSky: presetToSkyFrame(getDefaultWindlightDay().at(hour)), source: 'default-windlight' as const };
 }
+
+// --- Preset Option Types & Definition ---
+
+export interface WindlightPresetOption {
+  id: string;
+  name: string;
+  label: string;
+  description: string;
+  hour: number | null;
+}
+
+export const WINDLIGHT_PRESETS: WindlightPresetOption[] = [
+  {
+    id: 'region-default',
+    name: 'Region Default',
+    label: 'Region Default',
+    description: 'Use simulator region environment and daylight cycle',
+    hour: null,
+  },
+  {
+    id: 'A-12AM',
+    name: 'Midnight',
+    label: 'Midnight (12 AM)',
+    description: 'Deep night preset with dark sky and bright star field',
+    hour: 0.0,
+  },
+  {
+    id: 'A-3AM',
+    name: 'Late Night',
+    label: 'Late Night (3 AM)',
+    description: 'Pre-dawn horizon with low ambient illumination',
+    hour: 0.125,
+  },
+  {
+    id: 'A-6AM',
+    name: 'Sunrise',
+    label: 'Sunrise (6 AM)',
+    description: 'Warm morning dawn with eastern sun angle',
+    hour: 0.25,
+  },
+  {
+    id: 'A-9AM',
+    name: 'Morning',
+    label: 'Morning (9 AM)',
+    description: 'Soft morning light with gentle horizon gradient',
+    hour: 0.375,
+  },
+  {
+    id: 'A-12PM',
+    name: 'Noon',
+    label: 'Noon (12 PM)',
+    description: 'Bright midday sun overhead with intense skylight',
+    hour: 0.5,
+  },
+  {
+    id: 'A-3PM',
+    name: 'Afternoon',
+    label: 'Afternoon (3 PM)',
+    description: 'Warm afternoon lighting with lengthening shadows',
+    hour: 0.625,
+  },
+  {
+    id: 'A-6PM',
+    name: 'Sunset',
+    label: 'Sunset (6 PM)',
+    description: 'Golden hour sunset with vivid atmospheric haze',
+    hour: 0.75,
+  },
+  {
+    id: 'A-9PM',
+    name: 'Evening',
+    label: 'Evening (9 PM)',
+    description: 'Twilight dusk transitioning into dark night sky',
+    hour: 0.875,
+  },
+];
+
+export function getWindlightPresetOption(id: string): WindlightPresetOption | undefined {
+  if (!id || typeof id !== 'string') return undefined;
+  return WINDLIGHT_PRESETS.find((p) => p.id.toLowerCase() === id.trim().toLowerCase());
+}
+
+// --- State Management Interfaces ---
+
+export interface EnvironmentPresetState {
+  selectedPresetId: string;
+  isCustomOverride: boolean;
+  activeHour: number | null;
+  isConnected: boolean;
+  isLoading: boolean;
+  error: string | null;
+  lastUpdated: number | null;
+  preset: WindlightPreset | null;
+  skyFrame: WindlightSkyFrame | null;
+}
+
+export interface ViewerServiceProtocol {
+  connected?: boolean;
+  send?: (messageType: string, payload?: any) => Promise<any> | void;
+  dispatch?: (action: string, payload?: any) => Promise<any> | void;
+  setEnvironment?: (presetId: string, hour?: number | null) => Promise<any> | void;
+  on?: (event: string, listener: (...args: any[]) => void) => void;
+  off?: (event: string, listener: (...args: any[]) => void) => void;
+}
+
+export interface PresetSelectOptions {
+  hour?: number;
+  silent?: boolean;
+}
+
+// --- Handler Functions & Dispatchers ---
+
+/**
+ * Connects UI preset selection to viewer service protocol methods,
+ * updates local state, and handles network disconnections and errors gracefully.
+ */
+export async function selectEnvironmentPreset(
+  presetId: string,
+  protocol?: ViewerServiceProtocol,
+  options?: PresetSelectOptions
+): Promise<EnvironmentPresetState> {
+  const normId = (!presetId || typeof presetId !== 'string') ? 'region-default' : presetId.trim();
+  const option = getWindlightPresetOption(normId) || WINDLIGHT_PRESETS[0];
+
+  const targetHour = options?.hour !== undefined && Number.isFinite(options.hour)
+    ? ((options.hour % 1) + 1) % 1
+    : option.hour;
+
+  let isConnected = true;
+  let error: string | null = null;
+  let isLoading = false;
+
+  if (protocol) {
+    if (protocol.connected === false) {
+      isConnected = false;
+      error = 'Disconnected from simulator. Local environment preview applied.';
+    } else {
+      try {
+        isLoading = true;
+        if (typeof protocol.setEnvironment === 'function') {
+          await protocol.setEnvironment(option.id, targetHour);
+        } else if (typeof protocol.dispatch === 'function') {
+          await protocol.dispatch('ENVIRONMENT_PRESET_CHANGE', { presetId: option.id, hour: targetHour });
+        } else if (typeof protocol.send === 'function') {
+          await protocol.send('set_environment', { presetId: option.id, hour: targetHour });
+        }
+      } catch (err: any) {
+        error = err?.message || 'Failed to apply environment preset on server. Using local preview.';
+      } finally {
+        isLoading = false;
+      }
+    }
+  }
+
+  let preset: WindlightPreset | null = null;
+  let skyFrame: WindlightSkyFrame | null = null;
+
+  if (targetHour !== null) {
+    preset = getDefaultWindlightDay().at(targetHour);
+    skyFrame = presetToSkyFrame(preset);
+  }
+
+  return {
+    selectedPresetId: option.id,
+    isCustomOverride: option.id !== 'region-default',
+    activeHour: targetHour,
+    isConnected,
+    isLoading,
+    error,
+    lastUpdated: Date.now(),
+    preset,
+    skyFrame,
+  };
+}
+
+// --- Manager Class ---
+
+export class WindlightPresetManager {
+  private state: EnvironmentPresetState;
+  private listeners: Set<(state: EnvironmentPresetState) => void> = new Set();
+
+  constructor(initialPresetId = 'region-default', protocol?: ViewerServiceProtocol) {
+    const option = getWindlightPresetOption(initialPresetId) || WINDLIGHT_PRESETS[0];
+    const hour = option.hour;
+    const preset = hour !== null ? getDefaultWindlightDay().at(hour) : null;
+    const isConnected = protocol?.connected !== false;
+    const error = protocol?.connected === false ? 'Disconnected from simulator. Local environment preview applied.' : null;
+    this.state = {
+      selectedPresetId: option.id,
+      isCustomOverride: option.id !== 'region-default',
+      activeHour: hour,
+      isConnected,
+      isLoading: false,
+      error,
+      lastUpdated: Date.now(),
+      preset,
+      skyFrame: preset ? presetToSkyFrame(preset) : null,
+    };
+  }
+
+  public getState(): EnvironmentPresetState {
+    return { ...this.state };
+  }
+
+  public subscribe(listener: (state: EnvironmentPresetState) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private emit() {
+    for (const listener of this.listeners) {
+      listener(this.getState());
+    }
+  }
+
+  public async selectPreset(
+    presetId: string,
+    protocol?: ViewerServiceProtocol,
+    options?: PresetSelectOptions
+  ): Promise<EnvironmentPresetState> {
+    this.state = { ...this.state, isLoading: true };
+    this.emit();
+
+    const newState = await selectEnvironmentPreset(presetId, protocol, options);
+    this.state = newState;
+    this.emit();
+    return this.state;
+  }
+
+  public async setCustomSunHour(
+    hour: number,
+    protocol?: ViewerServiceProtocol
+  ): Promise<EnvironmentPresetState> {
+    const validHour = Number.isFinite(hour) ? ((hour % 1) + 1) % 1 : 0.5;
+    const activePreset = this.state.selectedPresetId === 'region-default' ? 'A-12PM' : this.state.selectedPresetId;
+    return this.selectPreset(activePreset, protocol, { hour: validHour });
+  }
+
+  public async resetToRegionDefault(protocol?: ViewerServiceProtocol): Promise<EnvironmentPresetState> {
+    return this.selectPreset('region-default', protocol);
+  }
+
+  public clearError() {
+    if (this.state.error) {
+      this.state = { ...this.state, error: null };
+      this.emit();
+    }
+  }
+}
+
+// --- React Custom Hook ---
+
+export function useWindlightPreset(protocol?: ViewerServiceProtocol, initialPresetId = 'region-default') {
+  const manager = useMemo(() => new WindlightPresetManager(initialPresetId, protocol), [initialPresetId, protocol]);
+  const [state, setState] = useState<EnvironmentPresetState>(() => manager.getState());
+
+  useEffect(() => {
+    setState(manager.getState());
+    return manager.subscribe((newState) => setState(newState));
+  }, [manager]);
+
+  const selectPreset = useCallback(
+    (presetId: string, options?: PresetSelectOptions) => manager.selectPreset(presetId, protocol, options),
+    [manager, protocol]
+  );
+
+  const setCustomHour = useCallback(
+    (hour: number) => manager.setCustomSunHour(hour, protocol),
+    [manager, protocol]
+  );
+
+  const resetToRegionDefault = useCallback(
+    () => manager.resetToRegionDefault(protocol),
+    [manager, protocol]
+  );
+
+  const clearError = useCallback(() => manager.clearError(), [manager]);
+
+  return {
+    state,
+    selectPreset,
+    setCustomHour,
+    resetToRegionDefault,
+    clearError,
+    presets: WINDLIGHT_PRESETS,
+  };
+}
+
+// --- React UI Component ---
+
+export interface EnvironmentPresetSelectorProps {
+  protocol?: ViewerServiceProtocol;
+  currentPresetId?: string;
+  onPresetChange?: (presetId: string, state: EnvironmentPresetState) => void;
+  className?: string;
+  disabled?: boolean;
+  showHourSlider?: boolean;
+}
+
+export const EnvironmentPresetSelector: React.FC<EnvironmentPresetSelectorProps> = ({
+  protocol,
+  currentPresetId = 'region-default',
+  onPresetChange,
+  className = '',
+  disabled = false,
+  showHourSlider = true,
+}) => {
+  const { state, selectPreset, setCustomHour, resetToRegionDefault, clearError, presets } = useWindlightPreset(
+    protocol,
+    currentPresetId
+  );
+
+  const handleSelect = async (presetId: string) => {
+    if (disabled) return;
+    const newState = await selectPreset(presetId);
+    if (onPresetChange) {
+      onPresetChange(presetId, newState);
+    }
+  };
+
+  const handleSliderChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    const val = parseFloat(e.target.value);
+    const newState = await setCustomHour(val);
+    if (onPresetChange) {
+      onPresetChange(state.selectedPresetId, newState);
+    }
+  };
+
+  const currentOption = getWindlightPresetOption(state.selectedPresetId) || presets[0];
+
+  return React.createElement(
+    'div',
+    {
+      className: `environment-preset-selector ${className}`.trim(),
+      'aria-label': 'Environment Preset Selector',
+      role: 'group',
+    },
+    React.createElement(
+      'div',
+      { className: 'environment-preset-header' },
+      React.createElement('h3', { className: 'environment-preset-title' }, 'Environment Presets'),
+      state.isCustomOverride &&
+        React.createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'environment-preset-reset-btn',
+            onClick: () => resetToRegionDefault(),
+            disabled,
+            'aria-label': 'Reset to region default environment',
+          },
+          'Reset to Region'
+        )
+    ),
+    state.error &&
+      React.createElement(
+        'div',
+        {
+          className: 'environment-preset-alert environment-preset-error',
+          role: 'alert',
+          'aria-live': 'polite',
+        },
+        React.createElement('span', null, state.error),
+        React.createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'environment-preset-dismiss-btn',
+            onClick: clearError,
+            'aria-label': 'Dismiss alert',
+          },
+          '×'
+        )
+      ),
+    React.createElement(
+      'div',
+      { className: 'environment-preset-controls' },
+      React.createElement(
+        'label',
+        { htmlFor: 'windlight-preset-select', className: 'environment-preset-label' },
+        'Active Sky & Day Cycle Preset'
+      ),
+      React.createElement(
+        'select',
+        {
+          id: 'windlight-preset-select',
+          className: 'environment-preset-dropdown',
+          value: state.selectedPresetId,
+          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => handleSelect(e.target.value),
+          disabled: disabled || state.isLoading,
+          'aria-label': 'Select Environment Preset',
+        },
+        presets.map((p) =>
+          React.createElement('option', { key: p.id, value: p.id }, p.label)
+        )
+      )
+    ),
+    React.createElement(
+      'div',
+      { className: 'environment-preset-grid', role: 'radiogroup', 'aria-label': 'Quick Preset Selection' },
+      presets.map((p) => {
+        const isActive = state.selectedPresetId === p.id;
+        return React.createElement(
+          'button',
+          {
+            key: p.id,
+            type: 'button',
+            role: 'radio',
+            'aria-checked': isActive,
+            'aria-label': p.label,
+            className: `environment-preset-chip ${isActive ? 'active' : ''}`.trim(),
+            onClick: () => handleSelect(p.id),
+            disabled: disabled || state.isLoading,
+          },
+          p.name
+        );
+      })
+    ),
+    React.createElement(
+      'div',
+      { className: 'environment-preset-description' },
+      React.createElement('p', null, currentOption.description)
+    ),
+    showHourSlider &&
+      state.isCustomOverride &&
+      state.activeHour !== null &&
+      React.createElement(
+        'div',
+        { className: 'environment-preset-slider-container' },
+        React.createElement(
+          'label',
+          { htmlFor: 'windlight-hour-slider', className: 'environment-preset-slider-label' },
+          `Sun Hour: ${(state.activeHour * 24).toFixed(1)}h (${Math.round(state.activeHour * 100)}% of day cycle)`
+        ),
+        React.createElement('input', {
+          id: 'windlight-hour-slider',
+          type: 'range',
+          min: '0',
+          max: '0.999',
+          step: '0.005',
+          value: state.activeHour,
+          onChange: handleSliderChange,
+          disabled: disabled || state.isLoading,
+          className: 'environment-preset-slider',
+          'aria-label': 'Adjust Sun Hour',
+        })
+      )
+  );
+};
+
+export const WindlightPresetSelector = EnvironmentPresetSelector;
+
