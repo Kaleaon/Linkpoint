@@ -4,9 +4,11 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.util.Log
+import com.linkpoint.objects.ObjectManager
 import com.linkpoint.protocol.types.LLVector3
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
@@ -25,11 +27,13 @@ import java.util.concurrent.Executors
  */
 class SoundManager(
     private val context: Context,
-    private val cache: AssetCache
+    private val cache: AssetCache,
+    var objectManager: ObjectManager? = null
 ) {
     companion object {
         private const val TAG = "SoundManager"
         private const val MAX_STREAMS = 20
+        private const val DEFAULT_FALLBACK_DISTANCE = 15f
     }
 
     private val soundPool: SoundPool
@@ -88,7 +92,8 @@ class SoundManager(
         soundId: UUID,
         position: LLVector3,
         gain: Float = 1.0f,
-        loop: Boolean = false
+        loop: Boolean = false,
+        objectId: UUID? = null
     ): Int? {
         return withContext(soundDispatcher) {
             val soundPoolId = loadSound(soundId) ?: return@withContext null
@@ -99,10 +104,13 @@ class SoundManager(
             val volume = calculateVolume(distance, maxDistance, gain)
             val pan = calculatePan(position)
 
+            val leftVol = volume * (1f - pan.coerceIn(0f, 1f))
+            val rightVol = volume * (1f + pan.coerceIn(-1f, 0f))
+
             val streamId = soundPool.play(
                 soundPoolId,
-                volume * soundEffectsVolume * masterVolume,
-                volume * soundEffectsVolume * masterVolume,
+                leftVol * soundEffectsVolume * masterVolume,
+                rightVol * soundEffectsVolume * masterVolume,
                 1,
                 if (loop) -1 else 0,
                 1.0f
@@ -116,7 +124,8 @@ class SoundManager(
                     soundId = soundId,
                     position = position,
                     gain = gain,
-                    loop = loop
+                    loop = loop,
+                    objectId = objectId
                 )
             }
 
@@ -208,11 +217,19 @@ class SoundManager(
      * Play an attached sound from UDP message.
      * Attached sounds are played relative to an object in the world.
      */
-    fun playAttachedSound(soundId: UUID, objectId: UUID, ownerId: UUID, gain: Float) {
-        scope.launch {
-            // For now, play at listener position - in full implementation,
-            // would look up object position from ObjectManager
-            playSound(soundId, listenerPosition, gain, loop = false)
+    fun playAttachedSound(soundId: UUID, objectId: UUID, ownerId: UUID, gain: Float): Job {
+        return scope.launch {
+            val targetObject = objectManager?.getObjectByUUID(objectId)
+            val position = targetObject?.position
+                ?: (listenerPosition + (listenerForward * DEFAULT_FALLBACK_DISTANCE))
+
+            playSound(
+                soundId = soundId,
+                position = position,
+                gain = gain,
+                loop = false,
+                objectId = objectId
+            )
             Log.d(TAG, "[${Thread.currentThread().name}] Playing attached sound $soundId on object $objectId")
         }
     }
@@ -240,18 +257,36 @@ class SoundManager(
     }
 
     private fun updateSpatialSound(playback: SoundPlayback) {
-        val distance = playback.position.distance(listenerPosition)
+        val currentPosition = if (playback.objectId != null) {
+            val objPos = objectManager?.getObjectByUUID(playback.objectId)?.position
+            if (objPos != null) {
+                playback.position = objPos
+                objPos
+            } else {
+                listenerPosition + (listenerForward * DEFAULT_FALLBACK_DISTANCE)
+            }
+        } else {
+            playback.position
+        }
+
+        val distance = currentPosition.distance(listenerPosition)
         val volume = calculateVolume(distance, 30f, playback.gain)
-        val pan = calculatePan(playback.position)
+        val pan = calculatePan(currentPosition)
 
         val leftVol = volume * (1f - pan.coerceIn(0f, 1f))
         val rightVol = volume * (1f + pan.coerceIn(-1f, 0f))
 
-        soundPool.setVolume(playback.streamId,
+        soundPool.setVolume(
+            playback.streamId,
             leftVol * soundEffectsVolume * masterVolume,
             rightVol * soundEffectsVolume * masterVolume
         )
     }
+
+    /**
+     * Get playing sounds map for test/diagnostic inspection.
+     */
+    fun getPlayingSounds(): Map<Int, SoundPlayback> = playingSounds.toMap()
 
     /**
      * Set volume levels
@@ -327,7 +362,8 @@ class SoundManager(
 data class SoundPlayback(
     val streamId: Int,
     val soundId: UUID,
-    val position: LLVector3,
+    var position: LLVector3,
     val gain: Float,
-    val loop: Boolean
+    val loop: Boolean,
+    val objectId: UUID? = null
 )
