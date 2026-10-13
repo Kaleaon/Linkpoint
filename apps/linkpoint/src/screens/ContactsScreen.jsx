@@ -148,7 +148,7 @@ export default function ContactsScreen() {
       ) : null}
 
       {tab === "ADD FROM SL" ? (
-        <FriendsToAdd friends={unsaved} total={friends.length} onlineIds={onlineIds} busy={busy} button={button} onSave={saveFriends} loggedIn={app.auth.isLoggedIn()} />
+        <FriendsToAdd friends={unsaved} total={friends.length} onlineIds={onlineIds} busy={busy} button={button} onSave={saveFriends} loggedIn={app.auth.isLoggedIn()} run={run} say={say} />
       ) : (
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 8 }}>
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search contacts" aria-label="Search contacts" style={{ minHeight: 36, padding: "0 10px", border: `1px solid ${V.outv}`, borderRadius: V.rs, background: V.surf, color: V.ink, font: `400 12.5px/1 ${t.font}` }} />
@@ -199,7 +199,7 @@ export default function ContactsScreen() {
   );
 }
 
-function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedIn }) {
+function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedIn, run, say }) {
   const { V, t } = useTheme();
   const { actions } = useApp();
 
@@ -224,7 +224,7 @@ function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedI
         title="No friends loaded"
         description="No friends have been loaded from the grid yet."
         actionLabel="REFRESH FRIENDS"
-        onAction={() => app.friends.refresh?.()}
+        onAction={() => run(async () => { await app.friends.refresh(); say("info", "Friends list updated."); })}
       />
     );
   }

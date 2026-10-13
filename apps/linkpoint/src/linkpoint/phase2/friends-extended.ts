@@ -326,6 +326,33 @@ export class FriendsExtended extends Utils.EventEmitter {
     return Array.from(this.friends.values()).map(friend => ({ ...friend }));
   }
 
+  /**
+   * Re-fetch friends list from protocol and update internal state.
+   */
+  async refresh(): Promise<any[]> {
+    if (typeof this.protocol?.fetchFriends === 'function') {
+      const friends = await this.protocol.fetchFriends();
+      if (Array.isArray(friends)) {
+        if (typeof this.protocol.emit === 'function') {
+          this.protocol.emit('friends_loaded', friends);
+        }
+        this.replaceFriends(friends.map((f: any) => ({
+          id: f.id,
+          name: f.name,
+          onlineStatus: f.onlineStatus ?? f.online,
+          permissions: f.permissions ?? {
+            canSeeOnline: typeof f.rightsHasMask === 'number' ? Boolean(f.rightsHasMask & 1) : Boolean(f.rightsHas),
+            canSeeOnMap: typeof f.rightsHasMask === 'number' ? Boolean(f.rightsHasMask & 2) : Boolean(f.rightsHas),
+            canModifyObjects: typeof f.rightsGivenMask === 'number' ? Boolean(f.rightsGivenMask & 4) : Boolean(f.rightsGiven),
+          }
+        })));
+        this.emit('friends_loaded', friends);
+        return this.getFriends();
+      }
+    }
+    return this.getFriends();
+  }
+
   getStats() {
     let onlineFriends = 0;
     for (const f of this.friends.values()) {
