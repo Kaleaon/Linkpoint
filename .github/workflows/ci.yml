@@ -29,6 +29,8 @@ jobs:
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -167,6 +169,8 @@ jobs:
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
@@ -222,6 +226,7 @@ jobs:
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
           components: rustfmt, clippy, llvm-tools-preview
 
       - name: Install cargo-llvm-cov
@@ -288,6 +293,11 @@ jobs:
 
       - name: Build native protocol shared library
         run: cargo build -p linkpoint-protocol --release
+
+      - name: Fetch Flutter dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
 
       - name: Verify Dart formatting
         run: |

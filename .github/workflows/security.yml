@@ -29,6 +29,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - uses: dtolnay/rust-toolchain@stable
+        with: { toolchain: stable }
       - run: npm ci
       - run: node scripts/check_npm_audit.mjs
       - run: cargo install cargo-audit --locked
