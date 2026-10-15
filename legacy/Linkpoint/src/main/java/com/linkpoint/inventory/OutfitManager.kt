@@ -213,7 +213,7 @@ class OutfitManager(
         reason: WearableLoadFailureReason,
         detail: String,
         throwable: Throwable? = null
-    ): WearableData {
+    ): WearableData? {
         WearableAssetTelemetry.recordFallback(reason)
         if (throwable != null) {
             Log.e(
@@ -227,12 +227,7 @@ class OutfitManager(
                 "Using fallback wearable for item=${item.itemId} asset=${item.assetId} reason=$reason detail=$detail"
             )
         }
-        return WearableData(
-            type = type,
-            assetId = item.assetId,
-            textures = emptyMap(),
-            params = emptyMap()
-        )
+        return null
     }
 
     private suspend fun rebakeWearableLayers(wearableType: WearableType) {

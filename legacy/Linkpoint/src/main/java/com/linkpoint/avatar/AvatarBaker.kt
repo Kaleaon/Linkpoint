@@ -153,6 +153,7 @@ class AvatarBaker(
         val targetWidth = BAKE_WIDTH.coerceAtMost(MAX_BAKE_WIDTH)
         val targetHeight = BAKE_HEIGHT.coerceAtMost(MAX_BAKE_HEIGHT)
         val bitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(getFallbackColorForChannel(channel))
 
         try {
             val canvas = Canvas(bitmap)
@@ -339,11 +340,8 @@ class AvatarBaker(
         return layers
     }
 
-    private fun createFallbackLayerTexture(channel: Int): Bitmap {
-        val width = BAKE_WIDTH
-        val height = BAKE_HEIGHT
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val color = when (channel) {
+    private fun getFallbackColorForChannel(channel: Int): Int {
+        return when (channel) {
             BAKE_HEAD, BAKE_UPPER, BAKE_LOWER, BAKE_LEFTARM, BAKE_LEFTLEG, BAKE_AUX1, BAKE_AUX2, BAKE_AUX3 -> {
                 0xFFE0AC69.toInt() // Neutral skin tone (warm tan)
             }
@@ -351,7 +349,13 @@ class AvatarBaker(
             BAKE_HAIR -> 0xFF4A3525.toInt() // Neutral hair color
             else -> 0xFF808080.toInt()      // Neutral cloth gray
         }
-        bitmap.eraseColor(color)
+    }
+
+    private fun createFallbackLayerTexture(channel: Int): Bitmap {
+        val width = BAKE_WIDTH
+        val height = BAKE_HEIGHT
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(getFallbackColorForChannel(channel))
         return bitmap
     }
 
