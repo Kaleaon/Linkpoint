@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Scene3D } from '../scene-3d';
+import { Camera3D } from '../camera-3d';
 
 function makeScene() {
   const graphics = {
@@ -174,5 +175,75 @@ describe('Scene3D rendering state', () => {
     expect(volumeCall).toBeDefined();
     expect(volumeCall[5]).toBeDefined();
     expect(volumeCall[5]).toHaveLength(9);
+  });
+
+  it('builds billboard model matrices orthogonal to viewMatrix', () => {
+    const { scene } = makeScene();
+    const camera3d = new Camera3D();
+    // Create an arbitrary view matrix (simulating camera rotated and translated)
+    const eye = [10, 20, 30];
+    const target = [2, 5, 1];
+    const up = [0.2, 0.8, 0.5]; // Arbitrary non-aligned up vector (includes roll/tilt)
+    const viewMatrix = camera3d.mat4LookAt(eye, target, up);
+
+    const pos = [15, 25, 35];
+    const scale = [2, 3, 4];
+    const model = (scene as any).calculateModelMatrix(pos, [0, 0, 0], scale, true, viewMatrix);
+
+    // Verify translation in model matrix
+    expect(Array.from(model.slice(12, 15))).toEqual(pos);
+
+    // Multiply view * model to check orientation alignment in view space
+    const viewScale = new Float32Array(16);
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        let sum = 0;
+        for (let k = 0; k < 4; k++) {
+          sum += viewMatrix[k * 4 + row] * model[col * 4 + k];
+        }
+        viewScale[col * 4 + row] = sum;
+      }
+    }
+
+    // In view space, the upper-left 3x3 rotation should be diagonal equal to scale
+    expect(viewScale[0]).toBeCloseTo(scale[0], 5);
+    expect(viewScale[1]).toBeCloseTo(0, 5);
+    expect(viewScale[2]).toBeCloseTo(0, 5);
+
+    expect(viewScale[4]).toBeCloseTo(0, 5);
+    expect(viewScale[5]).toBeCloseTo(scale[1], 5);
+    expect(viewScale[6]).toBeCloseTo(0, 5);
+
+    expect(viewScale[8]).toBeCloseTo(0, 5);
+    expect(viewScale[9]).toBeCloseTo(0, 5);
+    expect(viewScale[10]).toBeCloseTo(scale[2], 5);
+  });
+
+  it('passes billboard model matrix to renderObject when object.billboard is true', () => {
+    const { scene, graphics } = makeScene();
+    const camera3d = new Camera3D();
+    const eye = [0, -10, 0];
+    const target = [0, 0, 0];
+    const viewMatrix = camera3d.mat4LookAt(eye, target, [0, 0, 1]);
+
+    scene.addObject('particle-1', {
+      mesh: 'particle-sprite',
+      position: [1, 2, 3],
+      scale: [1.5, 2.5, 1],
+      billboard: true,
+    });
+
+    scene.renderObject(scene.objects.get('particle-1'), viewMatrix, new Float32Array(16));
+
+    const drawCall = graphics.drawMesh.mock.calls.find((call) => call[0] === 'particle-sprite');
+    expect(drawCall).toBeDefined();
+
+    const uModelMatrix = drawCall[2].uModelMatrix;
+    expect(Array.from(uModelMatrix.slice(12, 15))).toEqual([1, 2, 3]);
+
+    // Check billboard orientation: Right vector [1,0,0]*1.5, Up vector [0,0,1]*2.5, Back vector [0,-1,0]
+    expect(uModelMatrix[0]).toBeCloseTo(1.5, 5);
+    expect(uModelMatrix[5]).toBeCloseTo(0, 5);
+    expect(uModelMatrix[6]).toBeCloseTo(2.5, 5);
   });
 });
