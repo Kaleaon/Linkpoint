@@ -24,7 +24,7 @@ class PythonEmitter(BaseEmitter):
         out.append(self.get_header_warning("#"))
         out.append("import struct")
         out.append("from dataclasses import dataclass, field")
-        out.append("from typing import Optional, List, Dict, Any\n")
+        out.append("from typing import Dict, List, Optional\n")
 
         out.append(f'TEMPLATE_VERSION = "{ast.version}"\n')
 
