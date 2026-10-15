@@ -2,6 +2,15 @@ package com.linkpoint.inventory
 
 import com.linkpoint.avatar.WearableType
 import com.linkpoint.avatar.AvatarBaker
+import com.linkpoint.assets.AssetType
+import kotlinx.coroutines.test.runTest
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -212,5 +221,163 @@ class OutfitManagerTest {
             affectedBakeChannelsForType(WearableType.PANTS)
         )
         assertTrue(affectedBakeChannelsForType(WearableType.SKIN).size >= 8)
+    }
+
+    private fun createTestInventoryItem(
+        itemId: UUID = UUID.randomUUID(),
+        assetId: UUID = UUID.randomUUID(),
+        wearableType: WearableType = WearableType.SHIRT
+    ): InventoryItem {
+        return InventoryItem(
+            itemId = itemId,
+            assetId = assetId,
+            parentId = UUID.randomUUID(),
+            name = "Test Wearable Item",
+            description = "Test Item Description",
+            assetType = AssetType.CLOTHING.value,
+            inventoryType = InventoryType.WEARABLE,
+            flags = wearableType.value,
+            permissions = ItemPermissions(0, 0, 0, 0, 0, UUID.randomUUID(), UUID.randomUUID()),
+            saleInfo = SaleInfo(0, 0),
+            creationDate = 0
+        )
+    }
+
+    @Test
+    fun loadWearableDataReturnsNullAndIncrementsTelemetryOnFetcherMissing() = runTest {
+        WearableAssetTelemetry.reset()
+        val mockInv = mock<InventoryManager>()
+        val mockBaker = mock<AvatarBaker>()
+        val mockGesture = mock<GestureManager>()
+
+        val item = createTestInventoryItem()
+        whenever(mockInv.getItem(item.itemId)).thenReturn(item)
+
+        val outfitManager = OutfitManager(
+            inventoryManager = mockInv,
+            baker = mockBaker,
+            gestureManager = mockGesture,
+            wearableAssetFetcher = null
+        )
+
+        val success = outfitManager.wearItem(item.itemId)
+        assertTrue(success)
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.MISSING_FETCHER))
+        verify(mockBaker, never()).setWearable(any(), any())
+    }
+
+    @Test
+    fun loadWearableDataReturnsNullAndIncrementsTelemetryOnNullBytes() = runTest {
+        WearableAssetTelemetry.reset()
+        val mockInv = mock<InventoryManager>()
+        val mockBaker = mock<AvatarBaker>()
+        val mockGesture = mock<GestureManager>()
+
+        val item = createTestInventoryItem()
+        whenever(mockInv.getItem(item.itemId)).thenReturn(item)
+
+        val outfitManager = OutfitManager(
+            inventoryManager = mockInv,
+            baker = mockBaker,
+            gestureManager = mockGesture,
+            wearableAssetFetcher = { null }
+        )
+
+        val success = outfitManager.wearItem(item.itemId)
+        assertTrue(success)
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.MISSING_ASSET_BYTES))
+        verify(mockBaker, never()).setWearable(any(), any())
+    }
+
+    @Test
+    fun loadWearableDataReturnsNullAndIncrementsTelemetryOnCorruptPayload() = runTest {
+        WearableAssetTelemetry.reset()
+        val mockInv = mock<InventoryManager>()
+        val mockBaker = mock<AvatarBaker>()
+        val mockGesture = mock<GestureManager>()
+
+        val item = createTestInventoryItem()
+        whenever(mockInv.getItem(item.itemId)).thenReturn(item)
+
+        val malformedRaw = """
+            LLWearable version 22
+            textures 1
+            bad-index not-a-uuid
+        """.trimIndent().toByteArray()
+
+        val outfitManager = OutfitManager(
+            inventoryManager = mockInv,
+            baker = mockBaker,
+            gestureManager = mockGesture,
+            wearableAssetFetcher = { malformedRaw }
+        )
+
+        val success = outfitManager.wearItem(item.itemId)
+        assertTrue(success)
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD))
+        verify(mockBaker, never()).setWearable(any(), any())
+    }
+
+    @Test
+    fun loadWearableDataReturnsNullAndIncrementsTelemetryOnFetchException() = runTest {
+        WearableAssetTelemetry.reset()
+        val mockInv = mock<InventoryManager>()
+        val mockBaker = mock<AvatarBaker>()
+        val mockGesture = mock<GestureManager>()
+
+        val item = createTestInventoryItem()
+        whenever(mockInv.getItem(item.itemId)).thenReturn(item)
+
+        val outfitManager = OutfitManager(
+            inventoryManager = mockInv,
+            baker = mockBaker,
+            gestureManager = mockGesture,
+            wearableAssetFetcher = { throw java.io.IOException("Network dropped") }
+        )
+
+        val success = outfitManager.wearItem(item.itemId)
+        assertTrue(success)
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.FETCH_EXCEPTION))
+        verify(mockBaker, never()).setWearable(any(), any())
+    }
+
+    @Test
+    fun wearWearableRetainsPreviousWearableStateOnNullData() = runTest {
+        WearableAssetTelemetry.reset()
+        val mockInv = mock<InventoryManager>()
+        val mockBaker = mock<AvatarBaker>()
+        val mockGesture = mock<GestureManager>()
+
+        val validItem = createTestInventoryItem(wearableType = WearableType.SHIRT)
+        val invalidItem = createTestInventoryItem(wearableType = WearableType.SHIRT)
+
+        val validRaw = """
+            LLWearable version 22
+            type 4
+            parameters 0
+            textures 1
+            1 11111111-1111-1111-1111-111111111111
+        """.trimIndent().toByteArray()
+
+        whenever(mockInv.getItem(validItem.itemId)).thenReturn(validItem)
+        whenever(mockInv.getItem(invalidItem.itemId)).thenReturn(invalidItem)
+
+        val outfitManager = OutfitManager(
+            inventoryManager = mockInv,
+            baker = mockBaker,
+            gestureManager = mockGesture,
+            wearableAssetFetcher = { item ->
+                if (item.itemId == validItem.itemId) validRaw else null
+            }
+        )
+
+        // 1. Wear valid item -> AvatarBaker.setWearable is called
+        outfitManager.wearItem(validItem.itemId)
+        verify(mockBaker).setWearable(eq(WearableType.SHIRT), any())
+
+        // 2. Wear invalid item -> AvatarBaker.setWearable is NOT called again
+        outfitManager.wearItem(invalidItem.itemId)
+        verify(mockBaker, times(1)).setWearable(eq(WearableType.SHIRT), any())
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.MISSING_ASSET_BYTES))
     }
 }
