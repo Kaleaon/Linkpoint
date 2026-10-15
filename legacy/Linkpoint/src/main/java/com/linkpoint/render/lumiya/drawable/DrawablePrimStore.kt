@@ -47,6 +47,7 @@ class DrawablePrimStore {
     ) {
         @Volatile
         var isDirty: Boolean = true
+            private set
 
         var scaleS: Float = scaleS
             set(value) {
