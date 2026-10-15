@@ -28,23 +28,28 @@ DEFAULT_TARGET_OUT_DIRS = {
 
 def get_default_target_out_dir(target: str) -> str:
     if target == "kotlin":
-        return (
-            "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/generated"
-            if os.path.exists("legacy/Linkpoint")
-            else "Linkpoint/src/main/java/com/linkpoint/protocol/generated"
-        )
+        if os.path.exists("legacy/Linkpoint/src/main/java/com/linkpoint/protocol"):
+            return "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/generated"
+        elif os.path.exists("src/main/java/com/linkpoint/protocol"):
+            return "src/main/java/com/linkpoint/protocol/generated"
+        else:
+            return "Linkpoint/src/main/java/com/linkpoint/protocol/generated"
     if target == "java":
-        return (
-            "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
-            if os.path.exists("legacy/Linkpoint")
-            else "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
-        )
+        if os.path.exists("legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java"):
+            return (
+                "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
+            )
+        elif os.path.exists("src/main/java/com/linkpoint/protocol/java"):
+            return "src/main/java/com/linkpoint/protocol/java/generated"
+        else:
+            return "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
     if target == "dart":
-        return (
-            "packages/linkpoint_dart/lib/src/generated"
-            if os.path.exists("packages/linkpoint_dart")
-            else "packages/viewer-dart/lib/src/generated"
-        )
+        if os.path.exists("packages/linkpoint_dart"):
+            return "packages/linkpoint_dart/lib/src/generated"
+        elif os.path.exists("lib/src"):
+            return "lib/src/generated"
+        else:
+            return "packages/viewer-dart/lib/src/generated"
     return DEFAULT_TARGET_OUT_DIRS.get(target, f"generated/{target}")
 
 
