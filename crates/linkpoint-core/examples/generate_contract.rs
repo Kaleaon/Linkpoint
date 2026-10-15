@@ -16,18 +16,10 @@ fn main() {
     }
     fs::write(dart_target, DART_CONTRACT).expect("write generated Dart Viewer contract");
 
-    let mut kt_target =
+    let kt_target =
         root.join("legacy/Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt");
     if let Some(parent) = kt_target.parent() {
-        if !parent.exists() {
-            kt_target =
-                root.join("Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt");
-            if let Some(p2) = kt_target.parent() {
-                let _ = fs::create_dir_all(p2);
-            }
-        } else {
-            let _ = fs::create_dir_all(parent);
-        }
+        let _ = fs::create_dir_all(parent);
     }
     fs::write(kt_target, KT_CONTRACT).expect("write generated Kotlin Viewer contract");
 }
