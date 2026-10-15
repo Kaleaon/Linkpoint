@@ -24,7 +24,7 @@ class DrawablePrimStore {
     }
 
     /** Per-face material data. Populated from TextureEntryParser.parseFull. */
-    data class FaceMaterial(
+    class FaceMaterial(
         var textureId: UUID = NULL_UUID,
         var textureHandle: Int = 0,
         var normalHandle: Int = 0,
@@ -35,16 +35,91 @@ class DrawablePrimStore {
         var colorG: Float = 1f,
         var colorB: Float = 1f,
         var colorA: Float = 1f,
-        var scaleS: Float = 1f,
-        var scaleT: Float = 1f,
-        var offsetS: Float = 0f,
-        var offsetT: Float = 0f,
-        var rotation: Float = 0f,
+        scaleS: Float = 1f,
+        scaleT: Float = 1f,
+        offsetS: Float = 0f,
+        offsetT: Float = 0f,
+        rotation: Float = 0f,
         var metallicFactor: Float = 0f,
         var roughnessFactor: Float = 0.5f,
         var descriptor: MaterialDescriptor? = null,
         var glow: Float = 0f
-    )
+    ) {
+        @Volatile
+        var isDirty: Boolean = true
+            private set
+
+        var scaleS: Float = 1f
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var scaleT: Float = 1f
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var offsetS: Float = 0f
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var offsetT: Float = 0f
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var rotation: Float = 0f
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        init {
+            this.scaleS = scaleS
+            this.scaleT = scaleT
+            this.offsetS = offsetS
+            this.offsetT = offsetT
+            this.rotation = rotation
+        }
+
+        private val matrixBuffer = FloatArray(16)
+        @Volatile
+        private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+
+        fun getMatrix(): FloatArray {
+            if (isDirty) {
+                synchronized(matrixBuffer) {
+                    if (isDirty) {
+                        if (scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f) {
+                            cachedMatrix = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+                        } else {
+                            MaterialDescriptor.UvTransform.computeMatrix(
+                                scaleS, scaleT, offsetS, offsetT, rotation, matrixBuffer
+                            )
+                            cachedMatrix = matrixBuffer
+                        }
+                        isDirty = false
+                    }
+                }
+            }
+            return cachedMatrix
+        }
+    }
 
     /** Per-prim instance snapshot data. */
     data class PrimInstance(
