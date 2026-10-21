@@ -408,6 +408,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unified_llsd:
+    dependency: "direct main"
+    description:
+      path: "../../../Unified-LLSD/dart"
+      relative: true
+    source: path
+    version: "1.0.0"
   vector_math:
     dependency: transitive
     description:

@@ -11,6 +11,8 @@ dependencies:
   ffi: ^2.1.0
   flutter:
     sdk: flutter
+  unified_llsd:
+    path: ../../../Unified-LLSD/dart
 
 dev_dependencies:
   flutter_test:
