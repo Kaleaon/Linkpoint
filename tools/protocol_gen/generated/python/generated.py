@@ -5,7 +5,7 @@
 
 import struct
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Dict, List, Optional
 
 TEMPLATE_VERSION = "2.0"
 
@@ -5362,12 +5362,12 @@ class AgentDomainCapabilitiesCapabilities:
     maturity_rating: Optional[str] = None
 
 @dataclass
-class EventQueueGetCapabilities:
-    ack: Optional[int] = None
-    events: List[str] = field(default_factory=list)
-
-@dataclass
 class CapabilitiesRequestResponseCapabilities:
     capabilities: List[str] = field(default_factory=list)
     seed_response: Optional[str] = None
     fetch_inventory: Optional[str] = None
+
+@dataclass
+class EventQueueGetCapabilities:
+    ack: Optional[int] = None
+    events: List[str] = field(default_factory=list)

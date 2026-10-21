@@ -71,6 +71,42 @@ version 2.0
         uncompressed = decompress_fn(compressed)
         self.assertEqual(uncompressed, bytes([0x01, 0x00, 0x00, 0x00, 0x02]))
 
+    def test_swift_emitter(self):
+        ast = TemplateParser().parse(self.sample_template)
+        emitter = EMITTERS["swift"]
+        out_dir = os.path.join(self.test_dir, "swift")
+        results = emitter.emit(ast, out_dir)
+        
+        proto_file = os.path.join(out_dir, "GeneratedProtocol.swift")
+        llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.swift")
+        
+        self.assertIn(proto_file, results)
+        self.assertIn(llsd_file, results)
+        
+        proto_content = results[proto_file]
+        self.assertIn("public struct GeneratedProtocol", proto_content)
+        self.assertIn("func decompressZerocoded", proto_content)
+        self.assertIn("public struct TestPacketPacket", proto_content)
+        self.assertIn("func serialize() -> Data", proto_content)
+
+    def test_csharp_emitter(self):
+        ast = TemplateParser().parse(self.sample_template)
+        emitter = EMITTERS["csharp"]
+        out_dir = os.path.join(self.test_dir, "csharp")
+        results = emitter.emit(ast, out_dir)
+        
+        proto_file = os.path.join(out_dir, "GeneratedProtocol.cs")
+        llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.cs")
+        
+        self.assertIn(proto_file, results)
+        self.assertIn(llsd_file, results)
+        
+        proto_content = results[proto_file]
+        self.assertIn("public static class GeneratedProtocol", proto_content)
+        self.assertIn("DecompressZerocoded", proto_content)
+        self.assertIn("public class TestPacketPacket", proto_content)
+        self.assertIn("public byte[] Serialize()", proto_content)
+
 
 if __name__ == "__main__":
     unittest.main()

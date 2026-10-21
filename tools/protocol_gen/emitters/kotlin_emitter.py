@@ -1,7 +1,9 @@
 import os
 from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 def _format_kt_int(num: int) -> str:
     if num > 2147483647:
