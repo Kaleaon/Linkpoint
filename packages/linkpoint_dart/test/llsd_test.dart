@@ -32,11 +32,19 @@ void main() {
 
     test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
         () {
-      var vectorsDir = Directory(
-          '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
-      if (!vectorsDir.existsSync()) {
-        vectorsDir =
-            Directory('Linkpoint/src/test/resources/llsd-conformance/vectors');
+      final candidatePaths = [
+        '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
+        'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        'Linkpoint/src/test/resources/llsd-conformance/vectors',
+      ];
+      Directory vectorsDir = Directory(candidatePaths[0]);
+      for (final path in candidatePaths) {
+        final d = Directory(path);
+        if (d.existsSync()) {
+          vectorsDir = d;
+          break;
+        }
       }
       expect(vectorsDir.existsSync(), isTrue,
           reason: 'Vectors directory must exist');
