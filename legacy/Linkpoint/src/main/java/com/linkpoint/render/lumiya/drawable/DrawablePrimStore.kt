@@ -24,7 +24,7 @@ class DrawablePrimStore {
     }
 
     /** Per-face material data. Populated from TextureEntryParser.parseFull. */
-    data class FaceMaterial(
+    class FaceMaterial(
         var textureId: UUID = NULL_UUID,
         var textureHandle: Int = 0,
         var normalHandle: Int = 0,
@@ -35,16 +35,83 @@ class DrawablePrimStore {
         var colorG: Float = 1f,
         var colorB: Float = 1f,
         var colorA: Float = 1f,
-        var scaleS: Float = 1f,
-        var scaleT: Float = 1f,
-        var offsetS: Float = 0f,
-        var offsetT: Float = 0f,
-        var rotation: Float = 0f,
+        scaleS: Float = 1f,
+        scaleT: Float = 1f,
+        offsetS: Float = 0f,
+        offsetT: Float = 0f,
+        rotation: Float = 0f,
         var metallicFactor: Float = 0f,
         var roughnessFactor: Float = 0.5f,
         var descriptor: MaterialDescriptor? = null,
         var glow: Float = 0f
-    )
+    ) {
+        @Volatile
+        var isDirty: Boolean = true
+            private set
+
+        var scaleS: Float = scaleS
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var scaleT: Float = scaleT
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var offsetS: Float = offsetS
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var offsetT: Float = offsetT
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        var rotation: Float = rotation
+            set(value) {
+                if (field != value) {
+                    field = value
+                    isDirty = true
+                }
+            }
+
+        private val matrixBuffer = FloatArray(16)
+        @Volatile
+        private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+
+        fun getMatrix(): FloatArray {
+            if (isDirty) {
+                synchronized(matrixBuffer) {
+                    if (isDirty) {
+                        if (scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f) {
+                            cachedMatrix = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+                        } else {
+                            MaterialDescriptor.UvTransform.computeMatrix(
+                                scaleS, scaleT, offsetS, offsetT, rotation, matrixBuffer
+                            )
+                            cachedMatrix = matrixBuffer
+                        }
+                        isDirty = false
+                    }
+                }
+            }
+            return cachedMatrix
+        }
+    }
 
     /** Per-prim instance snapshot data. */
     data class PrimInstance(
@@ -92,7 +159,7 @@ class DrawablePrimStore {
     private var slotIsTransparent = BooleanArray(capacity)
     private var slotModelMatrices = FloatArray(capacity * 16).also {
         for (i in 0 until capacity) {
-            Matrix.setIdentityM(it, i * 16)
+            setIdentityMatrix(it, i * 16)
         }
     }
 
@@ -167,6 +234,64 @@ class DrawablePrimStore {
         }
     }
 
+    private fun setIdentityMatrix(mat: FloatArray, offset: Int) {
+        java.util.Arrays.fill(mat, offset, offset + 16, 0f)
+        mat[offset] = 1f
+        mat[offset + 5] = 1f
+        mat[offset + 10] = 1f
+        mat[offset + 15] = 1f
+    }
+
+    private fun updateModelMatrix(
+        slot: Int,
+        posX: Float, posY: Float, posZ: Float,
+        scaleX: Float, scaleY: Float, scaleZ: Float,
+        rotation: FloatArray?
+    ) {
+        val offset = slot * 16
+        if (rotation != null && rotation.size >= 16) {
+            slotModelMatrices[offset + 0] = rotation[0] * scaleX
+            slotModelMatrices[offset + 1] = rotation[1] * scaleX
+            slotModelMatrices[offset + 2] = rotation[2] * scaleX
+            slotModelMatrices[offset + 3] = rotation[3] * scaleX
+
+            slotModelMatrices[offset + 4] = rotation[4] * scaleY
+            slotModelMatrices[offset + 5] = rotation[5] * scaleY
+            slotModelMatrices[offset + 6] = rotation[6] * scaleY
+            slotModelMatrices[offset + 7] = rotation[7] * scaleY
+
+            slotModelMatrices[offset + 8] = rotation[8] * scaleZ
+            slotModelMatrices[offset + 9] = rotation[9] * scaleZ
+            slotModelMatrices[offset + 10] = rotation[10] * scaleZ
+            slotModelMatrices[offset + 11] = rotation[11] * scaleZ
+
+            slotModelMatrices[offset + 12] = rotation[12] + posX
+            slotModelMatrices[offset + 13] = rotation[13] + posY
+            slotModelMatrices[offset + 14] = rotation[14] + posZ
+            slotModelMatrices[offset + 15] = rotation[15]
+        } else {
+            slotModelMatrices[offset + 0] = scaleX
+            slotModelMatrices[offset + 1] = 0f
+            slotModelMatrices[offset + 2] = 0f
+            slotModelMatrices[offset + 3] = 0f
+
+            slotModelMatrices[offset + 4] = 0f
+            slotModelMatrices[offset + 5] = scaleY
+            slotModelMatrices[offset + 6] = 0f
+            slotModelMatrices[offset + 7] = 0f
+
+            slotModelMatrices[offset + 8] = 0f
+            slotModelMatrices[offset + 9] = 0f
+            slotModelMatrices[offset + 10] = scaleZ
+            slotModelMatrices[offset + 11] = 0f
+
+            slotModelMatrices[offset + 12] = posX
+            slotModelMatrices[offset + 13] = posY
+            slotModelMatrices[offset + 14] = posZ
+            slotModelMatrices[offset + 15] = 1f
+        }
+    }
+
     private fun resetSlot(slot: Int) {
         slotShape[slot] = ShapeKind.BOX.ordinal
         slotHollow[slot] = false
@@ -177,7 +302,7 @@ class DrawablePrimStore {
         slotAabbHalfY[slot] = 0.5f
         slotAabbHalfZ[slot] = 0.5f
         slotIsTransparent[slot] = false
-        Matrix.setIdentityM(slotModelMatrices, slot * 16)
+        setIdentityMatrix(slotModelMatrices, slot * 16)
 
         slotFaceCount[slot] = 1
         val base = slot * MAX_FACES_PER_PRIM
@@ -229,7 +354,7 @@ class DrawablePrimStore {
         slotModelMatrices = FloatArray(newCap * 16)
         System.arraycopy(oldModelMat, 0, slotModelMatrices, 0, capacity * 16)
         for (i in capacity until newCap) {
-            Matrix.setIdentityM(slotModelMatrices, i * 16)
+            setIdentityMatrix(slotModelMatrices, i * 16)
         }
 
         slotFaceCount = slotFaceCount.copyOf(newCap)
@@ -277,10 +402,7 @@ class DrawablePrimStore {
 
     fun addPrim(id: Long, posX: Float, posY: Float, posZ: Float) {
         val slot = getOrAllocateSlot(id)
-        val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
-        Matrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
+        updateModelMatrix(slot, posX, posY, posZ, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot], null)
     }
 
     fun upsertPrim(
@@ -314,15 +436,7 @@ class DrawablePrimStore {
             slotAabbHalfZ[slot] = localHalfZ
         }
 
-        val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
-        if (rotation != null && rotation.size >= 16) {
-            val tmp = FloatArray(16)
-            Matrix.multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
-            System.arraycopy(tmp, 0, slotModelMatrices, offset, 16)
-        }
-        Matrix.scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
+        updateModelMatrix(slot, posX, posY, posZ, scaleX, scaleY, scaleZ, rotation)
 
         applyTextureEntry(slot, shape, slotHollow[slot], textureEntry)
     }
