@@ -11,7 +11,7 @@ export default defineConfig({
     setupFiles: [path.resolve(__dirname, "./apps/linkpoint/vitest.setup.ts")],
     include: [
       "packages/**/*.test.ts",
-      "apps/linkpoint/src/lib/llsd.test.ts",
+      "apps/linkpoint/src/lib/**/*.test.ts",
       "apps/linkpoint/src/linkpoint/__tests__/**/*.{test,spec}.{ts,tsx}"
     ],
     coverage: {
