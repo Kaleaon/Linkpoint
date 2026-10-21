@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "@types/sql.js": "^1.4.11",
-    "@unified-llsd/typescript": "file:../Unified-LLSD/typescript",
     "sql.js": "^1.14.2"
   },
   "engines": {

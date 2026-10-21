@@ -5,6 +5,6 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@unified-llsd/typescript": "file:../../Unified-LLSD/typescript"
+    "@unified-llsd/typescript": "*"
   }
 }

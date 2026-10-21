@@ -1,0 +1,23 @@
+{
+  "name": "@unified-llsd/typescript",
+  "version": "1.0.0",
+  "description": "Zero-dependency idiomatic native TypeScript LLSD SDK library",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test dist/test/llsd.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
