@@ -19,6 +19,7 @@
     "@linkpoint/viewer-client": "0.1.0",
     "@linkpoint/viewer-store": "0.1.0",
     "@linkpoint/viewer-types": "0.1.0",
+    "@unified-llsd/typescript": "file:../../Unified-LLSD/typescript",
     "@noble/hashes": "^2.4.0",
     "@tauri-apps/api": "^2.8.0",
     "@xmldom/xmldom": "0.9.12",
