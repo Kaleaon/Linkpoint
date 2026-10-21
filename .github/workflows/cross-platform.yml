@@ -130,24 +130,22 @@ jobs:
         run: bash scripts/build_native_libraries.sh
 
   dart-ffi:
-    name: Dart Flutter FFI conformance
+    name: Polyglot FFI test orchestrator
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
         with:
           toolchain: stable
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
-      - name: Build native protocol shared library
-        run: cargo build -p linkpoint-protocol --release
-      - name: Run Flutter Dart FFI test suite
-        run: |
-          cd packages/linkpoint_dart
-          flutter pub get
-          flutter test
+      - name: Run Polyglot Conformance Test Orchestrator
+        run: bash scripts/run_polyglot_tests.sh
 
   native-readiness:
     name: Native shell readiness
