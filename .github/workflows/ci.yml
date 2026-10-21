@@ -60,15 +60,6 @@ jobs:
       - name: Run Ruff format check
         run: ruff format --check scripts/ tools/
 
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install Node dependencies
-        run: npm ci
-
       - name: Cache pre-commit environments
         uses: actions/cache@v4
         with:
@@ -99,7 +90,7 @@ jobs:
           cache: "gradle"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
         with:
           packages: >-
             platform-tools
