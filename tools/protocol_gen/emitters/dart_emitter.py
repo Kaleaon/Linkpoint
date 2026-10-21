@@ -17,6 +17,19 @@ class DartEmitter(BaseEmitter):
         with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
 
+        try:
+            import subprocess
+            subprocess.run(
+                ["dart", "format", out_file],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            with open(out_file, "r", encoding="utf-8") as f:
+                code = f.read()
+        except Exception:
+            pass
+
         return {out_file: code}
 
     def _generate_dart_code(self, ast: ProtocolAST) -> str:
