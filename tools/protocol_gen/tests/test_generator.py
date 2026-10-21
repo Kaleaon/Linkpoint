@@ -71,6 +71,11 @@ version 2.0
         uncompressed = decompress_fn(compressed)
         self.assertEqual(uncompressed, bytes([0x01, 0x00, 0x00, 0x00, 0x02]))
 
+        # Test zero-count run length: 0x00 0x00 -> 0 bytes
+        zero_run_compressed = bytes([0x01, 0x00, 0x00, 0x02])
+        zero_run_uncompressed = decompress_fn(zero_run_compressed)
+        self.assertEqual(zero_run_uncompressed, bytes([0x01, 0x02]))
+
 
 if __name__ == "__main__":
     unittest.main()

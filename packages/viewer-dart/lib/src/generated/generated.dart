@@ -501,15 +501,10 @@ class GeneratedProtocolCatalog {
       if (b == 0) {
         if (i + 1 < src.length) {
           final count = src[i + 1];
-          if (count == 0) {
+          for (int k = 0; k < count; k++) {
             dest.add(0);
-            i += 2;
-          } else {
-            for (int k = 0; k < count; k++) {
-              dest.add(0);
-            }
-            i += 2;
           }
+          i += 2;
         } else {
           dest.add(0);
           i += 1;
@@ -6824,16 +6819,6 @@ class AgentDomainCapabilitiesCapabilities {
   });
 }
 
-class EventQueueGetCapabilities {
-  final int? ack;
-  final List<String>? events;
-
-  EventQueueGetCapabilities({
-    this.ack,
-    this.events,
-  });
-}
-
 class CapabilitiesRequestResponseCapabilities {
   final List<String>? capabilities;
   final String? seed_response;
@@ -6843,5 +6828,15 @@ class CapabilitiesRequestResponseCapabilities {
     this.capabilities,
     this.seed_response,
     this.fetch_inventory,
+  });
+}
+
+class EventQueueGetCapabilities {
+  final int? ack;
+  final List<String>? events;
+
+  EventQueueGetCapabilities({
+    this.ack,
+    this.events,
   });
 }

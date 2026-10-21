@@ -39,15 +39,10 @@ class DartEmitter(BaseEmitter):
       if (b == 0) {
         if (i + 1 < src.length) {
           final count = src[i + 1];
-          if (count == 0) {
+          for (int k = 0; k < count; k++) {
             dest.add(0);
-            i += 2;
-          } else {
-            for (int k = 0; k < count; k++) {
-              dest.add(0);
-            }
-            i += 2;
           }
+          i += 2;
         } else {
           dest.add(0);
           i += 1;

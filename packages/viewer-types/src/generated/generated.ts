@@ -499,15 +499,10 @@ export function decompressZerocoded(src: Uint8Array): Uint8Array {
     if (b === 0) {
       if (i + 1 < src.length) {
         const count = src[i + 1];
-        if (count === 0) {
+        for (let k = 0; k < count; k++) {
           dest.push(0);
-          i += 2;
-        } else {
-          for (let k = 0; k < count; k++) {
-            dest.push(0);
-          }
-          i += 2;
         }
+        i += 2;
       } else {
         dest.push(0);
         i += 1;
@@ -3914,13 +3909,13 @@ export interface AgentDomainCapabilitiesCapabilities {
   maturity_rating?: string;
 }
 
-export interface EventQueueGetCapabilities {
-  ack?: number;
-  events: string[];
-}
-
 export interface CapabilitiesRequestResponseCapabilities {
   capabilities: string[];
   seed_response?: string;
   fetch_inventory?: string;
+}
+
+export interface EventQueueGetCapabilities {
+  ack?: number;
+  events: string[];
 }
