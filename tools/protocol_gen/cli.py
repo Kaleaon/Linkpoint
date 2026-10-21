@@ -16,13 +16,15 @@ DEFAULT_TEMPLATE_PATH = "schemas/protocol/message_template.msg"
 DEFAULT_LLSD_DIR = "schemas/protocol/llsd"
 
 DEFAULT_TARGET_OUT_DIRS = {
-    "kotlin": "Linkpoint/src/main/java/com/linkpoint/protocol/generated",
+    "kotlin": "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/generated",
     "rust": "crates/linkpoint-protocol/src/generated",
     "dart": "packages/viewer-dart/lib/src/generated",
     "typescript": "packages/viewer-types/src/generated",
     "python": "tools/protocol_gen/generated/python",
     "c": "crates/linkpoint-protocol/c_include/generated",
-    "java": "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated",
+    "java": "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java/generated",
+    "swift": "platforms/iOS/Sources/LLSD/Generated",
+    "csharp": "sdks/csharp/src/Generated",
 }
 
 
@@ -130,7 +132,7 @@ def main():
     p_gen.add_argument(
         "--target",
         default="all",
-        help="Target languages (kotlin,rust,dart,typescript,python,c,java,all)",
+        help="Target languages (kotlin,rust,dart,typescript,python,c,java,swift,csharp,all)",
     )
     p_gen.add_argument("--out-dir", default=None, help="Custom output directory root")
     p_gen.set_defaults(func=cmd_generate)

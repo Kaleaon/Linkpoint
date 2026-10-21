@@ -73,8 +73,10 @@ if [[ ${skip_gradle} -eq 0 ]]; then
   if [[ -z "${GRADLE_CMD}" ]]; then
     if command -v gradle >/dev/null 2>&1; then
       GRADLE_CMD="gradle"
+    elif [[ -x "${LINKPOINT_ROOT}/gradlew" ]]; then
+      GRADLE_CMD="${LINKPOINT_ROOT}/gradlew"
     elif [[ -x "${LINKPOINT_ROOT}/../gradlew" ]]; then
-      GRADLE_CMD="./gradlew"
+      GRADLE_CMD="${LINKPOINT_ROOT}/../gradlew"
     else
       log "missing gradle executable or wrapper"; exit 2
     fi
