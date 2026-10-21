@@ -1,4 +1,5 @@
 import XCTest
+import FlatBuffers
 @testable import LLSD
 
 final class LLSDBinaryTests: XCTestCase {
@@ -74,7 +75,6 @@ final class LLSDBinaryTests: XCTestCase {
     }
 
     func testFlatBuffersMeshAndMaterialPayloadDecoding() throws {
-        #if canImport(FlatBuffers)
         var fbb = FlatBufferBuilder(initialSize: 1024)
         let lodKeyOffset = fbb.create(string: "high_lod")
         let meshOffset = AssetSchema_MeshBlock.createMeshBlock(
@@ -86,8 +86,7 @@ final class LLSDBinaryTests: XCTestCase {
         let data = fbb.data
 
         let decodedMesh = try LLSDBinaryAssetDecoder.decodeMeshBlock(from: data)
-        XCTAssertEqual(decodedMesh.lod, .highest)
+        XCTAssertEqual(decodedMesh.lod, AssetSchema_DetailLevel.highest)
         XCTAssertEqual(decodedMesh.lodKey, "high_lod")
-        #endif
     }
 }

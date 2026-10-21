@@ -1,7 +1,5 @@
 import Foundation
-#if canImport(FlatBuffers)
 import FlatBuffers
-#endif
 
 public enum LLSDBinaryError: Error, LocalizedError {
     case invalidHeader
@@ -301,8 +299,7 @@ public struct LLSDBinaryAssetDecoder {
     public static func decodeMeshBlock(from data: Data) throws -> AssetSchema_MeshBlock {
         var bb = ByteBuffer(data: data)
         var verifier = try Verifier(buffer: &bb)
-        try verifier.visitTable(at: 0)
-        try AssetSchema_MeshBlock.verify(&verifier, at: 0, of: AssetSchema_MeshBlock.self)
+        try ForwardOffset<AssetSchema_MeshBlock>.verify(&verifier, at: 0, of: AssetSchema_MeshBlock.self)
         return AssetSchema_MeshBlock.getRootAsMeshBlock(bb: bb)
     }
 
@@ -310,8 +307,7 @@ public struct LLSDBinaryAssetDecoder {
     public static func decodeGLTFMaterial(from data: Data) throws -> AssetSchema_GLTFMaterial {
         var bb = ByteBuffer(data: data)
         var verifier = try Verifier(buffer: &bb)
-        try verifier.visitTable(at: 0)
-        try AssetSchema_GLTFMaterial.verify(&verifier, at: 0, of: AssetSchema_GLTFMaterial.self)
+        try ForwardOffset<AssetSchema_GLTFMaterial>.verify(&verifier, at: 0, of: AssetSchema_GLTFMaterial.self)
         return AssetSchema_GLTFMaterial.getRootAsGLTFMaterial(bb: bb)
     }
 
@@ -319,8 +315,7 @@ public struct LLSDBinaryAssetDecoder {
     public static func decodeAssetMetadata(from data: Data) throws -> AssetSchema_AssetMetadata {
         var bb = ByteBuffer(data: data)
         var verifier = try Verifier(buffer: &bb)
-        try verifier.visitTable(at: 0)
-        try AssetSchema_AssetMetadata.verify(&verifier, at: 0, of: AssetSchema_AssetMetadata.self)
+        try ForwardOffset<AssetSchema_AssetMetadata>.verify(&verifier, at: 0, of: AssetSchema_AssetMetadata.self)
         return AssetSchema_AssetMetadata.getRootAsAssetMetadata(bb: bb)
     }
 }

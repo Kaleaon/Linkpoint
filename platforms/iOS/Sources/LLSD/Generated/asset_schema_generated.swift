@@ -34,7 +34,7 @@ public enum AssetSchema_DetailLevel: Int8, Enum, Verifiable {
 
 public struct AssetSchema_Vector2: NativeStruct, Verifiable, FlatbuffersInitializable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
 
   private var _x: Float32
   private var _y: Float32
@@ -65,7 +65,7 @@ public struct AssetSchema_Vector2: NativeStruct, Verifiable, FlatbuffersInitiali
 
 public struct AssetSchema_Vector2_Mutable: FlatBufferObject {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Struct
 
@@ -77,7 +77,7 @@ public struct AssetSchema_Vector2_Mutable: FlatBufferObject {
 
 public struct AssetSchema_Vector3: NativeStruct, Verifiable, FlatbuffersInitializable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
 
   private var _x: Float32
   private var _y: Float32
@@ -113,7 +113,7 @@ public struct AssetSchema_Vector3: NativeStruct, Verifiable, FlatbuffersInitiali
 
 public struct AssetSchema_Vector3_Mutable: FlatBufferObject {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Struct
 
@@ -126,7 +126,7 @@ public struct AssetSchema_Vector3_Mutable: FlatBufferObject {
 
 public struct AssetSchema_TextureTransformPacked: NativeStruct, Verifiable, FlatbuffersInitializable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
 
   private var _scaleX: Float32
   private var _scaleY: Float32
@@ -187,7 +187,7 @@ public struct AssetSchema_TextureTransformPacked: NativeStruct, Verifiable, Flat
 
 public struct AssetSchema_TextureTransformPacked_Mutable: FlatBufferObject {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Struct
 
@@ -205,7 +205,7 @@ public struct AssetSchema_TextureTransformPacked_Mutable: FlatBufferObject {
 
 public struct AssetSchema_TextureTransformPackedTight: NativeStruct, Verifiable, FlatbuffersInitializable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
 
   private var _scaleX: Float32
   private var _scaleY: Float32
@@ -251,7 +251,7 @@ public struct AssetSchema_TextureTransformPackedTight: NativeStruct, Verifiable,
 
 public struct AssetSchema_TextureTransformPackedTight_Mutable: FlatBufferObject {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Struct
 
@@ -266,7 +266,7 @@ public struct AssetSchema_TextureTransformPackedTight_Mutable: FlatBufferObject 
 
 public struct AssetSchema_JointInfluence: NativeStruct, Verifiable, FlatbuffersInitializable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
 
   private var _jointIndex: UInt8
   private let padding0__: UInt8 = 0
@@ -299,7 +299,7 @@ public struct AssetSchema_JointInfluence: NativeStruct, Verifiable, FlatbuffersI
 
 public struct AssetSchema_JointInfluence_Mutable: FlatBufferObject {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Struct
 
@@ -311,7 +311,7 @@ public struct AssetSchema_JointInfluence_Mutable: FlatBufferObject {
 
 public struct AssetSchema_TextureTransform: FlatBufferObject, Verifiable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Table
 
@@ -362,7 +362,7 @@ public struct AssetSchema_TextureTransform: FlatBufferObject, Verifiable {
 
 public struct AssetSchema_GLTFMaterial: FlatBufferObject, Verifiable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Table
 
@@ -420,7 +420,7 @@ public struct AssetSchema_GLTFMaterial: FlatBufferObject, Verifiable {
 
 public struct AssetSchema_MeshBlock: FlatBufferObject, Verifiable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Table
 
@@ -512,7 +512,7 @@ public struct AssetSchema_MeshBlock: FlatBufferObject, Verifiable {
 
 public struct AssetSchema_AssetMetadata: FlatBufferObject, Verifiable {
 
-  static func validateVersion() { FlatBuffersVersion_2_0_8() }
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
   public var __buffer: ByteBuffer! { return _accessor.bb }
   private var _accessor: Table
 

@@ -157,6 +157,23 @@ def compile_flatbuffers(
                     with open(fpath, "w", encoding="utf-8") as f:
                         f.write(content)
 
+        if target_clean == "swift":
+            import re
+
+            for fname in os.listdir(target_dir):
+                if fname.endswith(".swift"):
+                    fpath = os.path.join(target_dir, fname)
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    if "FlatBuffersVersion_" in content:
+                        content = re.sub(
+                            r"FlatBuffersVersion_\d+_\d+_\d+\(\)",
+                            "FlatBuffersVersion_23_5_26()",
+                            content,
+                        )
+                        with open(fpath, "w", encoding="utf-8") as f:
+                            f.write(content)
+
     return generated_fbs_count
 
 

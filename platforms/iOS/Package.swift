@@ -14,7 +14,7 @@ let package = Package(
         .library(name: "LinkpointiOS", targets: ["LinkpointiOS"])
     ],
     dependencies: [
-        .package(url: "https://github.com/google/flatbuffers.git", from: "2.0.8")
+        .package(url: "https://github.com/google/flatbuffers.git", from: "23.5.26")
     ],
     targets: [
         .target(
