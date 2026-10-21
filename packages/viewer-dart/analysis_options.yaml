@@ -1,0 +1,4 @@
+analyzer:
+  errors:
+    override_on_non_overriding_member: ignore
+    unnecessary_non_null_assertion: ignore
