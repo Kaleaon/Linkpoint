@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 /// Second Life Packet Flags
 class SLPacketFlags {
+  static const int zerocoded = 0x80;
   static const int reliable = 0x40;
-  static const int resent = 0x80;
-  static const int zerocoded = 0x20;
+  static const int resent = 0x20;
   static const int appendedAcks = 0x10;
 }
 
@@ -22,16 +22,16 @@ class SLPacketHeader {
     required this.acks,
   });
 
+  bool get isZerocoded => (flags & SLPacketFlags.zerocoded) != 0;
   bool get isReliable => (flags & SLPacketFlags.reliable) != 0;
   bool get isResent => (flags & SLPacketFlags.resent) != 0;
-  bool get isZerocoded => (flags & SLPacketFlags.zerocoded) != 0;
   bool get hasAppendedAcks => (flags & SLPacketFlags.appendedAcks) != 0;
 }
 
 /// Second Life Packet Codec and Zero-Coding Decompressor
 class SLPacketCodec {
   /// Decompresses zero-coded SL packet bytes.
-  static Uint8List zeroDecompress(Uint8List src, {int headerSize = 4}) {
+  static Uint8List zeroDecompress(Uint8List src, {int headerSize = 6}) {
     if (src.length <= headerSize) return Uint8List.fromList(src);
 
     final out = <int>[];
@@ -59,21 +59,41 @@ class SLPacketCodec {
 
   /// Parses SL UDP packet header from bytes.
   static SLPacketHeader parseHeader(Uint8List packetBytes) {
-    if (packetBytes.length < 4) {
+    if (packetBytes.length < 6) {
       throw FormatException('Packet length too short for SL header');
     }
+    final bd = ByteData.sublistView(packetBytes);
     final flags = packetBytes[0];
-    final seq = (packetBytes[1] << 24) |
-        (packetBytes[2] << 16) |
-        (packetBytes[3] << 8) |
-        (packetBytes.length > 4 ? packetBytes[4] : 0);
-    final msgId = packetBytes.length > 5 ? packetBytes[5] : 0;
+    final seq = bd.getUint32(1, Endian.big);
+    final extra = packetBytes[5];
+
+    var offset = 6 + extra;
+    var msgId = 0;
+
+    if (offset < packetBytes.length) {
+      final first = packetBytes[offset];
+      if (first != 0xFF) {
+        msgId = first;
+        offset += 1;
+      } else if (offset + 1 < packetBytes.length && packetBytes[offset + 1] != 0xFF) {
+        final second = packetBytes[offset + 1];
+        msgId = (0xFF00) | second;
+        offset += 2;
+      } else if (offset + 3 < packetBytes.length) {
+        msgId = bd.getUint32(offset, Endian.big);
+        offset += 4;
+      }
+    }
 
     final acks = <int>[];
-    if ((flags & SLPacketFlags.appendedAcks) != 0) {
+    if ((flags & SLPacketFlags.appendedAcks) != 0 && packetBytes.isNotEmpty) {
       final ackCount = packetBytes.last;
-      for (var i = 0; i < ackCount; i++) {
-        acks.add(i + 1);
+      final ackStart = packetBytes.length - 1 - (ackCount * 4);
+      if (ackStart >= offset) {
+        for (var i = 0; i < ackCount; i++) {
+          final pos = ackStart + (i * 4);
+          acks.add(bd.getUint32(pos, Endian.big));
+        }
       }
     }
 
