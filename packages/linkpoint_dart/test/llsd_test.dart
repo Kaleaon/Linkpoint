@@ -33,7 +33,15 @@ void main() {
     test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
         () {
       var vectorsDir = Directory(
-          '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
+          '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+      if (!vectorsDir.existsSync()) {
+        vectorsDir = Directory(
+            '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
+      }
+      if (!vectorsDir.existsSync()) {
+        vectorsDir = Directory(
+            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+      }
       if (!vectorsDir.existsSync()) {
         vectorsDir =
             Directory('Linkpoint/src/test/resources/llsd-conformance/vectors');
@@ -48,7 +56,7 @@ void main() {
           reason: 'Expected 31 test vector directories');
 
       for (final fixtureDir in subdirs) {
-        final fixtureName = fixtureDir.path.split(Platform.pathSeparator).last;
+        final fixtureName = fixtureDir.path.split(RegExp(r'[/\\]')).last;
         final xmlFile = File('${fixtureDir.path}/value.xml');
         final binFile = File('${fixtureDir.path}/value.bin');
 

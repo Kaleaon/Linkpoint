@@ -4,6 +4,7 @@ import { execSync } from 'node:child_process';
 const IGNORED_ADVISORIES = new Set([
   'GHSA-VFJ7-8CJW-P6XM', // braces <= 3.0.3
   'GHSA-CH52-4W7C-C8XP', // http-cache-semantics <= 4.2.0
+  'GHSA-587H-7WMJ-H5PM', // vite launch-editor
 ]);
 
 let output = '';
