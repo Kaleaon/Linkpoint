@@ -128,7 +128,9 @@ class SwiftEmitter(BaseEmitter):
             out.append("    public func serialize() -> Data {")
             out.append("        var data = Data()")
             out.append("        var num = messageNumber.littleEndian")
-            out.append("        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))")
+            out.append(
+                "        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))"
+            )
             out.append("        return data")
             out.append("    }")
             out.append("}\n")

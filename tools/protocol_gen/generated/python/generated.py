@@ -5,7 +5,7 @@
 
 import struct
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Optional, List, Dict, Any
 
 TEMPLATE_VERSION = "2.0"
 

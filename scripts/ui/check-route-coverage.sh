@@ -2,6 +2,9 @@
 set -euo pipefail
 
 NAV_FILE="Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt"
+if [[ ! -f "$NAV_FILE" ]]; then
+  NAV_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt"
+fi
 
 if [[ ! -f "$NAV_FILE" ]]; then
   echo "❌ Navigation file not found: $NAV_FILE"
