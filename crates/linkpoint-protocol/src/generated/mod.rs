@@ -17,13 +17,8 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
         if b == 0 {
             if i + 1 < src.len() {
                 let count = src[i + 1] as usize;
-                if count == 0 {
-                    dest.push(0);
-                    i += 2;
-                } else {
-                    dest.extend(std::iter::repeat(0).take(count));
-                    i += 2;
-                }
+                dest.extend(std::iter::repeat(0).take(count));
+                i += 2;
             } else {
                 dest.push(0);
                 i += 1;
@@ -8270,14 +8265,14 @@ pub struct AgentDomainCapabilitiesCapabilities {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct EventQueueGetCapabilities {
-    pub ack: Option<i32>,
-    pub events: Vec<String>,
-}
-
-#[derive(Debug, Clone, Default)]
 pub struct CapabilitiesRequestResponseCapabilities {
     pub capabilities: Vec<String>,
     pub seed_response: Option<String>,
     pub fetch_inventory: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct EventQueueGetCapabilities {
+    pub ack: Option<i32>,
+    pub events: Vec<String>,
 }

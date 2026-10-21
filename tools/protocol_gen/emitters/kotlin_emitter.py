@@ -54,13 +54,8 @@ class KotlinEmitter(BaseEmitter):
             if (b == 0.toByte()) {
                 if (i + 1 < src.size) {
                     val count = src[i + 1].toInt() and 0xFF
-                    if (count == 0) {
-                        dest.add(0.toByte())
-                        i += 2
-                    } else {
-                        repeat(count) { dest.add(0.toByte()) }
-                        i += 2
-                    }
+                    repeat(count) { dest.add(0.toByte()) }
+                    i += 2
                 } else {
                     dest.add(0.toByte())
                     i++

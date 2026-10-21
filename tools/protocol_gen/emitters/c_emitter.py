@@ -67,15 +67,10 @@ class CEmitter(BaseEmitter):
         if (b == 0) {
             if (i + 1 < src_len) {
                 uint8_t count = src[i + 1];
-                if (count == 0) {
+                for (uint8_t k = 0; k < count && out_len < dest_capacity; k++) {
                     dest[out_len++] = 0;
-                    i += 2;
-                } else {
-                    for (uint8_t k = 0; k < count && out_len < dest_capacity; k++) {
-                        dest[out_len++] = 0;
-                    }
-                    i += 2;
                 }
+                i += 2;
             } else {
                 dest[out_len++] = 0;
                 i += 1;
