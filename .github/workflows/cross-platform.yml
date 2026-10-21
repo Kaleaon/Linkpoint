@@ -46,8 +46,6 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
       - uses: actions/checkout@v4
-        with:
-          autocrlf: false
       - name: Normalize working tree line endings
         run: |
           git config core.autocrlf false
@@ -63,8 +61,6 @@ jobs:
       - name: Set up Rust toolchain
         if: matrix.os == 'ubuntu-latest'
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -99,8 +95,6 @@ jobs:
           git config --system core.autocrlf false || true
           git config --global core.autocrlf false
       - uses: actions/checkout@v4
-        with:
-          autocrlf: false
       - name: Normalize working tree line endings
         run: |
           git config core.autocrlf false
@@ -115,15 +109,17 @@ jobs:
           python-version: "3.11"
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
-      - uses: taiki-e/install-action@wasm-bindgen-cli
-        if: matrix.os == 'ubuntu-latest'
       - uses: Swatinem/rust-cache@v2
         continue-on-error: true
       - run: cargo test --workspace --locked
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Install wasm-bindgen CLI
+        if: matrix.os == 'ubuntu-latest'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@0.2.129
       - name: Verify WebAssembly build and size constraint
         if: matrix.os == 'ubuntu-latest'
         run: bash scripts/build_wasm.sh
