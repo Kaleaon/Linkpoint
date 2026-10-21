@@ -182,6 +182,10 @@ docker/**/*.env
 build_output.txt
 
 # Linkpoint Next JavaScript/Rust workspace output
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
 /node_modules/
 **/node_modules/
 **/dist/

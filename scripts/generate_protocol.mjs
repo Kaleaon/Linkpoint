@@ -3,7 +3,7 @@ import process from 'process';
 
 const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
 const args = process.argv.slice(2);
-const targetArgs = args.length > 0 ? args.join(' ') : '--target typescript,dart,python,c,kotlin,rust,java';
+const targetArgs = args.length > 0 ? args.join(' ') : '--target all';
 
 try {
   execSync(`${pythonCmd} tools/protocol_gen/cli.py generate ${targetArgs}`, { stdio: 'inherit' });

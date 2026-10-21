@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
+    pool: "forks",
     globals: true,
     silent: true,
     setupFiles: [path.resolve(__dirname, "./apps/linkpoint/vitest.setup.ts")],

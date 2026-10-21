@@ -1,0 +1,17 @@
+{
+  "name": "com.linkpoint.sdk",
+  "version": "1.0.0",
+  "displayName": "Linkpoint Metaverse SDK",
+  "description": "Managed C# SDK and LLSD codec library for Second Life and OpenSimulator grids.",
+  "unity": "2021.3",
+  "keywords": [
+    "llsd",
+    "secondlife",
+    "metaverse",
+    "networking",
+    "protocol"
+  ],
+  "author": {
+    "name": "Linkpoint Core Team"
+  }
+}
