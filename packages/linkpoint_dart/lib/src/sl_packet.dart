@@ -75,7 +75,8 @@ class SLPacketCodec {
       if (first != 0xFF) {
         msgId = first;
         offset += 1;
-      } else if (offset + 1 < packetBytes.length && packetBytes[offset + 1] != 0xFF) {
+      } else if (offset + 1 < packetBytes.length &&
+          packetBytes[offset + 1] != 0xFF) {
         final second = packetBytes[offset + 1];
         msgId = (0xFF00) | second;
         offset += 2;

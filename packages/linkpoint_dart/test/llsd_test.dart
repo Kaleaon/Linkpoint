@@ -39,8 +39,8 @@ void main() {
             '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
       }
       if (!vectorsDir.existsSync()) {
-        vectorsDir =
-            Directory('legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+        vectorsDir = Directory(
+            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
       }
       if (!vectorsDir.existsSync()) {
         vectorsDir =
