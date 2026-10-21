@@ -14,6 +14,8 @@ from tools.protocol_gen.parser.llsd_schema_parser import LLSDSchemaParser
 from tools.protocol_gen.parser.template_parser import TemplateParser
 from tools.protocol_gen.proto_ast.models import ProtocolAST
 
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+
 DEFAULT_TEMPLATE_PATH = "schemas/protocol/message_template.msg"
 DEFAULT_LLSD_DIR = "schemas/protocol/llsd"
 
@@ -42,15 +44,34 @@ DEFAULT_FBS_OUT_DIRS = {
 def load_ast(template_path: str, llsd_dir: str) -> ProtocolAST:
     ast = ProtocolAST()
 
-    if os.path.exists(template_path):
-        with open(template_path, "r", encoding="utf-8") as f:
+    resolved_template = template_path
+    if not os.path.exists(resolved_template) and not os.path.isabs(resolved_template):
+        alt = os.path.join(REPO_ROOT, template_path)
+        if os.path.exists(alt):
+            resolved_template = alt
+        else:
+            alt2 = os.path.join(
+                REPO_ROOT,
+                "legacy/Linkpoint/src/test/resources/protocol/message_template.msg",
+            )
+            if os.path.exists(alt2):
+                resolved_template = alt2
+
+    resolved_llsd = llsd_dir
+    if not os.path.exists(resolved_llsd) and not os.path.isabs(resolved_llsd):
+        alt = os.path.join(REPO_ROOT, llsd_dir)
+        if os.path.exists(alt):
+            resolved_llsd = alt
+
+    if os.path.exists(resolved_template):
+        with open(resolved_template, "r", encoding="utf-8") as f:
             content = f.read()
         TemplateParser().parse(content, ast)
     else:
         print(f"Warning: Template file {template_path} not found.")
 
-    if os.path.exists(llsd_dir):
-        LLSDSchemaParser().parse_directory(llsd_dir, ast)
+    if os.path.exists(resolved_llsd):
+        LLSDSchemaParser().parse_directory(resolved_llsd, ast)
     else:
         print(f"Warning: LLSD schema directory {llsd_dir} not found.")
 
