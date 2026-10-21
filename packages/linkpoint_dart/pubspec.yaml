@@ -12,7 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   unified_llsd:
-    path: ../../../Unified-LLSD/dart
+    git:
+      url: https://github.com/Kaleaon/Unified-LLSD.git
+      path: dart
+      ref: stitch/fix/dart-llsd-repair-unification-jm1-b1569d0d-6d7c-4594-906c-73e49598c7b1
 
 dev_dependencies:
   flutter_test:
