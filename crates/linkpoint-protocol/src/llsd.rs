@@ -212,11 +212,26 @@ mod tests {
     #[test]
     fn passes_all_31_canonical_test_vectors() {
         let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let mut vectors_dir =
-            manifest_dir.join("../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors");
+        let mut vectors_dir = manifest_dir
+            .join("..")
+            .join("..")
+            .join("legacy")
+            .join("Linkpoint")
+            .join("src")
+            .join("test")
+            .join("resources")
+            .join("llsd-conformance")
+            .join("vectors");
         if !vectors_dir.exists() {
-            vectors_dir =
-                manifest_dir.join("../../Linkpoint/src/test/resources/llsd-conformance/vectors");
+            vectors_dir = manifest_dir
+                .join("..")
+                .join("..")
+                .join("Linkpoint")
+                .join("src")
+                .join("test")
+                .join("resources")
+                .join("llsd-conformance")
+                .join("vectors");
         }
 
         if !vectors_dir.exists() {
