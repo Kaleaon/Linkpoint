@@ -79,19 +79,22 @@ def load_ast(template_path: str, llsd_dir: str) -> ProtocolAST:
 
 
 def compile_flatbuffers(
-    targets: list[str], fbs_dir: str = "schemas", out_dir: str | None = None
+    targets: list[str],
+    fbs_dir: str = "schemas",
+    out_dir: str | None = None,
+    strict: bool = False,
 ) -> int:
     flatc_path = shutil.which("flatc")
     if not flatc_path:
-        sys.stderr.write(
-            "Error: 'flatc' binary (FlatBuffers compiler) not found in system PATH.\n"
-            "Please install the FlatBuffers compiler to compile .fbs schemas:\n"
-            "  - Ubuntu/Debian: sudo apt-get install flatbuffers-compiler\n"
-            "  - macOS: brew install flatbuffers\n"
-            "  - Build from source: https://github.com/google/flatbuffers\n"
+        msg = (
+            "Warning: 'flatc' binary (FlatBuffers compiler) not found in system PATH. "
+            "Skipping FlatBuffers schema compilation.\n"
         )
+        sys.stderr.write(msg)
         sys.stderr.flush()
-        sys.exit(1)
+        if strict:
+            sys.exit(1)
+        return 0
 
     seen_basenames = set()
     unique_fbs_files = []
@@ -245,7 +248,10 @@ def cmd_generate(args):
     fbs_targets = [t for t in targets if t in DEFAULT_FBS_OUT_DIRS or args.flatc]
     if args.flatc or fbs_targets:
         fbs_count = compile_flatbuffers(
-            fbs_targets, fbs_dir=args.fbs_dir, out_dir=args.out_dir
+            fbs_targets,
+            fbs_dir=args.fbs_dir,
+            out_dir=args.out_dir,
+            strict=bool(args.flatc),
         )
         generated_count += fbs_count
 
