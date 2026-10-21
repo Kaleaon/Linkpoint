@@ -212,12 +212,18 @@ mod tests {
     #[test]
     fn passes_all_31_canonical_test_vectors() {
         let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let vectors_dir =
+        let legacy_vectors_dir =
+            manifest_dir.join("../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors");
+        let direct_vectors_dir =
             manifest_dir.join("../../Linkpoint/src/test/resources/llsd-conformance/vectors");
 
-        if !vectors_dir.exists() {
+        let vectors_dir = if legacy_vectors_dir.exists() {
+            legacy_vectors_dir
+        } else if direct_vectors_dir.exists() {
+            direct_vectors_dir
+        } else {
             return;
-        }
+        };
 
         let entries = std::fs::read_dir(&vectors_dir)
             .unwrap_or_else(|e| panic!("Failed to read vectors dir at {:?}: {}", vectors_dir, e));
