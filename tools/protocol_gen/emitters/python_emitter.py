@@ -17,6 +17,13 @@ class PythonEmitter(BaseEmitter):
         with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
 
+        import shutil
+        import subprocess
+
+        ruff_bin = shutil.which("ruff")
+        if ruff_bin:
+            subprocess.run([ruff_bin, "format", out_file], capture_output=True)
+
         return {out_file: code}
 
     def _generate_python_code(self, ast: ProtocolAST) -> str:
@@ -24,7 +31,7 @@ class PythonEmitter(BaseEmitter):
         out.append(self.get_header_warning("#"))
         out.append("import struct")
         out.append("from dataclasses import dataclass, field")
-        out.append("from typing import Optional, List, Dict, Any\n")
+        out.append("from typing import Dict, List, Optional\n")
 
         out.append(f'TEMPLATE_VERSION = "{ast.version}"\n')
 
@@ -46,7 +53,7 @@ class PythonEmitter(BaseEmitter):
                     dest.append(0)
                     i += 2
                 else:
-                    dest.extend(b'\\x00' * count)
+                    dest.extend(b"\x00" * count)
                     i += 2
             else:
                 dest.append(0)
@@ -68,7 +75,7 @@ class PythonEmitter(BaseEmitter):
                 f"    is_zerocoded: bool = {'True' if msg.encoding == 'Zerocoded' else 'False'}\n"
             )
             out.append("    def serialize(self) -> bytes:")
-            out.append(f"        return struct.pack('<I', {msg.message_number})\n")
+            out.append(f'        return struct.pack("<I", {msg.message_number})\n\n')
 
         out.append("# Generated LLSD Capability Schemas")
         for schema in ast.llsd_schemas:
@@ -87,6 +94,6 @@ class PythonEmitter(BaseEmitter):
                     py_type = "List[str]"
                     default_val = "field(default_factory=list)"
                 out.append(f"    {p_name}: {py_type} = {default_val}")
-            out.append("")
+            out.append("\n")
 
         return "\n".join(out)

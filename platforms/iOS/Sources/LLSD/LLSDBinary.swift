@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FlatBuffers)
+import FlatBuffers
+#endif
 
 public enum LLSDBinaryError: Error, LocalizedError {
     case invalidHeader
@@ -6,6 +9,7 @@ public enum LLSDBinaryError: Error, LocalizedError {
     case invalidTag(UInt8)
     case stringDecodingFailed
     case missingEndMarker(UInt8)
+    case flatBuffersVerificationFailed(String)
 
     public var errorDescription: String? {
         switch self {
@@ -14,6 +18,7 @@ public enum LLSDBinaryError: Error, LocalizedError {
         case .invalidTag(let tag): return "Invalid LLSD binary tag byte: \(UnicodeScalar(tag))."
         case .stringDecodingFailed: return "Failed to decode UTF-8 string from binary data."
         case .missingEndMarker(let tag): return "Missing expected container end marker tag: \(UnicodeScalar(tag))."
+        case .flatBuffersVerificationFailed(let details): return "FlatBuffers schema verification failed: \(details)."
         }
     }
 }
@@ -289,3 +294,34 @@ public struct LLSDBinaryReader {
         }
     }
 }
+
+// MARK: - Type-Safe FlatBuffers Asset Decoder
+public struct LLSDBinaryAssetDecoder {
+    /// Validates and decodes binary FlatBuffers MeshBlock payload.
+    public static func decodeMeshBlock(from data: Data) throws -> AssetSchema_MeshBlock {
+        var bb = ByteBuffer(data: data)
+        var verifier = try Verifier(buffer: &bb)
+        try verifier.visitTable(at: 0)
+        try AssetSchema_MeshBlock.verify(&verifier, at: 0, of: AssetSchema_MeshBlock.self)
+        return AssetSchema_MeshBlock.getRootAsMeshBlock(bb: bb)
+    }
+
+    /// Validates and decodes binary FlatBuffers GLTFMaterial payload.
+    public static func decodeGLTFMaterial(from data: Data) throws -> AssetSchema_GLTFMaterial {
+        var bb = ByteBuffer(data: data)
+        var verifier = try Verifier(buffer: &bb)
+        try verifier.visitTable(at: 0)
+        try AssetSchema_GLTFMaterial.verify(&verifier, at: 0, of: AssetSchema_GLTFMaterial.self)
+        return AssetSchema_GLTFMaterial.getRootAsGLTFMaterial(bb: bb)
+    }
+
+    /// Validates and decodes binary FlatBuffers AssetMetadata payload.
+    public static func decodeAssetMetadata(from data: Data) throws -> AssetSchema_AssetMetadata {
+        var bb = ByteBuffer(data: data)
+        var verifier = try Verifier(buffer: &bb)
+        try verifier.visitTable(at: 0)
+        try AssetSchema_AssetMetadata.verify(&verifier, at: 0, of: AssetSchema_AssetMetadata.self)
+        return AssetSchema_AssetMetadata.getRootAsAssetMetadata(bb: bb)
+    }
+}
+

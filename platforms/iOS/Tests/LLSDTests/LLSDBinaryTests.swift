@@ -72,4 +72,22 @@ final class LLSDBinaryTests: XCTestCase {
         XCTAssertEqual(parsed["active"]?.asBool, true)
         XCTAssertEqual(parsed["items"]?.asArray?.count, 3)
     }
+
+    func testFlatBuffersMeshAndMaterialPayloadDecoding() throws {
+        #if canImport(FlatBuffers)
+        var fbb = FlatBufferBuilder(initialSize: 1024)
+        let lodKeyOffset = fbb.create(string: "high_lod")
+        let meshOffset = AssetSchema_MeshBlock.createMeshBlock(
+            &fbb,
+            lod: .highest,
+            lodKeyOffset: lodKeyOffset
+        )
+        fbb.finish(offset: meshOffset)
+        let data = fbb.data
+
+        let decodedMesh = try LLSDBinaryAssetDecoder.decodeMeshBlock(from: data)
+        XCTAssertEqual(decodedMesh.lod, .highest)
+        XCTAssertEqual(decodedMesh.lodKey, "high_lod")
+        #endif
+    }
 }
