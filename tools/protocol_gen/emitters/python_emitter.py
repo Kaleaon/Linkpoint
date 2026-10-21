@@ -53,7 +53,7 @@ class PythonEmitter(BaseEmitter):
                     dest.append(0)
                     i += 2
                 else:
-                    dest.extend(b"\x00" * count)
+                    dest.extend(b"\\x00" * count)
                     i += 2
             else:
                 dest.append(0)

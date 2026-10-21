@@ -48,19 +48,23 @@ class CapabilityDeclarationAuditTest {
     }
 
     private fun locateCapabilityFile(repoRoot: File): File {
+        val path0 = File(repoRoot, "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/capabilities/CapabilityManager.kt")
+        if (path0.exists()) return path0
         val path1 = File(repoRoot, "Linkpoint/src/main/java/com/linkpoint/protocol/capabilities/CapabilityManager.kt")
         if (path1.exists()) return path1
         val path2 = File(repoRoot, "src/main/java/com/linkpoint/protocol/capabilities/CapabilityManager.kt")
         if (path2.exists()) return path2
-        return path1
+        return path0
     }
 
     private fun locateSourceDir(repoRoot: File): File {
+        val dir0 = File(repoRoot, "legacy/Linkpoint/src/main/java/com/linkpoint")
+        if (dir0.exists()) return dir0
         val dir1 = File(repoRoot, "Linkpoint/src/main/java/com/linkpoint")
         if (dir1.exists()) return dir1
         val dir2 = File(repoRoot, "src/main/java/com/linkpoint")
         if (dir2.exists()) return dir2
-        return dir1
+        return dir0
     }
 
     private fun locateRepoRoot(): File {
@@ -68,7 +72,7 @@ class CapabilityDeclarationAuditTest {
         var dir: File? = File(userDir)
         repeat(6) {
             val current = dir ?: return@repeat
-            if (File(current, ".git").exists() || File(current, "Linkpoint/src").exists()) {
+            if (File(current, ".git").exists() || File(current, "legacy/Linkpoint/src").exists() || File(current, "Linkpoint/src").exists()) {
                 return current
             }
             dir = current.parentFile

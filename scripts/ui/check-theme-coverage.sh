@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+THEME_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+if [[ ! -f "$THEME_FILE" ]]; then
+  THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+fi
 
 if [[ ! -f "$THEME_FILE" ]]; then
   echo "❌ Theme catalog file not found: $THEME_FILE"
@@ -20,7 +23,7 @@ text = Path(theme_file).read_text(encoding='utf-8')
 
 central_dir = Path("packages/design-system/themes")
 community_dir = Path("ktheme-pr/themes/community")
-assets_dir = Path("Linkpoint/src/main/assets/themes")
+assets_dir = Path("legacy/Linkpoint/src/main/assets/themes") if Path("legacy/Linkpoint/src/main/assets/themes").exists() else Path("Linkpoint/src/main/assets/themes")
 
 errors = []
 
