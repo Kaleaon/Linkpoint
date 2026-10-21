@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+import os
+import sys
+
+# SCons build configuration for Linkpoint Protocol GDExtension library
+
+opts = Variables("build_options.py")
+opts.Add(EnumVariable("target", "Build target", "template_release", allowed_values=("template_debug", "template_release")))
+opts.Add(EnumVariable("platform", "Target platform", sys.platform if sys.platform in ("linux", "darwin", "win32") else "linux", allowed_values=("linux", "windows", "win32", "macos", "darwin")))
+opts.Add(BoolVariable("use_llvm", "Use LLVM/Clang compiler", False))
+
+env = Environment(variables=opts)
+
+# Map platform names
+platform_name = env["platform"]
+if platform_name == "win32":
+    platform_name = "windows"
+elif platform_name == "darwin":
+    platform_name = "macos"
+
+env.Append(CPPPATH=[
+    "src/",
+    "src/generated/",
+    "src/generated/protocol/",
+    "src/generated/schema/",
+    "godot-cpp/include/",
+    "godot-cpp/gen/include/",
+])
+
+sources = [
+    "src/linkpoint_protocol_module.cpp",
+    "src/linkpoint_protocol.cpp",
+    "src/generated/protocol/GodotProtocol.cpp",
+]
+
+if platform_name in ["linux", "macos"]:
+    env.Append(CCFLAGS=["-O3", "-std=c++17", "-fPIC"])
+    if platform_name == "linux":
+        env.Append(LINKFLAGS=["-shared", "-Wl,-soname,liblinkpoint_protocol.so"])
+    else:
+        env.Append(LINKFLAGS=["-dynamiclib"])
+elif platform_name == "windows":
+    env.Append(CCFLAGS=["/std:c++17", "/O2", "/MD"])
+    env.Append(LINKFLAGS=["/DLL"])
+
+target_path = f"bin/liblinkpoint_protocol.{platform_name}.{env['target']}.x86_64"
+
+if os.path.exists("godot-cpp/SConstruct"):
+    SConscript("godot-cpp/SConstruct")
+
+library = env.SharedLibrary(target=target_path, source=sources)
+Default(library)
