@@ -35,8 +35,16 @@ void main() {
       var vectorsDir = Directory(
           '../../Linkpoint/src/test/resources/llsd-conformance/vectors');
       if (!vectorsDir.existsSync()) {
+        vectorsDir = Directory(
+            '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+      }
+      if (!vectorsDir.existsSync()) {
         vectorsDir =
             Directory('Linkpoint/src/test/resources/llsd-conformance/vectors');
+      }
+      if (!vectorsDir.existsSync()) {
+        vectorsDir = Directory(
+            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
       }
       expect(vectorsDir.existsSync(), isTrue,
           reason: 'Vectors directory must exist');
