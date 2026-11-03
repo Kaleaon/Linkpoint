@@ -17,6 +17,19 @@ class PythonEmitter(BaseEmitter):
         with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
 
+        try:
+            import subprocess
+
+            subprocess.run(
+                ["ruff", "format", out_file],
+                check=False,
+                capture_output=True,
+            )
+            with open(out_file, "r", encoding="utf-8") as f:
+                code = f.read()
+        except Exception:
+            pass
+
         return {out_file: code}
 
     def _generate_python_code(self, ast: ProtocolAST) -> str:
@@ -24,7 +37,7 @@ class PythonEmitter(BaseEmitter):
         out.append(self.get_header_warning("#"))
         out.append("import struct")
         out.append("from dataclasses import dataclass, field")
-        out.append("from typing import Optional, List, Dict, Any\n")
+        out.append("from typing import Dict, List, Optional\n")
 
         out.append(f'TEMPLATE_VERSION = "{ast.version}"\n')
 
