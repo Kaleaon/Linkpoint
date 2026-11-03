@@ -335,6 +335,12 @@ export class SLConnectionFull extends Utils.EventEmitter {
     return slBridge.declineInventoryOffer({ id });
   }
 
+  /** Offer an inventory item to another avatar. */
+  async offerItem(targetId: string, item: any) {
+    this.requireConnected();
+    return slBridge.offerItem(targetId, item);
+  }
+
   /** Accept a group membership invitation. */
   async acceptGroupInvite(id: string) {
     this.requireConnected();
