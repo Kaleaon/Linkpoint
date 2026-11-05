@@ -23,6 +23,7 @@ DEFAULT_TARGET_OUT_DIRS = {
     "python": "tools/protocol_gen/generated/python",
     "c": "crates/linkpoint-protocol/c_include/generated",
     "java": "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated",
+    "godot": "platforms/godot/gdextension/src/generated/protocol",
 }
 
 
