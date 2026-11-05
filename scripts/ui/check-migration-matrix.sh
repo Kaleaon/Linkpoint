@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAV_FILE="${NAV_FILE:-legacy/Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt}"
-if [[ ! -f "$NAV_FILE" && -f "Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt" ]]; then
-  NAV_FILE="Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt"
-fi
+NAV_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt"
+[[ -f "$NAV_FILE" ]] || NAV_FILE="Linkpoint/src/main/java/com/linkpoint/ui/navigation/Navigation.kt"
 MATRIX_FILE="scripts/ui/route-migration-matrix.csv"
 
 if [[ ! -f "$NAV_FILE" ]]; then

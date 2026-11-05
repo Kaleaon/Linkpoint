@@ -376,7 +376,7 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
     const rawDir = typeof __dirname !== 'undefined' ? __dirname : '';
     const cleanDir = rawDir.replace(/^\/([a-zA-Z]:)/, '$1');
     const cwd = process.cwd();
-    const candidateDirs = [
+    const candidates = [
       path.resolve(cleanDir, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cleanDir, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(rawDir, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
@@ -385,10 +385,8 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
       path.resolve(cwd, 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, '../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
-      path.resolve(cwd, '../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
-      path.resolve(cwd, '../Linkpoint/src/test/resources/llsd-conformance/vectors'),
     ];
-    let vectorsDir = candidateDirs.find(d => Boolean(d) && fs.existsSync(d)) || '';
+    let vectorsDir = candidates.find(d => Boolean(d) && fs.existsSync(d)) || candidates[0];
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
     const subdirs = fs.readdirSync(vectorsDir)
