@@ -199,13 +199,7 @@ export class LinkpointApp {
   async loadFriends() {
     if (!this.auth.isLoggedIn()) return [];
     try {
-      if (typeof this.protocol.fetchFriends === 'function') {
-        const friends = await this.protocol.fetchFriends();
-        if (Array.isArray(friends)) {
-          this.protocol.emit('friends_loaded', friends);
-          return friends;
-        }
-      }
+      return await this.friends.refresh();
     } catch (err) {
       console.warn('[LinkpointApp] loadFriends warning:', err);
     }
