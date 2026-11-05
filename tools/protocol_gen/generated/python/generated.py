@@ -505,12 +505,8 @@ def decompress_zerocoded(src: bytes) -> bytes:
         if b == 0:
             if i + 1 < src_len:
                 count = src[i + 1]
-                if count == 0:
-                    dest.append(0)
-                    i += 2
-                else:
-                    dest.extend(b"\x00" * count)
-                    i += 2
+                dest.extend(b"\x00" * count)
+                i += 2
             else:
                 dest.append(0)
                 i += 1
@@ -5858,3 +5854,8 @@ class CapabilitiesRequestResponseCapabilities:
     capabilities: List[str] = field(default_factory=list)
     seed_response: Optional[str] = None
     fetch_inventory: Optional[str] = None
+
+@dataclass
+class EventQueueGetCapabilities:
+    ack: Optional[int] = None
+    events: List[str] = field(default_factory=list)
