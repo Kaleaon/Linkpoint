@@ -1,5 +1,7 @@
 package com.linkpoint.chat
 
+import com.linkpoint.linden.llmessage.IMType
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed

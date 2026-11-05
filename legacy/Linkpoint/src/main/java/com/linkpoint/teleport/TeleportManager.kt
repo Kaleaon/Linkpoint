@@ -2,6 +2,7 @@ package com.linkpoint.teleport
 
 import android.util.Log
 import com.linkpoint.core.RegionInfo
+import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.capabilities.EventHandler
 import com.linkpoint.protocol.capabilities.EventQueueDispatcher
@@ -12,7 +13,6 @@ import com.linkpoint.protocol.messages.SLMessagePackers
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.protocol.types.putUUID
-import com.linkpoint.linden.llmessage.IMType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -349,7 +349,7 @@ class TeleportManager(
                 identity = AgentIdentity(agentId, sessionId),
                 fromGroup = false,
                 toAgentId = lure.senderId,
-                dialog = IMType.LURE_DECLINED,
+                dialog = IMType.LURE_DECLINED, // IM_LURE_DECLINED
                 id = lure.lureId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
                 fromAgentName = "You",
