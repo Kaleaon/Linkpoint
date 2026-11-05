@@ -22,6 +22,9 @@ let androidResDir = path.join(rootDir, 'legacy/Linkpoint/src/main/res');
 if (!fs.existsSync(androidResDir)) {
   androidResDir = path.join(rootDir, 'Linkpoint/src/main/res');
 }
+if (!fs.existsSync(androidResDir)) {
+  androidResDir = path.join(rootDir, 'app/src/main/res');
+}
 
 const SUPPORTED_LOCALES = ['en', 'es', 'fr', 'ja'];
 const isCheckMode = process.argv.includes('--check') || process.argv.includes('--verify');
