@@ -97,7 +97,10 @@ class DrawablePrimStore {
             this.rotation = rotation
         }
 
+        @Transient
         private val matrixBuffer = FloatArray(16)
+
+        @Transient
         @Volatile
         private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
 
