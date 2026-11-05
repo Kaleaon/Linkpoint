@@ -1,7 +1,8 @@
 name: linkpoint_dart
 description: Modern Dart and Flutter SDK for Second Life standards, protocol serialization, LLSD, and viewer contracts.
 version: 0.1.0
-publish_to: none
+repository: https://github.com/Kaleaon/Linkpoint
+homepage: https://github.com/Kaleaon/Linkpoint
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

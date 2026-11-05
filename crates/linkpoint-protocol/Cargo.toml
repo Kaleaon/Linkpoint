@@ -3,13 +3,15 @@ name = "linkpoint-protocol"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "Linkpoint protocol parser and binary LLSD zero-code transport engine"
 
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
-linkpoint-core = { path = "../linkpoint-core" }
-linkpoint-scene = { path = "../linkpoint-scene" }
+linkpoint-core = { path = "../linkpoint-core", version = "0.1.0" }
+linkpoint-scene = { path = "../linkpoint-scene", version = "0.1.0" }
 base64 = "0.21"
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 serde-llsd-benthic = { version = "0.3.3", default-features = false }
