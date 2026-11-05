@@ -1,6 +1,5 @@
 package com.linkpoint.render.materials
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.render.lumiya.drawable.DrawableMeshStore
 import com.linkpoint.render.lumiya.drawable.DrawablePrimStore
 import org.junit.Assert.assertEquals
@@ -9,8 +8,11 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class CachedTexMatrixStoreTest {
 
     @Test
