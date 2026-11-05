@@ -20,3 +20,5 @@
 *.db binary
 *.dat binary
 
+**/llsd-conformance/** text eol=lf
+

@@ -7,6 +7,7 @@
  */
 import skeletonData from './avatar-data/skeleton.json';
 import type { JointPose, Quat, Vec3 } from './avatar-animation';
+import { DualQuaternion } from './dual-quaternion';
 
 export type Mat4 = Float32Array;
 
@@ -199,18 +200,23 @@ export function skinMatrices(skeleton: AvatarSkeleton, skin: MeshSkin, world: Ma
   });
 }
 
-/** CPU skinning of one vertex by up to four weighted joints (reference implementation / tests / fallback). */
+/** CPU skinning of one vertex by up to four weighted joints using Dual Quaternion Linear Blending (DLB). */
 export function skinPoint(point: Vec3, joints: ArrayLike<number>, weights: ArrayLike<number>, matrices: Mat4[]): Vec3 {
-  const out: Vec3 = [0, 0, 0];
   let total = 0;
+  const activeDqs: DualQuaternion[] = [];
+  const activeWeights: number[] = [];
+
   for (let i = 0; i < 4; i++) {
     const w = weights[i];
     const m = matrices[joints[i]];
     if (!(w > 0) || !m) continue;
     total += w;
-    out[0] += w * (m[0] * point[0] + m[4] * point[1] + m[8] * point[2] + m[12]);
-    out[1] += w * (m[1] * point[0] + m[5] * point[1] + m[9] * point[2] + m[13]);
-    out[2] += w * (m[2] * point[0] + m[6] * point[1] + m[10] * point[2] + m[14]);
+    activeDqs.push(DualQuaternion.fromMatrix(m));
+    activeWeights.push(w);
   }
-  return total > 0 ? out : point;
+
+  if (total <= 0 || activeDqs.length === 0) return point;
+
+  const blended = DualQuaternion.blend(activeDqs, activeWeights);
+  return blended.transformPoint(point);
 }
