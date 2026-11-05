@@ -81,13 +81,20 @@ object ThemeCatalog {
                 File("Linkpoint/src/main/assets/themes"),
                 File("legacy/Linkpoint/src/main/assets/themes"),
                 File("packages/design-system/themes"),
+                File("packages/design-system/themes/community"),
                 File("Linkpoint/packages/design-system/themes"),
+                File("Linkpoint/packages/design-system/themes/community"),
+                File("legacy/Linkpoint/packages/design-system/themes"),
                 File("../packages/design-system/themes"),
+                File("../packages/design-system/themes/community"),
                 File("../../packages/design-system/themes"),
+                File("../../packages/design-system/themes/community"),
                 File("ktheme-pr/themes/community"),
-                File("Linkpoint/ktheme-pr/themes/community"),
                 File("legacy/ktheme-pr/themes/community"),
+                File("Linkpoint/ktheme-pr/themes/community"),
                 File("../ktheme-pr/themes/community"),
+                File("../legacy/ktheme-pr/themes/community"),
+                File("../../ktheme-pr/themes/community"),
                 File("../../legacy/ktheme-pr/themes/community")
             )
 
