@@ -99,7 +99,11 @@ impl PackedQuaternion {
         let z = f64::from(i16_vec[2]) / 32767.0;
 
         let sum_sq = x * x + y * y + z * z;
-        let w = if sum_sq < 1.0 { (1.0 - sum_sq).sqrt() } else { 0.0 };
+        let w = if sum_sq < 1.0 {
+            (1.0 - sum_sq).sqrt()
+        } else {
+            0.0
+        };
 
         [
             ((x * 10000.0).round() / 10000.0) as f32,

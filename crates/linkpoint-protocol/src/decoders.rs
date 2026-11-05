@@ -172,7 +172,13 @@ mod tests {
         assert_eq!(decoded.sim_access, 21);
         assert_eq!(decoded.sim_name, "Aharon");
         assert_eq!(decoded.sim_owner_id, [1u8; 16]);
-        assert!(RegionFlags::has_flag(decoded.region_flags, RegionFlags::ALLOW_YOURSELF));
-        assert!(RegionFlags::has_flag(decoded.region_flags, RegionFlags::ALLOW_PHYSICS));
+        assert!(RegionFlags::has_flag(
+            decoded.region_flags,
+            RegionFlags::ALLOW_YOURSELF
+        ));
+        assert!(RegionFlags::has_flag(
+            decoded.region_flags,
+            RegionFlags::ALLOW_PHYSICS
+        ));
     }
 }

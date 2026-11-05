@@ -20,10 +20,13 @@ pub mod wasm;
 
 pub use capabilities::{CapabilitySet, Event, EventQueue};
 pub use circuit::{CircuitCodecError, USE_CIRCUIT_CODE_MESSAGE_ID, UseCircuitCode};
-pub use decoders::{ObjectFlags, ObjectUpdateData, ObjectUpdateDecoder, RegionFlags, RegionHandshakeData, RegionHandshakeDecoder};
+pub use decoders::{
+    ObjectFlags, ObjectUpdateData, ObjectUpdateDecoder, RegionFlags, RegionHandshakeData,
+    RegionHandshakeDecoder,
+};
 pub use endpoint::{EndpointPolicy, EndpointPolicyError};
 pub use login::{LoginOutcome, LoginParameters, LoginRedirect, LoginResponse, LoginResponseError};
 pub use packet::{PacketFlags, PacketFrequency, PacketHeader, PacketParseError};
 pub use reliable::{AckResult, ReliablePacket, ReliableUdp};
-pub use spatial::{PackedQuaternion, Vector3U16, Vector3U8};
+pub use spatial::{PackedQuaternion, Vector3U8, Vector3U16};
 pub use transport::{HttpResponse, HttpTransport, TransportError, TransportLimits, UdpCircuit};
