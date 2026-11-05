@@ -71,6 +71,15 @@ export class WorldViewer extends Utils.EventEmitter {
       : 'Live simulator scene: streaming from grid…';
   }
 
+  public clearTextureCache(): void {
+    const keys = Array.from(this.decodedTextures.keys());
+    for (const key of keys) {
+      this.decodedTextures.delete(key);
+    }
+    this.decodedTextures.clear();
+    this.emit('textures_cleared');
+  }
+
   constructor(protocolManager: any) {
     super();
     this.protocol = protocolManager;
