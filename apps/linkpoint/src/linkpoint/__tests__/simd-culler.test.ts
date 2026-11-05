@@ -8,6 +8,9 @@ import {
   HYSTERESIS_MARGIN,
   TELEPORT_THRESHOLD,
   LARGE_OBJECT_RADIUS,
+  defaultModelMatrix,
+  eulerToQuaternion,
+  normalizeQuaternion,
 } from '../simd-culler';
 import { Camera3D } from '../camera-3d';
 import { extractFrustum, multiplyMat4, INSIDE, OUTSIDE } from '../frustum';
@@ -211,5 +214,126 @@ describe('TieredSimdCuller', () => {
 
     console.log(`SIMD Culler benchmark for 4,000 objects: ${avgTimePerFrameMs.toFixed(3)}ms / frame`);
     expect(avgTimePerFrameMs).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('defaultModelMatrix & Quaternion Conversion', () => {
+  it('converts identity quaternion [0, 0, 0, 1] to an identity matrix', () => {
+    const pos = [10, 20, 30];
+    const rot = [0, 0, 0, 1];
+    const scale = [1, 1, 1];
+    const matrix = defaultModelMatrix(pos, rot, scale);
+
+    const expected = new Float32Array([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      10, 20, 30, 1,
+    ]);
+
+    for (let i = 0; i < 16; i++) {
+      expect(matrix[i]).toBeCloseTo(expected[i], 5);
+    }
+  });
+
+  it('produces correct column-major matrices for 90-degree rotations along X, Y, and Z axes', () => {
+    const pos = [0, 0, 0];
+    const scale = [1, 1, 1];
+    const halfAngle = Math.PI / 4; // 45 deg for 90 deg rotation
+    const sin45 = Math.sin(halfAngle);
+    const cos45 = Math.cos(halfAngle);
+
+    // X-axis 90 degree rotation [sin45, 0, 0, cos45]
+    const rotX = [sin45, 0, 0, cos45];
+    const matX = defaultModelMatrix(pos, rotX, scale);
+    const expectedX = [
+      1, 0, 0, 0,
+      0, 0, 1, 0,
+      0, -1, 0, 0,
+      0, 0, 0, 1,
+    ];
+    for (let i = 0; i < 16; i++) {
+      expect(matX[i]).toBeCloseTo(expectedX[i], 5);
+    }
+
+    // Y-axis 90 degree rotation [0, sin45, 0, cos45]
+    const rotY = [0, sin45, 0, cos45];
+    const matY = defaultModelMatrix(pos, rotY, scale);
+    const expectedY = [
+      0, 0, -1, 0,
+      0, 1, 0, 0,
+      1, 0, 0, 0,
+      0, 0, 0, 1,
+    ];
+    for (let i = 0; i < 16; i++) {
+      expect(matY[i]).toBeCloseTo(expectedY[i], 5);
+    }
+
+    // Z-axis 90 degree rotation [0, 0, sin45, cos45]
+    const rotZ = [0, 0, sin45, cos45];
+    const matZ = defaultModelMatrix(pos, rotZ, scale);
+    const expectedZ = [
+      0, 1, 0, 0,
+      -1, 0, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ];
+    for (let i = 0; i < 16; i++) {
+      expect(matZ[i]).toBeCloseTo(expectedZ[i], 5);
+    }
+  });
+
+  it('normalizes non-unit quaternions to prevent scale distortion', () => {
+    const pos = [0, 0, 0];
+    const scale = [1, 1, 1];
+    // Non-unit quaternion: scaled by factor of 5
+    const rotNonUnit = [0, 0, 5 * Math.SQRT1_2, 5 * Math.SQRT1_2];
+    const matNonUnit = defaultModelMatrix(pos, rotNonUnit, scale);
+
+    const rotUnit = [0, 0, Math.SQRT1_2, Math.SQRT1_2];
+    const matUnit = defaultModelMatrix(pos, rotUnit, scale);
+
+    for (let i = 0; i < 16; i++) {
+      expect(matNonUnit[i]).toBeCloseTo(matUnit[i], 5);
+    }
+  });
+
+  it('converts 3-element Euler angles [rx, ry, rz] to a unit quaternion', () => {
+    const euler: [number, number, number] = [Math.PI / 2, 0, 0]; // 90 deg around X
+    const q = eulerToQuaternion(euler[0], euler[1], euler[2]);
+
+    expect(q[0]).toBeCloseTo(Math.SQRT1_2, 5);
+    expect(q[1]).toBeCloseTo(0, 5);
+    expect(q[2]).toBeCloseTo(0, 5);
+    expect(q[3]).toBeCloseTo(Math.SQRT1_2, 5);
+
+    const matEuler = defaultModelMatrix([0, 0, 0], euler, [1, 1, 1]);
+    const matQuat = defaultModelMatrix([0, 0, 0], q, [1, 1, 1]);
+
+    for (let i = 0; i < 16; i++) {
+      expect(matEuler[i]).toBeCloseTo(matQuat[i], 5);
+    }
+  });
+
+  it('computes bounding sphere radius matching true transformed AABB extents in upsertObject', () => {
+    const culler = new TieredSimdCuller();
+    // Asymmetric box: min [-1, -2, -3], max [1, 2, 3]
+    const bounds = { min: [-1, -2, -3], max: [1, 2, 3] };
+    // 90 degree rotation around Z axis
+    const rotZ: [number, number, number, number] = [0, 0, Math.SQRT1_2, Math.SQRT1_2];
+
+    culler.upsertObject('rotatedBox', [10, 20, 30], rotZ, [1, 1, 1], bounds);
+    const obj = culler.getObject('rotatedBox')!;
+
+    // Transformed bounds: X extents become 4 ([-2, 2]), Y extents become 2 ([-1, 1]), Z extents 6 ([-3, 3])
+    expect(obj.worldMin[0]).toBeCloseTo(10 - 2, 4);
+    expect(obj.worldMax[0]).toBeCloseTo(10 + 2, 4);
+    expect(obj.worldMin[1]).toBeCloseTo(20 - 1, 4);
+    expect(obj.worldMax[1]).toBeCloseTo(20 + 1, 4);
+    expect(obj.worldMin[2]).toBeCloseTo(30 - 3, 4);
+    expect(obj.worldMax[2]).toBeCloseTo(30 + 3, 4);
+
+    const expectedRadius = Math.hypot(4, 2, 6) / 2;
+    expect(obj.radius).toBeCloseTo(expectedRadius, 4);
   });
 });

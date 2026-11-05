@@ -20,7 +20,7 @@ DEFAULT_TOKENS_PATH = "packages/design-system/src/tokens/tokens.json"
 
 DEFAULT_TARGET_FILES = {
     "typescript": "packages/design-system/src/tokens/tokens.ts",
-    "kotlin": "Linkpoint/ui-components/src/main/java/com/linkpoint/ui/components/linkpoint2/tokens/GeneratedTokens.kt",
+    "kotlin": "legacy/Linkpoint/ui-components/src/main/java/com/linkpoint/ui/components/linkpoint2/tokens/GeneratedTokens.kt",
     "dart": "packages/linkpoint_dart/lib/src/generated_tokens.dart",
     "rust": "crates/linkpoint-core/src/generated_tokens.rs",
 }
