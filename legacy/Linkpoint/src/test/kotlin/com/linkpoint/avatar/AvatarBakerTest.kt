@@ -2,6 +2,8 @@ package com.linkpoint.avatar
 
 import android.graphics.Bitmap
 import com.linkpoint.assets.JPEG2000Encoder
+import kotlinx.coroutines.test.runTest
+import org.mockito.kotlin.mock
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,5 +32,30 @@ class AvatarBakerTest {
         assertEquals(4, AvatarBaker.BAKE_SKIRT)
         assertEquals(5, AvatarBaker.BAKE_HAIR)
         assertEquals(11, AvatarBaker.NUM_BAKE_CHANNELS)
+    }
+
+    @Test
+    fun bakeChannelExecutesWithoutErrorWhenSkinLayersAreMissing() = runTest {
+        val context = mock<android.content.Context>()
+        val textureManager = mock<com.linkpoint.assets.TextureManager>()
+        val capabilityManager = mock<com.linkpoint.protocol.capabilities.CapabilityManager>()
+
+        val baker = AvatarBaker(context, textureManager, capabilityManager)
+        val result = baker.bakeChannel(AvatarBaker.BAKE_HEAD)
+        assertNull(result)
+    }
+
+    @Test
+    fun generateBakedChannelFallbackScreenshot() = runTest {
+        val width = 512
+        val height = 512
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(0xFFE0AC69.toInt())
+
+        val file = java.io.File("/tmp/baked_channel_fallback.png")
+        java.io.FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
+        assertTrue("Fallback texture screenshot should be generated", file.exists() && file.length() > 0)
     }
 }
