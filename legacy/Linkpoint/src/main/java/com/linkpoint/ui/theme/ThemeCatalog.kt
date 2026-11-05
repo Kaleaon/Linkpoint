@@ -86,10 +86,10 @@ object ThemeCatalog {
                 File("../../packages/design-system/themes"),
                 File("legacy/ktheme-pr/themes/community"),
                 File("Linkpoint/ktheme-pr/themes/community"),
-                File("../legacy/ktheme-pr/themes/community"),
-                File("../../legacy/ktheme-pr/themes/community"),
                 File("ktheme-pr/themes/community"),
+                File("../legacy/ktheme-pr/themes/community"),
                 File("../ktheme-pr/themes/community"),
+                File("../../legacy/ktheme-pr/themes/community"),
                 File("../../ktheme-pr/themes/community")
             )
 
