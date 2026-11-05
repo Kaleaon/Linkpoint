@@ -35,7 +35,8 @@ String resolveVectorPath(String relativeSubpath) {
 void main() {
   group('Pure Dart J2K & LLMesh Pipeline Tests', () {
     test('J2K texture decoder decodes test vectors natively without C-FFI', () {
-      final path = resolveVectorPath('textures/j2k_texture_decoder_vectors.json');
+      final path =
+          resolveVectorPath('textures/j2k_texture_decoder_vectors.json');
       final jsonContent = File(path).readAsStringSync();
       final data = json.decode(jsonContent);
 
@@ -52,7 +53,8 @@ void main() {
 
           final rgba = J2KDecoder.decodeRgba(bytes);
           expect(rgba, isNotNull);
-          expect(rgba!.length, equals(expected['width'] * expected['height'] * 4));
+          expect(
+              rgba!.length, equals(expected['width'] * expected['height'] * 4));
         } else {
           final header = J2KDecoder.parseHeader(bytes);
           expect(header, isNotNull);
@@ -61,7 +63,9 @@ void main() {
       }
     });
 
-    test('LLMesh converter parses binary mesh and generates GLTF JSON in pure Dart', () {
+    test(
+        'LLMesh converter parses binary mesh and generates GLTF JSON in pure Dart',
+        () {
       final path = resolveVectorPath('mesh/llmesh_decompress_vectors.json');
       final jsonContent = File(path).readAsStringSync();
       final data = json.decode(jsonContent);

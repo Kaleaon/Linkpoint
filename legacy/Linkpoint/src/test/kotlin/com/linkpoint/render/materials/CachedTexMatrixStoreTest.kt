@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(manifest = Config.NONE)
 class CachedTexMatrixStoreTest {
 
     @Test

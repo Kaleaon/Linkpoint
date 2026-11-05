@@ -16,7 +16,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(manifest = Config.NONE)
 class DrawablePrimStoreTest {
 
     private lateinit var store: DrawablePrimStore

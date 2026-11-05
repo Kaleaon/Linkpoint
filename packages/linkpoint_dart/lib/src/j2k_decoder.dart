@@ -78,7 +78,10 @@ class J2KDecoder {
 
   static Uint8List? decodeRgba(Uint8List bytes) {
     final header = parseHeader(bytes);
-    if (header == null || header.status != 'success' || header.width == 0 || header.height == 0) {
+    if (header == null ||
+        header.status != 'success' ||
+        header.width == 0 ||
+        header.height == 0) {
       return null;
     }
 

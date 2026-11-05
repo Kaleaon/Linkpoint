@@ -47,7 +47,6 @@ class DrawablePrimStore {
     ) {
         @Volatile
         var isDirty: Boolean = true
-            private set
 
         var scaleS: Float = scaleS
             set(value) {
@@ -89,16 +88,19 @@ class DrawablePrimStore {
                 }
             }
 
+        @Transient
         private val matrixBuffer = FloatArray(16)
+
+        @Transient
         @Volatile
-        private var cachedMatrix: FloatArray = IDENTITY_MATRIX
+        private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
 
         fun getMatrix(): FloatArray {
             if (isDirty) {
                 synchronized(matrixBuffer) {
                     if (isDirty) {
                         if (scaleS == 1f && scaleT == 1f && offsetS == 0f && offsetT == 0f && rotation == 0f) {
-                            cachedMatrix = IDENTITY_MATRIX
+                            cachedMatrix = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
                         } else {
                             MaterialDescriptor.UvTransform.computeMatrix(
                                 scaleS, scaleT, offsetS, offsetT, rotation, matrixBuffer
@@ -128,10 +130,8 @@ class DrawablePrimStore {
     )
 
     companion object {
-        private const val TAG = "DrawablePrimStore"
         private val NULL_UUID = UUID(0L, 0L)
         private val IDENTITY_TEX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
-        private val IDENTITY_MATRIX = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
 
         const val GLOW_THRESHOLD = 0.005f
         private const val DEFAULT_INITIAL_CAPACITY = 256
