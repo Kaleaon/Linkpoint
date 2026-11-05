@@ -100,6 +100,8 @@ class UiCoverageValidatorTest {
         if (Files.exists(legacyNested)) return legacyNested
         val nested = root.resolve("Linkpoint").resolve(relativePath)
         if (Files.exists(nested)) return nested
+        val legacy = root.resolve("legacy/Linkpoint").resolve(relativePath)
+        if (Files.exists(legacy)) return legacy
         error("Unable to resolve source path: $relativePath")
     }
 

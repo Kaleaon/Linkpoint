@@ -85,10 +85,13 @@ object ThemeCatalog {
                 File("legacy/packages/design-system/themes"),
                 File("legacy/Linkpoint/packages/design-system/themes"),
                 File("../packages/design-system/themes"),
+                File("../../packages/design-system/themes"),
                 File("ktheme-pr/themes/community"),
                 File("Linkpoint/ktheme-pr/themes/community"),
+                File("legacy/ktheme-pr/themes/community"),
                 File("legacy/Linkpoint/ktheme-pr/themes/community"),
-                File("../ktheme-pr/themes/community")
+                File("../ktheme-pr/themes/community"),
+                File("../../legacy/ktheme-pr/themes/community")
             )
 
             for (dir in possibleDirs) {
