@@ -48,14 +48,10 @@ void main() {
           break;
         }
       }
-      if (vectorsDir == null) {
-        fail('Vectors directory must exist');
-      }
-      final resolvedDir = vectorsDir;
-      expect(resolvedDir.existsSync(), isTrue,
+      expect(vectorsDir != null && vectorsDir.existsSync(), isTrue,
           reason: 'Vectors directory must exist');
 
-      final subdirs = resolvedDir.listSync().whereType<Directory>().toList()
+      final subdirs = vectorsDir!.listSync().whereType<Directory>().toList()
         ..sort((a, b) => a.path.compareTo(b.path));
 
       expect(subdirs.length, equals(31),
