@@ -1,6 +1,6 @@
 package com.linkpoint.linden.llrender
 
-import com.linkpoint.linden.llmath.Matrix4
+import com.linkpoint.scene.math.Matrix4
 import com.linkpoint.linden.llmath.Vector3
 import com.linkpoint.linden.llmath.Vector4
 
