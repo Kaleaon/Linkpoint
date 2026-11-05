@@ -40,6 +40,9 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Install Dart dependencies
+        run: cd packages/linkpoint_dart && flutter pub get
+
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -100,10 +103,10 @@ jobs:
             ndk;26.3.11579264
 
       - name: Grant execute permission for gradlew
-        run: chmod +x legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
+        run: chmod +x gradlew legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
 
       - name: Validate parity snapshot clean-tree guards
-        run: bash scripts/check_parity_snapshot_guards.sh
+        run: bash scripts/check_parity_snapshot_guards.sh --guards-only
 
       - name: Validate no decompilation artifacts
         run: bash scripts/check_no_decompilation_artifacts.sh
@@ -283,6 +286,7 @@ jobs:
       - name: Verify Dart formatting
         run: |
           cd packages/linkpoint_dart
+          flutter pub get
           dart format --output=none --set-exit-if-changed .
 
       - name: Run Flutter analyze
