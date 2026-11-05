@@ -84,7 +84,7 @@ class KotlinEmitter(BaseEmitter):
             out.append(f"    val messageNumber: Int = {msg_num_str},")
             out.append(f'    val frequency: String = "{msg.frequency}",')
             out.append(
-                f'    val isZerocoded: Boolean = {"true" if msg.encoding == "Zerocoded" else "false"}'
+                f"    val isZerocoded: Boolean = {'true' if msg.encoding == 'Zerocoded' else 'false'}"
             )
             out.append(") {\n")
             out.append("    fun serialize(): ByteArray {")
