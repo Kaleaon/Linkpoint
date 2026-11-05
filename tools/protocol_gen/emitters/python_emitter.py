@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from tools.protocol_gen.emitters.base import BaseEmitter
 from tools.protocol_gen.proto_ast.models import ProtocolAST
@@ -17,14 +18,26 @@ class PythonEmitter(BaseEmitter):
         with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
 
+        try:
+            subprocess.run(
+                ["ruff", "format", out_file],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            with open(out_file, "r", encoding="utf-8") as f:
+                code = f.read()
+        except Exception:
+            pass
+
         return {out_file: code}
 
     def _generate_python_code(self, ast: ProtocolAST) -> str:
         out = []
         out.append(self.get_header_warning("#"))
-        out.append("import struct")
+        out.append("\nimport struct")
         out.append("from dataclasses import dataclass, field")
-        out.append("from typing import Optional, List, Dict, Any\n")
+        out.append("from typing import Dict, List, Optional\n")
 
         out.append(f'TEMPLATE_VERSION = "{ast.version}"\n')
 
@@ -71,7 +84,7 @@ class PythonEmitter(BaseEmitter):
             out.append(f"        return struct.pack('<I', {msg.message_number})\n")
 
         out.append("# Generated LLSD Capability Schemas")
-        for schema in ast.llsd_schemas:
+        for schema in sorted(ast.llsd_schemas, key=lambda s: s.title):
             out.append("@dataclass")
             out.append(f"class {schema.title}Capabilities:")
             for p_name, prop in schema.properties.items():
@@ -87,6 +100,6 @@ class PythonEmitter(BaseEmitter):
                     py_type = "List[str]"
                     default_val = "field(default_factory=list)"
                 out.append(f"    {p_name}: {py_type} = {default_val}")
-            out.append("")
+            out.append("\n")
 
         return "\n".join(out)

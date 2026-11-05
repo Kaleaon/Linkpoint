@@ -33,7 +33,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Run offline conformance layers
         run: |
@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload offline conformance reports
         if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@v4
         with:
           name: protocol-conformance-offline
           path: legacy/Linkpoint/build/reports/protocol/
@@ -65,17 +65,17 @@ jobs:
       NDK_VERSION: '26.3.11579264'
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
+        uses: android-actions/setup-android@v3
         with:
           packages: >-
             platform-tools
@@ -85,7 +85,7 @@ jobs:
             ndk;${{ env.NDK_VERSION }}
 
       - name: Cache Gradle packages
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -109,7 +109,7 @@ jobs:
 
       - name: Upload conformance reports
         if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@v4
         with:
           name: protocol-conformance-full
           path: |
