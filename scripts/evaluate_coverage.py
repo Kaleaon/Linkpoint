@@ -7,9 +7,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
-def parse_jacoco_xml(xml_path: Path):
+def parse_jacoco_xml(xml_path: Path, warn_if_missing: bool = False):
     if not xml_path.exists():
-        print(f"Warning: JaCoCo XML file not found at {xml_path}")
+        if warn_if_missing:
+            print(f"Warning: JaCoCo XML file not found at {xml_path}")
         return None
 
     try:
@@ -80,12 +81,18 @@ def main():
     parser = argparse.ArgumentParser(
         description="Evaluate Component Coverage & Quality Gates"
     )
+    default_android = Path(
+        "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+    )
+    if not default_android.exists():
+        default_android = Path(
+            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        )
+
     parser.add_argument(
         "--android-report",
         type=Path,
-        default=Path(
-            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-        ),
+        default=default_android,
     )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))
     parser.add_argument("--rust-report", type=Path, default=Path("lcov.info"))

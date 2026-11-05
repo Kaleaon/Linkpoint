@@ -63,14 +63,10 @@ jobs:
       - name: Run Ruff format check
         run: ruff format --check scripts/ tools/
 
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Fetch Dart dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
 
       - name: Cache pre-commit environments
         uses: actions/cache@v4
@@ -85,6 +81,8 @@ jobs:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
     permissions:
       contents: read
 
@@ -187,7 +185,11 @@ jobs:
         run: node scripts/sync-i18n.js --check
 
       - name: Run web workspace validation
-        run: npm run check:web
+        run: |
+          npm run typecheck
+          npm run test:coverage
+          npm run typecheck -w @linkpoint/app
+          npm run build -w @linkpoint/app
 
       - name: Upload Web coverage report
         uses: actions/upload-artifact@v4
@@ -241,7 +243,7 @@ jobs:
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
       - name: Run Rust tests with coverage
-        run: cargo llvm-cov --workspace --locked --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --locked --ignore-filename-regex "generated" --lcov --output-path lcov.info
 
       - name: Upload Rust coverage report
         uses: actions/upload-artifact@v4
@@ -291,6 +293,11 @@ jobs:
 
       - name: Build native protocol shared library
         run: cargo build -p linkpoint-protocol --release
+
+      - name: Fetch Dart dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
 
       - name: Verify Dart formatting
         run: |

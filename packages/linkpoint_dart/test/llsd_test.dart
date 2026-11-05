@@ -13,11 +13,15 @@ void main() {
 
       final xml = LLSD.serializeXml(map);
       expect(
-          xml,
-          contains(
-              '<key>agent_id</key><uuid>00000000-0000-0000-0000-000000000000</uuid>'));
-      expect(xml,
-          contains('<key>region_name</key><string>Welcome Island</string>'));
+        xml,
+        contains(
+          '<key>agent_id</key><uuid>00000000-0000-0000-0000-000000000000</uuid>',
+        ),
+      );
+      expect(
+        xml,
+        contains('<key>region_name</key><string>Welcome Island</string>'),
+      );
       expect(xml, contains('<key>online</key><boolean>true</boolean>'));
     });
 
