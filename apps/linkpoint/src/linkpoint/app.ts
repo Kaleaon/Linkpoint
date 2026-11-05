@@ -126,6 +126,17 @@ export class LinkpointApp {
       }
     });
 
+    this.friends.on('online_alert', (data: any) => {
+      this.notifications.handleNotification({
+        id: `online-alert-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        title: 'Friend Online Alert',
+        message: data.message || `${data.friendName} is now ${data.status}.`,
+        type: 'online_alert',
+        friendId: data.friendId,
+        timestamp: Date.now(),
+      });
+    });
+
     this.protocol.on('friend_request', (data: any) => {
       this.notifications.handleNotification({
         id: data.requestId || String(Date.now()),
