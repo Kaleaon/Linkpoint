@@ -34,6 +34,7 @@ void main() {
         () {
       final candidates = [
         '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
         '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
         'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
         'Linkpoint/src/test/resources/llsd-conformance/vectors',

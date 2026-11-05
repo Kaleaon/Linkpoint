@@ -47,6 +47,7 @@ class DrawablePrimStore {
     ) {
         @Volatile
         var isDirty: Boolean = true
+            private set
 
         var scaleS: Float = scaleS
             set(value) {
@@ -113,12 +114,103 @@ class DrawablePrimStore {
             }
             return cachedMatrix
         }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is FaceMaterial) return false
+            return textureId == other.textureId &&
+                    textureHandle == other.textureHandle &&
+                    normalHandle == other.normalHandle &&
+                    metallicRoughnessHandle == other.metallicRoughnessHandle &&
+                    emissiveHandle == other.emissiveHandle &&
+                    occlusionHandle == other.occlusionHandle &&
+                    colorR == other.colorR &&
+                    colorG == other.colorG &&
+                    colorB == other.colorB &&
+                    colorA == other.colorA &&
+                    scaleS == other.scaleS &&
+                    scaleT == other.scaleT &&
+                    offsetS == other.offsetS &&
+                    offsetT == other.offsetT &&
+                    rotation == other.rotation &&
+                    metallicFactor == other.metallicFactor &&
+                    roughnessFactor == other.roughnessFactor &&
+                    descriptor == other.descriptor &&
+                    glow == other.glow
+        }
+
+        override fun hashCode(): Int {
+            var result = textureId.hashCode()
+            result = 31 * result + textureHandle
+            result = 31 * result + normalHandle
+            result = 31 * result + metallicRoughnessHandle
+            result = 31 * result + emissiveHandle
+            result = 31 * result + occlusionHandle
+            result = 31 * result + colorR.hashCode()
+            result = 31 * result + colorG.hashCode()
+            result = 31 * result + colorB.hashCode()
+            result = 31 * result + colorA.hashCode()
+            result = 31 * result + scaleS.hashCode()
+            result = 31 * result + scaleT.hashCode()
+            result = 31 * result + offsetS.hashCode()
+            result = 31 * result + offsetT.hashCode()
+            result = 31 * result + rotation.hashCode()
+            result = 31 * result + metallicFactor.hashCode()
+            result = 31 * result + roughnessFactor.hashCode()
+            result = 31 * result + (descriptor?.hashCode() ?: 0)
+            result = 31 * result + glow.hashCode()
+            return result
+        }
+
+        fun copy(
+            textureId: UUID = this.textureId,
+            textureHandle: Int = this.textureHandle,
+            normalHandle: Int = this.normalHandle,
+            metallicRoughnessHandle: Int = this.metallicRoughnessHandle,
+            emissiveHandle: Int = this.emissiveHandle,
+            occlusionHandle: Int = this.occlusionHandle,
+            colorR: Float = this.colorR,
+            colorG: Float = this.colorG,
+            colorB: Float = this.colorB,
+            colorA: Float = this.colorA,
+            scaleS: Float = this.scaleS,
+            scaleT: Float = this.scaleT,
+            offsetS: Float = this.offsetS,
+            offsetT: Float = this.offsetT,
+            rotation: Float = this.rotation,
+            metallicFactor: Float = this.metallicFactor,
+            roughnessFactor: Float = this.roughnessFactor,
+            descriptor: MaterialDescriptor? = this.descriptor,
+            glow: Float = this.glow
+        ): FaceMaterial {
+            return FaceMaterial(
+                textureId = textureId,
+                textureHandle = textureHandle,
+                normalHandle = normalHandle,
+                metallicRoughnessHandle = metallicRoughnessHandle,
+                emissiveHandle = emissiveHandle,
+                occlusionHandle = occlusionHandle,
+                colorR = colorR,
+                colorG = colorG,
+                colorB = colorB,
+                colorA = colorA,
+                scaleS = scaleS,
+                scaleT = scaleT,
+                offsetS = offsetS,
+                offsetT = offsetT,
+                rotation = rotation,
+                metallicFactor = metallicFactor,
+                roughnessFactor = roughnessFactor,
+                descriptor = descriptor,
+                glow = glow
+            )
+        }
     }
 
     /** Per-prim instance snapshot data. */
     data class PrimInstance(
         val id: Long,
-        val modelMatrix: FloatArray = FloatArray(16).also { Matrix.setIdentityM(it, 0) },
+        val modelMatrix: FloatArray = FloatArray(16).also { GlMatrix.setIdentityM(it, 0) },
         var shape: ShapeKind = ShapeKind.BOX,
         var hollow: Boolean = false,
         var scaleX: Float = 1f, var scaleY: Float = 1f, var scaleZ: Float = 1f,
@@ -131,7 +223,7 @@ class DrawablePrimStore {
 
     companion object {
         private val NULL_UUID = UUID(0L, 0L)
-        private val IDENTITY_TEX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+        private val IDENTITY_TEX = FloatArray(16).also { GlMatrix.setIdentityM(it, 0) }
 
         const val GLOW_THRESHOLD = 0.005f
         private const val DEFAULT_INITIAL_CAPACITY = 256
@@ -161,7 +253,7 @@ class DrawablePrimStore {
     private var slotIsTransparent = BooleanArray(capacity)
     private var slotModelMatrices = FloatArray(capacity * 16).also {
         for (i in 0 until capacity) {
-            Matrix.setIdentityM(it, i * 16)
+            GlMatrix.setIdentityM(it, i * 16)
         }
     }
 
@@ -246,7 +338,7 @@ class DrawablePrimStore {
         slotAabbHalfY[slot] = 0.5f
         slotAabbHalfZ[slot] = 0.5f
         slotIsTransparent[slot] = false
-        Matrix.setIdentityM(slotModelMatrices, slot * 16)
+        GlMatrix.setIdentityM(slotModelMatrices, slot * 16)
 
         slotFaceCount[slot] = 1
         val base = slot * MAX_FACES_PER_PRIM
@@ -298,7 +390,7 @@ class DrawablePrimStore {
         slotModelMatrices = FloatArray(newCap * 16)
         System.arraycopy(oldModelMat, 0, slotModelMatrices, 0, capacity * 16)
         for (i in capacity until newCap) {
-            Matrix.setIdentityM(slotModelMatrices, i * 16)
+            GlMatrix.setIdentityM(slotModelMatrices, i * 16)
         }
 
         slotFaceCount = slotFaceCount.copyOf(newCap)
@@ -347,9 +439,9 @@ class DrawablePrimStore {
     fun addPrim(id: Long, posX: Float, posY: Float, posZ: Float) {
         val slot = getOrAllocateSlot(id)
         val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
-        Matrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
+        GlMatrix.setIdentityM(slotModelMatrices, offset)
+        GlMatrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
+        GlMatrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
     }
 
     fun upsertPrim(
@@ -384,14 +476,14 @@ class DrawablePrimStore {
         }
 
         val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
+        GlMatrix.setIdentityM(slotModelMatrices, offset)
+        GlMatrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
         if (rotation != null && rotation.size >= 16) {
             val tmp = FloatArray(16)
-            Matrix.multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
+            GlMatrix.multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
             System.arraycopy(tmp, 0, slotModelMatrices, offset, 16)
         }
-        Matrix.scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
+        GlMatrix.scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
 
         applyTextureEntry(slot, shape, slotHollow[slot], textureEntry)
     }
@@ -886,13 +978,13 @@ class DrawablePrimStore {
         val scS = faceScaleS[fIdx]
         val scT = faceScaleT[fIdx]
 
-        Matrix.setIdentityM(outMatrix, 0)
-        Matrix.translateM(outMatrix, 0, 0.5f + offS, 0.5f + offT, 0f)
+        GlMatrix.setIdentityM(outMatrix, 0)
+        GlMatrix.translateM(outMatrix, 0, 0.5f + offS, 0.5f + offT, 0f)
         if (rot != 0f) {
-            Matrix.rotateM(outMatrix, 0, Math.toDegrees(rot.toDouble()).toFloat(), 0f, 0f, 1f)
+            GlMatrix.rotateM(outMatrix, 0, Math.toDegrees(rot.toDouble()).toFloat(), 0f, 0f, 1f)
         }
-        Matrix.scaleM(outMatrix, 0, scS, scT, 1f)
-        Matrix.translateM(outMatrix, 0, -0.5f, -0.5f, 0f)
+        GlMatrix.scaleM(outMatrix, 0, scS, scT, 1f)
+        GlMatrix.translateM(outMatrix, 0, -0.5f, -0.5f, 0f)
     }
 
     private fun ensureShapes(ctx: LumiyaRenderContext) {
@@ -1133,5 +1225,96 @@ class DrawablePrimStore {
                                    (a + 3).toShort(), (b + 3).toShort(), (b + 2).toShort()))
         }
         return bm.buildVAO(verts.toFloatArray(), indices.toShortArray(), listOf(0 to 3, 1 to 3, 2 to 2))
+    }
+}
+
+internal object GlMatrix {
+    fun setIdentityM(sm: FloatArray, smOffset: Int) {
+        for (i in 0..15) {
+            sm[smOffset + i] = 0f
+        }
+        sm[smOffset + 0] = 1f
+        sm[smOffset + 5] = 1f
+        sm[smOffset + 10] = 1f
+        sm[smOffset + 15] = 1f
+    }
+
+    fun translateM(m: FloatArray, mOffset: Int, x: Float, y: Float, z: Float) {
+        m[mOffset + 12] += m[mOffset + 0] * x + m[mOffset + 4] * y + m[mOffset + 8] * z
+        m[mOffset + 13] += m[mOffset + 1] * x + m[mOffset + 5] * y + m[mOffset + 9] * z
+        m[mOffset + 14] += m[mOffset + 2] * x + m[mOffset + 6] * y + m[mOffset + 10] * z
+        m[mOffset + 15] += m[mOffset + 3] * x + m[mOffset + 7] * y + m[mOffset + 11] * z
+    }
+
+    fun scaleM(m: FloatArray, mOffset: Int, x: Float, y: Float, z: Float) {
+        for (i in 0..3) {
+            m[mOffset + i] *= x
+            m[mOffset + 4 + i] *= y
+            m[mOffset + 8 + i] *= z
+        }
+    }
+
+    fun multiplyMM(
+        result: FloatArray, resultOffset: Int,
+        lhs: FloatArray, lhsOffset: Int,
+        rhs: FloatArray, rhsOffset: Int
+    ) {
+        val temp = FloatArray(16)
+        for (col in 0..3) {
+            val rhs0 = rhs[rhsOffset + col * 4 + 0]
+            val rhs1 = rhs[rhsOffset + col * 4 + 1]
+            val rhs2 = rhs[rhsOffset + col * 4 + 2]
+            val rhs3 = rhs[rhsOffset + col * 4 + 3]
+            for (row in 0..3) {
+                temp[col * 4 + row] = lhs[lhsOffset + row + 0] * rhs0 +
+                                      lhs[lhsOffset + row + 4] * rhs1 +
+                                      lhs[lhsOffset + row + 8] * rhs2 +
+                                      lhs[lhsOffset + row + 12] * rhs3
+            }
+        }
+        System.arraycopy(temp, 0, result, resultOffset, 16)
+    }
+
+    fun rotateM(m: FloatArray, mOffset: Int, a: Float, x: Float, y: Float, z: Float) {
+        if (a == 0f) return
+        val rad = Math.toRadians(a.toDouble())
+        val cos = kotlin.math.cos(rad).toFloat()
+        val sin = kotlin.math.sin(rad).toFloat()
+        val rot = FloatArray(16)
+        setIdentityM(rot, 0)
+        if (x == 0f && y == 0f && z == 1f) {
+            rot[0] = cos
+            rot[1] = sin
+            rot[4] = -sin
+            rot[5] = cos
+        } else {
+            val len = kotlin.math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+            if (len == 0f) return
+            val nx = x / len
+            val ny = y / len
+            val nz = z / len
+            val nc = 1f - cos
+            val xy = nx * ny
+            val yz = ny * nz
+            val zx = nz * nx
+            val xs = nx * sin
+            val ys = ny * sin
+            val zs = nz * sin
+
+            rot[0] = nx * nx * nc + cos
+            rot[1] = xy * nc + zs
+            rot[2] = zx * nc - ys
+
+            rot[4] = xy * nc - zs
+            rot[5] = ny * ny * nc + cos
+            rot[6] = yz * nc + xs
+
+            rot[8] = zx * nc + ys
+            rot[9] = yz * nc - xs
+            rot[10] = nz * nz * nc + cos
+        }
+        val temp = FloatArray(16)
+        multiplyMM(temp, 0, m, mOffset, rot, 0)
+        System.arraycopy(temp, 0, m, mOffset, 16)
     }
 }
