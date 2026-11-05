@@ -5846,6 +5846,11 @@ class AgentDomainCapabilitiesCapabilities:
     active_group_id: Optional[str] = None
     maturity_rating: Optional[str] = None
 
+@dataclass
+class EventQueueGetCapabilities:
+    ack: Optional[int] = None
+    events: List[str] = field(default_factory=list)
+
 
 @dataclass
 class CapabilitiesRequestResponseCapabilities:
