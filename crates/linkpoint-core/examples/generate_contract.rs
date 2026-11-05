@@ -16,10 +16,8 @@ fn main() {
     }
     fs::write(dart_target, DART_CONTRACT).expect("write generated Dart Viewer contract");
 
-    let legacy_kt_target =
-        root.join("legacy/Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt");
-    let kt_target = if legacy_kt_target.parent().is_some_and(|p| p.exists()) {
-        legacy_kt_target
+    let kt_target = if root.join("legacy/Linkpoint/src/main/java").exists() {
+        root.join("legacy/Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt")
     } else {
         root.join("Linkpoint/src/main/java/com/linkpoint/protocol/ViewerContract.kt")
     };
