@@ -75,6 +75,8 @@ if [[ ${skip_gradle} -eq 0 ]]; then
       GRADLE_CMD="./gradlew"
     elif [[ -x "${LINKPOINT_ROOT}/../gradlew" ]]; then
       GRADLE_CMD="../gradlew"
+    elif [[ -x "${REPO_ROOT}/gradlew" ]]; then
+      GRADLE_CMD="${REPO_ROOT}/gradlew"
     elif command -v gradle >/dev/null 2>&1; then
       GRADLE_CMD="gradle"
     else
