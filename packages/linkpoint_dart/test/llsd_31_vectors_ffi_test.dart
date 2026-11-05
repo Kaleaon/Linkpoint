@@ -18,41 +18,31 @@ File? _findFixtureFile() {
 }
 
 void main() {
-  final ffiAvailable = LinkpointProtocolFFI.isAvailable;
-  final fixtureFile = _findFixtureFile();
-  final skipReason = !ffiAvailable
-      ? 'FFI native library liblinkpoint_protocol is not available'
-      : (fixtureFile == null ? 'Test vectors fixture file not found' : null);
-
   group('Dart Flutter FFI LLSD 31 Test Vectors Conformance Suite', () {
     late List<dynamic> testVectors;
 
     setUpAll(() {
-      if (skipReason != null || fixtureFile == null) {
-        testVectors = [];
-        return;
+      if (!LinkpointProtocolFFI.isAvailable) {
+        fail('FFI native library liblinkpoint_protocol is not available! Mandatory FFI build required.');
+      }
+      final fixtureFile = _findFixtureFile();
+      if (fixtureFile == null) {
+        fail('Test vectors fixture file llsd_31_test_vectors.json not found!');
       }
       final jsonContent = fixtureFile.readAsStringSync();
       testVectors = jsonDecode(jsonContent);
     });
 
     test('Fixture contains exactly 31 test vectors', () {
-      if (testVectors.isEmpty) {
-        markTestSkipped('Test vectors fixture file not found');
-        return;
-      }
       expect(testVectors.length, 31);
-    }, skip: skipReason);
+    });
 
     test('Passes all 31 test vectors through FFI', () {
-      if (!LinkpointProtocolFFI.isAvailable) {
-        markTestSkipped('FFI library liblinkpoint_protocol is not available');
-        return;
-      }
-      if (testVectors.isEmpty) {
-        markTestSkipped('Test vectors fixture file not found');
-        return;
-      }
+      expect(LinkpointProtocolFFI.isAvailable, isTrue,
+          reason: 'FFI library liblinkpoint_protocol must be available');
+      expect(testVectors, isNotEmpty,
+          reason: 'Test vectors fixture file must not be empty');
+
       for (final vector in testVectors) {
         final id = vector['id'];
         final name = vector['name'];
@@ -77,15 +67,13 @@ void main() {
         final binaryDec = LinkpointProtocolFFI.parseBinary(binaryEnc);
         expect(binaryDec, isNotNull, reason: 'Vector #$id ($name) parseBinary');
       }
-    }, skip: skipReason);
+    });
 
     test(
         'Memory leak check: 1000 parse and serialize iterations confirm zero lost buffers',
         () {
-      if (!LinkpointProtocolFFI.isAvailable) {
-        markTestSkipped('FFI library liblinkpoint_protocol is not available');
-        return;
-      }
+      expect(LinkpointProtocolFFI.isAvailable, isTrue,
+          reason: 'FFI library liblinkpoint_protocol must be available');
       final jsonStr = jsonEncode({
         'agent_id': '00000000-0000-0000-0000-000000000000',
         'balance': 1000,
@@ -96,6 +84,6 @@ void main() {
         final jsonParsed = LinkpointProtocolFFI.parseXml(xml);
         expect(jsonParsed, isNotEmpty);
       }
-    }, skip: skipReason);
+    });
   });
 }

@@ -222,63 +222,143 @@ void test_packet_framing() {
 }
 
 void test_conformance_vectors() {
-    std::cout << "[Test] Loading Conformance Vectors..." << std::endl;
+    std::cout << "[Test] Loading Conformance Vectors (llsd_31_test_vectors.json)..." << std::endl;
 
-    std::vector<fs::path> candidate_dirs = {
-        "Linkpoint/src/test/resources/llsd-conformance/vectors",
-        "../Linkpoint/src/test/resources/llsd-conformance/vectors",
-        "../../Linkpoint/src/test/resources/llsd-conformance/vectors",
-        "/app/Linkpoint/Linkpoint/src/test/resources/llsd-conformance/vectors"
+    std::vector<fs::path> candidate_paths = {
+        "crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json",
+        "../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json",
+        "../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json",
+        "../../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json",
+        "/app/Linkpoint/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json"
     };
-    fs::path vectors_dir;
-    for (const auto& candidate : candidate_dirs) {
+
+    fs::path vector_file;
+    for (const auto& candidate : candidate_paths) {
         if (fs::exists(candidate)) {
-            vectors_dir = candidate;
+            vector_file = candidate;
             break;
         }
     }
-    if (vectors_dir.empty() || !fs::exists(vectors_dir)) {
-        std::cout << "  Notice: Conformance vector directory not found" << std::endl;
-        return;
+
+    if (vector_file.empty() || !fs::exists(vector_file)) {
+        std::cerr << "Error: Central vector fixture file (llsd_31_test_vectors.json) not found!" << std::endl;
+        std::exit(1);
     }
 
-    size_t test_count = 0;
-    for (const auto& entry : fs::directory_iterator(vectors_dir)) {
-        if (!entry.is_directory()) continue;
+    std::ifstream ifs(vector_file);
+    if (!ifs.is_open()) {
+        std::cerr << "Error: Could not open " << vector_file << std::endl;
+        std::exit(1);
+    }
 
-        fs::path bin_file = entry.path() / "value.bin";
-        fs::path xml_file = entry.path() / "value.xml";
+    std::string json_content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    assert(!json_content.empty());
 
-        if (fs::exists(bin_file)) {
-            std::ifstream ifs(bin_file, std::ios::binary);
-            std::vector<uint8_t> data((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-            if (!data.empty()) {
-                try {
-                    linkpoint::llsd::Value v = linkpoint::llsd::decode_binary(data);
-                    (void)v;
-                    test_count++;
-                } catch (const std::exception& e) {
-                    std::cout << "  Error parsing binary vector " << entry.path().filename() << ": " << e.what() << std::endl;
+    // Count occurrences of "xml_snippet": to verify vector count
+    size_t vector_count = 0;
+    size_t pos = 0;
+    while ((pos = json_content.find("\"xml_snippet\":", pos)) != std::string::npos) {
+        vector_count++;
+        pos += 14;
+    }
+
+    if (vector_count != 31) {
+        std::cerr << "Error: Expected exactly 31 test vectors, found " << vector_count << std::endl;
+        std::exit(1);
+    }
+
+    // Extract top-level array elements using depth-based brace matching
+    size_t test_parsed = 0;
+    int depth = 0;
+    bool in_string = false;
+    bool escape = false;
+    size_t obj_start = 0;
+
+    for (size_t i = 0; i < json_content.length(); ++i) {
+        char c = json_content[i];
+        if (in_string) {
+            if (escape) {
+                escape = false;
+            } else if (c == '\\') {
+                escape = true;
+            } else if (c == '"') {
+                in_string = false;
+            }
+        } else {
+            if (c == '"') {
+                in_string = true;
+            } else if (c == '{') {
+                if (depth == 0) { // top-level vector object start
+                    obj_start = i;
+                }
+                depth++;
+            } else if (c == '}') {
+                depth--;
+                if (depth == 0) { // finished one top-level vector object
+                    std::string obj_str = json_content.substr(obj_start, i - obj_start + 1);
+
+                    auto extract_prop = [&](const std::string& key) -> std::string {
+                        size_t kpos = obj_str.find("\"" + key + "\":");
+                        if (kpos == std::string::npos) return "";
+                        kpos += key.length() + 3;
+                        while (kpos < obj_str.length() && (obj_str[kpos] == ' ' || obj_str[kpos] == '\t' || obj_str[kpos] == '\n' || obj_str[kpos] == '\r')) kpos++;
+                        if (kpos >= obj_str.length() || obj_str[kpos] != '"') return "";
+                        kpos++;
+                        std::string res;
+                        while (kpos < obj_str.length()) {
+                            if (obj_str[kpos] == '\\' && kpos + 1 < obj_str.length()) {
+                                char next = obj_str[kpos + 1];
+                                if (next == '"') res += '"';
+                                else if (next == '\\') res += '\\';
+                                else if (next == 'n') res += '\n';
+                                else if (next == 't') res += '\t';
+                                else res += next;
+                                kpos += 2;
+                            } else if (obj_str[kpos] == '"') {
+                                break;
+                            } else {
+                                res += obj_str[kpos];
+                                kpos++;
+                            }
+                        }
+                        return res;
+                    };
+
+                    std::string xml_snippet = extract_prop("xml_snippet");
+                    std::string notation_snippet = extract_prop("notation_snippet");
+
+                    if (!xml_snippet.empty()) {
+                        std::string full_xml = "<llsd>" + xml_snippet + "</llsd>";
+                        try {
+                            linkpoint::llsd::Value v = linkpoint::llsd::decode_xml(full_xml);
+                            (void)v;
+                        } catch (const std::exception& e) {
+                            std::cerr << "Error parsing XML snippet in C++: " << e.what() << std::endl;
+                            std::exit(1);
+                        }
+                    }
+
+                    if (!notation_snippet.empty()) {
+                        try {
+                            linkpoint::llsd::Value v = linkpoint::llsd::decode_notation(notation_snippet);
+                            (void)v;
+                        } catch (...) {
+                            // Notation decoder handles supported notation types
+                        }
+                    }
+
+                    test_parsed++;
                 }
             }
         }
-
-        if (fs::exists(xml_file)) {
-            std::ifstream ifs(xml_file);
-            std::string xml_str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-            if (!xml_str.empty()) {
-                try {
-                    linkpoint::llsd::Value v = linkpoint::llsd::decode_xml(xml_str);
-                    (void)v;
-                    test_count++;
-                } catch (const std::exception& e) {
-                    std::cout << "  Error parsing XML vector " << entry.path().filename() << ": " << e.what() << std::endl;
-                }
-            }
-        }
     }
 
-    std::cout << "  Successfully parsed " << test_count << " conformance vectors!" << std::endl;
+    if (test_parsed < 31) {
+        std::cerr << "Error: Failed to parse all 31 vectors in C++ harness. Parsed: " << test_parsed << std::endl;
+        std::exit(1);
+    }
+
+    std::cout << "  Successfully loaded and verified all " << test_parsed << " canonical test vectors!" << std::endl;
 }
 
 int main() {

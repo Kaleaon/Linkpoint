@@ -3,17 +3,31 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn get_python_command() -> &'static str {
-    for cmd in &["python3", "python", "py"] {
-        if Command::new(cmd)
-            .arg("--version")
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false)
-        {
-            return cmd;
+    if cfg!(windows) {
+        for cmd in &["python", "py", "python3"] {
+            if Command::new(cmd)
+                .arg("--version")
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false)
+            {
+                return cmd;
+            }
         }
+        "python"
+    } else {
+        for cmd in &["python3", "python", "py"] {
+            if Command::new(cmd)
+                .arg("--version")
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false)
+            {
+                return cmd;
+            }
+        }
+        "python3"
     }
-    "python3"
 }
 
 fn main() {
