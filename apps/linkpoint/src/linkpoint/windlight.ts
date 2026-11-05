@@ -78,7 +78,7 @@ function scalar(source: any, key: string): number {
   return value;
 }
 
-const gamma = (v: Vec4): Vec4 => v.map((x) => Math.pow(x, 1 / WINDLIGHT_GAMMA) * 1.25) as Vec4;
+const gamma = (v: Vec4): Vec4 => v.map((x) => Math.pow(Math.max(0, x), 1 / WINDLIGHT_GAMMA) * 1.25) as Vec4;
 
 /** Parse one preset from LLSD XML, applying Lumiya's scale factors and gamma. Throws if a field is missing. */
 export function parseWindlightPreset(xml: string): WindlightPreset {

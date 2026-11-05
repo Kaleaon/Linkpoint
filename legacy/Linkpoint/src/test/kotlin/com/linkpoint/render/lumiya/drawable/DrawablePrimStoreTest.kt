@@ -1,6 +1,8 @@
 package com.linkpoint.render.lumiya.drawable
 
 import com.linkpoint.protocol.messages.PrimShapeParams
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
