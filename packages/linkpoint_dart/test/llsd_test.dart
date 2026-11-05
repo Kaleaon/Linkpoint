@@ -40,8 +40,8 @@ void main() {
         '/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
       ];
       Directory? vectorsDir;
-      for (final candidate in candidates) {
-        final d = Directory(candidate);
+      for (final p in candidates) {
+        final d = Directory(p);
         if (d.existsSync()) {
           vectorsDir = d;
           break;

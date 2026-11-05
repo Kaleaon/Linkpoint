@@ -105,12 +105,12 @@ jobs:
 
       - name: Grant execute permission for tooling
         run: |
-          chmod +x legacy/gradlew legacy/Linkpoint/gradlew
+          chmod +x gradlew legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
           chmod +x legacy/Linkpoint/tools/protocol/*.sh legacy/Linkpoint/tools/protocol/*.py
 
       - name: Run unified conformance suite
         env:
-          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
         run: legacy/Linkpoint/tools/protocol/run_conformance.sh
 
       - name: Upload conformance reports

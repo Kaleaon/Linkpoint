@@ -5,7 +5,7 @@
 
 import struct
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any
+from typing import Dict, List, Optional
 
 TEMPLATE_VERSION = "2.0"
 
@@ -495,6 +495,7 @@ REGISTERED_MESSAGES: Dict[str, int] = {
     "GameControlInput": 32,
 }
 
+
 def decompress_zerocoded(src: bytes) -> bytes:
     dest = bytearray()
     i = 0
@@ -504,7 +505,7 @@ def decompress_zerocoded(src: bytes) -> bytes:
         if b == 0:
             if i + 1 < src_len:
                 count = src[i + 1]
-                dest.extend(b'\x00' * count)
+                dest.extend(b"\x00" * count)
                 i += 2
             else:
                 dest.append(0)
@@ -513,6 +514,7 @@ def decompress_zerocoded(src: bytes) -> bytes:
             dest.append(b)
             i += 1
     return bytes(dest)
+
 
 # Generated UDP Messages
 @dataclass
@@ -523,7 +525,8 @@ class TestMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 1)
+        return struct.pack("<I", 1)
+
 
 @dataclass
 class PacketAckPacket:
@@ -533,7 +536,8 @@ class PacketAckPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 4294967291)
+        return struct.pack("<I", 4294967291)
+
 
 @dataclass
 class OpenCircuitPacket:
@@ -543,7 +547,8 @@ class OpenCircuitPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 4294967292)
+        return struct.pack("<I", 4294967292)
+
 
 @dataclass
 class CloseCircuitPacket:
@@ -553,7 +558,8 @@ class CloseCircuitPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 4294967293)
+        return struct.pack("<I", 4294967293)
+
 
 @dataclass
 class StartPingCheckPacket:
@@ -563,7 +569,8 @@ class StartPingCheckPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 1)
+        return struct.pack("<I", 1)
+
 
 @dataclass
 class CompletePingCheckPacket:
@@ -573,7 +580,8 @@ class CompletePingCheckPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 2)
+        return struct.pack("<I", 2)
+
 
 @dataclass
 class AddCircuitCodePacket:
@@ -583,7 +591,8 @@ class AddCircuitCodePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 2)
+        return struct.pack("<I", 2)
+
 
 @dataclass
 class UseCircuitCodePacket:
@@ -593,7 +602,8 @@ class UseCircuitCodePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 3)
+        return struct.pack("<I", 3)
+
 
 @dataclass
 class NeighborListPacket:
@@ -603,7 +613,8 @@ class NeighborListPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 3)
+        return struct.pack("<I", 3)
+
 
 @dataclass
 class AvatarTextureUpdatePacket:
@@ -613,7 +624,8 @@ class AvatarTextureUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 4)
+        return struct.pack("<I", 4)
+
 
 @dataclass
 class SimulatorMapUpdatePacket:
@@ -623,7 +635,8 @@ class SimulatorMapUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 5)
+        return struct.pack("<I", 5)
+
 
 @dataclass
 class SimulatorSetMapPacket:
@@ -633,7 +646,8 @@ class SimulatorSetMapPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 6)
+        return struct.pack("<I", 6)
+
 
 @dataclass
 class SubscribeLoadPacket:
@@ -643,7 +657,8 @@ class SubscribeLoadPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 7)
+        return struct.pack("<I", 7)
+
 
 @dataclass
 class UnsubscribeLoadPacket:
@@ -653,7 +668,8 @@ class UnsubscribeLoadPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 8)
+        return struct.pack("<I", 8)
+
 
 @dataclass
 class SimulatorReadyPacket:
@@ -663,7 +679,8 @@ class SimulatorReadyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 9)
+        return struct.pack("<I", 9)
+
 
 @dataclass
 class TelehubInfoPacket:
@@ -673,7 +690,8 @@ class TelehubInfoPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 10)
+        return struct.pack("<I", 10)
+
 
 @dataclass
 class SimulatorPresentAtLocationPacket:
@@ -683,7 +701,8 @@ class SimulatorPresentAtLocationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 11)
+        return struct.pack("<I", 11)
+
 
 @dataclass
 class SimulatorLoadPacket:
@@ -693,7 +712,8 @@ class SimulatorLoadPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 12)
+        return struct.pack("<I", 12)
+
 
 @dataclass
 class SimulatorShutdownRequestPacket:
@@ -703,7 +723,8 @@ class SimulatorShutdownRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 13)
+        return struct.pack("<I", 13)
+
 
 @dataclass
 class RegionPresenceRequestByRegionIDPacket:
@@ -713,7 +734,8 @@ class RegionPresenceRequestByRegionIDPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 14)
+        return struct.pack("<I", 14)
+
 
 @dataclass
 class RegionPresenceRequestByHandlePacket:
@@ -723,7 +745,8 @@ class RegionPresenceRequestByHandlePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 15)
+        return struct.pack("<I", 15)
+
 
 @dataclass
 class RegionPresenceResponsePacket:
@@ -733,7 +756,8 @@ class RegionPresenceResponsePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 16)
+        return struct.pack("<I", 16)
+
 
 @dataclass
 class UpdateSimulatorPacket:
@@ -743,7 +767,8 @@ class UpdateSimulatorPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 17)
+        return struct.pack("<I", 17)
+
 
 @dataclass
 class LogDwellTimePacket:
@@ -753,7 +778,8 @@ class LogDwellTimePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 18)
+        return struct.pack("<I", 18)
+
 
 @dataclass
 class FeatureDisabledPacket:
@@ -763,7 +789,8 @@ class FeatureDisabledPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 19)
+        return struct.pack("<I", 19)
+
 
 @dataclass
 class LogFailedMoneyTransactionPacket:
@@ -773,7 +800,8 @@ class LogFailedMoneyTransactionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 20)
+        return struct.pack("<I", 20)
+
 
 @dataclass
 class UserReportInternalPacket:
@@ -783,7 +811,8 @@ class UserReportInternalPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 21)
+        return struct.pack("<I", 21)
+
 
 @dataclass
 class SetSimStatusInDatabasePacket:
@@ -793,7 +822,8 @@ class SetSimStatusInDatabasePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 22)
+        return struct.pack("<I", 22)
+
 
 @dataclass
 class SetSimPresenceInDatabasePacket:
@@ -803,7 +833,8 @@ class SetSimPresenceInDatabasePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 23)
+        return struct.pack("<I", 23)
+
 
 @dataclass
 class EconomyDataRequestPacket:
@@ -813,7 +844,8 @@ class EconomyDataRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 24)
+        return struct.pack("<I", 24)
+
 
 @dataclass
 class EconomyDataPacket:
@@ -823,7 +855,8 @@ class EconomyDataPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 25)
+        return struct.pack("<I", 25)
+
 
 @dataclass
 class AvatarPickerRequestPacket:
@@ -833,7 +866,8 @@ class AvatarPickerRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 26)
+        return struct.pack("<I", 26)
+
 
 @dataclass
 class AvatarPickerRequestBackendPacket:
@@ -843,7 +877,8 @@ class AvatarPickerRequestBackendPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 27)
+        return struct.pack("<I", 27)
+
 
 @dataclass
 class AvatarPickerReplyPacket:
@@ -853,7 +888,8 @@ class AvatarPickerReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 28)
+        return struct.pack("<I", 28)
+
 
 @dataclass
 class PlacesQueryPacket:
@@ -863,7 +899,8 @@ class PlacesQueryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 29)
+        return struct.pack("<I", 29)
+
 
 @dataclass
 class PlacesReplyPacket:
@@ -873,7 +910,8 @@ class PlacesReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 30)
+        return struct.pack("<I", 30)
+
 
 @dataclass
 class DirFindQueryPacket:
@@ -883,7 +921,8 @@ class DirFindQueryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 31)
+        return struct.pack("<I", 31)
+
 
 @dataclass
 class DirFindQueryBackendPacket:
@@ -893,7 +932,8 @@ class DirFindQueryBackendPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 32)
+        return struct.pack("<I", 32)
+
 
 @dataclass
 class DirPlacesQueryPacket:
@@ -903,7 +943,8 @@ class DirPlacesQueryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 33)
+        return struct.pack("<I", 33)
+
 
 @dataclass
 class DirPlacesQueryBackendPacket:
@@ -913,7 +954,8 @@ class DirPlacesQueryBackendPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 34)
+        return struct.pack("<I", 34)
+
 
 @dataclass
 class DirPlacesReplyPacket:
@@ -923,7 +965,8 @@ class DirPlacesReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 35)
+        return struct.pack("<I", 35)
+
 
 @dataclass
 class DirPeopleReplyPacket:
@@ -933,7 +976,8 @@ class DirPeopleReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 36)
+        return struct.pack("<I", 36)
+
 
 @dataclass
 class DirEventsReplyPacket:
@@ -943,7 +987,8 @@ class DirEventsReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 37)
+        return struct.pack("<I", 37)
+
 
 @dataclass
 class DirGroupsReplyPacket:
@@ -953,7 +998,8 @@ class DirGroupsReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 38)
+        return struct.pack("<I", 38)
+
 
 @dataclass
 class DirClassifiedQueryPacket:
@@ -963,7 +1009,8 @@ class DirClassifiedQueryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 39)
+        return struct.pack("<I", 39)
+
 
 @dataclass
 class DirClassifiedQueryBackendPacket:
@@ -973,7 +1020,8 @@ class DirClassifiedQueryBackendPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 40)
+        return struct.pack("<I", 40)
+
 
 @dataclass
 class DirClassifiedReplyPacket:
@@ -983,7 +1031,8 @@ class DirClassifiedReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 41)
+        return struct.pack("<I", 41)
+
 
 @dataclass
 class AvatarClassifiedReplyPacket:
@@ -993,7 +1042,8 @@ class AvatarClassifiedReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 42)
+        return struct.pack("<I", 42)
+
 
 @dataclass
 class ClassifiedInfoRequestPacket:
@@ -1003,7 +1053,8 @@ class ClassifiedInfoRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 43)
+        return struct.pack("<I", 43)
+
 
 @dataclass
 class ClassifiedInfoReplyPacket:
@@ -1013,7 +1064,8 @@ class ClassifiedInfoReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 44)
+        return struct.pack("<I", 44)
+
 
 @dataclass
 class ClassifiedInfoUpdatePacket:
@@ -1023,7 +1075,8 @@ class ClassifiedInfoUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 45)
+        return struct.pack("<I", 45)
+
 
 @dataclass
 class ClassifiedDeletePacket:
@@ -1033,7 +1086,8 @@ class ClassifiedDeletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 46)
+        return struct.pack("<I", 46)
+
 
 @dataclass
 class ClassifiedGodDeletePacket:
@@ -1043,7 +1097,8 @@ class ClassifiedGodDeletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 47)
+        return struct.pack("<I", 47)
+
 
 @dataclass
 class DirLandQueryPacket:
@@ -1053,7 +1108,8 @@ class DirLandQueryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 48)
+        return struct.pack("<I", 48)
+
 
 @dataclass
 class DirLandQueryBackendPacket:
@@ -1063,7 +1119,8 @@ class DirLandQueryBackendPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 49)
+        return struct.pack("<I", 49)
+
 
 @dataclass
 class DirLandReplyPacket:
@@ -1073,7 +1130,8 @@ class DirLandReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 50)
+        return struct.pack("<I", 50)
+
 
 @dataclass
 class DirPopularQueryPacket:
@@ -1083,7 +1141,8 @@ class DirPopularQueryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 51)
+        return struct.pack("<I", 51)
+
 
 @dataclass
 class DirPopularQueryBackendPacket:
@@ -1093,7 +1152,8 @@ class DirPopularQueryBackendPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 52)
+        return struct.pack("<I", 52)
+
 
 @dataclass
 class DirPopularReplyPacket:
@@ -1103,7 +1163,8 @@ class DirPopularReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 53)
+        return struct.pack("<I", 53)
+
 
 @dataclass
 class ParcelInfoRequestPacket:
@@ -1113,7 +1174,8 @@ class ParcelInfoRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 54)
+        return struct.pack("<I", 54)
+
 
 @dataclass
 class ParcelInfoReplyPacket:
@@ -1123,7 +1185,8 @@ class ParcelInfoReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 55)
+        return struct.pack("<I", 55)
+
 
 @dataclass
 class ParcelObjectOwnersRequestPacket:
@@ -1133,7 +1196,8 @@ class ParcelObjectOwnersRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 56)
+        return struct.pack("<I", 56)
+
 
 @dataclass
 class ParcelObjectOwnersReplyPacket:
@@ -1143,7 +1207,8 @@ class ParcelObjectOwnersReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 57)
+        return struct.pack("<I", 57)
+
 
 @dataclass
 class GroupNoticesListRequestPacket:
@@ -1153,7 +1218,8 @@ class GroupNoticesListRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 58)
+        return struct.pack("<I", 58)
+
 
 @dataclass
 class GroupNoticesListReplyPacket:
@@ -1163,7 +1229,8 @@ class GroupNoticesListReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 59)
+        return struct.pack("<I", 59)
+
 
 @dataclass
 class GroupNoticeRequestPacket:
@@ -1173,7 +1240,8 @@ class GroupNoticeRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 60)
+        return struct.pack("<I", 60)
+
 
 @dataclass
 class GroupNoticeAddPacket:
@@ -1183,7 +1251,8 @@ class GroupNoticeAddPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 61)
+        return struct.pack("<I", 61)
+
 
 @dataclass
 class TeleportRequestPacket:
@@ -1193,7 +1262,8 @@ class TeleportRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 62)
+        return struct.pack("<I", 62)
+
 
 @dataclass
 class TeleportLocationRequestPacket:
@@ -1203,7 +1273,8 @@ class TeleportLocationRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 63)
+        return struct.pack("<I", 63)
+
 
 @dataclass
 class TeleportLocalPacket:
@@ -1213,7 +1284,8 @@ class TeleportLocalPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 64)
+        return struct.pack("<I", 64)
+
 
 @dataclass
 class TeleportLandmarkRequestPacket:
@@ -1223,7 +1295,8 @@ class TeleportLandmarkRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 65)
+        return struct.pack("<I", 65)
+
 
 @dataclass
 class TeleportProgressPacket:
@@ -1233,7 +1306,8 @@ class TeleportProgressPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 66)
+        return struct.pack("<I", 66)
+
 
 @dataclass
 class DataHomeLocationRequestPacket:
@@ -1243,7 +1317,8 @@ class DataHomeLocationRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 67)
+        return struct.pack("<I", 67)
+
 
 @dataclass
 class DataHomeLocationReplyPacket:
@@ -1253,7 +1328,8 @@ class DataHomeLocationReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 68)
+        return struct.pack("<I", 68)
+
 
 @dataclass
 class TeleportFinishPacket:
@@ -1263,7 +1339,8 @@ class TeleportFinishPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 69)
+        return struct.pack("<I", 69)
+
 
 @dataclass
 class StartLurePacket:
@@ -1273,7 +1350,8 @@ class StartLurePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 70)
+        return struct.pack("<I", 70)
+
 
 @dataclass
 class TeleportLureRequestPacket:
@@ -1283,7 +1361,8 @@ class TeleportLureRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 71)
+        return struct.pack("<I", 71)
+
 
 @dataclass
 class TeleportCancelPacket:
@@ -1293,7 +1372,8 @@ class TeleportCancelPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 72)
+        return struct.pack("<I", 72)
+
 
 @dataclass
 class TeleportStartPacket:
@@ -1303,7 +1383,8 @@ class TeleportStartPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 73)
+        return struct.pack("<I", 73)
+
 
 @dataclass
 class TeleportFailedPacket:
@@ -1313,7 +1394,8 @@ class TeleportFailedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 74)
+        return struct.pack("<I", 74)
+
 
 @dataclass
 class UndoPacket:
@@ -1323,7 +1405,8 @@ class UndoPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 75)
+        return struct.pack("<I", 75)
+
 
 @dataclass
 class RedoPacket:
@@ -1333,7 +1416,8 @@ class RedoPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 76)
+        return struct.pack("<I", 76)
+
 
 @dataclass
 class UndoLandPacket:
@@ -1343,7 +1427,8 @@ class UndoLandPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 77)
+        return struct.pack("<I", 77)
+
 
 @dataclass
 class AgentPausePacket:
@@ -1353,7 +1438,8 @@ class AgentPausePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 78)
+        return struct.pack("<I", 78)
+
 
 @dataclass
 class AgentResumePacket:
@@ -1363,7 +1449,8 @@ class AgentResumePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 79)
+        return struct.pack("<I", 79)
+
 
 @dataclass
 class AgentUpdatePacket:
@@ -1373,7 +1460,8 @@ class AgentUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 4)
+        return struct.pack("<I", 4)
+
 
 @dataclass
 class ChatFromViewerPacket:
@@ -1383,7 +1471,8 @@ class ChatFromViewerPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 80)
+        return struct.pack("<I", 80)
+
 
 @dataclass
 class AgentThrottlePacket:
@@ -1393,7 +1482,8 @@ class AgentThrottlePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 81)
+        return struct.pack("<I", 81)
+
 
 @dataclass
 class AgentFOVPacket:
@@ -1403,7 +1493,8 @@ class AgentFOVPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 82)
+        return struct.pack("<I", 82)
+
 
 @dataclass
 class AgentHeightWidthPacket:
@@ -1413,7 +1504,8 @@ class AgentHeightWidthPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 83)
+        return struct.pack("<I", 83)
+
 
 @dataclass
 class AgentSetAppearancePacket:
@@ -1423,7 +1515,8 @@ class AgentSetAppearancePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 84)
+        return struct.pack("<I", 84)
+
 
 @dataclass
 class AgentAnimationPacket:
@@ -1433,7 +1526,8 @@ class AgentAnimationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 5)
+        return struct.pack("<I", 5)
+
 
 @dataclass
 class AgentRequestSitPacket:
@@ -1443,7 +1537,8 @@ class AgentRequestSitPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 6)
+        return struct.pack("<I", 6)
+
 
 @dataclass
 class AgentSitPacket:
@@ -1453,7 +1548,8 @@ class AgentSitPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 7)
+        return struct.pack("<I", 7)
+
 
 @dataclass
 class AgentQuitCopyPacket:
@@ -1463,7 +1559,8 @@ class AgentQuitCopyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 85)
+        return struct.pack("<I", 85)
+
 
 @dataclass
 class RequestImagePacket:
@@ -1473,7 +1570,8 @@ class RequestImagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 8)
+        return struct.pack("<I", 8)
+
 
 @dataclass
 class ImageNotInDatabasePacket:
@@ -1483,7 +1581,8 @@ class ImageNotInDatabasePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 86)
+        return struct.pack("<I", 86)
+
 
 @dataclass
 class RebakeAvatarTexturesPacket:
@@ -1493,7 +1592,8 @@ class RebakeAvatarTexturesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 87)
+        return struct.pack("<I", 87)
+
 
 @dataclass
 class SetAlwaysRunPacket:
@@ -1503,7 +1603,8 @@ class SetAlwaysRunPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 88)
+        return struct.pack("<I", 88)
+
 
 @dataclass
 class ObjectAddPacket:
@@ -1513,7 +1614,8 @@ class ObjectAddPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 1)
+        return struct.pack("<I", 1)
+
 
 @dataclass
 class ObjectDeletePacket:
@@ -1523,7 +1625,8 @@ class ObjectDeletePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 89)
+        return struct.pack("<I", 89)
+
 
 @dataclass
 class ObjectDuplicatePacket:
@@ -1533,7 +1636,8 @@ class ObjectDuplicatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 90)
+        return struct.pack("<I", 90)
+
 
 @dataclass
 class ObjectDuplicateOnRayPacket:
@@ -1543,7 +1647,8 @@ class ObjectDuplicateOnRayPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 91)
+        return struct.pack("<I", 91)
+
 
 @dataclass
 class MultipleObjectUpdatePacket:
@@ -1553,7 +1658,8 @@ class MultipleObjectUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 2)
+        return struct.pack("<I", 2)
+
 
 @dataclass
 class RequestMultipleObjectsPacket:
@@ -1563,7 +1669,8 @@ class RequestMultipleObjectsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 3)
+        return struct.pack("<I", 3)
+
 
 @dataclass
 class ObjectPositionPacket:
@@ -1573,7 +1680,8 @@ class ObjectPositionPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 4)
+        return struct.pack("<I", 4)
+
 
 @dataclass
 class ObjectScalePacket:
@@ -1583,7 +1691,8 @@ class ObjectScalePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 92)
+        return struct.pack("<I", 92)
+
 
 @dataclass
 class ObjectRotationPacket:
@@ -1593,7 +1702,8 @@ class ObjectRotationPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 93)
+        return struct.pack("<I", 93)
+
 
 @dataclass
 class ObjectFlagUpdatePacket:
@@ -1603,7 +1713,8 @@ class ObjectFlagUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 94)
+        return struct.pack("<I", 94)
+
 
 @dataclass
 class ObjectClickActionPacket:
@@ -1613,7 +1724,8 @@ class ObjectClickActionPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 95)
+        return struct.pack("<I", 95)
+
 
 @dataclass
 class ObjectImagePacket:
@@ -1623,7 +1735,8 @@ class ObjectImagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 96)
+        return struct.pack("<I", 96)
+
 
 @dataclass
 class ObjectBypassModUpdatePacket:
@@ -1633,7 +1746,8 @@ class ObjectBypassModUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 431)
+        return struct.pack("<I", 431)
+
 
 @dataclass
 class ObjectMaterialPacket:
@@ -1643,7 +1757,8 @@ class ObjectMaterialPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 97)
+        return struct.pack("<I", 97)
+
 
 @dataclass
 class ObjectShapePacket:
@@ -1653,7 +1768,8 @@ class ObjectShapePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 98)
+        return struct.pack("<I", 98)
+
 
 @dataclass
 class ObjectExtraParamsPacket:
@@ -1663,7 +1779,8 @@ class ObjectExtraParamsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 99)
+        return struct.pack("<I", 99)
+
 
 @dataclass
 class ObjectOwnerPacket:
@@ -1673,7 +1790,8 @@ class ObjectOwnerPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 100)
+        return struct.pack("<I", 100)
+
 
 @dataclass
 class ObjectGroupPacket:
@@ -1683,7 +1801,8 @@ class ObjectGroupPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 101)
+        return struct.pack("<I", 101)
+
 
 @dataclass
 class ObjectBuyPacket:
@@ -1693,7 +1812,8 @@ class ObjectBuyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 102)
+        return struct.pack("<I", 102)
+
 
 @dataclass
 class BuyObjectInventoryPacket:
@@ -1703,7 +1823,8 @@ class BuyObjectInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 103)
+        return struct.pack("<I", 103)
+
 
 @dataclass
 class DerezContainerPacket:
@@ -1713,7 +1834,8 @@ class DerezContainerPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 104)
+        return struct.pack("<I", 104)
+
 
 @dataclass
 class ObjectPermissionsPacket:
@@ -1723,7 +1845,8 @@ class ObjectPermissionsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 105)
+        return struct.pack("<I", 105)
+
 
 @dataclass
 class ObjectSaleInfoPacket:
@@ -1733,7 +1856,8 @@ class ObjectSaleInfoPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 106)
+        return struct.pack("<I", 106)
+
 
 @dataclass
 class ObjectNamePacket:
@@ -1743,7 +1867,8 @@ class ObjectNamePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 107)
+        return struct.pack("<I", 107)
+
 
 @dataclass
 class ObjectDescriptionPacket:
@@ -1753,7 +1878,8 @@ class ObjectDescriptionPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 108)
+        return struct.pack("<I", 108)
+
 
 @dataclass
 class ObjectCategoryPacket:
@@ -1763,7 +1889,8 @@ class ObjectCategoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 109)
+        return struct.pack("<I", 109)
+
 
 @dataclass
 class ObjectSelectPacket:
@@ -1773,7 +1900,8 @@ class ObjectSelectPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 110)
+        return struct.pack("<I", 110)
+
 
 @dataclass
 class ObjectDeselectPacket:
@@ -1783,7 +1911,8 @@ class ObjectDeselectPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 111)
+        return struct.pack("<I", 111)
+
 
 @dataclass
 class ObjectAttachPacket:
@@ -1793,7 +1922,8 @@ class ObjectAttachPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 112)
+        return struct.pack("<I", 112)
+
 
 @dataclass
 class ObjectDetachPacket:
@@ -1803,7 +1933,8 @@ class ObjectDetachPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 113)
+        return struct.pack("<I", 113)
+
 
 @dataclass
 class ObjectDropPacket:
@@ -1813,7 +1944,8 @@ class ObjectDropPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 114)
+        return struct.pack("<I", 114)
+
 
 @dataclass
 class ObjectLinkPacket:
@@ -1823,7 +1955,8 @@ class ObjectLinkPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 115)
+        return struct.pack("<I", 115)
+
 
 @dataclass
 class ObjectDelinkPacket:
@@ -1833,7 +1966,8 @@ class ObjectDelinkPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 116)
+        return struct.pack("<I", 116)
+
 
 @dataclass
 class ObjectGrabPacket:
@@ -1843,7 +1977,8 @@ class ObjectGrabPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 117)
+        return struct.pack("<I", 117)
+
 
 @dataclass
 class ObjectGrabUpdatePacket:
@@ -1853,7 +1988,8 @@ class ObjectGrabUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 118)
+        return struct.pack("<I", 118)
+
 
 @dataclass
 class ObjectDeGrabPacket:
@@ -1863,7 +1999,8 @@ class ObjectDeGrabPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 119)
+        return struct.pack("<I", 119)
+
 
 @dataclass
 class ObjectSpinStartPacket:
@@ -1873,7 +2010,8 @@ class ObjectSpinStartPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 120)
+        return struct.pack("<I", 120)
+
 
 @dataclass
 class ObjectSpinUpdatePacket:
@@ -1883,7 +2021,8 @@ class ObjectSpinUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 121)
+        return struct.pack("<I", 121)
+
 
 @dataclass
 class ObjectSpinStopPacket:
@@ -1893,7 +2032,8 @@ class ObjectSpinStopPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 122)
+        return struct.pack("<I", 122)
+
 
 @dataclass
 class ObjectExportSelectedPacket:
@@ -1903,7 +2043,8 @@ class ObjectExportSelectedPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 123)
+        return struct.pack("<I", 123)
+
 
 @dataclass
 class ModifyLandPacket:
@@ -1913,7 +2054,8 @@ class ModifyLandPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 124)
+        return struct.pack("<I", 124)
+
 
 @dataclass
 class VelocityInterpolateOnPacket:
@@ -1923,7 +2065,8 @@ class VelocityInterpolateOnPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 125)
+        return struct.pack("<I", 125)
+
 
 @dataclass
 class VelocityInterpolateOffPacket:
@@ -1933,7 +2076,8 @@ class VelocityInterpolateOffPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 126)
+        return struct.pack("<I", 126)
+
 
 @dataclass
 class StateSavePacket:
@@ -1943,7 +2087,8 @@ class StateSavePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 127)
+        return struct.pack("<I", 127)
+
 
 @dataclass
 class ReportAutosaveCrashPacket:
@@ -1953,7 +2098,8 @@ class ReportAutosaveCrashPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 128)
+        return struct.pack("<I", 128)
+
 
 @dataclass
 class SimWideDeletesPacket:
@@ -1963,7 +2109,8 @@ class SimWideDeletesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 129)
+        return struct.pack("<I", 129)
+
 
 @dataclass
 class RequestObjectPropertiesFamilyPacket:
@@ -1973,7 +2120,8 @@ class RequestObjectPropertiesFamilyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 5)
+        return struct.pack("<I", 5)
+
 
 @dataclass
 class TrackAgentPacket:
@@ -1983,7 +2131,8 @@ class TrackAgentPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 130)
+        return struct.pack("<I", 130)
+
 
 @dataclass
 class ViewerStatsPacket:
@@ -1993,7 +2142,8 @@ class ViewerStatsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 131)
+        return struct.pack("<I", 131)
+
 
 @dataclass
 class ScriptAnswerYesPacket:
@@ -2003,7 +2153,8 @@ class ScriptAnswerYesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 132)
+        return struct.pack("<I", 132)
+
 
 @dataclass
 class UserReportPacket:
@@ -2013,7 +2164,8 @@ class UserReportPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 133)
+        return struct.pack("<I", 133)
+
 
 @dataclass
 class AlertMessagePacket:
@@ -2023,7 +2175,8 @@ class AlertMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 134)
+        return struct.pack("<I", 134)
+
 
 @dataclass
 class AgentAlertMessagePacket:
@@ -2033,7 +2186,8 @@ class AgentAlertMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 135)
+        return struct.pack("<I", 135)
+
 
 @dataclass
 class MeanCollisionAlertPacket:
@@ -2043,7 +2197,8 @@ class MeanCollisionAlertPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 136)
+        return struct.pack("<I", 136)
+
 
 @dataclass
 class ViewerFrozenMessagePacket:
@@ -2053,7 +2208,8 @@ class ViewerFrozenMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 137)
+        return struct.pack("<I", 137)
+
 
 @dataclass
 class HealthMessagePacket:
@@ -2063,7 +2219,8 @@ class HealthMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 138)
+        return struct.pack("<I", 138)
+
 
 @dataclass
 class ChatFromSimulatorPacket:
@@ -2073,7 +2230,8 @@ class ChatFromSimulatorPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 139)
+        return struct.pack("<I", 139)
+
 
 @dataclass
 class SimStatsPacket:
@@ -2083,7 +2241,8 @@ class SimStatsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 140)
+        return struct.pack("<I", 140)
+
 
 @dataclass
 class RequestRegionInfoPacket:
@@ -2093,7 +2252,8 @@ class RequestRegionInfoPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 141)
+        return struct.pack("<I", 141)
+
 
 @dataclass
 class RegionInfoPacket:
@@ -2103,7 +2263,8 @@ class RegionInfoPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 142)
+        return struct.pack("<I", 142)
+
 
 @dataclass
 class GodUpdateRegionInfoPacket:
@@ -2113,7 +2274,8 @@ class GodUpdateRegionInfoPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 143)
+        return struct.pack("<I", 143)
+
 
 @dataclass
 class NearestLandingRegionRequestPacket:
@@ -2123,7 +2285,8 @@ class NearestLandingRegionRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 144)
+        return struct.pack("<I", 144)
+
 
 @dataclass
 class NearestLandingRegionReplyPacket:
@@ -2133,7 +2296,8 @@ class NearestLandingRegionReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 145)
+        return struct.pack("<I", 145)
+
 
 @dataclass
 class NearestLandingRegionUpdatedPacket:
@@ -2143,7 +2307,8 @@ class NearestLandingRegionUpdatedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 146)
+        return struct.pack("<I", 146)
+
 
 @dataclass
 class TeleportLandingStatusChangedPacket:
@@ -2153,7 +2318,8 @@ class TeleportLandingStatusChangedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 147)
+        return struct.pack("<I", 147)
+
 
 @dataclass
 class RegionHandshakePacket:
@@ -2163,7 +2329,8 @@ class RegionHandshakePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 148)
+        return struct.pack("<I", 148)
+
 
 @dataclass
 class RegionHandshakeReplyPacket:
@@ -2173,7 +2340,8 @@ class RegionHandshakeReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 149)
+        return struct.pack("<I", 149)
+
 
 @dataclass
 class CoarseLocationUpdatePacket:
@@ -2183,7 +2351,8 @@ class CoarseLocationUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 6)
+        return struct.pack("<I", 6)
+
 
 @dataclass
 class ImageDataPacket:
@@ -2193,7 +2362,8 @@ class ImageDataPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 9)
+        return struct.pack("<I", 9)
+
 
 @dataclass
 class ImagePacketPacket:
@@ -2203,7 +2373,8 @@ class ImagePacketPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 10)
+        return struct.pack("<I", 10)
+
 
 @dataclass
 class LayerDataPacket:
@@ -2213,7 +2384,8 @@ class LayerDataPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 11)
+        return struct.pack("<I", 11)
+
 
 @dataclass
 class ObjectUpdatePacket:
@@ -2223,7 +2395,8 @@ class ObjectUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 12)
+        return struct.pack("<I", 12)
+
 
 @dataclass
 class ObjectUpdateCompressedPacket:
@@ -2233,7 +2406,8 @@ class ObjectUpdateCompressedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 13)
+        return struct.pack("<I", 13)
+
 
 @dataclass
 class ObjectUpdateCachedPacket:
@@ -2243,7 +2417,8 @@ class ObjectUpdateCachedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 14)
+        return struct.pack("<I", 14)
+
 
 @dataclass
 class ImprovedTerseObjectUpdatePacket:
@@ -2253,7 +2428,8 @@ class ImprovedTerseObjectUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 15)
+        return struct.pack("<I", 15)
+
 
 @dataclass
 class KillObjectPacket:
@@ -2263,7 +2439,8 @@ class KillObjectPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 16)
+        return struct.pack("<I", 16)
+
 
 @dataclass
 class CrossedRegionPacket:
@@ -2273,7 +2450,8 @@ class CrossedRegionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 7)
+        return struct.pack("<I", 7)
+
 
 @dataclass
 class SimulatorViewerTimeMessagePacket:
@@ -2283,7 +2461,8 @@ class SimulatorViewerTimeMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 150)
+        return struct.pack("<I", 150)
+
 
 @dataclass
 class EnableSimulatorPacket:
@@ -2293,7 +2472,8 @@ class EnableSimulatorPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 151)
+        return struct.pack("<I", 151)
+
 
 @dataclass
 class DisableSimulatorPacket:
@@ -2303,7 +2483,8 @@ class DisableSimulatorPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 152)
+        return struct.pack("<I", 152)
+
 
 @dataclass
 class ConfirmEnableSimulatorPacket:
@@ -2313,7 +2494,8 @@ class ConfirmEnableSimulatorPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 8)
+        return struct.pack("<I", 8)
+
 
 @dataclass
 class TransferRequestPacket:
@@ -2323,7 +2505,8 @@ class TransferRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 153)
+        return struct.pack("<I", 153)
+
 
 @dataclass
 class TransferInfoPacket:
@@ -2333,7 +2516,8 @@ class TransferInfoPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 154)
+        return struct.pack("<I", 154)
+
 
 @dataclass
 class TransferPacketPacket:
@@ -2343,7 +2527,8 @@ class TransferPacketPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 17)
+        return struct.pack("<I", 17)
+
 
 @dataclass
 class TransferAbortPacket:
@@ -2353,7 +2538,8 @@ class TransferAbortPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 155)
+        return struct.pack("<I", 155)
+
 
 @dataclass
 class RequestXferPacket:
@@ -2363,7 +2549,8 @@ class RequestXferPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 156)
+        return struct.pack("<I", 156)
+
 
 @dataclass
 class SendXferPacketPacket:
@@ -2373,7 +2560,8 @@ class SendXferPacketPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 18)
+        return struct.pack("<I", 18)
+
 
 @dataclass
 class ConfirmXferPacketPacket:
@@ -2383,7 +2571,8 @@ class ConfirmXferPacketPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 19)
+        return struct.pack("<I", 19)
+
 
 @dataclass
 class AbortXferPacket:
@@ -2393,7 +2582,8 @@ class AbortXferPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 157)
+        return struct.pack("<I", 157)
+
 
 @dataclass
 class AvatarAnimationPacket:
@@ -2403,7 +2593,8 @@ class AvatarAnimationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 20)
+        return struct.pack("<I", 20)
+
 
 @dataclass
 class AvatarAppearancePacket:
@@ -2413,7 +2604,8 @@ class AvatarAppearancePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 158)
+        return struct.pack("<I", 158)
+
 
 @dataclass
 class AvatarSitResponsePacket:
@@ -2423,7 +2615,8 @@ class AvatarSitResponsePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 21)
+        return struct.pack("<I", 21)
+
 
 @dataclass
 class SetFollowCamPropertiesPacket:
@@ -2433,7 +2626,8 @@ class SetFollowCamPropertiesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 159)
+        return struct.pack("<I", 159)
+
 
 @dataclass
 class ClearFollowCamPropertiesPacket:
@@ -2443,7 +2637,8 @@ class ClearFollowCamPropertiesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 160)
+        return struct.pack("<I", 160)
+
 
 @dataclass
 class CameraConstraintPacket:
@@ -2453,7 +2648,8 @@ class CameraConstraintPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 22)
+        return struct.pack("<I", 22)
+
 
 @dataclass
 class ObjectPropertiesPacket:
@@ -2463,7 +2659,8 @@ class ObjectPropertiesPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 9)
+        return struct.pack("<I", 9)
+
 
 @dataclass
 class ObjectPropertiesFamilyPacket:
@@ -2473,7 +2670,8 @@ class ObjectPropertiesFamilyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 10)
+        return struct.pack("<I", 10)
+
 
 @dataclass
 class RequestPayPricePacket:
@@ -2483,7 +2681,8 @@ class RequestPayPricePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 161)
+        return struct.pack("<I", 161)
+
 
 @dataclass
 class PayPriceReplyPacket:
@@ -2493,7 +2692,8 @@ class PayPriceReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 162)
+        return struct.pack("<I", 162)
+
 
 @dataclass
 class KickUserPacket:
@@ -2503,7 +2703,8 @@ class KickUserPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 163)
+        return struct.pack("<I", 163)
+
 
 @dataclass
 class KickUserAckPacket:
@@ -2513,7 +2714,8 @@ class KickUserAckPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 164)
+        return struct.pack("<I", 164)
+
 
 @dataclass
 class GodKickUserPacket:
@@ -2523,7 +2725,8 @@ class GodKickUserPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 165)
+        return struct.pack("<I", 165)
+
 
 @dataclass
 class SystemKickUserPacket:
@@ -2533,7 +2736,8 @@ class SystemKickUserPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 166)
+        return struct.pack("<I", 166)
+
 
 @dataclass
 class EjectUserPacket:
@@ -2543,7 +2747,8 @@ class EjectUserPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 167)
+        return struct.pack("<I", 167)
+
 
 @dataclass
 class FreezeUserPacket:
@@ -2553,7 +2758,8 @@ class FreezeUserPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 168)
+        return struct.pack("<I", 168)
+
 
 @dataclass
 class AvatarPropertiesRequestPacket:
@@ -2563,7 +2769,8 @@ class AvatarPropertiesRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 169)
+        return struct.pack("<I", 169)
+
 
 @dataclass
 class AvatarPropertiesRequestBackendPacket:
@@ -2573,7 +2780,8 @@ class AvatarPropertiesRequestBackendPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 170)
+        return struct.pack("<I", 170)
+
 
 @dataclass
 class AvatarPropertiesReplyPacket:
@@ -2583,7 +2791,8 @@ class AvatarPropertiesReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 171)
+        return struct.pack("<I", 171)
+
 
 @dataclass
 class AvatarInterestsReplyPacket:
@@ -2593,7 +2802,8 @@ class AvatarInterestsReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 172)
+        return struct.pack("<I", 172)
+
 
 @dataclass
 class AvatarGroupsReplyPacket:
@@ -2603,7 +2813,8 @@ class AvatarGroupsReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 173)
+        return struct.pack("<I", 173)
+
 
 @dataclass
 class AvatarPropertiesUpdatePacket:
@@ -2613,7 +2824,8 @@ class AvatarPropertiesUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 174)
+        return struct.pack("<I", 174)
+
 
 @dataclass
 class AvatarInterestsUpdatePacket:
@@ -2623,7 +2835,8 @@ class AvatarInterestsUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 175)
+        return struct.pack("<I", 175)
+
 
 @dataclass
 class AvatarNotesReplyPacket:
@@ -2633,7 +2846,8 @@ class AvatarNotesReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 176)
+        return struct.pack("<I", 176)
+
 
 @dataclass
 class AvatarNotesUpdatePacket:
@@ -2643,7 +2857,8 @@ class AvatarNotesUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 177)
+        return struct.pack("<I", 177)
+
 
 @dataclass
 class AvatarPicksReplyPacket:
@@ -2653,7 +2868,8 @@ class AvatarPicksReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 178)
+        return struct.pack("<I", 178)
+
 
 @dataclass
 class EventInfoRequestPacket:
@@ -2663,7 +2879,8 @@ class EventInfoRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 179)
+        return struct.pack("<I", 179)
+
 
 @dataclass
 class EventInfoReplyPacket:
@@ -2673,7 +2890,8 @@ class EventInfoReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 180)
+        return struct.pack("<I", 180)
+
 
 @dataclass
 class EventNotificationAddRequestPacket:
@@ -2683,7 +2901,8 @@ class EventNotificationAddRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 181)
+        return struct.pack("<I", 181)
+
 
 @dataclass
 class EventNotificationRemoveRequestPacket:
@@ -2693,7 +2912,8 @@ class EventNotificationRemoveRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 182)
+        return struct.pack("<I", 182)
+
 
 @dataclass
 class EventGodDeletePacket:
@@ -2703,7 +2923,8 @@ class EventGodDeletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 183)
+        return struct.pack("<I", 183)
+
 
 @dataclass
 class PickInfoReplyPacket:
@@ -2713,7 +2934,8 @@ class PickInfoReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 184)
+        return struct.pack("<I", 184)
+
 
 @dataclass
 class PickInfoUpdatePacket:
@@ -2723,7 +2945,8 @@ class PickInfoUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 185)
+        return struct.pack("<I", 185)
+
 
 @dataclass
 class PickDeletePacket:
@@ -2733,7 +2956,8 @@ class PickDeletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 186)
+        return struct.pack("<I", 186)
+
 
 @dataclass
 class PickGodDeletePacket:
@@ -2743,7 +2967,8 @@ class PickGodDeletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 187)
+        return struct.pack("<I", 187)
+
 
 @dataclass
 class ScriptQuestionPacket:
@@ -2753,7 +2978,8 @@ class ScriptQuestionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 188)
+        return struct.pack("<I", 188)
+
 
 @dataclass
 class ScriptControlChangePacket:
@@ -2763,7 +2989,8 @@ class ScriptControlChangePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 189)
+        return struct.pack("<I", 189)
+
 
 @dataclass
 class ScriptDialogPacket:
@@ -2773,7 +3000,8 @@ class ScriptDialogPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 190)
+        return struct.pack("<I", 190)
+
 
 @dataclass
 class ScriptDialogReplyPacket:
@@ -2783,7 +3011,8 @@ class ScriptDialogReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 191)
+        return struct.pack("<I", 191)
+
 
 @dataclass
 class ForceScriptControlReleasePacket:
@@ -2793,7 +3022,8 @@ class ForceScriptControlReleasePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 192)
+        return struct.pack("<I", 192)
+
 
 @dataclass
 class RevokePermissionsPacket:
@@ -2803,7 +3033,8 @@ class RevokePermissionsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 193)
+        return struct.pack("<I", 193)
+
 
 @dataclass
 class LoadURLPacket:
@@ -2813,7 +3044,8 @@ class LoadURLPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 194)
+        return struct.pack("<I", 194)
+
 
 @dataclass
 class ScriptTeleportRequestPacket:
@@ -2823,7 +3055,8 @@ class ScriptTeleportRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 195)
+        return struct.pack("<I", 195)
+
 
 @dataclass
 class ParcelOverlayPacket:
@@ -2833,7 +3066,8 @@ class ParcelOverlayPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 196)
+        return struct.pack("<I", 196)
+
 
 @dataclass
 class ParcelPropertiesRequestPacket:
@@ -2843,7 +3077,8 @@ class ParcelPropertiesRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 11)
+        return struct.pack("<I", 11)
+
 
 @dataclass
 class ParcelPropertiesRequestByIDPacket:
@@ -2853,7 +3088,8 @@ class ParcelPropertiesRequestByIDPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 197)
+        return struct.pack("<I", 197)
+
 
 @dataclass
 class ParcelPropertiesPacket:
@@ -2863,7 +3099,8 @@ class ParcelPropertiesPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 23)
+        return struct.pack("<I", 23)
+
 
 @dataclass
 class ParcelPropertiesUpdatePacket:
@@ -2873,7 +3110,8 @@ class ParcelPropertiesUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 198)
+        return struct.pack("<I", 198)
+
 
 @dataclass
 class ParcelReturnObjectsPacket:
@@ -2883,7 +3121,8 @@ class ParcelReturnObjectsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 199)
+        return struct.pack("<I", 199)
+
 
 @dataclass
 class ParcelSetOtherCleanTimePacket:
@@ -2893,7 +3132,8 @@ class ParcelSetOtherCleanTimePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 200)
+        return struct.pack("<I", 200)
+
 
 @dataclass
 class ParcelDisableObjectsPacket:
@@ -2903,7 +3143,8 @@ class ParcelDisableObjectsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 201)
+        return struct.pack("<I", 201)
+
 
 @dataclass
 class ParcelSelectObjectsPacket:
@@ -2913,7 +3154,8 @@ class ParcelSelectObjectsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 202)
+        return struct.pack("<I", 202)
+
 
 @dataclass
 class EstateCovenantRequestPacket:
@@ -2923,7 +3165,8 @@ class EstateCovenantRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 203)
+        return struct.pack("<I", 203)
+
 
 @dataclass
 class EstateCovenantReplyPacket:
@@ -2933,7 +3176,8 @@ class EstateCovenantReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 204)
+        return struct.pack("<I", 204)
+
 
 @dataclass
 class ForceObjectSelectPacket:
@@ -2943,7 +3187,8 @@ class ForceObjectSelectPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 205)
+        return struct.pack("<I", 205)
+
 
 @dataclass
 class ParcelBuyPassPacket:
@@ -2953,7 +3198,8 @@ class ParcelBuyPassPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 206)
+        return struct.pack("<I", 206)
+
 
 @dataclass
 class ParcelDeedToGroupPacket:
@@ -2963,7 +3209,8 @@ class ParcelDeedToGroupPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 207)
+        return struct.pack("<I", 207)
+
 
 @dataclass
 class ParcelReclaimPacket:
@@ -2973,7 +3220,8 @@ class ParcelReclaimPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 208)
+        return struct.pack("<I", 208)
+
 
 @dataclass
 class ParcelClaimPacket:
@@ -2983,7 +3231,8 @@ class ParcelClaimPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 209)
+        return struct.pack("<I", 209)
+
 
 @dataclass
 class ParcelJoinPacket:
@@ -2993,7 +3242,8 @@ class ParcelJoinPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 210)
+        return struct.pack("<I", 210)
+
 
 @dataclass
 class ParcelDividePacket:
@@ -3003,7 +3253,8 @@ class ParcelDividePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 211)
+        return struct.pack("<I", 211)
+
 
 @dataclass
 class ParcelReleasePacket:
@@ -3013,7 +3264,8 @@ class ParcelReleasePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 212)
+        return struct.pack("<I", 212)
+
 
 @dataclass
 class ParcelBuyPacket:
@@ -3023,7 +3275,8 @@ class ParcelBuyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 213)
+        return struct.pack("<I", 213)
+
 
 @dataclass
 class ParcelGodForceOwnerPacket:
@@ -3033,7 +3286,8 @@ class ParcelGodForceOwnerPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 214)
+        return struct.pack("<I", 214)
+
 
 @dataclass
 class ParcelAccessListRequestPacket:
@@ -3043,7 +3297,8 @@ class ParcelAccessListRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 215)
+        return struct.pack("<I", 215)
+
 
 @dataclass
 class ParcelAccessListReplyPacket:
@@ -3053,7 +3308,8 @@ class ParcelAccessListReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 216)
+        return struct.pack("<I", 216)
+
 
 @dataclass
 class ParcelAccessListUpdatePacket:
@@ -3063,7 +3319,8 @@ class ParcelAccessListUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 217)
+        return struct.pack("<I", 217)
+
 
 @dataclass
 class ParcelDwellRequestPacket:
@@ -3073,7 +3330,8 @@ class ParcelDwellRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 218)
+        return struct.pack("<I", 218)
+
 
 @dataclass
 class ParcelDwellReplyPacket:
@@ -3083,7 +3341,8 @@ class ParcelDwellReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 219)
+        return struct.pack("<I", 219)
+
 
 @dataclass
 class RequestParcelTransferPacket:
@@ -3093,7 +3352,8 @@ class RequestParcelTransferPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 220)
+        return struct.pack("<I", 220)
+
 
 @dataclass
 class UpdateParcelPacket:
@@ -3103,7 +3363,8 @@ class UpdateParcelPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 221)
+        return struct.pack("<I", 221)
+
 
 @dataclass
 class RemoveParcelPacket:
@@ -3113,7 +3374,8 @@ class RemoveParcelPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 222)
+        return struct.pack("<I", 222)
+
 
 @dataclass
 class MergeParcelPacket:
@@ -3123,7 +3385,8 @@ class MergeParcelPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 223)
+        return struct.pack("<I", 223)
+
 
 @dataclass
 class LogParcelChangesPacket:
@@ -3133,7 +3396,8 @@ class LogParcelChangesPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 224)
+        return struct.pack("<I", 224)
+
 
 @dataclass
 class CheckParcelSalesPacket:
@@ -3143,7 +3407,8 @@ class CheckParcelSalesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 225)
+        return struct.pack("<I", 225)
+
 
 @dataclass
 class ParcelSalesPacket:
@@ -3153,7 +3418,8 @@ class ParcelSalesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 226)
+        return struct.pack("<I", 226)
+
 
 @dataclass
 class ParcelGodMarkAsContentPacket:
@@ -3163,7 +3429,8 @@ class ParcelGodMarkAsContentPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 227)
+        return struct.pack("<I", 227)
+
 
 @dataclass
 class ViewerStartAuctionPacket:
@@ -3173,7 +3440,8 @@ class ViewerStartAuctionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 228)
+        return struct.pack("<I", 228)
+
 
 @dataclass
 class StartAuctionPacket:
@@ -3183,7 +3451,8 @@ class StartAuctionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 229)
+        return struct.pack("<I", 229)
+
 
 @dataclass
 class ConfirmAuctionStartPacket:
@@ -3193,7 +3462,8 @@ class ConfirmAuctionStartPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 230)
+        return struct.pack("<I", 230)
+
 
 @dataclass
 class CompleteAuctionPacket:
@@ -3203,7 +3473,8 @@ class CompleteAuctionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 231)
+        return struct.pack("<I", 231)
+
 
 @dataclass
 class CancelAuctionPacket:
@@ -3213,7 +3484,8 @@ class CancelAuctionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 232)
+        return struct.pack("<I", 232)
+
 
 @dataclass
 class CheckParcelAuctionsPacket:
@@ -3223,7 +3495,8 @@ class CheckParcelAuctionsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 233)
+        return struct.pack("<I", 233)
+
 
 @dataclass
 class ParcelAuctionsPacket:
@@ -3233,7 +3506,8 @@ class ParcelAuctionsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 234)
+        return struct.pack("<I", 234)
+
 
 @dataclass
 class UUIDNameRequestPacket:
@@ -3243,7 +3517,8 @@ class UUIDNameRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 235)
+        return struct.pack("<I", 235)
+
 
 @dataclass
 class UUIDNameReplyPacket:
@@ -3253,7 +3528,8 @@ class UUIDNameReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 236)
+        return struct.pack("<I", 236)
+
 
 @dataclass
 class UUIDGroupNameRequestPacket:
@@ -3263,7 +3539,8 @@ class UUIDGroupNameRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 237)
+        return struct.pack("<I", 237)
+
 
 @dataclass
 class UUIDGroupNameReplyPacket:
@@ -3273,7 +3550,8 @@ class UUIDGroupNameReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 238)
+        return struct.pack("<I", 238)
+
 
 @dataclass
 class ChatPassPacket:
@@ -3283,7 +3561,8 @@ class ChatPassPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 239)
+        return struct.pack("<I", 239)
+
 
 @dataclass
 class EdgeDataPacketPacket:
@@ -3293,7 +3572,8 @@ class EdgeDataPacketPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 24)
+        return struct.pack("<I", 24)
+
 
 @dataclass
 class SimStatusPacket:
@@ -3303,7 +3583,8 @@ class SimStatusPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 12)
+        return struct.pack("<I", 12)
+
 
 @dataclass
 class ChildAgentUpdatePacket:
@@ -3313,7 +3594,8 @@ class ChildAgentUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 25)
+        return struct.pack("<I", 25)
+
 
 @dataclass
 class ChildAgentAlivePacket:
@@ -3323,7 +3605,8 @@ class ChildAgentAlivePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 26)
+        return struct.pack("<I", 26)
+
 
 @dataclass
 class ChildAgentPositionUpdatePacket:
@@ -3333,7 +3616,8 @@ class ChildAgentPositionUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 27)
+        return struct.pack("<I", 27)
+
 
 @dataclass
 class ChildAgentDyingPacket:
@@ -3343,7 +3627,8 @@ class ChildAgentDyingPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 240)
+        return struct.pack("<I", 240)
+
 
 @dataclass
 class ChildAgentUnknownPacket:
@@ -3353,7 +3638,8 @@ class ChildAgentUnknownPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 241)
+        return struct.pack("<I", 241)
+
 
 @dataclass
 class AtomicPassObjectPacket:
@@ -3363,7 +3649,8 @@ class AtomicPassObjectPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 28)
+        return struct.pack("<I", 28)
+
 
 @dataclass
 class KillChildAgentsPacket:
@@ -3373,7 +3660,8 @@ class KillChildAgentsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 242)
+        return struct.pack("<I", 242)
+
 
 @dataclass
 class GetScriptRunningPacket:
@@ -3383,7 +3671,8 @@ class GetScriptRunningPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 243)
+        return struct.pack("<I", 243)
+
 
 @dataclass
 class ScriptRunningReplyPacket:
@@ -3393,7 +3682,8 @@ class ScriptRunningReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 244)
+        return struct.pack("<I", 244)
+
 
 @dataclass
 class SetScriptRunningPacket:
@@ -3403,7 +3693,8 @@ class SetScriptRunningPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 245)
+        return struct.pack("<I", 245)
+
 
 @dataclass
 class ScriptResetPacket:
@@ -3413,7 +3704,8 @@ class ScriptResetPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 246)
+        return struct.pack("<I", 246)
+
 
 @dataclass
 class ScriptSensorRequestPacket:
@@ -3423,7 +3715,8 @@ class ScriptSensorRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 247)
+        return struct.pack("<I", 247)
+
 
 @dataclass
 class ScriptSensorReplyPacket:
@@ -3433,7 +3726,8 @@ class ScriptSensorReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 248)
+        return struct.pack("<I", 248)
+
 
 @dataclass
 class CompleteAgentMovementPacket:
@@ -3443,7 +3737,8 @@ class CompleteAgentMovementPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 249)
+        return struct.pack("<I", 249)
+
 
 @dataclass
 class AgentMovementCompletePacket:
@@ -3453,7 +3748,8 @@ class AgentMovementCompletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 250)
+        return struct.pack("<I", 250)
+
 
 @dataclass
 class DataServerLogoutPacket:
@@ -3463,7 +3759,8 @@ class DataServerLogoutPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 251)
+        return struct.pack("<I", 251)
+
 
 @dataclass
 class LogoutRequestPacket:
@@ -3473,7 +3770,8 @@ class LogoutRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 252)
+        return struct.pack("<I", 252)
+
 
 @dataclass
 class LogoutReplyPacket:
@@ -3483,7 +3781,8 @@ class LogoutReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 253)
+        return struct.pack("<I", 253)
+
 
 @dataclass
 class ImprovedInstantMessagePacket:
@@ -3493,7 +3792,8 @@ class ImprovedInstantMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 254)
+        return struct.pack("<I", 254)
+
 
 @dataclass
 class RetrieveInstantMessagesPacket:
@@ -3503,7 +3803,8 @@ class RetrieveInstantMessagesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 255)
+        return struct.pack("<I", 255)
+
 
 @dataclass
 class FindAgentPacket:
@@ -3513,7 +3814,8 @@ class FindAgentPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 256)
+        return struct.pack("<I", 256)
+
 
 @dataclass
 class RequestGodlikePowersPacket:
@@ -3523,7 +3825,8 @@ class RequestGodlikePowersPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 257)
+        return struct.pack("<I", 257)
+
 
 @dataclass
 class GrantGodlikePowersPacket:
@@ -3533,7 +3836,8 @@ class GrantGodlikePowersPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 258)
+        return struct.pack("<I", 258)
+
 
 @dataclass
 class GodlikeMessagePacket:
@@ -3543,7 +3847,8 @@ class GodlikeMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 259)
+        return struct.pack("<I", 259)
+
 
 @dataclass
 class EstateOwnerMessagePacket:
@@ -3553,7 +3858,8 @@ class EstateOwnerMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 260)
+        return struct.pack("<I", 260)
+
 
 @dataclass
 class GenericMessagePacket:
@@ -3563,7 +3869,8 @@ class GenericMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 261)
+        return struct.pack("<I", 261)
+
 
 @dataclass
 class GenericStreamingMessagePacket:
@@ -3573,7 +3880,8 @@ class GenericStreamingMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 31)
+        return struct.pack("<I", 31)
+
 
 @dataclass
 class LargeGenericMessagePacket:
@@ -3583,7 +3891,8 @@ class LargeGenericMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 430)
+        return struct.pack("<I", 430)
+
 
 @dataclass
 class MuteListRequestPacket:
@@ -3593,7 +3902,8 @@ class MuteListRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 262)
+        return struct.pack("<I", 262)
+
 
 @dataclass
 class UpdateMuteListEntryPacket:
@@ -3603,7 +3913,8 @@ class UpdateMuteListEntryPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 263)
+        return struct.pack("<I", 263)
+
 
 @dataclass
 class RemoveMuteListEntryPacket:
@@ -3613,7 +3924,8 @@ class RemoveMuteListEntryPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 264)
+        return struct.pack("<I", 264)
+
 
 @dataclass
 class CopyInventoryFromNotecardPacket:
@@ -3623,7 +3935,8 @@ class CopyInventoryFromNotecardPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 265)
+        return struct.pack("<I", 265)
+
 
 @dataclass
 class UpdateInventoryItemPacket:
@@ -3633,7 +3946,8 @@ class UpdateInventoryItemPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 266)
+        return struct.pack("<I", 266)
+
 
 @dataclass
 class UpdateCreateInventoryItemPacket:
@@ -3643,7 +3957,8 @@ class UpdateCreateInventoryItemPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 267)
+        return struct.pack("<I", 267)
+
 
 @dataclass
 class MoveInventoryItemPacket:
@@ -3653,7 +3968,8 @@ class MoveInventoryItemPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 268)
+        return struct.pack("<I", 268)
+
 
 @dataclass
 class CopyInventoryItemPacket:
@@ -3663,7 +3979,8 @@ class CopyInventoryItemPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 269)
+        return struct.pack("<I", 269)
+
 
 @dataclass
 class RemoveInventoryItemPacket:
@@ -3673,7 +3990,8 @@ class RemoveInventoryItemPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 270)
+        return struct.pack("<I", 270)
+
 
 @dataclass
 class ChangeInventoryItemFlagsPacket:
@@ -3683,7 +4001,8 @@ class ChangeInventoryItemFlagsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 271)
+        return struct.pack("<I", 271)
+
 
 @dataclass
 class SaveAssetIntoInventoryPacket:
@@ -3693,7 +4012,8 @@ class SaveAssetIntoInventoryPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 272)
+        return struct.pack("<I", 272)
+
 
 @dataclass
 class CreateInventoryFolderPacket:
@@ -3703,7 +4023,8 @@ class CreateInventoryFolderPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 273)
+        return struct.pack("<I", 273)
+
 
 @dataclass
 class UpdateInventoryFolderPacket:
@@ -3713,7 +4034,8 @@ class UpdateInventoryFolderPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 274)
+        return struct.pack("<I", 274)
+
 
 @dataclass
 class MoveInventoryFolderPacket:
@@ -3723,7 +4045,8 @@ class MoveInventoryFolderPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 275)
+        return struct.pack("<I", 275)
+
 
 @dataclass
 class RemoveInventoryFolderPacket:
@@ -3733,7 +4056,8 @@ class RemoveInventoryFolderPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 276)
+        return struct.pack("<I", 276)
+
 
 @dataclass
 class FetchInventoryDescendentsPacket:
@@ -3743,7 +4067,8 @@ class FetchInventoryDescendentsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 277)
+        return struct.pack("<I", 277)
+
 
 @dataclass
 class InventoryDescendentsPacket:
@@ -3753,7 +4078,8 @@ class InventoryDescendentsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 278)
+        return struct.pack("<I", 278)
+
 
 @dataclass
 class FetchInventoryPacket:
@@ -3763,7 +4089,8 @@ class FetchInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 279)
+        return struct.pack("<I", 279)
+
 
 @dataclass
 class FetchInventoryReplyPacket:
@@ -3773,7 +4100,8 @@ class FetchInventoryReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 280)
+        return struct.pack("<I", 280)
+
 
 @dataclass
 class BulkUpdateInventoryPacket:
@@ -3783,7 +4111,8 @@ class BulkUpdateInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 281)
+        return struct.pack("<I", 281)
+
 
 @dataclass
 class RequestInventoryAssetPacket:
@@ -3793,7 +4122,8 @@ class RequestInventoryAssetPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 282)
+        return struct.pack("<I", 282)
+
 
 @dataclass
 class InventoryAssetResponsePacket:
@@ -3803,7 +4133,8 @@ class InventoryAssetResponsePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 283)
+        return struct.pack("<I", 283)
+
 
 @dataclass
 class RemoveInventoryObjectsPacket:
@@ -3813,7 +4144,8 @@ class RemoveInventoryObjectsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 284)
+        return struct.pack("<I", 284)
+
 
 @dataclass
 class PurgeInventoryDescendentsPacket:
@@ -3823,7 +4155,8 @@ class PurgeInventoryDescendentsPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 285)
+        return struct.pack("<I", 285)
+
 
 @dataclass
 class UpdateTaskInventoryPacket:
@@ -3833,7 +4166,8 @@ class UpdateTaskInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 286)
+        return struct.pack("<I", 286)
+
 
 @dataclass
 class RemoveTaskInventoryPacket:
@@ -3843,7 +4177,8 @@ class RemoveTaskInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 287)
+        return struct.pack("<I", 287)
+
 
 @dataclass
 class MoveTaskInventoryPacket:
@@ -3853,7 +4188,8 @@ class MoveTaskInventoryPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 288)
+        return struct.pack("<I", 288)
+
 
 @dataclass
 class RequestTaskInventoryPacket:
@@ -3863,7 +4199,8 @@ class RequestTaskInventoryPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 289)
+        return struct.pack("<I", 289)
+
 
 @dataclass
 class ReplyTaskInventoryPacket:
@@ -3873,7 +4210,8 @@ class ReplyTaskInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 290)
+        return struct.pack("<I", 290)
+
 
 @dataclass
 class DeRezObjectPacket:
@@ -3883,7 +4221,8 @@ class DeRezObjectPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 291)
+        return struct.pack("<I", 291)
+
 
 @dataclass
 class DeRezAckPacket:
@@ -3893,7 +4232,8 @@ class DeRezAckPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 292)
+        return struct.pack("<I", 292)
+
 
 @dataclass
 class RezObjectPacket:
@@ -3903,7 +4243,8 @@ class RezObjectPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 293)
+        return struct.pack("<I", 293)
+
 
 @dataclass
 class RezObjectFromNotecardPacket:
@@ -3913,7 +4254,8 @@ class RezObjectFromNotecardPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 294)
+        return struct.pack("<I", 294)
+
 
 @dataclass
 class TransferInventoryPacket:
@@ -3923,7 +4265,8 @@ class TransferInventoryPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 295)
+        return struct.pack("<I", 295)
+
 
 @dataclass
 class TransferInventoryAckPacket:
@@ -3933,7 +4276,8 @@ class TransferInventoryAckPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 296)
+        return struct.pack("<I", 296)
+
 
 @dataclass
 class AcceptFriendshipPacket:
@@ -3943,7 +4287,8 @@ class AcceptFriendshipPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 297)
+        return struct.pack("<I", 297)
+
 
 @dataclass
 class DeclineFriendshipPacket:
@@ -3953,7 +4298,8 @@ class DeclineFriendshipPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 298)
+        return struct.pack("<I", 298)
+
 
 @dataclass
 class FormFriendshipPacket:
@@ -3963,7 +4309,8 @@ class FormFriendshipPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 299)
+        return struct.pack("<I", 299)
+
 
 @dataclass
 class TerminateFriendshipPacket:
@@ -3973,7 +4320,8 @@ class TerminateFriendshipPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 300)
+        return struct.pack("<I", 300)
+
 
 @dataclass
 class OfferCallingCardPacket:
@@ -3983,7 +4331,8 @@ class OfferCallingCardPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 301)
+        return struct.pack("<I", 301)
+
 
 @dataclass
 class AcceptCallingCardPacket:
@@ -3993,7 +4342,8 @@ class AcceptCallingCardPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 302)
+        return struct.pack("<I", 302)
+
 
 @dataclass
 class DeclineCallingCardPacket:
@@ -4003,7 +4353,8 @@ class DeclineCallingCardPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 303)
+        return struct.pack("<I", 303)
+
 
 @dataclass
 class RezScriptPacket:
@@ -4013,7 +4364,8 @@ class RezScriptPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 304)
+        return struct.pack("<I", 304)
+
 
 @dataclass
 class CreateInventoryItemPacket:
@@ -4023,7 +4375,8 @@ class CreateInventoryItemPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 305)
+        return struct.pack("<I", 305)
+
 
 @dataclass
 class CreateLandmarkForEventPacket:
@@ -4033,7 +4386,8 @@ class CreateLandmarkForEventPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 306)
+        return struct.pack("<I", 306)
+
 
 @dataclass
 class EventLocationRequestPacket:
@@ -4043,7 +4397,8 @@ class EventLocationRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 307)
+        return struct.pack("<I", 307)
+
 
 @dataclass
 class EventLocationReplyPacket:
@@ -4053,7 +4408,8 @@ class EventLocationReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 308)
+        return struct.pack("<I", 308)
+
 
 @dataclass
 class RegionHandleRequestPacket:
@@ -4063,7 +4419,8 @@ class RegionHandleRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 309)
+        return struct.pack("<I", 309)
+
 
 @dataclass
 class RegionIDAndHandleReplyPacket:
@@ -4073,7 +4430,8 @@ class RegionIDAndHandleReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 310)
+        return struct.pack("<I", 310)
+
 
 @dataclass
 class MoneyTransferRequestPacket:
@@ -4083,7 +4441,8 @@ class MoneyTransferRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 311)
+        return struct.pack("<I", 311)
+
 
 @dataclass
 class MoneyTransferBackendPacket:
@@ -4093,7 +4452,8 @@ class MoneyTransferBackendPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 312)
+        return struct.pack("<I", 312)
+
 
 @dataclass
 class MoneyBalanceRequestPacket:
@@ -4103,7 +4463,8 @@ class MoneyBalanceRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 313)
+        return struct.pack("<I", 313)
+
 
 @dataclass
 class MoneyBalanceReplyPacket:
@@ -4113,7 +4474,8 @@ class MoneyBalanceReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 314)
+        return struct.pack("<I", 314)
+
 
 @dataclass
 class RoutedMoneyBalanceReplyPacket:
@@ -4123,7 +4485,8 @@ class RoutedMoneyBalanceReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 315)
+        return struct.pack("<I", 315)
+
 
 @dataclass
 class ActivateGesturesPacket:
@@ -4133,7 +4496,8 @@ class ActivateGesturesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 316)
+        return struct.pack("<I", 316)
+
 
 @dataclass
 class DeactivateGesturesPacket:
@@ -4143,7 +4507,8 @@ class DeactivateGesturesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 317)
+        return struct.pack("<I", 317)
+
 
 @dataclass
 class MuteListUpdatePacket:
@@ -4153,7 +4518,8 @@ class MuteListUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 318)
+        return struct.pack("<I", 318)
+
 
 @dataclass
 class UseCachedMuteListPacket:
@@ -4163,7 +4529,8 @@ class UseCachedMuteListPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 319)
+        return struct.pack("<I", 319)
+
 
 @dataclass
 class GrantUserRightsPacket:
@@ -4173,7 +4540,8 @@ class GrantUserRightsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 320)
+        return struct.pack("<I", 320)
+
 
 @dataclass
 class ChangeUserRightsPacket:
@@ -4183,7 +4551,8 @@ class ChangeUserRightsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 321)
+        return struct.pack("<I", 321)
+
 
 @dataclass
 class OnlineNotificationPacket:
@@ -4193,7 +4562,8 @@ class OnlineNotificationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 322)
+        return struct.pack("<I", 322)
+
 
 @dataclass
 class OfflineNotificationPacket:
@@ -4203,7 +4573,8 @@ class OfflineNotificationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 323)
+        return struct.pack("<I", 323)
+
 
 @dataclass
 class SetStartLocationRequestPacket:
@@ -4213,7 +4584,8 @@ class SetStartLocationRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 324)
+        return struct.pack("<I", 324)
+
 
 @dataclass
 class SetStartLocationPacket:
@@ -4223,7 +4595,8 @@ class SetStartLocationPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 325)
+        return struct.pack("<I", 325)
+
 
 @dataclass
 class NetTestPacket:
@@ -4233,7 +4606,8 @@ class NetTestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 326)
+        return struct.pack("<I", 326)
+
 
 @dataclass
 class SetCPURatioPacket:
@@ -4243,7 +4617,8 @@ class SetCPURatioPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 327)
+        return struct.pack("<I", 327)
+
 
 @dataclass
 class SimCrashedPacket:
@@ -4253,7 +4628,8 @@ class SimCrashedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 328)
+        return struct.pack("<I", 328)
+
 
 @dataclass
 class NameValuePairPacket:
@@ -4263,7 +4639,8 @@ class NameValuePairPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 329)
+        return struct.pack("<I", 329)
+
 
 @dataclass
 class RemoveNameValuePairPacket:
@@ -4273,7 +4650,8 @@ class RemoveNameValuePairPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 330)
+        return struct.pack("<I", 330)
+
 
 @dataclass
 class UpdateAttachmentPacket:
@@ -4283,7 +4661,8 @@ class UpdateAttachmentPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 331)
+        return struct.pack("<I", 331)
+
 
 @dataclass
 class RemoveAttachmentPacket:
@@ -4293,7 +4672,8 @@ class RemoveAttachmentPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 332)
+        return struct.pack("<I", 332)
+
 
 @dataclass
 class SoundTriggerPacket:
@@ -4303,7 +4683,8 @@ class SoundTriggerPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 29)
+        return struct.pack("<I", 29)
+
 
 @dataclass
 class AttachedSoundPacket:
@@ -4313,7 +4694,8 @@ class AttachedSoundPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 13)
+        return struct.pack("<I", 13)
+
 
 @dataclass
 class AttachedSoundGainChangePacket:
@@ -4323,7 +4705,8 @@ class AttachedSoundGainChangePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 14)
+        return struct.pack("<I", 14)
+
 
 @dataclass
 class PreloadSoundPacket:
@@ -4333,7 +4716,8 @@ class PreloadSoundPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 15)
+        return struct.pack("<I", 15)
+
 
 @dataclass
 class ObjectAnimationPacket:
@@ -4343,7 +4727,8 @@ class ObjectAnimationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 30)
+        return struct.pack("<I", 30)
+
 
 @dataclass
 class AssetUploadRequestPacket:
@@ -4353,7 +4738,8 @@ class AssetUploadRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 333)
+        return struct.pack("<I", 333)
+
 
 @dataclass
 class AssetUploadCompletePacket:
@@ -4363,7 +4749,8 @@ class AssetUploadCompletePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 334)
+        return struct.pack("<I", 334)
+
 
 @dataclass
 class EmailMessageRequestPacket:
@@ -4373,7 +4760,8 @@ class EmailMessageRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 335)
+        return struct.pack("<I", 335)
+
 
 @dataclass
 class EmailMessageReplyPacket:
@@ -4383,7 +4771,8 @@ class EmailMessageReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 336)
+        return struct.pack("<I", 336)
+
 
 @dataclass
 class InternalScriptMailPacket:
@@ -4393,7 +4782,8 @@ class InternalScriptMailPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 16)
+        return struct.pack("<I", 16)
+
 
 @dataclass
 class ScriptDataRequestPacket:
@@ -4403,7 +4793,8 @@ class ScriptDataRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 337)
+        return struct.pack("<I", 337)
+
 
 @dataclass
 class ScriptDataReplyPacket:
@@ -4413,7 +4804,8 @@ class ScriptDataReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 338)
+        return struct.pack("<I", 338)
+
 
 @dataclass
 class CreateGroupRequestPacket:
@@ -4423,7 +4815,8 @@ class CreateGroupRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 339)
+        return struct.pack("<I", 339)
+
 
 @dataclass
 class CreateGroupReplyPacket:
@@ -4433,7 +4826,8 @@ class CreateGroupReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 340)
+        return struct.pack("<I", 340)
+
 
 @dataclass
 class UpdateGroupInfoPacket:
@@ -4443,7 +4837,8 @@ class UpdateGroupInfoPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 341)
+        return struct.pack("<I", 341)
+
 
 @dataclass
 class GroupRoleChangesPacket:
@@ -4453,7 +4848,8 @@ class GroupRoleChangesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 342)
+        return struct.pack("<I", 342)
+
 
 @dataclass
 class JoinGroupRequestPacket:
@@ -4463,7 +4859,8 @@ class JoinGroupRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 343)
+        return struct.pack("<I", 343)
+
 
 @dataclass
 class JoinGroupReplyPacket:
@@ -4473,7 +4870,8 @@ class JoinGroupReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 344)
+        return struct.pack("<I", 344)
+
 
 @dataclass
 class EjectGroupMemberRequestPacket:
@@ -4483,7 +4881,8 @@ class EjectGroupMemberRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 345)
+        return struct.pack("<I", 345)
+
 
 @dataclass
 class EjectGroupMemberReplyPacket:
@@ -4493,7 +4892,8 @@ class EjectGroupMemberReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 346)
+        return struct.pack("<I", 346)
+
 
 @dataclass
 class LeaveGroupRequestPacket:
@@ -4503,7 +4903,8 @@ class LeaveGroupRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 347)
+        return struct.pack("<I", 347)
+
 
 @dataclass
 class LeaveGroupReplyPacket:
@@ -4513,7 +4914,8 @@ class LeaveGroupReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 348)
+        return struct.pack("<I", 348)
+
 
 @dataclass
 class InviteGroupRequestPacket:
@@ -4523,7 +4925,8 @@ class InviteGroupRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 349)
+        return struct.pack("<I", 349)
+
 
 @dataclass
 class InviteGroupResponsePacket:
@@ -4533,7 +4936,8 @@ class InviteGroupResponsePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 350)
+        return struct.pack("<I", 350)
+
 
 @dataclass
 class GroupProfileRequestPacket:
@@ -4543,7 +4947,8 @@ class GroupProfileRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 351)
+        return struct.pack("<I", 351)
+
 
 @dataclass
 class GroupProfileReplyPacket:
@@ -4553,7 +4958,8 @@ class GroupProfileReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 352)
+        return struct.pack("<I", 352)
+
 
 @dataclass
 class GroupAccountSummaryRequestPacket:
@@ -4563,7 +4969,8 @@ class GroupAccountSummaryRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 353)
+        return struct.pack("<I", 353)
+
 
 @dataclass
 class GroupAccountSummaryReplyPacket:
@@ -4573,7 +4980,8 @@ class GroupAccountSummaryReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 354)
+        return struct.pack("<I", 354)
+
 
 @dataclass
 class GroupAccountDetailsRequestPacket:
@@ -4583,7 +4991,8 @@ class GroupAccountDetailsRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 355)
+        return struct.pack("<I", 355)
+
 
 @dataclass
 class GroupAccountDetailsReplyPacket:
@@ -4593,7 +5002,8 @@ class GroupAccountDetailsReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 356)
+        return struct.pack("<I", 356)
+
 
 @dataclass
 class GroupAccountTransactionsRequestPacket:
@@ -4603,7 +5013,8 @@ class GroupAccountTransactionsRequestPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 357)
+        return struct.pack("<I", 357)
+
 
 @dataclass
 class GroupAccountTransactionsReplyPacket:
@@ -4613,7 +5024,8 @@ class GroupAccountTransactionsReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 358)
+        return struct.pack("<I", 358)
+
 
 @dataclass
 class GroupActiveProposalsRequestPacket:
@@ -4623,7 +5035,8 @@ class GroupActiveProposalsRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 359)
+        return struct.pack("<I", 359)
+
 
 @dataclass
 class GroupActiveProposalItemReplyPacket:
@@ -4633,7 +5046,8 @@ class GroupActiveProposalItemReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 360)
+        return struct.pack("<I", 360)
+
 
 @dataclass
 class GroupVoteHistoryRequestPacket:
@@ -4643,7 +5057,8 @@ class GroupVoteHistoryRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 361)
+        return struct.pack("<I", 361)
+
 
 @dataclass
 class GroupVoteHistoryItemReplyPacket:
@@ -4653,7 +5068,8 @@ class GroupVoteHistoryItemReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 362)
+        return struct.pack("<I", 362)
+
 
 @dataclass
 class StartGroupProposalPacket:
@@ -4663,7 +5079,8 @@ class StartGroupProposalPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 363)
+        return struct.pack("<I", 363)
+
 
 @dataclass
 class GroupProposalBallotPacket:
@@ -4673,7 +5090,8 @@ class GroupProposalBallotPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 364)
+        return struct.pack("<I", 364)
+
 
 @dataclass
 class TallyVotesPacket:
@@ -4683,7 +5101,8 @@ class TallyVotesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 365)
+        return struct.pack("<I", 365)
+
 
 @dataclass
 class GroupMembersRequestPacket:
@@ -4693,7 +5112,8 @@ class GroupMembersRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 366)
+        return struct.pack("<I", 366)
+
 
 @dataclass
 class GroupMembersReplyPacket:
@@ -4703,7 +5123,8 @@ class GroupMembersReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 367)
+        return struct.pack("<I", 367)
+
 
 @dataclass
 class ActivateGroupPacket:
@@ -4713,7 +5134,8 @@ class ActivateGroupPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 368)
+        return struct.pack("<I", 368)
+
 
 @dataclass
 class SetGroupContributionPacket:
@@ -4723,7 +5145,8 @@ class SetGroupContributionPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 369)
+        return struct.pack("<I", 369)
+
 
 @dataclass
 class SetGroupAcceptNoticesPacket:
@@ -4733,7 +5156,8 @@ class SetGroupAcceptNoticesPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 370)
+        return struct.pack("<I", 370)
+
 
 @dataclass
 class GroupRoleDataRequestPacket:
@@ -4743,7 +5167,8 @@ class GroupRoleDataRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 371)
+        return struct.pack("<I", 371)
+
 
 @dataclass
 class GroupRoleDataReplyPacket:
@@ -4753,7 +5178,8 @@ class GroupRoleDataReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 372)
+        return struct.pack("<I", 372)
+
 
 @dataclass
 class GroupRoleMembersRequestPacket:
@@ -4763,7 +5189,8 @@ class GroupRoleMembersRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 373)
+        return struct.pack("<I", 373)
+
 
 @dataclass
 class GroupRoleMembersReplyPacket:
@@ -4773,7 +5200,8 @@ class GroupRoleMembersReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 374)
+        return struct.pack("<I", 374)
+
 
 @dataclass
 class GroupTitlesRequestPacket:
@@ -4783,7 +5211,8 @@ class GroupTitlesRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 375)
+        return struct.pack("<I", 375)
+
 
 @dataclass
 class GroupTitlesReplyPacket:
@@ -4793,7 +5222,8 @@ class GroupTitlesReplyPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 376)
+        return struct.pack("<I", 376)
+
 
 @dataclass
 class GroupTitleUpdatePacket:
@@ -4803,7 +5233,8 @@ class GroupTitleUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 377)
+        return struct.pack("<I", 377)
+
 
 @dataclass
 class GroupRoleUpdatePacket:
@@ -4813,7 +5244,8 @@ class GroupRoleUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 378)
+        return struct.pack("<I", 378)
+
 
 @dataclass
 class LiveHelpGroupRequestPacket:
@@ -4823,7 +5255,8 @@ class LiveHelpGroupRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 379)
+        return struct.pack("<I", 379)
+
 
 @dataclass
 class LiveHelpGroupReplyPacket:
@@ -4833,7 +5266,8 @@ class LiveHelpGroupReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 380)
+        return struct.pack("<I", 380)
+
 
 @dataclass
 class AgentWearablesRequestPacket:
@@ -4843,7 +5277,8 @@ class AgentWearablesRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 381)
+        return struct.pack("<I", 381)
+
 
 @dataclass
 class AgentWearablesUpdatePacket:
@@ -4853,7 +5288,8 @@ class AgentWearablesUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 382)
+        return struct.pack("<I", 382)
+
 
 @dataclass
 class AgentIsNowWearingPacket:
@@ -4863,7 +5299,8 @@ class AgentIsNowWearingPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 383)
+        return struct.pack("<I", 383)
+
 
 @dataclass
 class AgentCachedTexturePacket:
@@ -4873,7 +5310,8 @@ class AgentCachedTexturePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 384)
+        return struct.pack("<I", 384)
+
 
 @dataclass
 class AgentCachedTextureResponsePacket:
@@ -4883,7 +5321,8 @@ class AgentCachedTextureResponsePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 385)
+        return struct.pack("<I", 385)
+
 
 @dataclass
 class AgentDataUpdateRequestPacket:
@@ -4893,7 +5332,8 @@ class AgentDataUpdateRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 386)
+        return struct.pack("<I", 386)
+
 
 @dataclass
 class AgentDataUpdatePacket:
@@ -4903,7 +5343,8 @@ class AgentDataUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 387)
+        return struct.pack("<I", 387)
+
 
 @dataclass
 class GroupDataUpdatePacket:
@@ -4913,7 +5354,8 @@ class GroupDataUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 388)
+        return struct.pack("<I", 388)
+
 
 @dataclass
 class AgentGroupDataUpdatePacket:
@@ -4923,7 +5365,8 @@ class AgentGroupDataUpdatePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 389)
+        return struct.pack("<I", 389)
+
 
 @dataclass
 class AgentDropGroupPacket:
@@ -4933,7 +5376,8 @@ class AgentDropGroupPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 390)
+        return struct.pack("<I", 390)
+
 
 @dataclass
 class LogTextMessagePacket:
@@ -4943,7 +5387,8 @@ class LogTextMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 391)
+        return struct.pack("<I", 391)
+
 
 @dataclass
 class ViewerEffectPacket:
@@ -4953,7 +5398,8 @@ class ViewerEffectPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 17)
+        return struct.pack("<I", 17)
+
 
 @dataclass
 class CreateTrustedCircuitPacket:
@@ -4963,7 +5409,8 @@ class CreateTrustedCircuitPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 392)
+        return struct.pack("<I", 392)
+
 
 @dataclass
 class DenyTrustedCircuitPacket:
@@ -4973,7 +5420,8 @@ class DenyTrustedCircuitPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 393)
+        return struct.pack("<I", 393)
+
 
 @dataclass
 class RequestTrustedCircuitPacket:
@@ -4983,7 +5431,8 @@ class RequestTrustedCircuitPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 394)
+        return struct.pack("<I", 394)
+
 
 @dataclass
 class RezSingleAttachmentFromInvPacket:
@@ -4993,7 +5442,8 @@ class RezSingleAttachmentFromInvPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 395)
+        return struct.pack("<I", 395)
+
 
 @dataclass
 class RezMultipleAttachmentsFromInvPacket:
@@ -5003,7 +5453,8 @@ class RezMultipleAttachmentsFromInvPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 396)
+        return struct.pack("<I", 396)
+
 
 @dataclass
 class DetachAttachmentIntoInvPacket:
@@ -5013,7 +5464,8 @@ class DetachAttachmentIntoInvPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 397)
+        return struct.pack("<I", 397)
+
 
 @dataclass
 class CreateNewOutfitAttachmentsPacket:
@@ -5023,7 +5475,8 @@ class CreateNewOutfitAttachmentsPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 398)
+        return struct.pack("<I", 398)
+
 
 @dataclass
 class UserInfoRequestPacket:
@@ -5033,7 +5486,8 @@ class UserInfoRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 399)
+        return struct.pack("<I", 399)
+
 
 @dataclass
 class UserInfoReplyPacket:
@@ -5043,7 +5497,8 @@ class UserInfoReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 400)
+        return struct.pack("<I", 400)
+
 
 @dataclass
 class UpdateUserInfoPacket:
@@ -5053,7 +5508,8 @@ class UpdateUserInfoPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 401)
+        return struct.pack("<I", 401)
+
 
 @dataclass
 class ParcelRenamePacket:
@@ -5063,7 +5519,8 @@ class ParcelRenamePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 402)
+        return struct.pack("<I", 402)
+
 
 @dataclass
 class InitiateDownloadPacket:
@@ -5073,7 +5530,8 @@ class InitiateDownloadPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 403)
+        return struct.pack("<I", 403)
+
 
 @dataclass
 class SystemMessagePacket:
@@ -5083,7 +5541,8 @@ class SystemMessagePacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 404)
+        return struct.pack("<I", 404)
+
 
 @dataclass
 class MapLayerRequestPacket:
@@ -5093,7 +5552,8 @@ class MapLayerRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 405)
+        return struct.pack("<I", 405)
+
 
 @dataclass
 class MapLayerReplyPacket:
@@ -5103,7 +5563,8 @@ class MapLayerReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 406)
+        return struct.pack("<I", 406)
+
 
 @dataclass
 class MapBlockRequestPacket:
@@ -5113,7 +5574,8 @@ class MapBlockRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 407)
+        return struct.pack("<I", 407)
+
 
 @dataclass
 class MapNameRequestPacket:
@@ -5123,7 +5585,8 @@ class MapNameRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 408)
+        return struct.pack("<I", 408)
+
 
 @dataclass
 class MapBlockReplyPacket:
@@ -5133,7 +5596,8 @@ class MapBlockReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 409)
+        return struct.pack("<I", 409)
+
 
 @dataclass
 class MapItemRequestPacket:
@@ -5143,7 +5607,8 @@ class MapItemRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 410)
+        return struct.pack("<I", 410)
+
 
 @dataclass
 class MapItemReplyPacket:
@@ -5153,7 +5618,8 @@ class MapItemReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 411)
+        return struct.pack("<I", 411)
+
 
 @dataclass
 class SendPostcardPacket:
@@ -5163,7 +5629,8 @@ class SendPostcardPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 412)
+        return struct.pack("<I", 412)
+
 
 @dataclass
 class RpcChannelRequestPacket:
@@ -5173,7 +5640,8 @@ class RpcChannelRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 413)
+        return struct.pack("<I", 413)
+
 
 @dataclass
 class RpcChannelReplyPacket:
@@ -5183,7 +5651,8 @@ class RpcChannelReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 414)
+        return struct.pack("<I", 414)
+
 
 @dataclass
 class RpcScriptRequestInboundPacket:
@@ -5193,7 +5662,8 @@ class RpcScriptRequestInboundPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 415)
+        return struct.pack("<I", 415)
+
 
 @dataclass
 class RpcScriptRequestInboundForwardPacket:
@@ -5203,7 +5673,8 @@ class RpcScriptRequestInboundForwardPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 416)
+        return struct.pack("<I", 416)
+
 
 @dataclass
 class RpcScriptReplyInboundPacket:
@@ -5213,7 +5684,8 @@ class RpcScriptReplyInboundPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 417)
+        return struct.pack("<I", 417)
+
 
 @dataclass
 class ScriptMailRegistrationPacket:
@@ -5223,7 +5695,8 @@ class ScriptMailRegistrationPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 418)
+        return struct.pack("<I", 418)
+
 
 @dataclass
 class ParcelMediaCommandMessagePacket:
@@ -5233,7 +5706,8 @@ class ParcelMediaCommandMessagePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 419)
+        return struct.pack("<I", 419)
+
 
 @dataclass
 class ParcelMediaUpdatePacket:
@@ -5243,7 +5717,8 @@ class ParcelMediaUpdatePacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 420)
+        return struct.pack("<I", 420)
+
 
 @dataclass
 class LandStatRequestPacket:
@@ -5253,7 +5728,8 @@ class LandStatRequestPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 421)
+        return struct.pack("<I", 421)
+
 
 @dataclass
 class LandStatReplyPacket:
@@ -5263,7 +5739,8 @@ class LandStatReplyPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 422)
+        return struct.pack("<I", 422)
+
 
 @dataclass
 class ErrorPacket:
@@ -5273,7 +5750,8 @@ class ErrorPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 423)
+        return struct.pack("<I", 423)
+
 
 @dataclass
 class ObjectIncludeInSearchPacket:
@@ -5283,7 +5761,8 @@ class ObjectIncludeInSearchPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 424)
+        return struct.pack("<I", 424)
+
 
 @dataclass
 class RezRestoreToWorldPacket:
@@ -5293,7 +5772,8 @@ class RezRestoreToWorldPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 425)
+        return struct.pack("<I", 425)
+
 
 @dataclass
 class LinkInventoryItemPacket:
@@ -5303,7 +5783,8 @@ class LinkInventoryItemPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 426)
+        return struct.pack("<I", 426)
+
 
 @dataclass
 class RetrieveIMsExtendedPacket:
@@ -5313,7 +5794,8 @@ class RetrieveIMsExtendedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 427)
+        return struct.pack("<I", 427)
+
 
 @dataclass
 class JoinGroupRequestExtendedPacket:
@@ -5323,7 +5805,8 @@ class JoinGroupRequestExtendedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 428)
+        return struct.pack("<I", 428)
+
 
 @dataclass
 class CreateGroupRequestExtendedPacket:
@@ -5333,7 +5816,8 @@ class CreateGroupRequestExtendedPacket:
     is_zerocoded: bool = False
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 429)
+        return struct.pack("<I", 429)
+
 
 @dataclass
 class GameControlInputPacket:
@@ -5343,7 +5827,8 @@ class GameControlInputPacket:
     is_zerocoded: bool = True
 
     def serialize(self) -> bytes:
-        return struct.pack('<I', 32)
+        return struct.pack("<I", 32)
+
 
 # Generated LLSD Capability Schemas
 @dataclass
@@ -5356,6 +5841,13 @@ class AgentDomainCapabilitiesCapabilities:
     hover_height: Optional[float] = None
     active_group_id: Optional[str] = None
     maturity_rating: Optional[str] = None
+
+
+@dataclass
+class EventQueueGetCapabilities:
+    ack: Optional[int] = None
+    events: List[str] = field(default_factory=list)
+
 
 @dataclass
 class CapabilitiesRequestResponseCapabilities:
