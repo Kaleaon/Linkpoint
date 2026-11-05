@@ -4,15 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/src/ffi.dart';
 
 File? _findFixtureFile() {
-  final candidates = [
-    '../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    '../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    '/app/Linkpoint/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-  ];
-  for (final path in candidates) {
-    final file = File(path);
-    if (file.existsSync()) return file;
+  const relPath =
+      'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json';
+  var curr = Directory.current;
+  for (var i = 0; i < 10; i++) {
+    final cand = File('${curr.path}/$relPath');
+    if (cand.existsSync()) return cand;
+    final parent = curr.parent;
+    if (parent.path == curr.path) break;
+    curr = parent;
   }
   return null;
 }
@@ -65,37 +65,48 @@ void main() {
         expect(xmlDec, isNotNull, reason: 'Vector #$id ($name) parseXml');
 
         final notationEnc = LinkpointProtocolFFI.serializeNotation(jsonStr);
-        expect(notationEnc, isNotEmpty,
-            reason: 'Vector #$id ($name) serializeNotation');
+        expect(
+          notationEnc,
+          isNotEmpty,
+          reason: 'Vector #$id ($name) serializeNotation',
+        );
         final notationDec = LinkpointProtocolFFI.parseNotation(notationEnc);
-        expect(notationDec, isNotNull,
-            reason: 'Vector #$id ($name) parseNotation');
+        expect(
+          notationDec,
+          isNotNull,
+          reason: 'Vector #$id ($name) parseNotation',
+        );
 
         final binaryEnc = LinkpointProtocolFFI.serializeBinary(jsonStr);
-        expect(binaryEnc, isNotEmpty,
-            reason: 'Vector #$id ($name) serializeBinary');
+        expect(
+          binaryEnc,
+          isNotEmpty,
+          reason: 'Vector #$id ($name) serializeBinary',
+        );
         final binaryDec = LinkpointProtocolFFI.parseBinary(binaryEnc);
         expect(binaryDec, isNotNull, reason: 'Vector #$id ($name) parseBinary');
       }
     }, skip: skipReason);
 
     test(
-        'Memory leak check: 1000 parse and serialize iterations confirm zero lost buffers',
-        () {
-      if (!LinkpointProtocolFFI.isAvailable) {
-        markTestSkipped('FFI library liblinkpoint_protocol is not available');
-        return;
-      }
-      final jsonStr = jsonEncode({
-        'agent_id': '00000000-0000-0000-0000-000000000000',
-        'balance': 1000,
-        'online': true
-      });
-      for (var i = 0; i < 1000; i++) {
-        final xml = LinkpointProtocolFFI.serializeXml(jsonStr);
-        final jsonParsed = LinkpointProtocolFFI.parseXml(xml);
-        expect(jsonParsed, isNotEmpty);
-      }
-    }, skip: skipReason);
+      'Memory leak check: 1000 parse and serialize iterations confirm zero lost buffers',
+      () {
+        if (!LinkpointProtocolFFI.isAvailable) {
+          markTestSkipped('FFI library liblinkpoint_protocol is not available');
+          return;
+        }
+        final jsonStr = jsonEncode({
+          'agent_id': '00000000-0000-0000-0000-000000000000',
+          'balance': 1000,
+          'online': true,
+        });
+        for (var i = 0; i < 1000; i++) {
+          final xml = LinkpointProtocolFFI.serializeXml(jsonStr);
+          final jsonParsed = LinkpointProtocolFFI.parseXml(xml);
+          expect(jsonParsed, isNotEmpty);
+        }
+      },
+      skip: skipReason,
+    );
   });
 }

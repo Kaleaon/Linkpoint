@@ -373,18 +373,51 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
   }
 
   it('passes all 31 canonical test vectors in XML and Binary formats', () => {
-    const candidates = [
-      path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
-      path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
-      path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
-      path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
-    ];
-    let vectorsDir = candidates.find(p => fs.existsSync(p)) || candidates[0];
+    function findLlsdVectorsDir(): string {
+      const candidatePaths = [
+        path.join('legacy', 'Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('Linkpoint', 'src', 'test', 'resources', 'llsd-conformance', 'vectors'),
+        path.join('src', 'test', 'resources', 'llsd-conformance', 'vectors')
+      ];
+
+      let current = __dirname;
+      for (let i = 0; i < 10; i++) {
+        for (const rel of candidatePaths) {
+          const cand = path.join(current, rel);
+          if (fs.existsSync(cand)) return cand;
+        }
+        const parent = path.dirname(current);
+        if (parent === current) break;
+        current = parent;
+      }
+
+      current = process.cwd();
+      for (let i = 0; i < 10; i++) {
+        for (const rel of candidatePaths) {
+          const cand = path.join(current, rel);
+          if (fs.existsSync(cand)) return cand;
+        }
+        const parent = path.dirname(current);
+        if (parent === current) break;
+        current = parent;
+      }
+
+      const direct = [
+        path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
+        path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
+        path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
+        path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      ];
+      return direct.find(p => fs.existsSync(p)) || direct[0];
+    }
+
+    const vectorsDir = findLlsdVectorsDir();
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
     const subdirs = fs.readdirSync(vectorsDir)
+      .filter(name => !name.startsWith('.'))
       .map(name => path.join(vectorsDir, name))
-      .filter(p => fs.statSync(p).isDirectory())
+      .filter(p => fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'value.xml')))
       .sort();
 
     expect(subdirs.length).toBe(31);
