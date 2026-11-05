@@ -878,6 +878,93 @@ class ViewerSession {
     return { worn: true, itemId, append };
   }
 
+  async offerItem({ targetId, item, itemId } = {}) {
+    if (!targetId) throw new Error('targetId is required');
+    const resolvedItemId = itemId || (item && (item.id || item.itemID)) || (typeof item === 'string' ? item : null);
+    if (!resolvedItemId) throw new Error('itemId is required');
+    const bot = this.requireBot();
+
+    try {
+      const comms = bot.clientCommands?.comms;
+      const invCommands = bot.clientCommands?.inventory;
+      let invItem = null;
+      if (invCommands && typeof invCommands.getInventoryItem === 'function') {
+        try {
+          invItem = await invCommands.getInventoryItem(resolvedItemId);
+        } catch { /* ignore */ }
+      }
+      if (comms && typeof comms.giveInventory === 'function' && invItem) {
+        await comms.giveInventory(targetId, invItem);
+        return { offered: true, targetId, itemId: resolvedItemId };
+      }
+
+      const circuit = bot.currentRegion?.circuit || bot.circuit;
+      if (circuit && typeof circuit.sendMessage === 'function') {
+        const { ImprovedInstantMessageMessage } = require('@caspertech/node-metaverse/dist/lib/classes/messages/ImprovedInstantMessage');
+        const { InstantMessageDialog } = require('@caspertech/node-metaverse/dist/lib/enums/InstantMessageDialog');
+        const { PacketFlags } = require('@caspertech/node-metaverse/dist/lib/enums/PacketFlags');
+        const { UUID, Vector3, Utils } = require('@caspertech/node-metaverse');
+
+        const toUUID = (val) => {
+          if (!val) return UUID.zero();
+          if (val instanceof UUID) return val;
+          try { return new UUID(String(val)); } catch { return UUID.zero(); }
+        };
+
+        let agent = null;
+        try { agent = bot.agent; } catch { /* ignore */ }
+        let agentId = UUID.zero();
+        if (agent && agent.agentID) {
+          agentId = toUUID(agent.agentID);
+        } else if (typeof bot.agentID === 'function') {
+          try { agentId = toUUID(bot.agentID()); } catch { /* ignore */ }
+        }
+        const firstName = (agent && agent.firstName) || bot.firstName || '';
+        const lastName = (agent && agent.lastName) || bot.lastName || '';
+        const agentName = [firstName, lastName].filter(Boolean).join(' ').trim();
+
+        const toId = toUUID(targetId);
+        const itemUUID = toUUID(resolvedItemId);
+        const itemName = (item && item.name) || (invItem && invItem.name) || 'Inventory Item';
+        const assetType = (item && typeof item.assetType === 'number') ? item.assetType : (invItem && typeof invItem.type === 'number') ? invItem.type : 0;
+
+        const bucket = Buffer.allocUnsafe(17);
+        bucket.writeUInt8(assetType, 0);
+        itemUUID.writeToBuffer(bucket, 1);
+
+        const im = new ImprovedInstantMessageMessage();
+        im.AgentData = {
+          AgentID: agentId,
+          SessionID: circuit.sessionID ? toUUID(circuit.sessionID) : UUID.zero(),
+        };
+        im.MessageBlock = {
+          FromGroup: false,
+          ToAgentID: toId,
+          ParentEstateID: 0,
+          RegionID: UUID.zero(),
+          Position: Vector3.getZero(),
+          Offline: 0,
+          Dialog: InstantMessageDialog.InventoryOffered,
+          ID: UUID.random(),
+          Timestamp: Math.floor(Date.now() / 1000),
+          FromAgentName: Utils.StringToBuffer(agentName),
+          Message: Utils.StringToBuffer(itemName),
+          BinaryBucket: bucket,
+        };
+        im.EstateBlock = { EstateID: 0 };
+
+        const seq = circuit.sendMessage(im, PacketFlags.Reliable);
+        if (typeof circuit.waitForAck === 'function' && typeof seq === 'number') {
+          try { await circuit.waitForAck(seq, 5000); } catch { /* timeout */ }
+        }
+      }
+    } catch (err) {
+      console.warn('[SL Session] offerItem warning:', err);
+      throw err;
+    }
+    return { offered: true, targetId, itemId: resolvedItemId };
+  }
+
   async wearOutfit({ outfitId } = {}) {
     if (!outfitId) throw new Error('outfitId is required');
     const bot = this.requireBot();
