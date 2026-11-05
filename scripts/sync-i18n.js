@@ -21,9 +21,9 @@ const webLocalesDir = path.join(rootDir, 'apps/linkpoint/src/locales');
 let androidResDir = path.join(rootDir, 'legacy/Linkpoint/src/main/res');
 if (!fs.existsSync(androidResDir)) {
   androidResDir = path.join(rootDir, 'Linkpoint/src/main/res');
-  if (!fs.existsSync(androidResDir)) {
-    androidResDir = path.join(rootDir, 'app/src/main/res');
-  }
+}
+if (!fs.existsSync(androidResDir)) {
+  androidResDir = path.join(rootDir, 'app/src/main/res');
 }
 
 const SUPPORTED_LOCALES = ['en', 'es', 'fr', 'ja'];
