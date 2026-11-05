@@ -1,12 +1,13 @@
 package com.linkpoint.chat
 
+import com.linkpoint.linden.llmessage.IMType
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.types.getUUID
 import com.linkpoint.teleport.TeleportLure
-import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.teleport.TeleportResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi

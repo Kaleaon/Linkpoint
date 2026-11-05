@@ -32,6 +32,12 @@ done
 
 for target in "${OPTIONAL_TARGETS[@]}"; do
     if rustup target list | grep -q "${target} (installed)"; then
+        if [[ "${target}" == *"windows-gnu"* ]] && [ "$(uname -s)" = "Linux" ]; then
+            if ! command -v x86_64-w64-mingw32-dlltool >/dev/null 2>&1 && ! command -v x86_64-w64-mingw32-gcc >/dev/null 2>&1; then
+                echo "Skipping target ${target} (mingw toolchain x86_64-w64-mingw32-dlltool not installed)"
+                continue
+            fi
+        fi
         echo "Building for installed target: ${target}"
         cargo build -p linkpoint-protocol --release --target "${target}" || echo "Warning: build for ${target} skipped"
     else
