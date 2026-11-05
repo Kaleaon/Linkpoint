@@ -46,7 +46,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
         with:
           packages: >-
             platform-tools
@@ -169,3 +169,77 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: ${{ startsWith(github.ref_name, 'next-v') || contains(github.ref_name, 'beta') }}
+
+  publish-registry-packages:
+    name: Task 4 - Publish Multi-Platform Registry Packages
+    needs: [publish-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Set up Flutter / Dart
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Publish npm package
+        if: ${{ secrets.NPM_TOKEN != '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=packages/viewer-types --access public
+
+      - name: Publish Pub.dev package
+        if: ${{ secrets.PUB_DEV_TOKEN != '' }}
+        env:
+          PUB_DEV_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
+        run: |
+          cd packages/linkpoint_dart
+          mkdir -p ~/.config/dart
+          cat << EOF > ~/.config/dart/pub-credentials.json
+          {
+            "accessToken": "${PUB_DEV_TOKEN}",
+            "refreshToken": null,
+            "tokenEndpoint": "https://accounts.google.com/o/oauth2/token",
+            "scopes": ["https://www.googleapis.com/auth/userinfo.email", "openid"],
+            "expiration": 2147483647000
+          }
+          EOF
+          dart pub publish --force
+
+      - name: Publish NuGet package
+        if: ${{ secrets.NUGET_KEY != '' }}
+        env:
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
+        run: |
+          dotnet pack sdks/csharp/src/Linkpoint.LLSD.csproj -c Release -o nupkg
+          dotnet nuget push nupkg/*.nupkg -k "$NUGET_KEY" -s https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Publish Crates.io package
+        if: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish -p linkpoint-protocol --token "$CARGO_REGISTRY_TOKEN"
+
