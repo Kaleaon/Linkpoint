@@ -83,9 +83,9 @@ def main():
     parser.add_argument(
         "--android-report",
         type=Path,
-        default=Path(
-            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-        ),
+        default=Path("legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        if Path("legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml").exists()
+        else Path("Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"),
     )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))
     parser.add_argument("--rust-report", type=Path, default=Path("lcov.info"))

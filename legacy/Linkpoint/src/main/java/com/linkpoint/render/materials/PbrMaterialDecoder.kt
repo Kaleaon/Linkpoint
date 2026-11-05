@@ -10,15 +10,17 @@ import java.util.UUID
 
 /**
  * Decodes glTF 2.0 PBR material payloads (from LLSD or data structures) and extracts PBR factors
- * while discarding metallic-roughness texture maps to satisfy OpenGL ES 2.0 sampler limits.
+ * and capability-aware texture maps.
  */
 object PbrMaterialDecoder {
 
     /**
      * Decodes an LLSD Map payload representing a glTF 2.0 PBR material into a [MaterialDescriptor].
-     * Discards metallic-roughness texture maps to stay within OpenGL ES 2.0 sampler limits.
+     * @param data The LLSD map payload containing PBR factors and texture maps.
+     * @param enableMetallicRoughness When true (default), extracts metallic-roughness texture maps for GLES 3.0+ rendering.
      */
-    fun decodeFromLLSD(data: LLSDMap): MaterialDescriptor {
+    @JvmOverloads
+    fun decodeFromLLSD(data: LLSDMap, enableMetallicRoughness: Boolean = true): MaterialDescriptor {
         var baseR = 1f
         var baseG = 1f
         var baseB = 1f
@@ -45,6 +47,7 @@ object PbrMaterialDecoder {
 
         var baseColorTexRef: MaterialDescriptor.TextureRef? = null
         var normalTexRef: MaterialDescriptor.TextureRef? = null
+        var metallicRoughnessTexRef: MaterialDescriptor.TextureRef? = null
 
         data.getMap("Textures")?.let { texturesMap ->
             texturesMap["BaseColor"]?.let { parseUUID(it)?.let { uuid ->
@@ -53,7 +56,11 @@ object PbrMaterialDecoder {
             texturesMap["Normal"]?.let { parseUUID(it)?.let { uuid ->
                 normalTexRef = MaterialDescriptor.TextureRef(uuid, uuid)
             }}
-            // Note: MetallicRoughness texture map is intentionally ignored / discarded for ES 2.0
+            if (enableMetallicRoughness) {
+                (texturesMap["MetallicRoughness"] ?: texturesMap["metallic_roughness"])?.let { parseUUID(it)?.let { uuid ->
+                    metallicRoughnessTexRef = MaterialDescriptor.TextureRef(uuid, uuid)
+                }}
+            }
         }
 
         if (baseColorTexRef == null) {
@@ -66,12 +73,17 @@ object PbrMaterialDecoder {
                 normalTexRef = MaterialDescriptor.TextureRef(uuid, uuid)
             }}
         }
+        if (enableMetallicRoughness && metallicRoughnessTexRef == null) {
+            (data["MetallicRoughnessTexture"] ?: data["metallic_roughness_texture"] ?: data["MetallicRoughness"])?.let { parseUUID(it)?.let { uuid ->
+                metallicRoughnessTexRef = MaterialDescriptor.TextureRef(uuid, uuid)
+            }}
+        }
 
         return MaterialDescriptor(
             baseColor = MaterialDescriptor.Float4(baseR, baseG, baseB, baseA),
             baseColorTexture = baseColorTexRef,
             normalTexture = normalTexRef,
-            metallicRoughnessTexture = null, // Discarded for ES 2.0
+            metallicRoughnessTexture = metallicRoughnessTexRef,
             metallicFactor = metallic,
             roughnessFactor = roughness
         )
