@@ -47,7 +47,6 @@ class DrawablePrimStore {
     ) {
         @Volatile
         var isDirty: Boolean = true
-            private set
 
         var scaleS: Float = scaleS
             set(value) {
@@ -89,7 +88,10 @@ class DrawablePrimStore {
                 }
             }
 
+        @Transient
         private val matrixBuffer = FloatArray(16)
+
+        @Transient
         @Volatile
         private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
 
