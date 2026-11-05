@@ -1,0 +1,82 @@
+// Central authoritative schema definition for GLTF materials, mesh binary structures,
+// joint weight arrays, and level-of-detail metadata across C++, Kotlin, C#, and Java runtimes.
+
+namespace AssetSchema;
+
+enum AlphaMode : byte {
+  OPAQUE = 0,
+  MASK = 1,
+  BLEND = 2
+}
+
+enum DetailLevel : byte {
+  HIGHEST = 0,
+  HIGH = 1,
+  MEDIUM = 2,
+  LOW = 3,
+  LOWEST = 4
+}
+
+struct Vector2 {
+  x: float;
+  y: float;
+}
+
+struct Vector3 {
+  x: float;
+  y: float;
+  z: float;
+}
+
+struct TextureTransformPacked {
+  scale_x: float;
+  scale_y: float;
+  rotation: float;
+  pad0: float;
+  offset_x: float;
+  offset_y: float;
+  pad1: float;
+  pad2: float;
+}
+
+struct TextureTransformPackedTight {
+  scale_x: float;
+  scale_y: float;
+  rotation: float;
+  offset_x: float;
+  offset_y: float;
+}
+
+table TextureTransform {
+  offset: Vector2;
+  scale: Vector2;
+  rotation: float;
+}
+
+table GLTFMaterial {
+  alpha_mode: AlphaMode = OPAQUE;
+  alpha_cutoff: float = 0.5;
+  double_sided: bool = false;
+  transforms: [TextureTransform];
+}
+
+struct JointInfluence {
+  joint_index: ubyte;
+  weight: float;
+}
+
+table MeshBlock {
+  lod: DetailLevel;
+  lod_key: string;
+  positions: [Vector3];
+  normals: [Vector3];
+  tex_coords: [Vector2];
+  joint_influences: [JointInfluence];
+}
+
+table AssetMetadata {
+  max_rigged_mesh_joints: uint = 256;
+  joint_sentinel: ubyte = 255;
+}
+
+root_type GLTFMaterial;
