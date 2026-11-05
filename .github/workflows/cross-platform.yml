@@ -43,7 +43,6 @@ jobs:
     steps:
       - name: Configure Git line endings and reset working tree
         run: |
-          git config --system core.autocrlf false || true
           git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - name: Normalize working tree line endings
@@ -93,7 +92,6 @@ jobs:
     steps:
       - name: Configure Git line endings and reset working tree
         run: |
-          git config --system core.autocrlf false || true
           git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - name: Normalize working tree line endings

@@ -12,6 +12,9 @@ import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.LLQuaternion
 import com.linkpoint.protocol.types.LLVector3
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.world.topography.PlanarTopographyProjection
+import com.linkpoint.world.topography.TopographyNetworkSerializer
+import com.linkpoint.world.topography.WorldTopographyProjection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +31,24 @@ import java.util.concurrent.ConcurrentHashMap
 class ObjectManager(
     private val udpConnection: UDPConnectionFixed
 ) {
+    var topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+
+    /**
+     * Manifold-aware spatial interpolation between local prediction and incoming server update.
+     * Smooths position transitions during high-velocity movement to prevent visual position snapping.
+     */
+    fun reconcilePosition(
+        current: LLVector3,
+        target: LLVector3,
+        smoothingFactor: Float = 0.5f
+    ): LLVector3 {
+        val factor = smoothingFactor.coerceIn(0f, 1f)
+        return LLVector3(
+            current.x + (target.x - current.x) * factor,
+            current.y + (target.y - current.y) * factor,
+            current.z + (target.z - current.z) * factor
+        )
+    }
     enum class RejectReason {
         ZERO_FULL_ID,
         ZERO_LOCAL_ID,
@@ -158,9 +179,24 @@ class ObjectManager(
             )
         }
 
+        val manifoldPos = if (data.parentId == 0) {
+            val coords = TopographyNetworkSerializer.fromCartesianProtocolPacket(
+                data.position.x, data.position.y, data.position.z, topographyProjection
+            )
+            LLVector3(coords[0], coords[1], coords[2])
+        } else {
+            data.position
+        }
+
+        val reconciledPos = if (obj.lastUpdate > 0 && (obj.isPhysical || data.velocity.length() > 0.1f)) {
+            reconcilePosition(obj.position, manifoldPos, 0.5f)
+        } else {
+            manifoldPos
+        }
+
         obj.apply {
             parentId = data.parentId
-            position = data.position
+            position = reconciledPos
             rotation = data.rotation
             velocity = data.velocity
             scale = data.scale
@@ -197,7 +233,20 @@ class ObjectManager(
             return
         }
         objects[data.localId]?.apply {
-            position = data.position
+            val manifoldPos = if (parentId == 0) {
+                val coords = TopographyNetworkSerializer.fromCartesianProtocolPacket(
+                    data.position.x, data.position.y, data.position.z, topographyProjection
+                )
+                LLVector3(coords[0], coords[1], coords[2])
+            } else {
+                data.position
+            }
+
+            position = if (lastUpdate > 0 && (isPhysical || data.velocity.length() > 0.1f)) {
+                reconcilePosition(position, manifoldPos, 0.6f)
+            } else {
+                manifoldPos
+            }
             rotation = data.rotation
             velocity = data.velocity
             angularVelocity = data.angularVelocity
@@ -427,6 +476,18 @@ class ObjectManager(
         rotation: LLQuaternion? = null,
         scale: LLVector3? = null
     ) {
+        val cartesianPos = if (position != null) {
+            val obj = objects[localId]
+            if (obj == null || obj.parentId == 0) {
+                val coords = TopographyNetworkSerializer.toCartesianProtocolPacket(
+                    position.x, position.y, position.z, topographyProjection
+                )
+                LLVector3(coords[0], coords[1], coords[2])
+            } else {
+                position
+            }
+        } else null
+
         scope.launch {
             // MultipleObjectUpdate packet
             // Determine update type flags
@@ -456,8 +517,8 @@ class ObjectManager(
             payload.putInt(localId)
             payload.put(updateType.toByte())
 
-            // Write position if provided
-            position?.let {
+            // Write position if provided (converted to server Cartesian space)
+            cartesianPos?.let {
                 payload.putFloat(it.x)
                 payload.putFloat(it.y)
                 payload.putFloat(it.z)
@@ -494,6 +555,11 @@ class ObjectManager(
         position: LLVector3,
         rotation: LLQuaternion = LLQuaternion.identity()
     ) {
+        val cartesianCoords = TopographyNetworkSerializer.toCartesianProtocolPacket(
+            position.x, position.y, position.z, topographyProjection
+        )
+        val cartesianPos = LLVector3(cartesianCoords[0], cartesianCoords[1], cartesianCoords[2])
+
         scope.launch {
             // RezObject message
             // NOTE: Second Life message blocks are little-endian; UUIDs remain raw big-endian bytes.
@@ -505,10 +571,10 @@ class ObjectManager(
             // RezData
             payload.putUUID(itemId)
 
-            // Position
-            payload.putFloat(position.x)
-            payload.putFloat(position.y)
-            payload.putFloat(position.z)
+            // Position (converted to Cartesian server space)
+            payload.putFloat(cartesianPos.x)
+            payload.putFloat(cartesianPos.y)
+            payload.putFloat(cartesianPos.z)
 
             // Rotation
             payload.putFloat(rotation.x)
@@ -994,7 +1060,15 @@ class ObjectManager(
                 val posZ = buffer.float
 
                 objects[localId]?.let { obj ->
-                    obj.position = com.linkpoint.protocol.types.LLVector3(posX, posY, posZ)
+                    val manifoldPos = if (obj.parentId == 0) {
+                        val coords = TopographyNetworkSerializer.fromCartesianProtocolPacket(
+                            posX, posY, posZ, topographyProjection
+                        )
+                        com.linkpoint.protocol.types.LLVector3(coords[0], coords[1], coords[2])
+                    } else {
+                        com.linkpoint.protocol.types.LLVector3(posX, posY, posZ)
+                    }
+                    obj.position = manifoldPos
                     obj.lastUpdate = System.currentTimeMillis()
                 }
             }
@@ -1075,6 +1149,11 @@ class ObjectManager(
     )
 
     fun createPrim(params: PrimCreateParams) {
+        val cartesianCoords = TopographyNetworkSerializer.toCartesianProtocolPacket(
+            params.position.x, params.position.y, params.position.z, topographyProjection
+        )
+        val cartesianPos = com.linkpoint.protocol.types.LLVector3(cartesianCoords[0], cartesianCoords[1], cartesianCoords[2])
+
         scope.launch {
             val payload = ByteBuffer.allocate(256).order(MESSAGE_BYTE_ORDER)
             // AgentData block: AgentID, SessionID, GroupID
@@ -1091,9 +1170,9 @@ class ObjectManager(
             payload.putShort((params.pathParams.endScale * 50000).toInt().toShort())
             
             // Position, Scale, Rotation
-            payload.putFloat(params.position.x)
-            payload.putFloat(params.position.y)
-            payload.putFloat(params.position.z)
+            payload.putFloat(cartesianPos.x)
+            payload.putFloat(cartesianPos.y)
+            payload.putFloat(cartesianPos.z)
             payload.putFloat(params.scale.x)
             payload.putFloat(params.scale.y)
             payload.putFloat(params.scale.z)
