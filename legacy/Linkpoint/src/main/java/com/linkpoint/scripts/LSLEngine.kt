@@ -1,16 +1,21 @@
 package com.linkpoint.scripts
 
 import android.util.Log
+import com.linkpoint.scripts.actor.ScriptActor
+import com.linkpoint.scripts.actor.ScriptChannelDispatcher
 import kotlinx.coroutines.*
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Basic LSL (Linden Scripting Language) runtime engine
- * This is a simplified implementation for handling incoming script events
- * and managing script state
+ *
+ * Uses [ScriptChannelDispatcher] and [ScriptActor] to execute script event handling
+ * within isolated coroutines communicating via non-blocking Kotlin Channels.
  */
-class LSLEngine {
+class LSLEngine(
+    val dispatcher: ScriptChannelDispatcher = ScriptChannelDispatcher()
+) {
 
     companion object {
         private const val TAG = "LSLEngine"
@@ -22,37 +27,30 @@ class LSLEngine {
         const val STATE_STOPPED = "stopped"
 
         // Event types
-        const val EVENT_STATE_ENTRY = "state_entry"
-        const val EVENT_STATE_EXIT = "state_exit"
-        const val EVENT_TOUCH_START = "touch_start"
-        const val EVENT_TOUCH = "touch"
-        const val EVENT_TOUCH_END = "touch_end"
-        const val EVENT_COLLISION_START = "collision_start"
-        const val EVENT_COLLISION = "collision"
-        const val EVENT_COLLISION_END = "collision_end"
-        const val EVENT_TIMER = "timer"
-        const val EVENT_LISTEN = "listen"
-        const val EVENT_MONEY = "money"
-        const val EVENT_HTTP_RESPONSE = "http_response"
-        const val EVENT_LINK_MESSAGE = "link_message"
-        const val EVENT_CHANGED = "changed"
-        const val EVENT_DATASERVER = "dataserver"
+        const val EVENT_STATE_ENTRY = ScriptChannelDispatcher.EVENT_STATE_ENTRY
+        const val EVENT_STATE_EXIT = ScriptChannelDispatcher.EVENT_STATE_EXIT
+        const val EVENT_TOUCH_START = ScriptChannelDispatcher.EVENT_TOUCH_START
+        const val EVENT_TOUCH = ScriptChannelDispatcher.EVENT_TOUCH
+        const val EVENT_TOUCH_END = ScriptChannelDispatcher.EVENT_TOUCH_END
+        const val EVENT_COLLISION_START = ScriptChannelDispatcher.EVENT_COLLISION_START
+        const val EVENT_COLLISION = ScriptChannelDispatcher.EVENT_COLLISION
+        const val EVENT_COLLISION_END = ScriptChannelDispatcher.EVENT_COLLISION_END
+        const val EVENT_TIMER = ScriptChannelDispatcher.EVENT_TIMER
+        const val EVENT_LISTEN = ScriptChannelDispatcher.EVENT_LISTEN
+        const val EVENT_MONEY = ScriptChannelDispatcher.EVENT_MONEY
+        const val EVENT_HTTP_RESPONSE = ScriptChannelDispatcher.EVENT_HTTP_RESPONSE
+        const val EVENT_LINK_MESSAGE = ScriptChannelDispatcher.EVENT_LINK_MESSAGE
+        const val EVENT_CHANGED = ScriptChannelDispatcher.EVENT_CHANGED
+        const val EVENT_DATASERVER = ScriptChannelDispatcher.EVENT_DATASERVER
     }
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    // Running scripts
+    // Legacy script instances lookup map
     private val scripts = ConcurrentHashMap<UUID, ScriptInstance>()
 
-    // Listeners
-    private val listenHandles = ConcurrentHashMap<Int, ListenHandle>()
-    private var nextListenHandle = 0
-
-    // Timers
-    private val timers = ConcurrentHashMap<UUID, Job>()
-
     /**
-     * Register a script
+     * Register a script actor.
      */
     fun registerScript(
         scriptId: UUID,
@@ -66,95 +64,65 @@ class LSLEngine {
             ownerId = ownerId,
             permissions = permissions
         )
+
+        val actor = dispatcher.registerScript(
+            scriptId = scriptId,
+            objectId = objectId,
+            ownerId = ownerId,
+            runtime = "lsl",
+            permissions = permissions,
+            eventHandler = { _, event ->
+                // Maintain event history on legacy instance for backward compatibility
+                instance.eventQueue.add(event)
+            }
+        )
+
+        instance.actor = actor
         scripts[scriptId] = instance
         return instance
     }
 
     /**
-     * Unregister a script
+     * Unregister a script actor.
      */
     fun unregisterScript(scriptId: UUID) {
         scripts.remove(scriptId)
-        timers[scriptId]?.cancel()
-        timers.remove(scriptId)
-
-        // Remove listeners
-        listenHandles.entries.filter { it.value.scriptId == scriptId }
-            .forEach { listenHandles.remove(it.key) }
+        dispatcher.unregisterScript(scriptId)
     }
 
     /**
      * Handle touch event on object
      */
     fun handleTouch(objectId: UUID, toucherId: UUID, position: Triple<Float, Float, Float>) {
-        // Find scripts in this object
-        scripts.values.filter { it.objectId == objectId }.forEach { script ->
-            queueEvent(script.scriptId, EVENT_TOUCH_START, mapOf(
-                "detected_id" to toucherId.toString(),
-                "pos" to position
-            ))
-        }
+        dispatcher.handleTouch(objectId, toucherId, position)
     }
 
     /**
      * Handle listen event
      */
     fun handleListen(channel: Int, name: String, id: UUID, message: String) {
-        listenHandles.values
-            .filter { it.channel == channel }
-            .filter { it.name.isEmpty() || it.name == name }
-            .filter { it.id == null || it.id == id }
-            .filter { it.msg.isEmpty() || message.contains(it.msg) }
-            .forEach { handle ->
-                queueEvent(handle.scriptId, EVENT_LISTEN, mapOf(
-                    "channel" to channel,
-                    "name" to name,
-                    "id" to id.toString(),
-                    "message" to message
-                ))
-            }
+        dispatcher.handleListen(channel, name, id, message)
     }
 
     /**
      * Handle link message
      */
     fun handleLinkMessage(objectId: UUID, senderNum: Int, num: Int, str: String, id: UUID) {
-        scripts.values.filter { it.objectId == objectId }.forEach { script ->
-            queueEvent(script.scriptId, EVENT_LINK_MESSAGE, mapOf(
-                "sender_num" to senderNum,
-                "num" to num,
-                "str" to str,
-                "id" to id.toString()
-            ))
-        }
-    }
-
-    /**
-     * Handle timer event
-     */
-    private fun handleTimer(scriptId: UUID) {
-        queueEvent(scriptId, EVENT_TIMER, emptyMap())
+        dispatcher.handleLinkMessage(objectId, senderNum, num, str, id)
     }
 
     /**
      * Handle HTTP response
      */
     fun handleHttpResponse(requestId: UUID, status: Int, metadata: Map<String, String>, body: String) {
-        // Find script that made this request
-        scripts.values.find { it.pendingHttpRequests.contains(requestId) }?.let { script ->
-            script.pendingHttpRequests.remove(requestId)
-            queueEvent(script.scriptId, EVENT_HTTP_RESPONSE, mapOf(
-                "request_id" to requestId.toString(),
-                "status" to status,
-                "metadata" to metadata,
-                "body" to body
-            ))
-        }
+        dispatcher.handleHttpResponse(requestId, status, metadata, body)
     }
 
-    private fun queueEvent(scriptId: UUID, eventName: String, data: Map<String, Any>) {
-        val script = scripts[scriptId] ?: return
-        script.eventQueue.add(ScriptEvent(eventName, data))
+    /**
+     * Queue event into a script's actor channel mailbox.
+     */
+    fun queueEvent(scriptId: UUID, eventName: String, data: Map<String, Any>) {
+        dispatcher.dispatchToScript(scriptId, eventName, data)
     }
 
     // LSL Functions implementation (called by script handlers)
@@ -163,7 +131,6 @@ class LSLEngine {
      * llSay - Say message on channel
      */
     fun llSay(scriptId: UUID, channel: Int, message: String) {
-        // Would send ChatFromViewer
         Log.d(TAG, "llSay($channel, $message)")
     }
 
@@ -185,42 +152,21 @@ class LSLEngine {
      * llListen - Start listening on channel
      */
     fun llListen(scriptId: UUID, channel: Int, name: String, id: UUID?, msg: String): Int {
-        val handle = ++nextListenHandle
-        listenHandles[handle] = ListenHandle(
-            handle = handle,
-            scriptId = scriptId,
-            channel = channel,
-            name = name,
-            id = id,
-            msg = msg
-        )
-        return handle
+        return dispatcher.registerListen(scriptId, channel, name, id, msg)
     }
 
     /**
      * llListenRemove - Stop listening
      */
     fun llListenRemove(handle: Int) {
-        listenHandles.remove(handle)
+        dispatcher.removeListen(handle)
     }
 
     /**
-     * llSetTimerEvent - Set timer
+     * llSetTimerEvent - Set repeating timer
      */
     fun llSetTimerEvent(scriptId: UUID, sec: Float) {
-        timers[scriptId]?.cancel()
-
-        if (sec <= 0) {
-            timers.remove(scriptId)
-            return
-        }
-
-        timers[scriptId] = scope.launch {
-            while (isActive) {
-                delay((sec * 1000).toLong())
-                handleTimer(scriptId)
-            }
-        }
+        dispatcher.setTimerEvent(scriptId, sec)
     }
 
     /**
@@ -228,7 +174,6 @@ class LSLEngine {
      */
     fun llGetPos(scriptId: UUID): Triple<Float, Float, Float>? {
         val script = scripts[scriptId] ?: return null
-        // Would query object position
         return Triple(128f, 128f, 30f)
     }
 
@@ -237,7 +182,6 @@ class LSLEngine {
      */
     fun llSetPos(scriptId: UUID, pos: Triple<Float, Float, Float>) {
         val script = scripts[scriptId] ?: return
-        // Would send ObjectPosition update
     }
 
     /**
@@ -245,8 +189,7 @@ class LSLEngine {
      */
     fun llGetRot(scriptId: UUID): FloatArray? {
         val script = scripts[scriptId] ?: return null
-        // Would query object rotation
-        return floatArrayOf(0f, 0f, 0f, 1f) // Identity quaternion
+        return floatArrayOf(0f, 0f, 0f, 1f)
     }
 
     /**
@@ -254,7 +197,6 @@ class LSLEngine {
      */
     fun llSetRot(scriptId: UUID, rot: FloatArray) {
         val script = scripts[scriptId] ?: return
-        // Would send ObjectRotation update
     }
 
     /**
@@ -270,10 +212,10 @@ class LSLEngine {
     fun llHTTPRequest(scriptId: UUID, url: String, params: List<String>, body: String): UUID {
         val requestId = UUID.randomUUID()
         scripts[scriptId]?.pendingHttpRequests?.add(requestId)
+        dispatcher.getActor(scriptId)?.pendingHttpRequests?.add(requestId)
 
         scope.launch {
-            // Would make actual HTTP request
-            // Then call handleHttpResponse
+            // Asynchronous HTTP request execution placeholder
         }
 
         return requestId
@@ -283,7 +225,6 @@ class LSLEngine {
      * llGiveInventory - Give inventory item
      */
     fun llGiveInventory(scriptId: UUID, destinationId: UUID, inventoryName: String) {
-        // Would send inventory give
     }
 
     /**
@@ -296,7 +237,8 @@ class LSLEngine {
 
     fun shutdown() {
         scope.cancel()
-        timers.values.forEach { it.cancel() }
+        dispatcher.shutdown()
+        scripts.clear()
     }
 }
 
@@ -307,7 +249,8 @@ data class ScriptInstance(
     val permissions: Int,
     var state: String = LSLEngine.STATE_DEFAULT,
     val eventQueue: MutableList<ScriptEvent> = mutableListOf(),
-    val pendingHttpRequests: MutableSet<UUID> = mutableSetOf()
+    val pendingHttpRequests: MutableSet<UUID> = mutableSetOf(),
+    var actor: ScriptActor? = null
 )
 
 data class ScriptEvent(
