@@ -120,7 +120,7 @@ json_patterns = [
     'packages/design-system/themes/*.json',
     'packages/design-system/themes/community/*.json',
     'legacy/ktheme-pr/themes/community/*.json',
-    'ktheme-pr/themes/community/*.json',
+    'ktheme-pr/themes/community/*.json'
 ]
 json_files = []
 for pat in json_patterns:
