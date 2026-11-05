@@ -118,9 +118,7 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - name: Install wasm-bindgen CLI
         if: matrix.os == 'ubuntu-latest'
-        uses: taiki-e/install-action@v2
-        with:
-          tool: wasm-bindgen-cli@0.2.129
+        uses: taiki-e/install-action@wasm-bindgen-cli@0.2.129
       - name: Verify WebAssembly build and size constraint
         if: matrix.os == 'ubuntu-latest'
         run: bash scripts/build_wasm.sh
