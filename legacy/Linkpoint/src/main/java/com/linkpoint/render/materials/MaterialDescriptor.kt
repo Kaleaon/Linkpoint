@@ -59,7 +59,12 @@ data class MaterialDescriptor(
         }
 
         companion object {
-            val IDENTITY_MATRIX: FloatArray = FloatArray(16).also { android.opengl.Matrix.setIdentityM(it, 0) }
+            val IDENTITY_MATRIX: FloatArray = floatArrayOf(
+                1f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 1f
+            )
             val IDENTITY = UvTransform(1f, 1f, 0f, 0f, 0f, precomputedMatrix = IDENTITY_MATRIX)
 
             fun computeMatrix(
@@ -70,13 +75,32 @@ data class MaterialDescriptor(
                 rotation: Float,
                 dest: FloatArray = FloatArray(16)
             ): FloatArray {
-                android.opengl.Matrix.setIdentityM(dest, 0)
-                android.opengl.Matrix.translateM(dest, 0, 0.5f + offsetS, 0.5f + offsetT, 0f)
-                if (rotation != 0f) {
-                    android.opengl.Matrix.rotateM(dest, 0, Math.toDegrees(rotation.toDouble()).toFloat(), 0f, 0f, 1f)
-                }
-                android.opengl.Matrix.scaleM(dest, 0, scaleS, scaleT, 1f)
-                android.opengl.Matrix.translateM(dest, 0, -0.5f, -0.5f, 0f)
+                val cos = Math.cos(rotation.toDouble()).toFloat()
+                val sin = Math.sin(rotation.toDouble()).toFloat()
+                val a = cos * scaleS
+                val b = -sin * scaleT
+                val c = sin * scaleS
+                val d = cos * scaleT
+
+                dest[0] = a
+                dest[1] = c
+                dest[2] = 0f
+                dest[3] = 0f
+
+                dest[4] = b
+                dest[5] = d
+                dest[6] = 0f
+                dest[7] = 0f
+
+                dest[8] = 0f
+                dest[9] = 0f
+                dest[10] = 1f
+                dest[11] = 0f
+
+                dest[12] = 0.5f + offsetS - 0.5f * a - 0.5f * b
+                dest[13] = 0.5f + offsetT - 0.5f * c - 0.5f * d
+                dest[14] = 0f
+                dest[15] = 1f
                 return dest
             }
         }
