@@ -36,7 +36,7 @@ repos:
 
       - id: dart-format
         name: dart format (packages/linkpoint_dart)
-        entry: bash -c 'cd packages/linkpoint_dart && (test -d .dart_tool || flutter pub get) && dart format --output=none --set-exit-if-changed .'
+        entry: bash -c 'cd packages/linkpoint_dart && (test -f .dart_tool/package_config.json || flutter pub get) && dart format --output=none --set-exit-if-changed .'
         language: system
         files: '^packages/linkpoint_dart/'
         pass_filenames: false
