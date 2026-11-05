@@ -47,9 +47,8 @@ class DrawablePrimStore {
     ) {
         @Volatile
         var isDirty: Boolean = true
-            private set
 
-        var scaleS: Float = 1f
+        var scaleS: Float = scaleS
             set(value) {
                 if (field != value) {
                     field = value
@@ -57,7 +56,7 @@ class DrawablePrimStore {
                 }
             }
 
-        var scaleT: Float = 1f
+        var scaleT: Float = scaleT
             set(value) {
                 if (field != value) {
                     field = value
@@ -65,7 +64,7 @@ class DrawablePrimStore {
                 }
             }
 
-        var offsetS: Float = 0f
+        var offsetS: Float = offsetS
             set(value) {
                 if (field != value) {
                     field = value
@@ -73,7 +72,7 @@ class DrawablePrimStore {
                 }
             }
 
-        var offsetT: Float = 0f
+        var offsetT: Float = offsetT
             set(value) {
                 if (field != value) {
                     field = value
@@ -81,7 +80,7 @@ class DrawablePrimStore {
                 }
             }
 
-        var rotation: Float = 0f
+        var rotation: Float = rotation
             set(value) {
                 if (field != value) {
                     field = value
@@ -89,15 +88,10 @@ class DrawablePrimStore {
                 }
             }
 
-        init {
-            this.scaleS = scaleS
-            this.scaleT = scaleT
-            this.offsetS = offsetS
-            this.offsetT = offsetT
-            this.rotation = rotation
-        }
-
+        @Transient
         private val matrixBuffer = FloatArray(16)
+
+        @Transient
         @Volatile
         private var cachedMatrix: FloatArray = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
 

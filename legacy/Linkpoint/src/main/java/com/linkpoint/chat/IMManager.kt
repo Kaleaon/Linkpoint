@@ -43,6 +43,12 @@ class IMManager(
     companion object {
         private const val TAG = "IMManager"
         private const val MAX_SESSION_HISTORY = 200
+
+        const val IM_LURE_USER = 22
+        const val IM_LURE_ACCEPTED = 23
+        const val IM_LURE_DECLINED = 24
+        const val IM_SESSION_GROUP_START = 15
+        const val IM_SESSION_SEND = 17
         private fun logDebug(tag: String, msg: String) {
             try { Log.d(tag, msg) } catch (_: Throwable) { println("[$tag] $msg") }
         }
