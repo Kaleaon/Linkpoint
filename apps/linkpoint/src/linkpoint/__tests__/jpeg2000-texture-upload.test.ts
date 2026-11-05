@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { JpxImage } from 'jpeg2000';
 import {
   scaleToPowerOfTwo,
   closestPowerOfTwo,
@@ -100,6 +101,38 @@ describe('JPEG2000 Texture Upload Pipeline', () => {
       // Verify EOC marker at the end (0xFF, 0xD9)
       expect(j2k[j2k.length - 2]).toBe(0xFF);
       expect(j2k[j2k.length - 1]).toBe(0xD9);
+    });
+
+    it('decodes encoded codestreams using JpxImage back to valid dimensions and RGBA pixels', async () => {
+      const width = 64;
+      const height = 64;
+      const rgba = new Uint8Array(width * height * 4);
+      for (let i = 0; i < width * height; i++) {
+        rgba[i * 4] = 200;
+        rgba[i * 4 + 1] = 100;
+        rgba[i * 4 + 2] = 50;
+        rgba[i * 4 + 3] = 255;
+      }
+
+      const j2k = await encodeJpeg2000(rgba, width, height, true);
+      expect(j2k).toBeInstanceOf(Uint8Array);
+
+      const jpx = new JpxImage();
+      jpx.parse(Buffer.from(j2k));
+
+      expect(jpx.width).toBe(64);
+      expect(jpx.height).toBe(64);
+      expect(jpx.componentsCount).toBe(4);
+
+      const decoded = jpx.tiles[0].items;
+      expect(decoded).toBeDefined();
+      expect(decoded.length).toBe(width * height * 4);
+
+      // Verify decoded pixels match expected RGBA (200, 100, 50, 255)
+      expect(decoded[0]).toBe(200);
+      expect(decoded[1]).toBe(100);
+      expect(decoded[2]).toBe(50);
+      expect(decoded[3]).toBe(255);
     });
   });
 
