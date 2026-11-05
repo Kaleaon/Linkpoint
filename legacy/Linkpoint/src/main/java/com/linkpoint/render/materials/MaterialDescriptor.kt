@@ -59,8 +59,58 @@ data class MaterialDescriptor(
         }
 
         companion object {
-            val IDENTITY_MATRIX: FloatArray = FloatArray(16).also { android.opengl.Matrix.setIdentityM(it, 0) }
+            val IDENTITY_MATRIX: FloatArray = floatArrayOf(
+                1f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 1f
+            )
             val IDENTITY = UvTransform(1f, 1f, 0f, 0f, 0f, precomputedMatrix = IDENTITY_MATRIX)
+
+            private fun setIdentityM(m: FloatArray, offset: Int) {
+                java.util.Arrays.fill(m, offset, offset + 16, 0f)
+                m[offset] = 1f
+                m[offset + 5] = 1f
+                m[offset + 10] = 1f
+                m[offset + 15] = 1f
+            }
+
+            private fun translateM(m: FloatArray, offset: Int, x: Float, y: Float, z: Float) {
+                for (i in 0..3) {
+                    m[offset + 12 + i] += m[offset + i] * x + m[offset + 4 + i] * y + m[offset + 8 + i] * z
+                }
+            }
+
+            private fun scaleM(m: FloatArray, offset: Int, x: Float, y: Float, z: Float) {
+                for (i in 0..3) {
+                    m[offset + i] *= x
+                    m[offset + 4 + i] *= y
+                    m[offset + 8 + i] *= z
+                }
+            }
+
+            private fun rotateZM(m: FloatArray, offset: Int, angleDegrees: Float) {
+                if (angleDegrees == 0f) return
+                val radians = Math.toRadians(angleDegrees.toDouble())
+                val s = Math.sin(radians).toFloat()
+                val c = Math.cos(radians).toFloat()
+                val a00 = m[offset]
+                val a01 = m[offset + 1]
+                val a02 = m[offset + 2]
+                val a03 = m[offset + 3]
+                val a10 = m[offset + 4]
+                val a11 = m[offset + 5]
+                val a12 = m[offset + 6]
+                val a13 = m[offset + 7]
+                m[offset] = a00 * c + a10 * s
+                m[offset + 1] = a01 * c + a11 * s
+                m[offset + 2] = a02 * c + a12 * s
+                m[offset + 3] = a03 * c + a13 * s
+                m[offset + 4] = a10 * c - a00 * s
+                m[offset + 5] = a11 * c - a01 * s
+                m[offset + 6] = a12 * c - a02 * s
+                m[offset + 7] = a13 * c - a03 * s
+            }
 
             fun computeMatrix(
                 scaleS: Float,
@@ -70,13 +120,13 @@ data class MaterialDescriptor(
                 rotation: Float,
                 dest: FloatArray = FloatArray(16)
             ): FloatArray {
-                android.opengl.Matrix.setIdentityM(dest, 0)
-                android.opengl.Matrix.translateM(dest, 0, 0.5f + offsetS, 0.5f + offsetT, 0f)
+                setIdentityM(dest, 0)
+                translateM(dest, 0, 0.5f + offsetS, 0.5f + offsetT, 0f)
                 if (rotation != 0f) {
-                    android.opengl.Matrix.rotateM(dest, 0, Math.toDegrees(rotation.toDouble()).toFloat(), 0f, 0f, 1f)
+                    rotateZM(dest, 0, Math.toDegrees(rotation.toDouble()).toFloat())
                 }
-                android.opengl.Matrix.scaleM(dest, 0, scaleS, scaleT, 1f)
-                android.opengl.Matrix.translateM(dest, 0, -0.5f, -0.5f, 0f)
+                scaleM(dest, 0, scaleS, scaleT, 1f)
+                translateM(dest, 0, -0.5f, -0.5f, 0f)
                 return dest
             }
         }

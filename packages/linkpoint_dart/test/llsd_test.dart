@@ -34,15 +34,17 @@ void main() {
         () {
       final candidates = [
         '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
-        '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
         'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
         'Linkpoint/src/test/resources/llsd-conformance/vectors',
       ];
       Directory? vectorsDir;
-      for (final p in candidates) {
-        final d = Directory(p);
-        if (d.existsSync()) {
-          vectorsDir = d;
+      for (final candidate in candidates) {
+        final dir = Directory(candidate);
+        if (dir.existsSync()) {
+          vectorsDir = dir;
           break;
         }
       }
