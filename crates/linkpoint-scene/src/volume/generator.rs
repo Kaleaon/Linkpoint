@@ -94,7 +94,7 @@ fn rotate_axis(v: P3, axis: char, angle: f32) -> P3 {
 fn cull_degenerate_triangles(vertices: &[f32], indices: &[u32]) -> Vec<u32> {
     let num_verts = vertices.len() / 3;
     let mut clean = Vec::with_capacity(indices.len());
-    for chunk in indices.chunks_exact(3) {
+    for chunk in indices.as_chunks::<3>().0 {
         let i0 = chunk[0] as usize;
         let i1 = chunk[1] as usize;
         let i2 = chunk[2] as usize;
@@ -870,7 +870,7 @@ fn build_cap(
     };
 
     let mut n = [0.0f32; 3];
-    for chunk in indices.chunks_exact(3) {
+    for chunk in indices.as_chunks::<3>().0 {
         let c = cross(
             sub(get_v(chunk[1]), get_v(chunk[0])),
             sub(get_v(chunk[2]), get_v(chunk[0])),
@@ -881,7 +881,7 @@ fn build_cap(
     }
 
     if n[0] * want[0] + n[1] * want[1] + n[2] * want[2] < 0.0 {
-        for chunk in indices.chunks_exact_mut(3) {
+        for chunk in indices.as_chunks_mut::<3>().0 {
             chunk.swap(1, 2);
         }
     }
@@ -1026,7 +1026,7 @@ fn smooth_normals(vertices: &[f32], indices: &[u32], weld: &[(usize, usize)]) ->
     let num_verts = vertices.len() / 3;
     let mut accum = vec![0.0f32; vertices.len()];
 
-    for chunk in indices.chunks_exact(3) {
+    for chunk in indices.as_chunks::<3>().0 {
         let i0 = chunk[0] as usize;
         let i1 = chunk[1] as usize;
         let i2 = chunk[2] as usize;
