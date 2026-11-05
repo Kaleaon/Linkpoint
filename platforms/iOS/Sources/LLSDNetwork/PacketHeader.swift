@@ -7,10 +7,10 @@ public struct PacketHeaderFlags: OptionSet {
         self.rawValue = rawValue
     }
 
-    public static let ack       = PacketHeaderFlags(rawValue: 0x80)
-    public static let resent    = PacketHeaderFlags(rawValue: 0x40)
-    public static let reliable  = PacketHeaderFlags(rawValue: 0x20)
-    public static let zerocoded = PacketHeaderFlags(rawValue: 0x10)
+    public static let zerocoded = PacketHeaderFlags(rawValue: 0x80)
+    public static let reliable  = PacketHeaderFlags(rawValue: 0x40)
+    public static let resent    = PacketHeaderFlags(rawValue: 0x20)
+    public static let ack       = PacketHeaderFlags(rawValue: 0x10)
 }
 
 public struct PacketHeader {
