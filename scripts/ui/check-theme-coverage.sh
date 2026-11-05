@@ -2,6 +2,7 @@
 set -euo pipefail
 
 THEME_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+[[ -f "$THEME_FILE" ]] || THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
 
 if [[ ! -f "$THEME_FILE" ]]; then
   echo "❌ Theme catalog file not found: $THEME_FILE"
@@ -19,10 +20,8 @@ theme_file = sys.argv[1]
 text = Path(theme_file).read_text(encoding='utf-8')
 
 central_dir = Path("packages/design-system/themes")
-community_dir = Path("packages/design-system/themes/community")
-if not community_dir.exists():
-    community_dir = Path("legacy/ktheme-pr/themes/community")
-assets_dir = Path("legacy/Linkpoint/src/main/assets/themes")
+community_dir = Path("legacy/ktheme-pr/themes/community") if Path("legacy/ktheme-pr/themes/community").exists() else (Path("packages/design-system/themes/community") if Path("packages/design-system/themes/community").exists() else Path("ktheme-pr/themes/community"))
+assets_dir = Path("legacy/Linkpoint/src/main/assets/themes") if Path("legacy/Linkpoint/src/main/assets/themes").exists() else Path("Linkpoint/src/main/assets/themes")
 
 errors = []
 
@@ -119,9 +118,9 @@ if kt_contrast_failures:
 # 3. JSON Theme Schema, Token Integrity & Contrast Validation
 json_patterns = [
     'packages/design-system/themes/*.json',
-    'packages/design-system/themes/*/*.json',
+    'packages/design-system/themes/community/*.json',
     'legacy/ktheme-pr/themes/community/*.json',
-    'ktheme-pr/themes/community/*.json'
+    'ktheme-pr/themes/community/*.json',
 ]
 json_files = []
 for pat in json_patterns:
