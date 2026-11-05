@@ -2,31 +2,40 @@ package com.linkpoint.render.materials
 
 import com.linkpoint.render.lumiya.drawable.DrawableMeshStore
 import com.linkpoint.render.lumiya.drawable.DrawablePrimStore
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class CachedTexMatrixStoreTest {
 
     @Test
     fun testFaceMaterialIdentityFastPath() {
+        val primFace = DrawablePrimStore.FaceMaterial()
+        assertTrue(primFace.isDirty)
+        val matrix1 = primFace.getMatrix()
+        assertFalse(primFace.isDirty)
+
+        // Identity fast path returns static identity matrix constant
+        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
+        assertSame("Identity FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, matrix1)
+
         val meshFace = DrawableMeshStore.FaceMaterial()
         assertTrue(meshFace.isDirty)
         val meshMatrix = meshFace.getMatrix()
         assertFalse(meshFace.isDirty)
-
-        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
         assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
     }
 
     @Test
     fun testFaceMaterialDirtyStateTrackingAndCaching() {
-        val face = DrawableMeshStore.FaceMaterial()
+        val face = DrawablePrimStore.FaceMaterial()
         face.getMatrix() // clear initial dirty flag
 
         // Mutate scale
@@ -58,7 +67,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testUvTransformPrecomputedMatrixIntegration() {
-        val face = DrawableMeshStore.FaceMaterial(
+        val face = DrawablePrimStore.FaceMaterial(
             scaleS = 2f,
             scaleT = 3f,
             offsetS = 0.1f,
@@ -87,7 +96,7 @@ class CachedTexMatrixStoreTest {
         val offsetT = -0.5f
         val rotation = 0.0f
 
-        val face = DrawableMeshStore.FaceMaterial(
+        val face = DrawablePrimStore.FaceMaterial(
             scaleS = scaleS,
             scaleT = scaleT,
             offsetS = offsetS,
@@ -116,7 +125,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testZeroAllocationsInSimulatedRenderLoop() {
-        val face = DrawableMeshStore.FaceMaterial(scaleS = 1.5f, scaleT = 1.5f)
+        val face = DrawablePrimStore.FaceMaterial(scaleS = 1.5f, scaleT = 1.5f)
         val initialMatrix = face.getMatrix()
 
         // Simulate 10,000 frame loop calls
