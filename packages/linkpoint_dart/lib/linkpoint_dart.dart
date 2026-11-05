@@ -8,3 +8,5 @@ export 'src/capabilities.dart';
 export 'src/generated_tokens.dart';
 export 'src/session.dart';
 export 'src/flutter_widgets.dart';
+export 'src/j2k_decoder.dart';
+export 'src/llmesh_converter.dart';
