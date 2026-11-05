@@ -81,6 +81,8 @@ struct RayIntersectCase {
 #[derive(Deserialize)]
 struct MeshVectorsFile {
     llmesh_vectors: Vec<LlmeshCase>,
+    multi_lod_vectors: Option<Vec<MultiLodCase>>,
+    submesh_vectors: Option<Vec<SubmeshCase>>,
 }
 
 #[derive(Deserialize)]
@@ -92,6 +94,42 @@ struct LlmeshCase {
 
 #[derive(Deserialize)]
 struct LlmeshExpected {
+    vertex_count: usize,
+    index_count: usize,
+}
+
+#[derive(Deserialize)]
+struct MultiLodCase {
+    name: String,
+    bounding_radius: f32,
+    distance_meters: f32,
+    fov_rad: f32,
+    screen_height_px: f32,
+    expected: MultiLodExpected,
+}
+
+#[derive(Deserialize)]
+struct MultiLodExpected {
+    projected_pixel_coverage: f32,
+    selected_lod: String,
+}
+
+#[derive(Deserialize)]
+struct SubmeshCase {
+    name: String,
+    hex_bytes: String,
+    expected: SubmeshExpected,
+}
+
+#[derive(Deserialize)]
+struct SubmeshExpected {
+    submesh_count: usize,
+    submeshes: Vec<SubmeshDetail>,
+}
+
+#[derive(Deserialize)]
+struct SubmeshDetail {
+    material_index: usize,
     vertex_count: usize,
     index_count: usize,
 }
@@ -222,14 +260,83 @@ fn test_llmesh_vectors() {
             case.name
         );
 
-        // Read num_faces (uint16 at offset 197)
-        let num_faces = u16::from_le_bytes([bytes[197], bytes[198]]) as usize;
+        // Read num_faces (uint16 at offset 185)
+        let num_faces = u16::from_le_bytes([bytes[185], bytes[186]]) as usize;
         assert_eq!(
             num_faces * 3,
             case.expected.index_count,
             "{}: index count",
             case.name
         );
+    }
+}
+
+#[test]
+fn test_multi_lod_vectors() {
+    use linkpoint_scene::{calculate_projected_pixel_coverage, select_lod};
+    let path = find_vector_file("mesh/llmesh_decompress_vectors.json");
+    let content = fs::read_to_string(&path).expect("Failed to read mesh vectors json");
+    let file_data: MeshVectorsFile =
+        serde_json::from_str(&content).expect("Failed to parse mesh vectors");
+
+    if let Some(lod_vectors) = file_data.multi_lod_vectors {
+        for case in lod_vectors {
+            let px = calculate_projected_pixel_coverage(
+                case.bounding_radius,
+                case.distance_meters,
+                case.fov_rad,
+                case.screen_height_px,
+            );
+            assert!(
+                (px - case.expected.projected_pixel_coverage).abs() < 0.5,
+                "{}: projected_pixel_coverage",
+                case.name
+            );
+
+            let lod = select_lod(px, None);
+            assert_eq!(
+                lod, case.expected.selected_lod,
+                "{}: selected_lod",
+                case.name
+            );
+        }
+    }
+}
+
+#[test]
+fn test_submesh_vectors() {
+    use linkpoint_scene::parse_binary_mesh_header;
+    let path = find_vector_file("mesh/llmesh_decompress_vectors.json");
+    let content = fs::read_to_string(&path).expect("Failed to read mesh vectors json");
+    let file_data: MeshVectorsFile =
+        serde_json::from_str(&content).expect("Failed to parse mesh vectors");
+
+    if let Some(submesh_vectors) = file_data.submesh_vectors {
+        for case in submesh_vectors {
+            let bytes = hex::decode(&case.hex_bytes).expect("Valid hex string");
+            let parsed = parse_binary_mesh_header(&bytes).expect("Parsed binary mesh header");
+            assert_eq!(
+                parsed.materials.len(),
+                case.expected.submesh_count,
+                "{}: submesh_count",
+                case.name
+            );
+            assert_eq!(
+                case.expected.submeshes.len(),
+                case.expected.submesh_count,
+                "{}: submeshes array length",
+                case.name
+            );
+            for (idx, sub) in case.expected.submeshes.iter().enumerate() {
+                assert_eq!(
+                    sub.material_index, idx,
+                    "{}: material index match",
+                    case.name
+                );
+                assert!(sub.vertex_count > 0, "{}: vertex count > 0", case.name);
+                assert!(sub.index_count > 0, "{}: index count > 0", case.name);
+            }
+        }
     }
 }
 

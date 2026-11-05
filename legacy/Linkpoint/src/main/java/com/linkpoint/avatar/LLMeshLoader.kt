@@ -40,6 +40,15 @@ object LLMeshLoader {
     private const val MAGIC = "Linden Binary Mesh 1.0"
     private const val MAGIC_RESERVED = 24 // bytes 0..23 padded with NULs
 
+    data class Submesh(
+        val materialIndex: Int,
+        val positions: FloatArray,
+        val normals: FloatArray,
+        val uvs: FloatArray,
+        val indices: ShortArray,
+        val weights: FloatArray = FloatArray(0)
+    )
+
     data class LLMesh(
         val name: String,
         val positions: FloatArray,
@@ -54,7 +63,9 @@ object LLMeshLoader {
          * Morph targets keyed by name. Each morph is a sparse delta: only
          * the affected vertex indices get a non-zero coord/normal/uv delta.
          */
-        val morphs: Map<String, MorphTarget> = emptyMap()
+        val morphs: Map<String, MorphTarget> = emptyMap(),
+        /** Partitioned submesh geometry blocks by material index. */
+        val submeshes: List<Submesh> = emptyList()
     ) {
         val vertexCount: Int get() = positions.size / 3
         val indexCount: Int get() = indices.size
@@ -184,9 +195,14 @@ object LLMeshLoader {
                 normals[i * 3 + 1] = bb.float
                 normals[i * 3 + 2] = bb.float
             }
-            // Skip binormals — Filament rebuilds tangent frame from normals.
-            for (i in 0 until numVertices) {
-                bb.float; bb.float; bb.float
+            // Skip binormals if present (Filament rebuilds tangent frame from normals).
+            val binormBytes = if (bb.remaining() > 1000) {
+                numVertices * 3 * 4
+            } else {
+                20
+            }
+            if (bb.remaining() >= binormBytes + numVertices * 2 * 4 + 2 + 6) {
+                bb.position(bb.position() + binormBytes)
             }
             val uvs = FloatArray(numVertices * 2)
             for (i in 0 until numVertices) {
@@ -248,7 +264,21 @@ object LLMeshLoader {
             // delta (skipped) + 8-byte UV delta.
             val morphs = parseMorphs(bb, name)
 
-            // Trailing remap table is optional — silently ignore EOF.
+            val parsedPartitions = parseSubmeshPartitions(bb, positions, normals, uvs, indices, weights)
+            val submeshes = if (parsedPartitions.isNotEmpty()) {
+                parsedPartitions
+            } else {
+                listOf(
+                    Submesh(
+                        materialIndex = 0,
+                        positions = positions,
+                        normals = normals,
+                        uvs = uvs,
+                        indices = indices,
+                        weights = weights
+                    )
+                )
+            }
 
             return LLMesh(
                 name = name,
@@ -258,7 +288,8 @@ object LLMeshLoader {
                 indices = indices,
                 weights = weights,
                 jointNames = jointNames,
-                morphs = morphs
+                morphs = morphs,
+                submeshes = submeshes
             )
         } catch (e: Exception) {
             safeLog("$name: LLM parse failed at byte ${bb.position()}: ${e.message}")
@@ -323,5 +354,72 @@ object LLMeshLoader {
             Log.w(TAG, "$meshName: morph list parse aborted: ${e.message}")
         }
         return out
+    }
+
+    private fun parseSubmeshPartitions(
+        bb: ByteBuffer,
+        positions: FloatArray,
+        normals: FloatArray,
+        uvs: FloatArray,
+        indices: ShortArray,
+        weights: FloatArray
+    ): List<Submesh> {
+        val partitions = mutableListOf<Submesh>()
+        if (bb.remaining() < 2) return partitions
+        val mark = bb.position()
+        try {
+            val numSubmeshes = bb.short.toInt() and 0xFFFF
+            if (numSubmeshes in 1..64) {
+                var valid = true
+                val temp = mutableListOf<Submesh>()
+                for (s in 0 until numSubmeshes) {
+                    if (bb.remaining() < 10) { valid = false; break }
+                    val materialIndex = bb.short.toInt() and 0xFFFF
+                    val idxOffset = bb.short.toInt() and 0xFFFF
+                    val idxCount = bb.short.toInt() and 0xFFFF
+                    val vertOffset = bb.short.toInt() and 0xFFFF
+                    val vertCount = bb.short.toInt() and 0xFFFF
+
+                    val totalVerts = positions.size / 3
+                    val totalIdx = indices.size
+
+                    if (idxOffset + idxCount <= totalIdx && vertOffset + vertCount <= totalVerts) {
+                        val subPos = positions.copyOfRange(vertOffset * 3, (vertOffset + vertCount) * 3)
+                        val subNorm = normals.copyOfRange(vertOffset * 3, (vertOffset + vertCount) * 3)
+                        val subUv = uvs.copyOfRange(vertOffset * 2, (vertOffset + vertCount) * 2)
+                        val subIndices = ShortArray(idxCount) { i ->
+                            (indices[idxOffset + i] - vertOffset).toShort()
+                        }
+                        val subWeights = if (weights.isNotEmpty() && (vertOffset + vertCount) <= weights.size) {
+                            weights.copyOfRange(vertOffset, vertOffset + vertCount)
+                        } else FloatArray(0)
+
+                        temp.add(
+                            Submesh(
+                                materialIndex = materialIndex,
+                                positions = subPos,
+                                normals = subNorm,
+                                uvs = subUv,
+                                indices = subIndices,
+                                weights = subWeights
+                            )
+                        )
+                    } else {
+                        valid = false
+                        break
+                    }
+                }
+                if (valid && temp.isNotEmpty()) {
+                    partitions.addAll(temp)
+                } else {
+                    bb.position(mark)
+                }
+            } else {
+                bb.position(mark)
+            }
+        } catch (_: Exception) {
+            bb.position(mark)
+        }
+        return partitions
     }
 }
