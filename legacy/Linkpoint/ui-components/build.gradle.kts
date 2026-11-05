@@ -74,7 +74,7 @@ dependencies {
 }
 
 roborazzi {
-    outputDir.set(file("build/outputs/roborazzi"))
+    outputDir.set(file("src/test/snapshots"))
 }
 
 tasks.register("roborazziDebugCheck") {

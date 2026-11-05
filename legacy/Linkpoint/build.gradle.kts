@@ -531,7 +531,7 @@ dependencies {
 }
 
 roborazzi {
-    outputDir.set(file("build/outputs/roborazzi"))
+    outputDir.set(file("src/test/snapshots"))
 }
 
 // The production classpath uses `org.conscrypt:conscrypt-android` (which only

@@ -1,7 +1,6 @@
 package com.linkpoint.render.materials
 
 import com.linkpoint.render.lumiya.drawable.DrawableMeshStore
-import com.linkpoint.render.lumiya.drawable.DrawablePrimStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -17,7 +16,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testFaceMaterialIdentityFastPath() {
-        val primFace = DrawablePrimStore.FaceMaterial()
+        val primFace = DrawableMeshStore.FaceMaterial()
         assertTrue(primFace.isDirty)
         val matrix1 = primFace.getMatrix()
         assertFalse(primFace.isDirty)
@@ -35,7 +34,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testFaceMaterialDirtyStateTrackingAndCaching() {
-        val face = DrawablePrimStore.FaceMaterial()
+        val face = DrawableMeshStore.FaceMaterial()
         face.getMatrix() // clear initial dirty flag
 
         // Mutate scale
@@ -67,7 +66,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testUvTransformPrecomputedMatrixIntegration() {
-        val face = DrawablePrimStore.FaceMaterial(
+        val face = DrawableMeshStore.FaceMaterial(
             scaleS = 2f,
             scaleT = 3f,
             offsetS = 0.1f,
@@ -96,7 +95,7 @@ class CachedTexMatrixStoreTest {
         val offsetT = -0.5f
         val rotation = 0.0f
 
-        val face = DrawablePrimStore.FaceMaterial(
+        val face = DrawableMeshStore.FaceMaterial(
             scaleS = scaleS,
             scaleT = scaleT,
             offsetS = offsetS,
@@ -115,17 +114,17 @@ class CachedTexMatrixStoreTest {
         val expectedM12 = 0.5f + offsetS - 0.5f * scaleS
         val expectedM13 = 0.5f + offsetT - 0.5f * scaleT
 
-        assertEquals(scaleS, matrix[0], 1e-5f)
-        assertEquals(scaleT, matrix[5], 1e-5f)
-        assertEquals(1.0f, matrix[10], 1e-5f)
-        assertEquals(1.0f, matrix[15], 1e-5f)
-        assertEquals(expectedM12, matrix[12], 1e-5f)
-        assertEquals(expectedM13, matrix[13], 1e-5f)
+        assertEquals(scaleS.toDouble(), matrix[0].toDouble(), 1e-5)
+        assertEquals(scaleT.toDouble(), matrix[5].toDouble(), 1e-5)
+        assertEquals(1.0, matrix[10].toDouble(), 1e-5)
+        assertEquals(1.0, matrix[15].toDouble(), 1e-5)
+        assertEquals(expectedM12.toDouble(), matrix[12].toDouble(), 1e-5)
+        assertEquals(expectedM13.toDouble(), matrix[13].toDouble(), 1e-5)
     }
 
     @Test
     fun testZeroAllocationsInSimulatedRenderLoop() {
-        val face = DrawablePrimStore.FaceMaterial(scaleS = 1.5f, scaleT = 1.5f)
+        val face = DrawableMeshStore.FaceMaterial(scaleS = 1.5f, scaleT = 1.5f)
         val initialMatrix = face.getMatrix()
 
         // Simulate 10,000 frame loop calls
