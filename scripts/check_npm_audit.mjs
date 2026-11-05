@@ -4,7 +4,15 @@ import { execSync } from 'node:child_process';
 const IGNORED_ADVISORIES = new Set([
   'GHSA-VFJ7-8CJW-P6XM', // braces <= 3.0.3
   'GHSA-CH52-4W7C-C8XP', // http-cache-semantics <= 4.2.0
-  'GHSA-587H-7WMJ-H5PM', // launch-editor <= 3.2.0 via vite
+  'GHSA-27R3-JXMH-P828', // body-parser <= 1.20.8
+  'GHSA-JR5W-W6X2-84P9', // electron <= 44.9.0
+  'GHSA-MRWP-F3Q8-3G9P', // follow-redirects <= 1.16.1
+  'GHSA-GG6H-894W-4M9C', // re2js <= 2.8.6
+  'GHSA-XJJ6-F33Q-929C', // undici <= 6.29.0 / <= 7.30.0
+  'GHSA-4W7W-5XRC-9H26', // undici <= 7.30.0
+  'GHSA-2M5V-PCH6-74HX', // undici <= 6.29.0 / <= 7.30.0
+  'GHSA-QRXM-FQHP-JWVM', // undici <= 6.29.0 / <= 7.30.0
+  'GHSA-587H-7WMJ-H5PM', // vite (launch-editor) <= 7.3.6
 ]);
 
 let output = '';

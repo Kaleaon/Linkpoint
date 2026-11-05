@@ -373,13 +373,13 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
   }
 
   it('passes all 31 canonical test vectors in XML and Binary formats', () => {
-    const candidatePaths = [
+    const candidates = [
       path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
     ];
-    let vectorsDir = candidatePaths.find(p => fs.existsSync(p)) || candidatePaths[0];
+    let vectorsDir = candidates.find(p => fs.existsSync(p)) || candidates[0];
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
     const subdirs = fs.readdirSync(vectorsDir)
