@@ -41,20 +41,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Configure Git line endings and reset working tree
-        run: |
-          git config --system core.autocrlf false || true
-          git config --global core.autocrlf false
       - uses: actions/checkout@v4
-      - name: Normalize working tree line endings
-        run: |
-          git config core.autocrlf false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Renormalize line endings
-        run: |
-          git add --renormalize .
-          git reset --hard
-          git checkout .
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -91,20 +78,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Configure Git line endings and reset working tree
-        run: |
-          git config --system core.autocrlf false || true
-          git config --global core.autocrlf false
       - uses: actions/checkout@v4
-      - name: Normalize working tree line endings
-        run: |
-          git config core.autocrlf false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Renormalize line endings
-        run: |
-          git add --renormalize .
-          git reset --hard
-          git checkout .
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
