@@ -402,7 +402,13 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
         current = parent;
       }
 
-      return path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors');
+      const direct = [
+        path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
+        path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
+        path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
+        path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      ];
+      return direct.find(p => fs.existsSync(p)) || direct[0];
     }
 
     const vectorsDir = findLlsdVectorsDir();

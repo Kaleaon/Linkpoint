@@ -59,6 +59,22 @@ void main() {
           curr = parent;
         }
 
+        if (vectorsDir == null) {
+          final directCandidates = [
+            '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+            '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
+            'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+            'Linkpoint/src/test/resources/llsd-conformance/vectors',
+          ];
+          for (final p in directCandidates) {
+            final d = Directory(p);
+            if (d.existsSync()) {
+              vectorsDir = d;
+              break;
+            }
+          }
+        }
+
         expect(
           vectorsDir != null && vectorsDir.existsSync(),
           isTrue,
