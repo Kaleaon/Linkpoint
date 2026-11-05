@@ -17,15 +17,15 @@ public class GeneratedLLSDCapabilities {
         public String maturity_rating;
     }
 
-    public static class EventQueueGetCapabilities {
-        public Integer ack;
-        public String events;
-    }
-
     public static class CapabilitiesRequestResponseCapabilities {
         public String capabilities;
         public String seed_response;
         public String fetch_inventory;
+    }
+
+    public static class EventQueueGetCapabilities {
+        public Integer ack;
+        public String events;
     }
 
 }
