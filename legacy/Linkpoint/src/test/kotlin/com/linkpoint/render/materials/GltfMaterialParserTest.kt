@@ -247,4 +247,23 @@ class GltfMaterialParserTest {
         assertNotNull(descriptor.baseColorTexture)
         assertEquals(baseUuid, descriptor.baseColorTexture?.resolvedId)
     }
+
+    @Test
+    fun testParseLlsdWithMetallicRoughnessDisabled() {
+        val mrUuid = UUID.randomUUID()
+        val llsd = LLSDMap().apply {
+            this["metallic_roughness_texture"] = LLSDUUID(mrUuid)
+        }
+
+        val descriptorDefault = GltfMaterialParser.parseLlsd(llsd)
+        assertNotNull(descriptorDefault.metallicRoughnessTexture)
+        assertEquals(mrUuid, descriptorDefault.metallicRoughnessTexture?.resolvedId)
+
+        val descriptorDisabled = GltfMaterialParser.parseLlsd(llsd, enableMetallicRoughness = false)
+        assertNull(descriptorDisabled.metallicRoughnessTexture)
+
+        @Suppress("DEPRECATION")
+        val pbrDisabled = PbrMaterialDecoder.decodeFromLLSD(llsd, enableMetallicRoughness = false)
+        assertNull(pbrDisabled.metallicRoughnessTexture)
+    }
 }

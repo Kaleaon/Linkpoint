@@ -16,13 +16,16 @@ object PbrMaterialDecoder {
     /**
      * Decodes an LLSD Map payload representing a glTF 2.0 PBR material into a [MaterialDescriptor].
      *
+     * @param data The LLSD map payload containing PBR factors and texture maps.
+     * @param enableMetallicRoughness When true (default), extracts metallic-roughness texture maps for GLES 3.0+ rendering.
      * @deprecated Use [GltfMaterialParser.parseLlsd] instead.
      */
     @Deprecated(
         message = "decodeFromLLSD is deprecated; use GltfMaterialParser.parseLlsd instead.",
-        replaceWith = ReplaceWith("GltfMaterialParser.parseLlsd(data)", "com.linkpoint.render.materials.GltfMaterialParser")
+        replaceWith = ReplaceWith("GltfMaterialParser.parseLlsd(data, enableMetallicRoughness)", "com.linkpoint.render.materials.GltfMaterialParser")
     )
-    fun decodeFromLLSD(data: LLSDMap): MaterialDescriptor {
-        return GltfMaterialParser.parseLlsd(data)
+    @JvmOverloads
+    fun decodeFromLLSD(data: LLSDMap, enableMetallicRoughness: Boolean = true): MaterialDescriptor {
+        return GltfMaterialParser.parseLlsd(data, enableMetallicRoughness)
     }
 }

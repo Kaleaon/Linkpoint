@@ -170,5 +170,47 @@ class PbrToPhongTranscoderTest {
 
         assertNotNull(descriptor.metallicRoughnessTexture)
         assertEquals(mrUUID, descriptor.metallicRoughnessTexture?.declaredId)
+
+        @Suppress("DEPRECATION")
+        val pbrDescriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+        assertNotNull(pbrDescriptor.metallicRoughnessTexture)
+        assertEquals(mrUUID, pbrDescriptor.metallicRoughnessTexture?.declaredId)
+    }
+
+    @Test
+    fun testPbrMaterialDecoderLLSDWithMetallicRoughnessDisabled() {
+        val texUUID = UUID.randomUUID()
+        val normUUID = UUID.randomUUID()
+        val mrUUID = UUID.randomUUID()
+
+        val llsdData = LLSDMap().apply {
+            this["Textures"] = LLSDMap().apply {
+                this["BaseColor"] = LLSDUUID(texUUID)
+                this["Normal"] = LLSDUUID(normUUID)
+                this["MetallicRoughness"] = LLSDUUID(mrUUID)
+            }
+        }
+
+        @Suppress("DEPRECATION")
+        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData, enableMetallicRoughness = false)
+
+        assertNotNull(descriptor.baseColorTexture)
+        assertNotNull(descriptor.normalTexture)
+        assertNull(descriptor.metallicRoughnessTexture)
+    }
+
+    @Test
+    fun testPbrMaterialDecoderLLSDTopLevelKeys() {
+        val mrUUID = UUID.randomUUID()
+
+        val llsdData = LLSDMap().apply {
+            this["MetallicRoughnessTexture"] = LLSDUUID(mrUUID)
+        }
+
+        @Suppress("DEPRECATION")
+        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+
+        assertNotNull(descriptor.metallicRoughnessTexture)
+        assertEquals(mrUUID, descriptor.metallicRoughnessTexture?.declaredId)
     }
 }
