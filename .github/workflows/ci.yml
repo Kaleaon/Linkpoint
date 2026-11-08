@@ -75,7 +75,7 @@ jobs:
   android:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
 
