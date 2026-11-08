@@ -87,6 +87,8 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: read
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
     steps:
       - name: Checkout repository
