@@ -108,3 +108,139 @@ export async function loadBodyParts(baseUrl = `${assetBase()}avatar/`, fetcher: 
   }));
   return parts;
 }
+
+/**
+ * Generates a low-poly procedural skinned humanoid body part geometry set.
+ * Used as fallback when binary avatar mesh assets are downloading or fail to load.
+ */
+export function createProceduralHumanoidParts(skeleton: AvatarSkeleton): Map<string, BodyPartGeometry> {
+  const parts = new Map<string, BodyPartGeometry>();
+
+  const buildBox = (
+    center: [number, number, number],
+    size: [number, number, number],
+    jointIndex: number
+  ) => {
+    const [cx, cy, cz] = center;
+    const [hx, hy, hz] = [size[0] / 2, size[1] / 2, size[2] / 2];
+    const positions = [
+      cx - hx, cy - hy, cz + hz,  cx + hx, cy - hy, cz + hz,  cx + hx, cy + hy, cz + hz,  cx - hx, cy + hy, cz + hz,
+      cx - hx, cy - hy, cz - hz,  cx - hx, cy + hy, cz - hz,  cx + hx, cy + hy, cz - hz,  cx + hx, cy - hy, cz - hz,
+      cx - hx, cy + hy, cz - hz,  cx - hx, cy + hy, cz + hz,  cx + hx, cy + hy, cz + hz,  cx + hx, cy + hy, cz - hz,
+      cx - hx, cy - hy, cz - hz,  cx + hx, cy - hy, cz - hz,  cx + hx, cy - hy, cz + hz,  cx - hx, cy - hy, cz + hz,
+      cx + hx, cy - hy, cz - hz,  cx + hx, cy + hy, cz - hz,  cx + hx, cy + hy, cz + hz,  cx + hx, cy - hy, cz + hz,
+      cx - hx, cy - hy, cz - hz,  cx - hx, cy - hy, cz + hz,  cx - hx, cy + hy, cz + hz,  cx - hx, cy + hy, cz - hz,
+    ];
+    const normals = [
+      0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
+      0, 0,-1,  0, 0,-1,  0, 0,-1,  0, 0,-1,
+      0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0,
+      0,-1, 0,  0,-1, 0,  0,-1, 0,  0,-1, 0,
+      1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
+     -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+    ];
+    const texCoords = new Array(24 * 2).fill(0.5);
+    const indices: number[] = [];
+    for (let f = 0; f < 6; f++) {
+      const o = f * 4;
+      indices.push(o, o + 1, o + 2, o, o + 2, o + 3);
+    }
+    const joints: number[] = [];
+    const jointWeights: number[] = [];
+    for (let i = 0; i < 24; i++) {
+      joints.push(jointIndex, 0, 0, 0);
+      jointWeights.push(1, 0, 0, 0);
+    }
+    return { positions, normals, texCoords, indices, joints, jointWeights };
+  };
+
+  const createPartGeometry = (
+    boxes: Array<{ center: [number, number, number]; size: [number, number, number]; jointName: string }>,
+    jointNames: string[]
+  ): BodyPartGeometry => {
+    let vertices: number[] = [];
+    let normals: number[] = [];
+    let texCoords: number[] = [];
+    let indices: number[] = [];
+    let joints: number[] = [];
+    let jointWeights: number[] = [];
+
+    for (const b of boxes) {
+      const jointIndex = Math.max(0, jointNames.indexOf(b.jointName));
+      const box = buildBox(b.center, b.size, jointIndex);
+      const vOffset = vertices.length / 3;
+      vertices = vertices.concat(box.positions);
+      normals = normals.concat(box.normals);
+      texCoords = texCoords.concat(box.texCoords);
+      indices = indices.concat(box.indices.map((idx) => idx + vOffset));
+      joints = joints.concat(box.joints);
+      jointWeights = jointWeights.concat(box.jointWeights);
+    }
+
+    return {
+      vertices,
+      normals,
+      texCoords,
+      indices,
+      joints,
+      jointWeights,
+      jointNames,
+      rigid: false,
+    };
+  };
+
+  const getPos = (jointName: string): [number, number, number] => skeleton.defaultPosition(jointName) as [number, number, number];
+
+  const upperBodyJoints = ['mPelvis', 'mTorso', 'mChest', 'mShoulderLeft', 'mElbowLeft', 'mWristLeft', 'mShoulderRight', 'mElbowRight', 'mWristRight'];
+  parts.set('upperBody', createPartGeometry([
+    { center: getPos('mTorso'), size: [0.28, 0.22, 0.25], jointName: 'mTorso' },
+    { center: getPos('mChest'), size: [0.32, 0.24, 0.30], jointName: 'mChest' },
+    { center: getPos('mShoulderLeft'), size: [0.12, 0.12, 0.25], jointName: 'mShoulderLeft' },
+    { center: getPos('mElbowLeft'), size: [0.10, 0.10, 0.25], jointName: 'mElbowLeft' },
+    { center: getPos('mWristLeft'), size: [0.08, 0.08, 0.10], jointName: 'mWristLeft' },
+    { center: getPos('mShoulderRight'), size: [0.12, 0.12, 0.25], jointName: 'mShoulderRight' },
+    { center: getPos('mElbowRight'), size: [0.10, 0.10, 0.25], jointName: 'mElbowRight' },
+    { center: getPos('mWristRight'), size: [0.08, 0.08, 0.10], jointName: 'mWristRight' },
+  ], upperBodyJoints));
+
+  const lowerBodyJoints = ['mPelvis', 'mHipLeft', 'mKneeLeft', 'mAnkleLeft', 'mHipRight', 'mKneeRight', 'mAnkleRight'];
+  parts.set('lowerBody', createPartGeometry([
+    { center: getPos('mPelvis'), size: [0.28, 0.22, 0.20], jointName: 'mPelvis' },
+    { center: getPos('mHipLeft'), size: [0.14, 0.14, 0.38], jointName: 'mHipLeft' },
+    { center: getPos('mKneeLeft'), size: [0.12, 0.12, 0.38], jointName: 'mKneeLeft' },
+    { center: getPos('mAnkleLeft'), size: [0.10, 0.18, 0.08], jointName: 'mAnkleLeft' },
+    { center: getPos('mHipRight'), size: [0.14, 0.14, 0.38], jointName: 'mHipRight' },
+    { center: getPos('mKneeRight'), size: [0.12, 0.12, 0.38], jointName: 'mKneeRight' },
+    { center: getPos('mAnkleRight'), size: [0.10, 0.18, 0.08], jointName: 'mAnkleRight' },
+  ], lowerBodyJoints));
+
+  const headJoints = ['mNeck', 'mHead'];
+  parts.set('head', createPartGeometry([
+    { center: getPos('mNeck'), size: [0.12, 0.12, 0.12], jointName: 'mNeck' },
+    { center: getPos('mHead'), size: [0.20, 0.22, 0.24], jointName: 'mHead' },
+  ], headJoints));
+
+  const eyelashesJoints = ['mHead'];
+  parts.set('eyelashes', createPartGeometry([
+    { center: [getPos('mHead')[0], getPos('mHead')[1] + 0.1, getPos('mHead')[2] + 0.05], size: [0.12, 0.02, 0.02], jointName: 'mHead' },
+  ], eyelashesJoints));
+
+  const eyeGeom = buildBox([0, 0, 0], [0.04, 0.04, 0.04], 0);
+  parts.set('eye', {
+    vertices: eyeGeom.positions,
+    normals: eyeGeom.normals,
+    texCoords: eyeGeom.texCoords,
+    indices: eyeGeom.indices,
+    joints: eyeGeom.joints,
+    jointWeights: eyeGeom.jointWeights,
+    jointNames: [],
+    rigid: true,
+  });
+
+  const hairJoints = ['mHead'];
+  parts.set('hair', createPartGeometry([
+    { center: [getPos('mHead')[0], getPos('mHead')[1], getPos('mHead')[2] + 0.12], size: [0.22, 0.24, 0.10], jointName: 'mHead' },
+  ], hairJoints));
+
+  return parts;
+}
