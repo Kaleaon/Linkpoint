@@ -80,12 +80,21 @@ def main():
     parser = argparse.ArgumentParser(
         description="Evaluate Component Coverage & Quality Gates"
     )
+    default_android = (
+        Path(
+            "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        )
+        if Path(
+            "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        ).exists()
+        else Path(
+            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        )
+    )
     parser.add_argument(
         "--android-report",
         type=Path,
-        default=Path(
-            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-        ),
+        default=default_android,
     )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))
     parser.add_argument("--rust-report", type=Path, default=Path("lcov.info"))
@@ -124,7 +133,15 @@ def main():
     android_data = parse_jacoco_xml(args.android_report)
     if android_data is None:
         # Search fallback locations
-        for fallback in Path(".").glob("**/jacoco*.xml"):
+        fallback_candidates = [
+            Path(
+                "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            ),
+            Path(
+                "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            ),
+        ] + list(Path(".").glob("**/jacoco*.xml"))
+        for fallback in fallback_candidates:
             android_data = parse_jacoco_xml(fallback)
             if android_data:
                 break
@@ -134,7 +151,10 @@ def main():
     # 2. Web
     web_data = parse_lcov(args.web_report)
     if web_data is None:
-        for fallback in Path(".").glob("**/coverage/lcov.info"):
+        web_fallbacks = list(Path(".").glob("**/coverage/lcov.info")) + list(
+            Path(".").glob("**/web*/**/lcov.info")
+        )
+        for fallback in web_fallbacks:
             web_data = parse_lcov(fallback)
             if web_data:
                 break
@@ -144,7 +164,15 @@ def main():
     # 3. Rust
     rust_data = parse_lcov(args.rust_report)
     if rust_data is None:
-        for fallback in [Path("coverage-rust.lcov"), Path("rust-lcov.info")]:
+        rust_fallbacks = (
+            [
+                Path("coverage-rust.lcov"),
+                Path("rust-lcov.info"),
+            ]
+            + list(Path(".").glob("**/rust*/**/lcov.info"))
+            + [Path("lcov.info")]
+        )
+        for fallback in rust_fallbacks:
             rust_data = parse_lcov(fallback)
             if rust_data:
                 break

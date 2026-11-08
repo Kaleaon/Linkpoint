@@ -251,7 +251,7 @@ jobs:
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
       - name: Run Rust tests with coverage
-        run: cargo llvm-cov --workspace --locked --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --locked --lcov --output-path lcov.info --ignore-filename-regex "generated"
 
       - name: Upload Rust coverage report
         uses: actions/upload-artifact@v4

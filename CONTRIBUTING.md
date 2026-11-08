@@ -75,7 +75,7 @@ To run code coverage reports locally across components:
 npm run test:coverage
 
 # Rust LLVM coverage
-cargo llvm-cov --workspace --lcov --output-path lcov.info
+cargo llvm-cov --workspace --lcov --output-path lcov.info --ignore-filename-regex "generated"
 
 # Evaluate quality gate locally
 python3 scripts/evaluate_coverage.py
