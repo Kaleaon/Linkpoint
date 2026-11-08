@@ -1,5 +1,7 @@
 package com.linkpoint.chat
 
+import com.linkpoint.linden.llmessage.IMType
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.messages.UDPConnectionFixed
@@ -10,7 +12,6 @@ import com.linkpoint.teleport.TeleportManager
 import com.linkpoint.teleport.TeleportResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import com.linkpoint.linden.llmessage.IMType
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -100,7 +101,7 @@ class IMManagerTest {
         buf.get() // offline
 
         val dialog = buf.get().toInt()
-        assertEquals(IMType.LURE_ACCEPTED.value, dialog)
+        assertEquals(com.linkpoint.linden.llmessage.IMType.LURE_ACCEPTED.value, dialog)
 
         val expectedLure = TeleportLure(
             lureId = lureId,
@@ -161,6 +162,6 @@ class IMManagerTest {
         buf.int; buf.getUUID(); buf.float; buf.float; buf.float; buf.get()
 
         val dialog = buf.get().toInt()
-        assertEquals(IMType.LURE_DECLINED.value, dialog)
+        assertEquals(com.linkpoint.linden.llmessage.IMType.LURE_DECLINED.value, dialog)
     }
 }
