@@ -23,7 +23,7 @@ DEFAULT_TARGET_FILES = {
     "kotlin": "legacy/Linkpoint/ui-components/src/main/java/com/linkpoint/ui/components/linkpoint2/tokens/GeneratedTokens.kt",
     "dart": "packages/linkpoint_dart/lib/src/generated_tokens.dart",
     "rust": "crates/linkpoint-core/src/generated_tokens.rs",
-    "swift": "platforms/iOS/Sources/LinkpointiOS/GeneratedTokens.swift",
+    "swift": "platforms/iOS/Sources/Ktheme/GeneratedTokens.swift",
 }
 
 TEMPLATE_FILES = {
@@ -115,7 +115,7 @@ def to_rust_color(hex_str: str) -> str:
 def to_swift_color(hex_str: str) -> str:
     r, g, b, a = parse_hex_color(hex_str)
     rf, gf, bf, af = r / 255.0, g / 255.0, b / 255.0, a / 255.0
-    return f"SwiftUI.Color(red: {fmt_f32(rf)}, green: {fmt_f32(gf)}, blue: {fmt_f32(bf)}, opacity: {fmt_f32(af)})"
+    return f"Color(red: {fmt_f32(rf)}, green: {fmt_f32(gf)}, blue: {fmt_f32(bf)}, opacity: {fmt_f32(af)})"
 
 
 def render_typescript_fallback(tokens_data: dict) -> str:
@@ -444,6 +444,11 @@ def cmd_check(args):
 
 
 def main():
+    if len(sys.argv) > 1 and not any(
+        cmd in sys.argv for cmd in ["generate", "check", "-h", "--help"]
+    ):
+        sys.argv.insert(1, "generate")
+
     parser = argparse.ArgumentParser(
         description="Linkpoint Workspace Token Generator CLI"
     )
