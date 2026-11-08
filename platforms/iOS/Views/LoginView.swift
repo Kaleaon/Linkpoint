@@ -1,4 +1,5 @@
 import SwiftUI
+import Ktheme
 
 struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
@@ -11,9 +12,12 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background gradient
+                // Background gradient using Ktheme design tokens
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)]),
+                    gradient: Gradient(colors: [
+                        Ktheme.brandPrimary.opacity(0.6),
+                        Ktheme.brandSecondary.opacity(0.6)
+                    ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -26,15 +30,15 @@ struct LoginView: View {
                             Image(systemName: "link.circle.fill")
                                 .resizable()
                                 .frame(width: 100, height: 100)
-                                .foregroundColor(.white)
+                                .foregroundColor(Ktheme.textPrimary)
 
                             Text("Linkpoint")
                                 .font(.system(size: 42, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(Ktheme.textPrimary)
 
                             Text("Connect to Virtual Worlds")
                                 .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(Ktheme.textMuted)
                         }
                         .padding(.top, 50)
                         .padding(.bottom, 30)
@@ -45,13 +49,13 @@ struct LoginView: View {
                             Button(action: { showingGridPicker = true }) {
                                 HStack {
                                     Text("Grid: \(authViewModel.selectedGrid.name)")
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(Ktheme.textPrimary)
                                     Spacer()
                                     Image(systemName: "chevron.down")
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Ktheme.textSecondary)
                                 }
                                 .padding()
-                                .background(Color(.systemBackground))
+                                .background(Ktheme.cardBackground)
                                 .cornerRadius(10)
                             }
 
@@ -75,7 +79,7 @@ struct LoginView: View {
                             // Error message
                             if let error = authViewModel.errorMessage {
                                 Text(error)
-                                    .foregroundColor(.red)
+                                    .foregroundColor(Ktheme.error)
                                     .font(.caption)
                                     .padding(.horizontal)
                             }
@@ -84,16 +88,16 @@ struct LoginView: View {
                             Button(action: login) {
                                 if authViewModel.isLoading {
                                     ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        .progressViewStyle(CircularProgressViewStyle(tint: Ktheme.textPrimary))
                                 } else {
                                     Text("Login")
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(Ktheme.textPrimary)
                                         .frame(maxWidth: .infinity)
                                 }
                             }
                             .frame(height: 50)
-                            .background(isFormValid ? Color.blue : Color.gray)
+                            .background(isFormValid ? Ktheme.brandPrimary : Ktheme.disabled)
                             .cornerRadius(10)
                             .disabled(!isFormValid || authViewModel.isLoading)
                         }
@@ -130,9 +134,9 @@ struct RoundedTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .padding()
-            .background(Color(.systemBackground))
+            .background(Ktheme.cardBackground)
             .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+            .shadow(color: Ktheme.shadow, radius: 5, x: 0, y: 2)
     }
 }
 
@@ -154,12 +158,12 @@ struct GridPickerView: View {
                                 .font(.headline)
                             Text(grid.loginURL)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Ktheme.textSecondary)
                         }
                         Spacer()
                         if grid.id == selectedGrid.id {
                             Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
+                                .foregroundColor(Ktheme.brandPrimary)
                         }
                     }
                 }
