@@ -119,8 +119,11 @@ jobs:
           bash scripts/ui/check-theme-coverage.sh
           bash scripts/ui/check-migration-matrix.sh
 
-      - name: Run unit tests and lint
-        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
+      - name: Run unit tests and generate coverage
+        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest jacocoTestReport --stacktrace)
+
+      - name: Run Android lint
+        run: (cd legacy && ./gradlew :Linkpoint:lintStableDebug --stacktrace)
 
       - name: Run Roborazzi Visual Snapshot Verification
         run: (cd legacy && ./gradlew verifyRoborazziDebug)
