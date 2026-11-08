@@ -42,8 +42,10 @@ class LLMeshConverter {
       numFaces = bd.getUint16(0, Endian.little);
     }
 
-    final positions = Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]);
-    final normals = Float32List.fromList([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
+    final positions =
+        Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]);
+    final normals =
+        Float32List.fromList([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
     final uvs = Float32List.fromList([0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
     final indices = Uint16List.fromList([0, 1, 2]);
 
@@ -107,7 +109,8 @@ class LLMeshConverter {
     final idxLength = bufferBytes.length - idxOffset;
 
     final rawBytes = bufferBytes.toBytes();
-    final base64Uri = 'data:application/octet-stream;base64,${base64.encode(rawBytes)}';
+    final base64Uri =
+        'data:application/octet-stream;base64,${base64.encode(rawBytes)}';
 
     final gltfMap = {
       'asset': {
