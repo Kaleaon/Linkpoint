@@ -194,7 +194,7 @@ jobs:
         with:
           name: web-coverage
           path: coverage/lcov.info
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Install Playwright Browsers
         run: npx playwright install chromium
