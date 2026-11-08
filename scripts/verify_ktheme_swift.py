@@ -15,9 +15,8 @@ def test_cli_generate_swift():
         "swift",
     ]
     result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
-    assert (
-        result.returncode == 0
-    ), f"cli.py --target swift failed:\n{result.stderr}\n{result.stdout}"
+    msg = f"cli.py --target swift failed:\n{result.stderr}\n{result.stdout}"
+    assert result.returncode == 0, msg
 
     swift_file = os.path.join(
         PROJECT_ROOT, "platforms", "iOS", "Sources", "Ktheme", "GeneratedTokens.swift"
@@ -39,9 +38,8 @@ def test_package_swift_includes_ktheme():
     with open(package_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert (
-        '.library(name: "Ktheme", targets: ["Ktheme"])' in content
-    ), "Ktheme library missing in Package.swift"
+    expected_lib = '.library(name: "Ktheme", targets: ["Ktheme"])'
+    assert expected_lib in content, "Ktheme library missing in Package.swift"
     assert 'name: "Ktheme"' in content, "Ktheme target missing in Package.swift"
     assert '"Ktheme"' in content, "Ktheme dependency missing in LinkpointiOS target"
     print(
@@ -98,9 +96,8 @@ def test_views_import_ktheme_no_hardcoded_colors():
 
         for pattern in forbidden_patterns:
             matches = re.findall(pattern, content)
-            assert (
-                len(matches) == 0
-            ), f"Forbidden hardcoded color pattern '{pattern}' found in {vf}: {matches}"
+            msg = f"Forbidden hardcoded color pattern '{pattern}' found in {vf}: {matches}"
+            assert len(matches) == 0, msg
 
     print(
         "[PASS] Requirement 3: LoginView and MainTabView import Ktheme with zero hardcoded colors."
@@ -120,16 +117,14 @@ def test_main_tab_view_adaptive_navigation():
     with open(main_tab_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert (
-        "@Environment(\\.horizontalSizeClass)" in content
-    ), "horizontalSizeClass environment property missing"
-    assert (
-        "NavigationSplitView" in content
-    ), "NavigationSplitView layout missing for regular width displays"
+    env_prop = "@Environment(\\.horizontalSizeClass)"
+    assert env_prop in content, "horizontalSizeClass environment property missing"
+    split_layout = "NavigationSplitView"
+    split_msg = "NavigationSplitView layout missing for regular width displays"
+    assert split_layout in content, split_msg
     assert "TabView" in content, "TabView layout missing for compact width displays"
-    assert (
-        "horizontalSizeClass == .regular" in content
-    ), "horizontalSizeClass condition missing"
+    reg_cond = "horizontalSizeClass == .regular"
+    assert reg_cond in content, "horizontalSizeClass condition missing"
 
     print(
         "[PASS] Requirements 4 & 5: MainTabView adapts between NavigationSplitView and TabView."
