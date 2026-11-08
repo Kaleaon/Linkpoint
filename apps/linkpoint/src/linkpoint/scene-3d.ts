@@ -180,20 +180,64 @@ export class Scene3D extends Utils.EventEmitter {
     this.graphics.createMesh('grid', grid.vertices, grid.indices, grid.normals, grid.texCoords, tangentsFor(grid));
   }
 
-  addAssetMesh(assetId: string, geometry: { vertices: number[]; indices: number[]; normals?: number[]; texCoords?: number[]; tangents?: number[]; parts?: any[] }) {
-    const parts = geometry.parts?.length ? geometry.parts : [geometry];
-    return parts.map((part, index) => {
-      const name = `asset:${assetId}:${index}`;
-      const skin = Array.isArray(part.joints) && Array.isArray(part.jointWeights) ? { joints: part.joints, weights: part.jointWeights } : undefined;
-      const tangents = tangentsFor(part);
-      try {
-        this.graphics.createMesh(name, part.vertices, part.indices, part.normals, part.texCoords, tangents, skin);
-        return { mesh: name, materialIndex: Number(part.materialIndex ?? index) };
-      } catch (err) {
-        console.warn(`[Scene3D] Failed to register mesh ${name}, falling back to asset proxy:`, err);
-        return { mesh: 'asset-proxy', materialIndex: Number(part.materialIndex ?? index) };
+  addAssetMesh(assetId: string, geometry: { vertices?: number[]; indices?: number[]; normals?: number[]; texCoords?: number[]; tangents?: number[]; parts?: any[]; lods?: Record<string, any[]>; metadata?: any }) {
+    const ALL_LOD_NAMES = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'] as const;
+    const lodsInput = geometry.lods && Object.keys(geometry.lods).length > 0 ? geometry.lods : null;
+    const lodMeshes: Record<string, Array<{ mesh: string; materialIndex: number }>> = {};
+
+    const registerSubmeshParts = (partsList: any[], lodPrefix: string) => {
+      return partsList.map((part, index) => {
+        const name = `asset:${assetId}:${lodPrefix}:${index}`;
+        const skin = Array.isArray(part.joints) && Array.isArray(part.jointWeights) ? { joints: part.joints, weights: part.jointWeights } : undefined;
+        const tangents = tangentsFor(part);
+        try {
+          this.graphics.createMesh(name, part.vertices, part.indices, part.normals, part.texCoords, tangents, skin);
+          if (lodPrefix === 'high_lod' || lodPrefix === 'default') {
+            try {
+              this.graphics.createMesh(`asset:${assetId}:${index}`, part.vertices, part.indices, part.normals, part.texCoords, tangents, skin);
+            } catch {
+              // Ignore alias errors
+            }
+          }
+          return { mesh: name, materialIndex: Number(part.materialIndex ?? index) };
+        } catch (err) {
+          console.warn(`[Scene3D] Failed to register LOD mesh ${name}, falling back to asset proxy:`, err);
+          return { mesh: 'asset-proxy', materialIndex: Number(part.materialIndex ?? index) };
+        }
+      });
+    };
+
+    if (lodsInput) {
+      for (const lodName of ALL_LOD_NAMES) {
+        if (Array.isArray(lodsInput[lodName]) && lodsInput[lodName].length > 0) {
+          lodMeshes[lodName] = registerSubmeshParts(lodsInput[lodName], lodName);
+        }
       }
-    });
+      if (!lodMeshes.high_lod && geometry.parts?.length) {
+        lodMeshes.high_lod = registerSubmeshParts(geometry.parts, 'high_lod');
+      }
+      if (!lodMeshes.medium_lod) {
+        lodMeshes.medium_lod = lodMeshes.high_lod || [];
+      }
+      if (!lodMeshes.low_lod) {
+        lodMeshes.low_lod = lodMeshes.medium_lod || lodMeshes.high_lod || [];
+      }
+      if (!lodMeshes.lowest_lod) {
+        lodMeshes.lowest_lod = lodMeshes.low_lod || lodMeshes.medium_lod || lodMeshes.high_lod || [];
+      }
+    } else {
+      const parts = geometry.parts?.length ? geometry.parts : [geometry.vertices ? geometry : { vertices: [], indices: [] }];
+      const defaultDraws = registerSubmeshParts(parts, 'high_lod');
+      lodMeshes.high_lod = defaultDraws;
+      lodMeshes.medium_lod = defaultDraws;
+      lodMeshes.low_lod = defaultDraws;
+      lodMeshes.lowest_lod = defaultDraws;
+    }
+
+    const primaryMeshes = lodMeshes.high_lod || [];
+    (primaryMeshes as any).lodMeshes = lodMeshes;
+    (primaryMeshes as any).lodThresholds = geometry.metadata?.lodPixelAngles || null;
+    return primaryMeshes;
   }
 
   /** Register the faces of a generated prim volume; returns one draw per face (material index = texture-entry face). */
@@ -363,10 +407,15 @@ export class Scene3D extends Utils.EventEmitter {
   }
 
   addObject(id: string, config: any) {
+    const lodMeshes = config.lodMeshes || config.meshes?.lodMeshes || null;
+    const lodThresholds = config.lodThresholds || config.meshes?.lodThresholds || null;
     const object = {
       id,
       mesh: config.mesh || 'cube',
       meshes: config.meshes || null,
+      lodMeshes,
+      lodThresholds,
+      currentLod: config.currentLod || 'high_lod',
       position: config.position || [0, 0, 0],
       rotation: config.rotation || [0, 0, 0],
       scale: config.scale || [1, 1, 1],
@@ -405,6 +454,10 @@ export class Scene3D extends Utils.EventEmitter {
   updateObject(id: string, updates: any) {
     const object = this.objects.get(id);
     if (object) {
+      if (updates.meshes) {
+        updates.lodMeshes = updates.lodMeshes || updates.meshes.lodMeshes || object.lodMeshes;
+        updates.lodThresholds = updates.lodThresholds || updates.meshes.lodThresholds || object.lodThresholds;
+      }
       Object.assign(object, updates);
       this.emit('object_updated', object);
     }
@@ -629,8 +682,125 @@ export class Scene3D extends Utils.EventEmitter {
     return (2 * Math.tan((fov * Math.PI) / 360)) / height;
   }
 
-  /** Meshes drawn for an object, falling back to its single mesh. */
+  /**
+   * Compute apparent screen pixel area (in sq px) for an object's bounding sphere footprint.
+   *
+   * Formula:
+   * radiusPx = (boundingRadius * screenHeightPx) / (2 * distance * tan(fov / 2))
+   * areaPx = PI * radiusPx^2
+   */
+  public calculateScreenPixelArea(
+    boundingRadius: number,
+    distanceMeters: number,
+    fovRad: number = Math.PI / 3,
+    screenHeightPx: number = 720
+  ): number {
+    const safeRadius = boundingRadius > 0 ? boundingRadius : 0.5;
+    const safeDistance = distanceMeters > 0.001 ? distanceMeters : 0.001;
+    const safeFov = Math.max(0.01, Math.min(Math.PI - 0.01, fovRad));
+    const tanHalfFov = Math.tan(safeFov / 2);
+    const safeTan = tanHalfFov > 0.0001 ? tanHalfFov : 0.57735;
+
+    const radiusPx = (safeRadius * screenHeightPx) / (2 * safeDistance * safeTan);
+    return Math.PI * radiusPx * radiusPx;
+  }
+
+  /**
+   * Select active LOD level for an object based on camera distance, bounding sphere, screen pixel area, and hysteresis.
+   */
+  public selectObjectLod(object: any): 'high_lod' | 'medium_lod' | 'low_lod' | 'lowest_lod' {
+    const lodMeshes = object.lodMeshes || object.meshes?.lodMeshes;
+    if (!lodMeshes) return 'high_lod';
+
+    const dx = object.position[0] - this.camera.position[0];
+    const dy = object.position[1] - this.camera.position[1];
+    const dz = object.position[2] - this.camera.position[2];
+    const distance = Math.hypot(dx, dy, dz);
+
+    const bounds = this.objectLocalBounds(object);
+    let localRadius = 0.5;
+    if (bounds) {
+      const bx = bounds.max[0] - bounds.min[0];
+      const by = bounds.max[1] - bounds.min[1];
+      const bz = bounds.max[2] - bounds.min[2];
+      localRadius = 0.5 * Math.hypot(bx, by, bz);
+    }
+    const scale = Array.isArray(object.scale) ? object.scale : [1, 1, 1];
+    const maxScale = Math.max(Math.abs(scale[0]), Math.abs(scale[1]), Math.abs(scale[2])) || 1;
+    const worldRadius = localRadius * maxScale;
+
+    const canvasHeight = (this.graphics as any).canvas?.height || 720;
+    const fovRad = ((Number(this.camera.fov) || 60) * Math.PI) / 180;
+
+    const pixelArea = this.calculateScreenPixelArea(worldRadius, distance, fovRad, canvasHeight);
+
+    let tHigh = 8000;
+    let tMed = 2000;
+    let tLow = 500;
+
+    const customAngles = object.lodThresholds || object.meshes?.lodThresholds;
+    if (customAngles) {
+      if (typeof customAngles.high_lod === 'number') {
+        const hD = customAngles.high_lod;
+        const mD = customAngles.medium_lod ?? hD / 2;
+        const lD = customAngles.low_lod ?? mD / 2;
+        tHigh = hD <= 2000 ? Math.PI * (hD / 2) ** 2 : hD;
+        tMed = mD <= 2000 ? Math.PI * (mD / 2) ** 2 : mD;
+        tLow = lD <= 2000 ? Math.PI * (lD / 2) ** 2 : lD;
+      }
+    }
+
+    const HYSTERESIS_MARGIN = 0.15;
+    const currentLod: 'high_lod' | 'medium_lod' | 'low_lod' | 'lowest_lod' = object.currentLod || 'high_lod';
+
+    let selected: 'high_lod' | 'medium_lod' | 'low_lod' | 'lowest_lod' = 'lowest_lod';
+
+    const highUpgrade = tHigh * (1 + HYSTERESIS_MARGIN);
+    const highDowngrade = tHigh * (1 - HYSTERESIS_MARGIN);
+
+    if (currentLod === 'high_lod') {
+      if (pixelArea >= highDowngrade) selected = 'high_lod';
+    } else {
+      if (pixelArea >= highUpgrade) selected = 'high_lod';
+    }
+
+    if (selected === 'lowest_lod' && pixelArea >= tMed * (1 - HYSTERESIS_MARGIN)) {
+      const medUpgrade = tMed * (1 + HYSTERESIS_MARGIN);
+      const medDowngrade = tMed * (1 - HYSTERESIS_MARGIN);
+
+      if (currentLod === 'medium_lod') {
+        if (pixelArea >= medDowngrade) selected = 'medium_lod';
+      } else if (currentLod === 'high_lod') {
+        if (pixelArea < highDowngrade && pixelArea >= medDowngrade) selected = 'medium_lod';
+      } else {
+        if (pixelArea >= medUpgrade) selected = 'medium_lod';
+      }
+    }
+
+    if (selected === 'lowest_lod' && pixelArea >= tLow * (1 - HYSTERESIS_MARGIN)) {
+      const lowUpgrade = tLow * (1 + HYSTERESIS_MARGIN);
+      const lowDowngrade = tLow * (1 - HYSTERESIS_MARGIN);
+
+      if (currentLod === 'low_lod') {
+        if (pixelArea >= lowDowngrade) selected = 'low_lod';
+      } else if (currentLod === 'high_lod' || currentLod === 'medium_lod') {
+        if (pixelArea >= lowDowngrade) selected = 'low_lod';
+      } else {
+        if (pixelArea >= lowUpgrade) selected = 'low_lod';
+      }
+    }
+
+    object.currentLod = selected;
+    return selected;
+  }
+
+  /** Meshes drawn for an object, selecting active LOD level when multi-LOD buffers are available. */
   private objectDraws(object: any) {
+    const lodMeshes = object.lodMeshes || object.meshes?.lodMeshes;
+    if (lodMeshes) {
+      const selectedLod = this.selectObjectLod(object);
+      return lodMeshes[selectedLod] || lodMeshes.high_lod || object.meshes;
+    }
     return object.meshes?.length ? object.meshes : [{ mesh: object.mesh, materialIndex: 0 }];
   }
 
@@ -641,7 +811,9 @@ export class Scene3D extends Utils.EventEmitter {
     if (object.skin) return null;
     const min = [Infinity, Infinity, Infinity];
     const max = [-Infinity, -Infinity, -Infinity];
-    for (const draw of this.objectDraws(object)) {
+    const lodMeshes = object.lodMeshes || object.meshes?.lodMeshes;
+    const draws = lodMeshes?.high_lod || (object.meshes?.length ? object.meshes : [{ mesh: object.mesh, materialIndex: 0 }]);
+    for (const draw of draws) {
       const bounds = this.graphics.getMeshBounds(draw.mesh);
       if (!bounds) return null;
       for (let axis = 0; axis < 3; axis++) {
