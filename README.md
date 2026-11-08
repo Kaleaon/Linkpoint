@@ -70,11 +70,9 @@ For design constraints and migration gates, read
 | `apps/linkpoint/` | Primary React application | Active |
 | `packages/` | Shared TypeScript libraries and design tokens | Active |
 | `crates/` | Shared Rust viewer core and native adapter | Active |
-| `design/` | UI source studies and prototypes | Reference |
-| `Linkpoint/` | Previous Kotlin/Android client | Legacy migration source |
+| `legacy/` | Previous Kotlin/Android client, Gradle build, decompiled/analysis sources, design studies | Legacy / reference only |
 | `docs/` | Architecture, migration, protocol, and historical notes | Mixed; use the index |
 | `platforms/` | Earlier platform experiments | Reference |
-| analysis/source directories | Reverse-engineering and compatibility evidence | Reference only |
 
 The detailed ownership and placement rules are in
 [docs/REPOSITORY_LAYOUT.md](docs/REPOSITORY_LAYOUT.md). Reference material must
@@ -90,7 +88,7 @@ not be imported into production code.
 | `npm run check:web` | Type-check, test, and build the web workspace |
 | `npm run check:rust` | Format-check, test, and lint the Rust workspace |
 | `npm run check` | Run the complete active-workspace validation |
-| `./gradlew :Linkpoint:assembleDebug` | Build the legacy Android client when needed |
+| `(cd legacy && ./gradlew :Linkpoint:assembleDebug)` | Build the legacy Android client when needed |
 
 ## Project policies
 

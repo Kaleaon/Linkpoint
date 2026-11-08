@@ -55,6 +55,33 @@ describe('UDP-referenced LLMesh asset decoding', () => {
     expect(mesh.skin.inverseBindMatrices[0]).toHaveLength(16);
   });
 
+  it('preserves all four LOD levels (high_lod, medium_lod, low_lod, lowest_lod) when present in asset data', () => {
+    const point = (x: number, y: number, z = 0) => ({ x, y, z });
+    const submesh = (mat = 0) => ({
+      position: [point(0, 0), point(1, 0), point(0, 1)],
+      triangleList: [0, 1, 2],
+      materialIndex: mat,
+    });
+    const mesh = normalizeLLMesh({
+      version: 1,
+      lodLevels: {
+        high_lod: [submesh(0), submesh(1)],
+        medium_lod: [submesh(0)],
+        low_lod: [submesh(0)],
+        lowest_lod: [submesh(0)],
+      },
+    });
+
+    expect(mesh.lods).toHaveProperty('high_lod');
+    expect(mesh.lods).toHaveProperty('medium_lod');
+    expect(mesh.lods).toHaveProperty('low_lod');
+    expect(mesh.lods).toHaveProperty('lowest_lod');
+    expect(mesh.lods.high_lod).toHaveLength(2);
+    expect(mesh.lods.medium_lod).toHaveLength(1);
+    expect(mesh.lods.low_lod).toHaveLength(1);
+    expect(mesh.lods.lowest_lod).toHaveLength(1);
+  });
+
   it('rejects corrupt triangle indices instead of sending unsafe geometry to WebGL', () => {
     expect(() => normalizeLLMesh({
       lodLevels: { high_lod: [{ position: [{ x: 0, y: 0, z: 0 }], triangleList: [0, 1, 0] }] },

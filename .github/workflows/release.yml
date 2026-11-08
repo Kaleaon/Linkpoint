@@ -76,8 +76,8 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > Linkpoint/release.keystore
-          cat > Linkpoint/keystore.properties << EOF
+          echo "$KEYSTORE_BASE64" | base64 -d > legacy/Linkpoint/release.keystore
+          cat > legacy/Linkpoint/keystore.properties << EOF
           storeFile=release.keystore
           storePassword=$KEYSTORE_PASSWORD
           keyAlias=$KEY_ALIAS
@@ -86,14 +86,14 @@ jobs:
 
       - name: Build Release APK and AAB
         run: |
-          chmod +x gradlew Linkpoint/gradlew 2>/dev/null || true
-          ./gradlew :Linkpoint:assembleRelease :Linkpoint:bundleRelease --stacktrace
+          chmod +x legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
+          (cd legacy && ./gradlew :Linkpoint:assembleRelease :Linkpoint:bundleRelease --stacktrace)
 
       - name: Consolidate release binaries and compute checksums
         run: |
           set -euo pipefail
           mkdir -p release-artifacts
-          find Linkpoint/build/outputs -type f \( -name "*.apk" -o -name "*.aab" \) -exec cp {} release-artifacts/ \;
+          find legacy/Linkpoint/build/outputs -type f \( -name "*.apk" -o -name "*.aab" \) -exec cp {} release-artifacts/ \;
           cd release-artifacts
           sha256sum *.apk *.aab > SHA256SUMS 2>/dev/null || sha256sum * > SHA256SUMS
           cp SHA256SUMS checksums.sha256

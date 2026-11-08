@@ -25,6 +25,8 @@ entry points. CI for these paths lives in `.github/workflows/cross-platform.yml`
 
 ## Migration and reference areas
 
+All of the paths below now live under `legacy/` (e.g. `legacy/Linkpoint/`).
+
 | Path | Use |
 | --- | --- |
 | `Linkpoint/` | Buildable Kotlin/Android predecessor and behavioral baseline |
