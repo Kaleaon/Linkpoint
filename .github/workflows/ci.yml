@@ -189,6 +189,12 @@ jobs:
       - name: Run web workspace validation
         run: npm run check:web
 
+      - name: Ensure Web coverage report is generated
+        run: |
+          if [ ! -f coverage/lcov.info ]; then
+            npm run test:coverage
+          fi
+
       - name: Upload Web coverage report
         uses: actions/upload-artifact@v4
         with:
