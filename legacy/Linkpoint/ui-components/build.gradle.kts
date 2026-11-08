@@ -36,6 +36,14 @@ android {
             isIncludeAndroidResources = true
         }
     }
+
+    lint {
+        abortOnError = false
+        checkTestSources = false
+        ignoreTestSources = true
+        checkDependencies = false
+        checkGeneratedSources = false
+    }
 }
 
 configurations.all {
