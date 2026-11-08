@@ -17,7 +17,7 @@ describe('terrain materials in the world', () => {
     });
     expect(scene.setWaterHeight).toHaveBeenCalledWith(18.5);
     expect(scene.setTerrainMaterials).toHaveBeenCalledWith({
-      textureNames: ['texture:aaa', '', 'texture:ccc', 'texture:ddd'], startHeights: [1, 2, 3, 4], heightRanges: [10, 20, 30, 40], origin: [256000, 256256],
+      textureNames: ['texture:aaa', '', 'texture:ccc', 'texture:ddd'], normalTextureNames: [], startHeights: [1, 2, 3, 4], heightRanges: [10, 20, 30, 40], origin: [256000, 256256],
     });
   });
 
