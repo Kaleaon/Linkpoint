@@ -154,7 +154,7 @@ class PbrToPhongTranscoderTest {
             }
         }
 
-        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+        val descriptor = GltfMaterialParser.parseLlsd(llsdData)
 
         assertEquals(0.7f, descriptor.baseColor.x, 0.01f)
         assertEquals(0.8f, descriptor.baseColor.y, 0.01f)
@@ -168,7 +168,7 @@ class PbrToPhongTranscoderTest {
         assertNotNull(descriptor.normalTexture)
         assertEquals(normUUID, descriptor.normalTexture?.declaredId)
 
-        // Constraint check: MetallicRoughness texture map is discarded for ES 2.0 sampler limits
-        assertNull(descriptor.metallicRoughnessTexture)
+        assertNotNull(descriptor.metallicRoughnessTexture)
+        assertEquals(mrUUID, descriptor.metallicRoughnessTexture?.declaredId)
     }
 }
