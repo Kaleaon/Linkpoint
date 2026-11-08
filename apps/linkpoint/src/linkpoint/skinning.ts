@@ -14,9 +14,9 @@ export { AvatarMeshRenderer } from './avatar-mesh-renderer';
 export type { SkinnedMeshData, RenderSubmeshPartition } from './avatar-mesh-renderer';
 export { DualQuaternion } from './dual-quaternion';
 
-/** Joints in the largest rigs Second Life accepts. */
-export const SL_MAX_RIGGED_JOINTS = 110;
-/** Uniform vectors left for camera/matrices in vertex shader. */
+/** Joints in the largest Bento rigs Second Life accepts. */
+export const SL_MAX_RIGGED_JOINTS = 134;
+/** Uniform vectors left for the matrices/camera/etc. of the vertex shader. */
 const RESERVED_VERTEX_VECTORS = 24;
 
 /** How many joints fit in a vertex shader given `MAX_VERTEX_UNIFORM_VECTORS` using DQS (2 vec4s per joint). */
