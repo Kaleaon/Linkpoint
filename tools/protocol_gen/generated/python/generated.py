@@ -5858,8 +5858,3 @@ class CapabilitiesRequestResponseCapabilities:
     capabilities: List[str] = field(default_factory=list)
     seed_response: Optional[str] = None
     fetch_inventory: Optional[str] = None
-
-@dataclass
-class EventQueueGetCapabilities:
-    ack: Optional[int] = None
-    events: List[str] = field(default_factory=list)
