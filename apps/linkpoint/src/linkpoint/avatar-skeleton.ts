@@ -36,13 +36,23 @@ export function multiply(a: ArrayLike<number>, b: ArrayLike<number>, out: Mat4 =
   return out;
 }
 
-/** Rigid transform: rotation by unit quaternion q, then translation t. */
-export function compose(t: Vec3, q: Quat = [0, 0, 0, 1]): Mat4 {
+/** Rigid/affine transform: rotation by unit quaternion q, local scale s, then translation t. */
+export function compose(t: Vec3, q: Quat = [0, 0, 0, 1], s: Vec3 = [1, 1, 1]): Mat4 {
   const [x, y, z, w] = q;
+  const [sx, sy, sz] = s;
   const m = identity();
-  m[0] = 1 - 2 * (y * y + z * z); m[1] = 2 * (x * y + z * w); m[2] = 2 * (x * z - y * w);
-  m[4] = 2 * (x * y - z * w); m[5] = 1 - 2 * (x * x + z * z); m[6] = 2 * (y * z + x * w);
-  m[8] = 2 * (x * z + y * w); m[9] = 2 * (y * z - x * w); m[10] = 1 - 2 * (x * x + y * y);
+  m[0] = (1 - 2 * (y * y + z * z)) * sx;
+  m[1] = 2 * (x * y + z * w) * sx;
+  m[2] = 2 * (x * z - y * w) * sx;
+
+  m[4] = 2 * (x * y - z * w) * sy;
+  m[5] = (1 - 2 * (x * x + z * z)) * sy;
+  m[6] = 2 * (y * z + x * w) * sy;
+
+  m[8] = 2 * (x * z + y * w) * sz;
+  m[9] = 2 * (y * z - x * w) * sz;
+  m[10] = (1 - 2 * (x * x + y * y)) * sz;
+
   m[12] = t[0]; m[13] = t[1]; m[14] = t[2];
   return m;
 }
@@ -114,7 +124,13 @@ export class AvatarSkeleton {
    * whose animated position is an offset from rest. `positionOverrides` (see
    * `jointPositionOverrides`) replace local rest positions before animation is applied.
    */
-  worldMatrices(pose: Map<string, JointPose> = new Map(), positionOverrides: Map<string, Vec3> = new Map(), pelvisOffset: Vec3 = [0, 0, 0]): Mat4[] {
+  worldMatrices(
+    pose: Map<string, JointPose> = new Map(),
+    positionOverrides: Map<string, Vec3> = new Map(),
+    pelvisOffset: Vec3 = [0, 0, 0],
+    scaleOverrides: Map<string, Vec3> = new Map(),
+    offsetOverrides: Map<string, Vec3> = new Map()
+  ): Mat4[] {
     const resolved = new Map<number, JointPose>();
     for (const [name, joint] of pose) {
       const index = this.indexOf(name);
@@ -124,13 +140,22 @@ export class AvatarSkeleton {
     for (const bone of this.bones) {
       const joint = resolved.get(bone.index);
       let position: Vec3 = positionOverrides.get(bone.name) || bone.rest;
+      const boneOffset = offsetOverrides.get(bone.name);
+      if (boneOffset) {
+        position = [position[0] + boneOffset[0], position[1] + boneOffset[1], position[2] + boneOffset[2]];
+      }
       if (bone.parent === null) position = [position[0] + pelvisOffset[0], position[1] + pelvisOffset[1], position[2] + pelvisOffset[2]];
       if (joint?.position) {
         position = bone.parent === null
           ? [position[0] + joint.position[0], position[1] + joint.position[1], position[2] + joint.position[2]]
           : joint.position;
       }
-      const local = compose(position, joint?.rotation);
+      let scale: Vec3 = bone.scale ? [bone.scale[0], bone.scale[1], bone.scale[2]] : [1, 1, 1];
+      const scaleOverride = scaleOverrides.get(bone.name);
+      if (scaleOverride) {
+        scale = [scale[0] * scaleOverride[0], scale[1] * scaleOverride[1], scale[2] * scaleOverride[2]];
+      }
+      const local = compose(position, joint?.rotation, scale);
       world[bone.index] = bone.parentIndex < 0 ? local : multiply(world[bone.parentIndex], local);
     }
     return world;
