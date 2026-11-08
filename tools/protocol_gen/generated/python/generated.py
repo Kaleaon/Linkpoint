@@ -517,6 +517,8 @@ def decompress_zerocoded(src: bytes) -> bytes:
 
 
 # Generated UDP Messages
+
+
 @dataclass
 class TestMessagePacket:
     message_name: str = "TestMessage"
@@ -5831,6 +5833,8 @@ class GameControlInputPacket:
 
 
 # Generated LLSD Capability Schemas
+
+
 @dataclass
 class AgentDomainCapabilitiesCapabilities:
     agent_id: Optional[str] = None
@@ -5844,16 +5848,11 @@ class AgentDomainCapabilitiesCapabilities:
 
 
 @dataclass
-class EventQueueGetCapabilities:
-    ack: Optional[int] = None
-    events: List[str] = field(default_factory=list)
-
-
-@dataclass
 class CapabilitiesRequestResponseCapabilities:
     capabilities: List[str] = field(default_factory=list)
     seed_response: Optional[str] = None
     fetch_inventory: Optional[str] = None
+
 
 @dataclass
 class EventQueueGetCapabilities:

@@ -17,25 +17,19 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testFaceMaterialIdentityFastPath() {
-        val primFace = DrawablePrimStore.FaceMaterial()
-        assertTrue(primFace.isDirty)
-        val matrix1 = primFace.getMatrix()
-        assertFalse(primFace.isDirty)
-
-        // Identity fast path returns static identity matrix constant
-        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
-        assertSame("Identity FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, matrix1)
-
         val meshFace = DrawableMeshStore.FaceMaterial()
         assertTrue(meshFace.isDirty)
         val meshMatrix = meshFace.getMatrix()
         assertFalse(meshFace.isDirty)
+
+        // Identity fast path returns static identity matrix constant
+        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
         assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
     }
 
     @Test
     fun testFaceMaterialDirtyStateTrackingAndCaching() {
-        val face = DrawablePrimStore.FaceMaterial()
+        val face = DrawableMeshStore.FaceMaterial()
         face.getMatrix() // clear initial dirty flag
 
         // Mutate scale
@@ -67,7 +61,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testUvTransformPrecomputedMatrixIntegration() {
-        val face = DrawablePrimStore.FaceMaterial(
+        val face = DrawableMeshStore.FaceMaterial(
             scaleS = 2f,
             scaleT = 3f,
             offsetS = 0.1f,
@@ -96,7 +90,7 @@ class CachedTexMatrixStoreTest {
         val offsetT = -0.5f
         val rotation = 0.0f
 
-        val face = DrawablePrimStore.FaceMaterial(
+        val face = DrawableMeshStore.FaceMaterial(
             scaleS = scaleS,
             scaleT = scaleT,
             offsetS = offsetS,
@@ -125,7 +119,7 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testZeroAllocationsInSimulatedRenderLoop() {
-        val face = DrawablePrimStore.FaceMaterial(scaleS = 1.5f, scaleT = 1.5f)
+        val face = DrawableMeshStore.FaceMaterial(scaleS = 1.5f, scaleT = 1.5f)
         val initialMatrix = face.getMatrix()
 
         // Simulate 10,000 frame loop calls
