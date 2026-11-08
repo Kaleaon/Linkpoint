@@ -61,8 +61,10 @@ export const WATER_PARAMETERS = [
 ] as const;
 
 export const TERRAIN_PARAMETERS = [
-  'uComposition', 'uDetail0', 'uDetail1', 'uDetail2', 'uDetail3', 'uDetailUse',
-  'uFallback0', 'uFallback1', 'uFallback2', 'uFallback3', 'uLightPos', 'uLightColor', 'uAmbientColor', 'uTileScale',
+  'uComposition', 'uDetail0', 'uDetail1', 'uDetail2', 'uDetail3',
+  'uDetailNormal0', 'uDetailNormal1', 'uDetailNormal2', 'uDetailNormal3',
+  'uDetailUse', 'uFallback0', 'uFallback1', 'uFallback2', 'uFallback3',
+  'uLightPos', 'uLightColor', 'uAmbientColor', 'uSkyColor', 'uHazeHorizon', 'uHazeColor', 'uTileScale',
 ] as const;
 
 async function fetchPackage(name: MaterialName, url: string): Promise<Uint8Array> {
