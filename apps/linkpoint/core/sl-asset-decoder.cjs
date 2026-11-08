@@ -112,7 +112,7 @@ function normalizeLLMesh(mesh) {
   } : null;
   return {
     format: 'llmesh-v1', selectedLod, parts, lods, skin, physics,
-    metadata: { version: mesh.version ?? null, creatorId: mesh.creatorID?.toString?.() || null, submodelId: mesh.submodel_id ?? null, cost: mesh.costData || null },
+    metadata: { version: mesh.version ?? null, creatorId: mesh.creatorID?.toString?.() || null, submodelId: mesh.submodel_id ?? null, cost: mesh.costData || null, lodPixelAngles: mesh.lod_pixel_angles || mesh.lodPixelAngles || mesh.header?.lod_pixel_angles || null },
     // Keep the original shape for older web clients while no longer truncating
     // meshes at the WebGL unsigned-short boundary: each material is its own draw.
     ...parts[0],
