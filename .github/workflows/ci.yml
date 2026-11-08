@@ -75,9 +75,11 @@ jobs:
   android:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC" -Dkotlin.daemon.jvmargs="-Xmx2048m -XX:+UseG1GC"
 
     steps:
       - name: Checkout repository
@@ -179,6 +181,9 @@ jobs:
 
       - name: Run web workspace validation
         run: npm run check:web
+
+      - name: Generate Web coverage report
+        run: npm run test:coverage
 
       - name: Upload Web coverage report
         uses: actions/upload-artifact@v4
