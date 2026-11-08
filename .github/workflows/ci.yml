@@ -55,7 +55,7 @@ jobs:
       - name: Install Ruff and pre-commit
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pre-commit
+          pip install ruff==0.8.0 pre-commit
 
       - name: Run Ruff static analysis
         run: ruff check scripts/ tools/
