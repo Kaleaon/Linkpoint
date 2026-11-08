@@ -39,7 +39,9 @@ import java.util.concurrent.atomic.AtomicInteger
 class TextureManager(
     private val context: android.content.Context,
     private val cache: AssetCache,
-    private val capabilityManager: com.linkpoint.protocol.capabilities.CapabilityManager? = null
+    private val capabilityManager: com.linkpoint.protocol.capabilities.CapabilityManager? = null,
+    val strategyManager: com.linkpoint.assets.transport.AssetFetchStrategyManager =
+        com.linkpoint.assets.transport.AssetFetchStrategyManager.createDefault(capabilityManager)
 ) {
     private val capabilityUrl: String? get() = 
         capabilityManager?.getTextureFetchURL() ?: capabilityManager?.getCapability(com.linkpoint.protocol.capabilities.CapabilityManager.CAP_GET_TEXTURE)
@@ -274,24 +276,31 @@ class TextureManager(
             val url = capUrl?.let { buildTextureUrl(it, textureId) }
 
             if (url == null) {
-                // No capability URL available - queue for retry when capabilities load
-                Log.w(TAG, "🖼️ Texture queued for retry: $textureId - GetTexture capability not yet available")
+                // Capability URL missing — evaluate transport strategy chain (e.g. REST asset server / UDP)
+                val strategyData = strategyManager.fetchAsset(textureId, AssetType.TEXTURE)
+                if (strategyData != null && strategyData.isNotEmpty()) {
+                    val durationMs = System.currentTimeMillis() - startTime
+                    Log.d(TAG, "🖼️ Texture downloaded via strategy chain: $textureId (${strategyData.size} bytes, ${durationMs}ms)")
+                    updateStats { it.copy(
+                        downloadedCount = it.downloadedCount + 1,
+                        downloadedBytes = it.downloadedBytes + strategyData.size
+                    )}
+                    return@withContext strategyData
+                }
+
+                Log.w(TAG, "🖼️ Texture download failed across transport strategy chain: $textureId")
                 NetworkLogger.logTextureResult(
                     textureId = textureId.toString(),
                     success = false,
-                    durationMs = 0,
+                    durationMs = System.currentTimeMillis() - startTime,
                     sizeBytes = null,
                     protocol = null,
-                    error = "GetTexture capability not available"
+                    error = "All transport strategies failed"
                 )
 
-                lastError = "GetTexture capability not available"
+                lastError = "All transport strategies failed"
                 lastErrorTime = System.currentTimeMillis()
                 updateStats { it.copy(failedCount = it.failedCount + 1) }
-
-                // Queue for retry instead of permanent failure
-                capabilityPendingTextures.offer(TextureRequest(textureId, TexturePriority.NORMAL, discard))
-                ensureCapabilityRetryLoopStarted()
 
                 return@withContext null
             }
@@ -462,6 +471,7 @@ class TextureManager(
      * Handle ImageData message - first packet of UDP texture transfer.
      */
     fun handleImageData(payload: ByteArray) {
+        strategyManager.getAdapter<com.linkpoint.assets.transport.UdpTextureAdapter>()?.onImageData(payload)
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
@@ -497,6 +507,7 @@ class TextureManager(
      * Handle ImagePacket message - subsequent packets of UDP texture transfer.
      */
     fun handleImagePacket(payload: ByteArray) {
+        strategyManager.getAdapter<com.linkpoint.assets.transport.UdpTextureAdapter>()?.onImagePacket(payload)
         try {
             val buffer = java.nio.ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
