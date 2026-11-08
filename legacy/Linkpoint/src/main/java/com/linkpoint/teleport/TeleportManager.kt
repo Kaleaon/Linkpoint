@@ -349,7 +349,7 @@ class TeleportManager(
                 identity = AgentIdentity(agentId, sessionId),
                 fromGroup = false,
                 toAgentId = lure.senderId,
-                dialog = IMType.LURE_DECLINED, // IM_LURE_DECLINED
+                dialog = IMType.LURE_DECLINED,
                 id = lure.lureId,
                 timestamp = (System.currentTimeMillis() / 1000).toInt(),
                 fromAgentName = "You",
