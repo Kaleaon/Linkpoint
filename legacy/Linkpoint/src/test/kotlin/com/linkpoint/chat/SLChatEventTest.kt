@@ -8,6 +8,7 @@ import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.teleport.TeleportManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.*
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -100,7 +101,9 @@ class SLChatEventTest {
             timestamp = 2000L
         )
 
-        val emittedEvent = imManager.messageFlow.first()
+        val emittedEvent = withTimeout(5000L) {
+            imManager.messageFlow.first()
+        }
         assertTrue("Emitted event should be FriendshipOffer", emittedEvent is SLChatEvent.FriendshipOffer)
         val offer = emittedEvent as SLChatEvent.FriendshipOffer
         assertEquals(senderId, offer.fromAgentId)
