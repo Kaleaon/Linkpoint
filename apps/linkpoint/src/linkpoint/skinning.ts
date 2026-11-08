@@ -11,8 +11,8 @@ export { SkinningPaletteUBO, AvatarSkeletonState, BENTO_MAX_PALETTE_JOINTS } fro
 export { AvatarMeshRenderer } from './avatar-mesh-renderer';
 export type { SkinnedMeshData, RenderSubmeshPartition } from './avatar-mesh-renderer';
 
-/** Joints in the largest rigs Second Life accepts. */
-export const SL_MAX_RIGGED_JOINTS = 110;
+/** Joints in the largest Bento rigs Second Life accepts. */
+export const SL_MAX_RIGGED_JOINTS = 134;
 /** Uniform vectors left for the matrices/camera/etc. of the vertex shader. */
 const RESERVED_VERTEX_VECTORS = 24;
 
