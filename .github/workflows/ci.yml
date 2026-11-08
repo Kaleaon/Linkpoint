@@ -78,6 +78,11 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: read
+    env:
+      GRADLE_OPTS: >-
+        -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+        -Dkotlin.daemon.jvmargs="-Xmx1g"
+        -Dkotlin.compiler.execution.strategy=in-process
 
     steps:
       - name: Checkout repository
@@ -102,6 +107,19 @@ jobs:
             cmake;3.22.1
             ndk;26.3.11579264
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+            legacy/Linkpoint/.gradle
+          key: ${{ runner.os }}-gradle-android-${{ hashFiles('legacy/**/*.gradle*', 'legacy/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-android-
+            ${{ runner.os }}-gradle-
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
 
@@ -118,10 +136,18 @@ jobs:
           bash scripts/ui/check-migration-matrix.sh
 
       - name: Run unit tests and lint
-        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
+        run: (cd legacy && ./gradlew --no-daemon :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
+
+      - name: Upload Android coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage
+          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          if-no-files-found: ignore
 
       - name: Run Roborazzi Visual Snapshot Verification
-        run: (cd legacy && ./gradlew verifyRoborazziDebug)
+        run: (cd legacy && ./gradlew --no-daemon verifyRoborazziDebug)
 
       - name: Upload Roborazzi Visual Diffs
         if: failure()
@@ -131,7 +157,7 @@ jobs:
           path: legacy/Linkpoint/build/outputs/roborazzi/
 
       - name: Assemble Debug build
-        run: (cd legacy && ./gradlew :Linkpoint:assembleDebug --stacktrace)
+        run: (cd legacy && ./gradlew --no-daemon :Linkpoint:assembleDebug --stacktrace)
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -140,13 +166,6 @@ jobs:
           name: linkpoint-debug-${{ github.sha }}
           path: legacy/Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
-
-      - name: Upload Android coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-coverage
-          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          if-no-files-found: ignore
 
   web:
     name: Task 3 - React & Web Workspace Checks
