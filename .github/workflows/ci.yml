@@ -84,15 +84,15 @@ jobs:
   android:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=512m" -Dkotlin.daemon.jvmargs="-Xmx2g"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -129,6 +129,14 @@ jobs:
       - name: Run unit tests and lint
         run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
 
+      - name: Upload Android coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage
+          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          if-no-files-found: ignore
+
       - name: Run Roborazzi Visual Snapshot Verification
         run: (cd legacy && ./gradlew verifyRoborazziDebug)
 
@@ -149,13 +157,6 @@ jobs:
           name: linkpoint-debug-${{ github.sha }}
           path: legacy/Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
-
-      - name: Upload Android coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-coverage
-          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          if-no-files-found: ignore
 
   web:
     name: Task 3 - React & Web Workspace Checks
