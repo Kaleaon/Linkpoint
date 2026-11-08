@@ -55,22 +55,13 @@ jobs:
       - name: Install Ruff and pre-commit
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pre-commit
+          pip install ruff==0.8.0 pre-commit
 
       - name: Run Ruff static analysis
         run: ruff check scripts/ tools/
 
       - name: Run Ruff format check
         run: ruff format --check scripts/ tools/
-
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install Node dependencies
-        run: npm ci
 
       - name: Cache pre-commit environments
         uses: actions/cache@v4
