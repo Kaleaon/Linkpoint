@@ -9,12 +9,14 @@
  */
 
 import { Utils } from '../utils';
+import { AvatarParamsManager } from './avatar-params';
 
 export class AvatarManager extends Utils.EventEmitter {
   public avatarId: string | null = null;
   private appearanceParams: Map<string, any> = new Map();
   private attachments: Map<number, any> = new Map();
   private visualParams: Map<number, number> = new Map();
+  private paramsManager = new AvatarParamsManager();
   private skeletonData: any = null;
 
   constructor() {
@@ -73,12 +75,17 @@ export class AvatarManager extends Utils.EventEmitter {
     }
     const clampedValue = Math.max(0, Math.min(1, value));
     this.visualParams.set(paramId, clampedValue);
+    this.paramsManager.setParam(paramId, clampedValue);
     console.log(`[Avatar] Set visual param ${paramId}: ${clampedValue}`);
     this.emit('visual_param_changed', { paramId, value: clampedValue });
   }
 
   getVisualParam(paramId: number) {
     return this.visualParams.get(paramId) ?? null;
+  }
+
+  getParamsManager(): AvatarParamsManager {
+    return this.paramsManager;
   }
 
   /**
