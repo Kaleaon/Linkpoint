@@ -18,12 +18,12 @@ class CachedTexMatrixStoreTest {
     fun testFaceMaterialIdentityFastPath() {
         val meshFace = DrawableMeshStore.FaceMaterial()
         assertTrue(meshFace.isDirty)
-        val matrix1 = meshFace.getMatrix()
+        val meshMatrix = meshFace.getMatrix()
         assertFalse(meshFace.isDirty)
 
         // Identity fast path returns static identity matrix constant
         val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
-        assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, matrix1)
+        assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
     }
 
     @Test

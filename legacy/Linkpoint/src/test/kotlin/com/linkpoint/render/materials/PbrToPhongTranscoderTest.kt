@@ -154,7 +154,7 @@ class PbrToPhongTranscoderTest {
             }
         }
 
-        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+        val descriptor = GltfMaterialParser.parseLlsd(llsdData)
 
         assertEquals(0.7f, descriptor.baseColor.x, 0.01f)
         assertEquals(0.8f, descriptor.baseColor.y, 0.01f)
@@ -186,6 +186,7 @@ class PbrToPhongTranscoderTest {
             }
         }
 
+        @Suppress("DEPRECATION")
         val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData, enableMetallicRoughness = false)
 
         assertNotNull(descriptor.baseColorTexture)
@@ -201,6 +202,7 @@ class PbrToPhongTranscoderTest {
             this["MetallicRoughnessTexture"] = LLSDUUID(mrUUID)
         }
 
+        @Suppress("DEPRECATION")
         val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
 
         assertNotNull(descriptor.metallicRoughnessTexture)
