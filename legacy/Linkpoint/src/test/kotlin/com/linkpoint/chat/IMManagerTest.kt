@@ -100,7 +100,7 @@ class IMManagerTest {
         buf.get() // offline
 
         val dialog = buf.get().toInt()
-        assertEquals(IMType.LURE_ACCEPTED.value, dialog)
+        assertEquals(com.linkpoint.linden.llmessage.IMType.LURE_ACCEPTED.value, dialog)
 
         val expectedLure = TeleportLure(
             lureId = lureId,
@@ -161,6 +161,6 @@ class IMManagerTest {
         buf.int; buf.getUUID(); buf.float; buf.float; buf.float; buf.get()
 
         val dialog = buf.get().toInt()
-        assertEquals(IMType.LURE_DECLINED.value, dialog)
+        assertEquals(com.linkpoint.linden.llmessage.IMType.LURE_DECLINED.value, dialog)
     }
 }
