@@ -80,8 +80,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="Evaluate Component Coverage & Quality Gates"
     )
-    default_android = (
-        Path(
+    parser.add_argument(
+        "--android-report",
+        type=Path,
+        default=Path(
             "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         )
         if Path(
@@ -89,12 +91,7 @@ def main():
         ).exists()
         else Path(
             "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-        )
-    )
-    parser.add_argument(
-        "--android-report",
-        type=Path,
-        default=default_android,
+        ),
     )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))
     parser.add_argument("--rust-report", type=Path, default=Path("lcov.info"))
