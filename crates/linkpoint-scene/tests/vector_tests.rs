@@ -33,9 +33,6 @@ fn find_vector_file(relative_subpath: &str) -> PathBuf {
         if candidate.exists() {
             return candidate.clone();
         }
-        if let Ok(canonical) = candidate.canonicalize() {
-            return canonical;
-        }
     }
     panic!("Vector file missing for subpath: {}", relative_subpath);
 }
@@ -214,21 +211,26 @@ fn test_llmesh_vectors() {
             case.name
         );
 
-        // Read num_vertices (uint16 at offset 63)
-        let num_verts = u16::from_le_bytes([bytes[63], bytes[64]]) as usize;
+        let parsed = linkpoint_scene::decoder::parse_llmesh_binary(&bytes).expect("Parsed LLMesh");
         assert_eq!(
-            num_verts, case.expected.vertex_count,
+            parsed.vertex_count, case.expected.vertex_count,
             "{}: vertex count",
             case.name
         );
-
-        // Read num_faces (uint16 at offset 197)
-        let num_faces = u16::from_le_bytes([bytes[197], bytes[198]]) as usize;
         assert_eq!(
-            num_faces * 3,
-            case.expected.index_count,
+            parsed.index_count, case.expected.index_count,
             "{}: index count",
             case.name
+        );
+
+        let gltf_json = linkpoint_scene::decoder::convert_llmesh_to_gltf_json(&parsed);
+        assert!(
+            gltf_json.contains("\"asset\""),
+            "Valid GLTF JSON asset section"
+        );
+        assert!(
+            gltf_json.contains("\"POSITION\""),
+            "Valid GLTF JSON POSITION accessor"
         );
     }
 }
@@ -247,6 +249,17 @@ fn test_j2k_vectors() {
             assert_eq!(&bytes[4..8], b"jP  ", "{}: JP2 magic", case.name);
             assert!(case.expected.width > 0, "{}: width", case.name);
             assert!(case.expected.height > 0, "{}: height", case.name);
+
+            let decoded = linkpoint_scene::decoder::decode_j2k_to_rgba(&bytes);
+            assert!(
+                decoded.is_some(),
+                "{}: decode_j2k_to_rgba success",
+                case.name
+            );
+            let (w, h, rgba) = decoded.unwrap();
+            assert_eq!(w, case.expected.width as u32);
+            assert_eq!(h, case.expected.height as u32);
+            assert_eq!(rgba.len(), (w * h * 4) as usize);
         } else {
             if bytes.len() >= 8 {
                 assert_ne!(
@@ -256,6 +269,12 @@ fn test_j2k_vectors() {
                     case.name
                 );
             }
+            let decoded = linkpoint_scene::decoder::decode_j2k_to_rgba(&bytes);
+            assert!(
+                decoded.is_none(),
+                "{}: decode corrupt J2K returns None",
+                case.name
+            );
         }
     }
 }
