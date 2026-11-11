@@ -228,7 +228,11 @@ void test_conformance_vectors() {
         "legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
         "../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
         "../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
-        "/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors"
+        "/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "../Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "../../Linkpoint/src/test/resources/llsd-conformance/vectors",
+        "/app/Linkpoint/Linkpoint/src/test/resources/llsd-conformance/vectors"
     };
     fs::path vectors_dir;
     for (const auto& candidate : candidate_dirs) {
