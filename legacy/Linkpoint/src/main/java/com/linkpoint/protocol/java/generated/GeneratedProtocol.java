@@ -508,15 +508,10 @@ public class GeneratedProtocol {
             if (b == 0) {
                 if (i + 1 < src.length) {
                     int count = src[i + 1] & 0xFF;
-                    if (count == 0) {
+                    for (int k = 0; k < count; k++) {
                         dest.put((byte) 0);
-                        i += 2;
-                    } else {
-                        for (int k = 0; k < count; k++) {
-                            dest.put((byte) 0);
-                        }
-                        i += 2;
                     }
+                    i += 2;
                 } else {
                     dest.put((byte) 0);
                     i++;
