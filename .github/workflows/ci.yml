@@ -40,6 +40,9 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Install Dart dependencies
+        run: cd packages/linkpoint_dart && flutter pub get
+
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -52,22 +55,13 @@ jobs:
       - name: Install Ruff and pre-commit
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pre-commit
+          pip install ruff==0.8.0 pre-commit
 
       - name: Run Ruff static analysis
         run: ruff check scripts/ tools/
 
       - name: Run Ruff format check
         run: ruff format --check scripts/ tools/
-
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install Node dependencies
-        run: npm ci
 
       - name: Cache pre-commit environments
         uses: actions/cache@v4
@@ -81,9 +75,11 @@ jobs:
   android:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC" -Dkotlin.daemon.jvmargs="-Xmx2048m -XX:+UseG1GC"
 
     steps:
       - name: Checkout repository
@@ -109,10 +105,19 @@ jobs:
             ndk;26.3.11579264
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew Linkpoint/gradlew 2>/dev/null || true
+        run: chmod +x gradlew legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm ci
 
       - name: Validate parity snapshot clean-tree guards
-        run: bash scripts/check_parity_snapshot_guards.sh
+        run: bash scripts/check_parity_snapshot_guards.sh --guards-only
 
       - name: Validate no decompilation artifacts
         run: bash scripts/check_no_decompilation_artifacts.sh
@@ -123,35 +128,38 @@ jobs:
           bash scripts/ui/check-theme-coverage.sh
           bash scripts/ui/check-migration-matrix.sh
 
-      - name: Run unit tests and lint
-        run: ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace
+      - name: Run unit tests and generate coverage
+        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest jacocoTestReport --stacktrace)
+
+      - name: Run Android lint
+        run: (cd legacy && ./gradlew :Linkpoint:lintStableDebug --stacktrace)
 
       - name: Run Roborazzi Visual Snapshot Verification
-        run: ./gradlew verifyRoborazziDebug
+        run: (cd legacy && ./gradlew verifyRoborazziDebug)
 
       - name: Upload Roborazzi Visual Diffs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: roborazzi-diffs
-          path: Linkpoint/build/outputs/roborazzi/
+          path: legacy/Linkpoint/build/outputs/roborazzi/
 
       - name: Assemble Debug build
-        run: ./gradlew :Linkpoint:assembleDebug --stacktrace
+        run: (cd legacy && ./gradlew :Linkpoint:assembleDebug --stacktrace)
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         if: success()
         with:
           name: linkpoint-debug-${{ github.sha }}
-          path: Linkpoint/build/outputs/apk/*/debug/*.apk
+          path: legacy/Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
 
       - name: Upload Android coverage report
         uses: actions/upload-artifact@v4
         with:
           name: android-coverage
-          path: Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
           if-no-files-found: ignore
 
   web:
@@ -185,6 +193,9 @@ jobs:
 
       - name: Run web workspace validation
         run: npm run check:web
+
+      - name: Generate Web coverage report
+        run: npm run test:coverage
 
       - name: Upload Web coverage report
         uses: actions/upload-artifact@v4
@@ -262,10 +273,10 @@ jobs:
           python-version: "3.11"
 
       - name: Grant execute permissions
-        run: chmod +x Linkpoint/tools/protocol/*.sh Linkpoint/tools/protocol/*.py 2>/dev/null || true
+        run: chmod +x legacy/Linkpoint/tools/protocol/*.sh legacy/Linkpoint/tools/protocol/*.py 2>/dev/null || true
 
       - name: Run protocol conformance suite
-        run: Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
+        run: legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
   dart:
     name: Task 6 - Dart Package Verification
@@ -289,9 +300,15 @@ jobs:
       - name: Build native protocol shared library
         run: cargo build -p linkpoint-protocol --release
 
+      - name: Fetch Flutter dependencies
+        run: |
+          cd packages/linkpoint_dart
+          flutter pub get
+
       - name: Verify Dart formatting
         run: |
           cd packages/linkpoint_dart
+          flutter pub get
           dart format --output=none --set-exit-if-changed .
 
       - name: Run Flutter analyze

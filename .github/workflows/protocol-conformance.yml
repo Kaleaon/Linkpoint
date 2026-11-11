@@ -4,15 +4,19 @@ on:
   push:
     branches: [ main, develop, 'claude/**', 'cursor/**', 'copilot/**' ]
     paths:
-      - 'Linkpoint/src/**'
-      - 'Linkpoint/tools/protocol/**'
+      - 'legacy/Linkpoint/src/**'
+      - 'legacy/Linkpoint/tools/protocol/**'
+      - 'tools/protocol_gen/**'
+      - 'schemas/protocol/**'
       - 'docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md'
       - '.github/workflows/protocol-conformance.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'Linkpoint/src/**'
-      - 'Linkpoint/tools/protocol/**'
+      - 'legacy/Linkpoint/src/**'
+      - 'legacy/Linkpoint/tools/protocol/**'
+      - 'tools/protocol_gen/**'
+      - 'schemas/protocol/**'
       - 'docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md'
       - '.github/workflows/protocol-conformance.yml'
   workflow_dispatch:
@@ -36,20 +40,22 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run offline conformance layers
+        env:
+          STRICT_CONFORMANCE: '1'
         run: |
           set -euo pipefail
-          chmod +x Linkpoint/tools/protocol/sync_master_template.sh \
-                   Linkpoint/tools/protocol/run_conformance.sh \
-                   Linkpoint/tools/protocol/verify_message_template_conformance.py \
-                   Linkpoint/tools/protocol/verify_protocol_docs.py
-          Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
+          chmod +x legacy/Linkpoint/tools/protocol/sync_master_template.sh \
+                   legacy/Linkpoint/tools/protocol/run_conformance.sh \
+                   legacy/Linkpoint/tools/protocol/verify_message_template_conformance.py \
+                   legacy/Linkpoint/tools/protocol/verify_protocol_docs.py
+          legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
       - name: Upload offline conformance reports
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: protocol-conformance-offline
-          path: Linkpoint/build/reports/protocol/
+          path: legacy/Linkpoint/build/reports/protocol/
           if-no-files-found: warn
 
   jvm-suite:
@@ -99,13 +105,13 @@ jobs:
 
       - name: Grant execute permission for tooling
         run: |
-          chmod +x gradlew Linkpoint/gradlew
-          chmod +x Linkpoint/tools/protocol/*.sh Linkpoint/tools/protocol/*.py
+          chmod +x gradlew legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
+          chmod +x legacy/Linkpoint/tools/protocol/*.sh legacy/Linkpoint/tools/protocol/*.py
 
       - name: Run unified conformance suite
         env:
-          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
-        run: Linkpoint/tools/protocol/run_conformance.sh
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+        run: legacy/Linkpoint/tools/protocol/run_conformance.sh
 
       - name: Upload conformance reports
         if: always()
@@ -113,6 +119,6 @@ jobs:
         with:
           name: protocol-conformance-full
           path: |
-            Linkpoint/build/reports/protocol/
-            Linkpoint/build/reports/tests/
+            legacy/Linkpoint/build/reports/protocol/
+            legacy/Linkpoint/build/reports/tests/
           if-no-files-found: warn

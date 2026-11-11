@@ -2,8 +2,8 @@
 set -euo pipefail
 
 TARGETS=(
-  "Linkpoint/src/main/java"
-  "Linkpoint/src/main/kotlin"
+  "legacy/Linkpoint/src/main/java"
+  "legacy/Linkpoint/src/main/kotlin"
 )
 
 patterns=(

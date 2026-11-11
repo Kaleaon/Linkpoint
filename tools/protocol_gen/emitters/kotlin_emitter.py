@@ -1,12 +1,15 @@
 import os
 from typing import Dict
-from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 from tools.protocol_gen.emitters.base import BaseEmitter
+from tools.protocol_gen.proto_ast.models import ProtocolAST
+
 
 def _format_kt_int(num: int) -> str:
     if num > 2147483647:
         return str(num - 4294967296)
     return str(num)
+
 
 class KotlinEmitter(BaseEmitter):
     def __init__(self):
@@ -21,10 +24,7 @@ class KotlinEmitter(BaseEmitter):
         proto_file = os.path.join(out_dir, "GeneratedProtocol.kt")
         llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.kt")
 
-        results = {
-            proto_file: proto_code,
-            llsd_file: llsd_code
-        }
+        results = {proto_file: proto_code, llsd_file: llsd_code}
 
         for path, content in results.items():
             with open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -54,13 +54,8 @@ class KotlinEmitter(BaseEmitter):
             if (b == 0.toByte()) {
                 if (i + 1 < src.size) {
                     val count = src[i + 1].toInt() and 0xFF
-                    if (count == 0) {
-                        dest.add(0.toByte())
-                        i += 2
-                    } else {
-                        repeat(count) { dest.add(0.toByte()) }
-                        i += 2
-                    }
+                    repeat(count) { dest.add(0.toByte()) }
+                    i += 2
                 } else {
                     dest.add(0.toByte())
                     i++
@@ -83,10 +78,14 @@ class KotlinEmitter(BaseEmitter):
             out.append(f'    val messageName: String = "{msg.name}",')
             out.append(f"    val messageNumber: Int = {msg_num_str},")
             out.append(f'    val frequency: String = "{msg.frequency}",')
-            out.append(f'    val isZerocoded: Boolean = {"true" if msg.encoding == "Zerocoded" else "false"}')
+            out.append(
+                f"    val isZerocoded: Boolean = {'true' if msg.encoding == 'Zerocoded' else 'false'}"
+            )
             out.append(") {\n")
             out.append("    fun serialize(): ByteArray {")
-            out.append("        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)")
+            out.append(
+                "        val buffer = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN)"
+            )
             out.append(f"        buffer.putInt({msg_num_str})")
             out.append("        return buffer.array().copyOf(buffer.position())")
             out.append("    }\n")
