@@ -21,6 +21,12 @@
 *.sqlite binary
 *.db binary
 *.dat binary
+*.j2k binary
+*.j2c binary
+*.jp2 binary
+*.llm binary
+*.mesh binary
+*.glb binary
 
 **/llsd-conformance/** text eol=lf
 
