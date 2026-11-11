@@ -454,6 +454,39 @@ class LocalCacheManager extends Utils.EventEmitter {
   }
 
   /**
+   * Clear all cached textures from memory, server endpoint, and IndexedDB.
+   */
+  public async clearTextureCache(): Promise<void> {
+    for (const key of Array.from(this.memoryCache.keys())) {
+      if (key.startsWith('tex_')) {
+        this.memoryCache.delete(key);
+      }
+    }
+
+    try {
+      await fetch('/api/sl/cache/clear-textures', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customPath: this.customFlashdrivePath }),
+      });
+    } catch {
+      // Ignore
+    }
+
+    try {
+      const db = await this.initIDB();
+      if (db) {
+        const tx = db.transaction([STORE_TEXTURES], 'readwrite');
+        tx.objectStore(STORE_TEXTURES).clear();
+      }
+    } catch {
+      // Ignore
+    }
+
+    this.emit('cache_cleared', { type: 'textures' });
+  }
+
+  /**
    * Get current statistics for the selected cache.
    */
   public async getStats(agentId?: string): Promise<CacheStats> {
