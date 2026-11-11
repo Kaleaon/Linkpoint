@@ -6,11 +6,9 @@ final class VirtualCircuitTests: XCTestCase {
     func testPacketProcessingAndReliability() async throws {
         let circuit = VirtualCircuitManager()
 
-        // Create a mock incoming packet bytes: reliable, sequence #100, message ID 0x00000001, body [0xAA, 0xBB]
-        let header = PacketHeader(flags: [.reliable], sequenceNumber: 100)
+        // Create a mock incoming packet bytes: reliable, sequence #100, message ID 1, body [0xAA, 0xBB]
+        let header = PacketHeader(flags: [.reliable], sequenceNumber: 100, messageId: 1)
         var rawData = header.serialize()
-        var msgIDBig: UInt32 = UInt32(1).bigEndian
-        withUnsafeBytes(of: &msgIDBig) { rawData.append(contentsOf: $0) }
         rawData.append(contentsOf: [0xAA, 0xBB])
 
         // Process incoming packet
@@ -25,10 +23,8 @@ final class VirtualCircuitTests: XCTestCase {
     func testPacketStreamAsyncSequence() async throws {
         let circuit = VirtualCircuitManager()
 
-        let header = PacketHeader(flags: [], sequenceNumber: 50)
+        let header = PacketHeader(flags: [], sequenceNumber: 50, messageId: 2)
         var rawData = header.serialize()
-        var msgIDBig: UInt32 = UInt32(2).bigEndian
-        withUnsafeBytes(of: &msgIDBig) { rawData.append(contentsOf: $0) }
         rawData.append(contentsOf: [0x11, 0x22])
 
         let dataToSend = rawData

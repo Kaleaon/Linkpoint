@@ -12,7 +12,7 @@ import { estimatedSunHour, windlightEnvironment } from './windlight';
 import { AvatarSkeleton, jointPositionOverrides, skinMatrices, type MeshSkin } from './avatar-skeleton';
 import { parseAnimation, type JointPose } from './avatar-animation';
 import { packJointRows, SL_MAX_RIGGED_JOINTS } from './skinning';
-import { generateVolume, volumeKey, volumeParamsFrom, type VolumeFace } from './sl-volume';
+import { generateVolume, initVolumeWasm, volumeKey, volumeParamsFrom, type VolumeFace } from './sl-volume';
 import { AvatarAnimator, bundledAnimationLoader } from './avatar-animator';
 import { BODY_PARTS, bodyPartRows, bodyPartSkin, bodyPartVertexSkin, createProceduralHumanoidParts, loadBodyParts, type BodyPartGeometry } from './avatar-body';
 import { AvatarParamsManager } from './phase2/avatar-params';
@@ -70,6 +70,15 @@ export class WorldViewer extends Utils.EventEmitter {
     return this.objects.length > 0
       ? `Live simulator scene: ${this.objects.length} objects loaded`
       : 'Live simulator scene: streaming from grid…';
+  }
+
+  public clearTextureCache(): void {
+    const keys = Array.from(this.decodedTextures.keys());
+    for (const key of keys) {
+      this.decodedTextures.delete(key);
+    }
+    this.decodedTextures.clear();
+    this.emit('textures_cleared');
   }
 
   constructor(protocolManager: any) {
@@ -240,8 +249,10 @@ export class WorldViewer extends Utils.EventEmitter {
     if (!m || !this.scene3d) return;
     if (Number.isFinite(m.waterHeight)) this.scene3d.setWaterHeight(m.waterHeight);
     if (Array.isArray(m.startHeights) && Array.isArray(m.heightRanges)) {
+      const normalIds = m.normalTextureIds || m.normalIds || [];
       this.scene3d.setTerrainMaterials({
         textureNames: (m.textureIds || []).map((id: string | null) => (id ? `texture:${id}` : '')),
+        normalTextureNames: normalIds.map((id: string | null) => (id ? `texture:${id}` : '')),
         startHeights: m.startHeights.map(Number), heightRanges: m.heightRanges.map(Number),
         origin: [Number(m.origin?.[0]) || 0, Number(m.origin?.[1]) || 0],
       });
@@ -660,6 +671,12 @@ export class WorldViewer extends Utils.EventEmitter {
         }
       }
       for (const texture of this.decodedTextures.values()) this.applyTexture(texture);
+      try {
+        await initVolumeWasm();
+      } catch (_err) {
+        // Fall back to pure JS volume generator if WASM module initialization fails
+      }
+      if (stale()) return;
       await this.loadScene();
       if (stale()) return;
       for (const object of this.sceneObjects.values()) {
@@ -1238,15 +1255,14 @@ export class WorldViewer extends Utils.EventEmitter {
     for (const object of this.sceneObjects.values()) positions.set(object.id, this.worldTransform(object).position);
     const frames = this.particles.update(now, positions);
     const live = new Set<string>();
-    // A plane starts in XY. Match its normal to the view direction with the camera pitch/yaw.
-    const rotation = [Math.PI / 2 + this.camera3d.rotation[0], 0, -this.camera3d.rotation[1]];
     for (const particle of frames) {
       const id = `particle:${particle.id}`;
       live.add(id);
       const texture = particle.textureId && this.decodedTextures.has(particle.textureId) ? `texture:${particle.textureId}` : undefined;
       const config = {
-        mesh: 'particle-sprite', position: particle.position, rotation, scale: [particle.scale[0], particle.scale[1], 1],
+        mesh: 'particle-sprite', position: particle.position, scale: [particle.scale[0], particle.scale[1], 1],
         color: particle.color, texture, faces: [{ texture, color: particle.color, fullBright: particle.emissive, pbr: { alphaMode: 'BLEND' } }],
+        billboard: true,
       };
       if (this.scene3d.objects.has(id)) this.scene3d.updateObject(id, config); else this.scene3d.addObject(id, config);
     }

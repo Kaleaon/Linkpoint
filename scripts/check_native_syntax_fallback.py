@@ -31,6 +31,7 @@ EXCLUDE_DIRS = {
     "cmdline-temp",
     "platforms",
     "builds",
+    "build",
     "ktheme-pr",
     "node_modules",
     ".git",
@@ -38,6 +39,7 @@ EXCLUDE_DIRS = {
 }
 
 EXCLUDE_PREFIXES = (
+    "legacy/Linkpoint/src/test/resources",
     "Linkpoint/src/test/resources",
     "crates/quick-xml",
 )

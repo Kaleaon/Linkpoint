@@ -1,6 +1,7 @@
 //! Octree spatial index with fast bounding-box range queries and worker re-balancing.
 
 use super::aabb::AABB;
+use super::topography::TopographyType;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -159,6 +160,93 @@ impl OctreeNode {
         }
     }
 
+    pub fn query_geodesic<'a>(
+        &'a self,
+        center: [f32; 2],
+        max_distance: f32,
+        topography: TopographyType,
+        results: &mut Vec<&'a SpatialEntity>,
+    ) {
+        let node_center = self.bounds.center();
+        let hx = (self.bounds.max[0] - self.bounds.min[0]) * 0.5;
+        let hy = (self.bounds.max[1] - self.bounds.min[1]) * 0.5;
+        let node_radius = (hx * hx + hy * hy).sqrt();
+
+        let node_dist =
+            topography.surface_geodesic_distance(center, [node_center[0], node_center[1]]);
+        if node_dist > max_distance + node_radius {
+            return;
+        }
+
+        for entity in &self.entities {
+            let entity_center = [entity.position[0], entity.position[1]];
+            let ehx = (entity.bounds.max[0] - entity.bounds.min[0]) * 0.5;
+            let ehy = (entity.bounds.max[1] - entity.bounds.min[1]) * 0.5;
+            let entity_radius = (ehx * ehx + ehy * ehy).sqrt();
+            let dist = topography.surface_geodesic_distance(center, entity_center);
+            if dist <= max_distance + entity_radius {
+                results.push(entity);
+            }
+        }
+
+        if let Some(ref children) = self.children {
+            for child in children.iter() {
+                child.query_geodesic(center, max_distance, topography, results);
+            }
+        }
+    }
+
+    pub fn query_horizon_culled<'a>(
+        &'a self,
+        camera_local: [f32; 3],
+        query_bounds: &AABB,
+        topography: TopographyType,
+        results: &mut Vec<&'a SpatialEntity>,
+    ) {
+        if !self.bounds.intersects(query_bounds) {
+            return;
+        }
+
+        let node_center = self.bounds.center();
+        let hx = (self.bounds.max[0] - self.bounds.min[0]) * 0.5;
+        let hy = (self.bounds.max[1] - self.bounds.min[1]) * 0.5;
+        let hz = (self.bounds.max[2] - self.bounds.min[2]) * 0.5;
+        let node_radius = (hx * hx + hy * hy + hz * hz).sqrt();
+        if topography.is_beyond_horizon(camera_local, node_center, node_radius) {
+            return;
+        }
+
+        for entity in &self.entities {
+            if entity.bounds.intersects(query_bounds) {
+                let ehx = (entity.bounds.max[0] - entity.bounds.min[0]) * 0.5;
+                let ehy = (entity.bounds.max[1] - entity.bounds.min[1]) * 0.5;
+                let ehz = (entity.bounds.max[2] - entity.bounds.min[2]) * 0.5;
+                let entity_radius = (ehx * ehx + ehy * ehy + ehz * ehz).sqrt();
+                if !topography.is_beyond_horizon(camera_local, entity.position, entity_radius) {
+                    results.push(entity);
+                }
+            }
+        }
+
+        if let Some(ref children) = self.children {
+            for child in children.iter() {
+                child.query_horizon_culled(camera_local, query_bounds, topography, results);
+            }
+        }
+    }
+
+    pub fn max_depth(&self) -> usize {
+        if let Some(ref children) = self.children {
+            children
+                .iter()
+                .map(|c| c.max_depth())
+                .max()
+                .unwrap_or(self.depth)
+        } else {
+            self.depth
+        }
+    }
+
     pub fn query_ray<'a>(
         &'a self,
         origin: [f32; 3],
@@ -230,6 +318,7 @@ impl OctreeNode {
 pub struct Octree {
     pub root: OctreeNode,
     pub count: usize,
+    pub topography: TopographyType,
 }
 
 impl Octree {
@@ -237,7 +326,13 @@ impl Octree {
         Self {
             root: OctreeNode::new(bounds, 0, max_depth, max_capacity),
             count: 0,
+            topography: TopographyType::Planar,
         }
+    }
+
+    pub fn with_topography(mut self, topography: TopographyType) -> Self {
+        self.topography = topography;
+        self
     }
 
     pub fn insert(&mut self, entity: SpatialEntity) -> bool {
@@ -257,10 +352,32 @@ impl Octree {
         removed
     }
 
-    pub fn query_aabb<'a>(&'a self, query_bounds: &AABB) -> Vec<&'a SpatialEntity> {
+    pub fn query_aabb(&self, query_bounds: &AABB) -> Vec<&SpatialEntity> {
         let mut results = Vec::new();
         self.root.query_aabb(query_bounds, &mut results);
         results
+    }
+
+    pub fn query_geodesic(&self, center: [f32; 2], max_distance: f32) -> Vec<&SpatialEntity> {
+        let mut results = Vec::new();
+        self.root
+            .query_geodesic(center, max_distance, self.topography, &mut results);
+        results
+    }
+
+    pub fn query_horizon_culled(
+        &self,
+        camera_local: [f32; 3],
+        query_bounds: &AABB,
+    ) -> Vec<&SpatialEntity> {
+        let mut results = Vec::new();
+        self.root
+            .query_horizon_culled(camera_local, query_bounds, self.topography, &mut results);
+        results
+    }
+
+    pub fn max_depth(&self) -> usize {
+        self.root.max_depth()
     }
 
     pub fn query_ray(&self, origin: [f32; 3], dir: [f32; 3]) -> Vec<(&SpatialEntity, f32)> {
