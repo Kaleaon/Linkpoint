@@ -14,5 +14,8 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@unified-llsd/typescript": "*"
   }
 }

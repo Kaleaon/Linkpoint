@@ -55,22 +55,13 @@ jobs:
       - name: Install Ruff and pre-commit
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pre-commit
+          pip install ruff==0.8.0 pre-commit
 
       - name: Run Ruff static analysis
         run: ruff check scripts/ tools/
 
       - name: Run Ruff format check
         run: ruff format --check scripts/ tools/
-
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install Node dependencies
-        run: npm ci
 
       - name: Cache pre-commit environments
         uses: actions/cache@v4
@@ -84,9 +75,11 @@ jobs:
   android:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC" -Dkotlin.daemon.jvmargs="-Xmx2048m -XX:+UseG1GC"
 
     steps:
       - name: Checkout repository
@@ -135,8 +128,11 @@ jobs:
           bash scripts/ui/check-theme-coverage.sh
           bash scripts/ui/check-migration-matrix.sh
 
-      - name: Run unit tests and lint
-        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
+      - name: Run unit tests and generate coverage
+        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest jacocoTestReport --stacktrace)
+
+      - name: Run Android lint
+        run: (cd legacy && ./gradlew :Linkpoint:lintStableDebug --stacktrace)
 
       - name: Run Roborazzi Visual Snapshot Verification
         run: (cd legacy && ./gradlew verifyRoborazziDebug)
@@ -197,6 +193,9 @@ jobs:
 
       - name: Run web workspace validation
         run: npm run check:web
+
+      - name: Generate Web coverage report
+        run: npm run test:coverage
 
       - name: Upload Web coverage report
         uses: actions/upload-artifact@v4
