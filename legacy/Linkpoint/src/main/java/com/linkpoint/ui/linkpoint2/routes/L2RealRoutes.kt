@@ -1071,22 +1071,61 @@ fun L2PlaceDetailRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Without persisted PlaceCard repository or DirParcelInfo round-trip,
-    // we honour the placeId but render a stub card. Future: wire to
-    // ParcelManager.requestParcelInfo(parcelId).
-    PlaceDetailScreen(
-        place = PlaceCard(
-            id = placeId ?: "unknown",
-            name = "Unknown place",
-            rating = "PG",
-            traffic = 0,
-            parcel = "",
+    val app = LinkpointApp.getInstanceOrNull()
+    val parcelManager = app?.parcelManager
+
+    var parcelInfo by remember { mutableStateOf<com.linkpoint.protocol.messages.AdditionalMessageParsers.ParcelInfoReplyData?>(null) }
+
+    LaunchedEffect(placeId) {
+        if (parcelManager != null) {
+            val pId = placeId ?: ""
+            parcelManager.requestParcelInfo(pId)
+        }
+    }
+
+    val latestParcelState = parcelManager?.latestParcelInfo?.collectAsState()
+    val liveParcel = latestParcelState?.value ?: parcelInfo
+
+    val placeCard = if (liveParcel != null) {
+        PlaceCard(
+            id = liveParcel.parcelID.toString(),
+            name = liveParcel.name.ifEmpty { "Parcel ${liveParcel.parcelID.toString().take(8)}" },
+            rating = if (liveParcel.flags and 0x00040000L != 0L) "Mature" else "PG",
+            traffic = liveParcel.dwell.toInt(),
+            parcel = "${liveParcel.simName} (${liveParcel.globalX.toInt()}, ${liveParcel.globalY.toInt()})",
             coverGradient = listOf(
                 androidx.compose.ui.graphics.Color(0xFF1D4060),
                 androidx.compose.ui.graphics.Color(0xFF4A7BA8),
             ),
-        ),
-        description = "Place details require a ParcelInfo round-trip; not yet wired.",
+        )
+    } else {
+        PlaceCard(
+            id = placeId ?: "unknown",
+            name = "Parcel ${placeId?.take(8) ?: "Unknown"}",
+            rating = "PG",
+            traffic = 0,
+            parcel = "Loading parcel info...",
+            coverGradient = listOf(
+                androidx.compose.ui.graphics.Color(0xFF1D4060),
+                androidx.compose.ui.graphics.Color(0xFF4A7BA8),
+            ),
+        )
+    }
+
+    val description = if (liveParcel != null) {
+        buildString {
+            if (liveParcel.description.isNotBlank()) append(liveParcel.description).append("\n\n")
+            append("Sim: ").append(liveParcel.simName)
+            append("\nArea: ").append(liveParcel.actualArea).append(" m²")
+            if (liveParcel.salePrice > 0) append("\nPrice: L$").append(liveParcel.salePrice)
+        }
+    } else {
+        "Requesting parcel information from simulator..."
+    }
+
+    PlaceDetailScreen(
+        place = placeCard,
+        description = description,
         whoIsHere = emptyList(),
         onBack = onBack,
         onTeleport = {},
