@@ -41,7 +41,7 @@ class PythonEmitter(BaseEmitter):
     def _generate_python_code(self, ast: ProtocolAST) -> str:
         out = []
         out.append(self.get_header_warning("#"))
-        out.append("\nimport struct")
+        out.append("import struct")
         out.append("from dataclasses import dataclass, field")
         out.append("from typing import Dict, List, Optional\n")
 
