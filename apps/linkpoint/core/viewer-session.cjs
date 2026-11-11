@@ -264,7 +264,7 @@ class ViewerSession {
   loadTexture(assetId) {
     if (!assetId) return;
     this.streamAsset(`texture:${assetId}`, AssetType.Texture, assetId, () => this.downloadTexture(assetId), async (buffer) => {
-      this.send('texture-ready', { assetId, ...await decodeJPEG2000(buffer) });
+      this.send('texture-ready', { assetId, ...await decodeJPEG2000(buffer, assetId) });
     });
   }
 
