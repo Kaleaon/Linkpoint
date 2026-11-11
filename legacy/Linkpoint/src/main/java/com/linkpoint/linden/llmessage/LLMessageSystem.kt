@@ -1,6 +1,7 @@
 package com.linkpoint.linden.llmessage
 
 import com.linkpoint.linden.llcommon.LLTimer
+import com.linkpoint.protocol.messages.MessageTemplateCatalog
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.util.concurrent.ConcurrentHashMap
