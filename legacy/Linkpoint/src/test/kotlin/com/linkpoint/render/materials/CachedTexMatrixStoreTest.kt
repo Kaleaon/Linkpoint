@@ -25,7 +25,7 @@ class CachedTexMatrixStoreTest {
 
         // Identity fast path returns static identity matrix constant
         val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
-        assertSame("Identity FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
+        assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
     }
 
     @Test
