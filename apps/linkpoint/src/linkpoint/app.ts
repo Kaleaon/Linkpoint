@@ -15,6 +15,7 @@ import { ContactsStore } from './contacts';
 import { NoticeStore } from './notices';
 import { Utils } from './utils';
 import { slBridge } from './sl-bridge';
+import { localCache } from './local-cache';
 
 // Phase 2 Modules
 import { EventQueueManager } from './phase2/event-queue';
@@ -75,7 +76,7 @@ export class LinkpointApp {
     this.inventoryOps = new InventoryOperations(this.inventoryCore);
     this.inventoryTypes = new InventorySpecialTypes();
     this.chatExtended = new ChatExtended(this.protocol);
-    this.groups = new GroupsManager(this.protocol);
+    this.groups = new GroupsManager(this.protocol, this.capabilities, this.notices);
     this.friends = new FriendsExtended(this.protocol);
   }
 
@@ -124,6 +125,17 @@ export class LinkpointApp {
       if (data?.id) {
         this.friends.updateFriendStatus(data.id, data.online ? 'online' : 'offline', data);
       }
+    });
+
+    this.friends.on('online_alert', (data: any) => {
+      this.notifications.handleNotification({
+        id: `online-alert-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        title: 'Friend Online Alert',
+        message: data.message || `${data.friendName} is now ${data.status}.`,
+        type: 'online_alert',
+        friendId: data.friendId,
+        timestamp: Date.now(),
+      });
     });
 
     this.protocol.on('friend_request', (data: any) => {
@@ -210,6 +222,13 @@ export class LinkpointApp {
       console.warn('[LinkpointApp] loadFriends warning:', err);
     }
     return this.friends.getFriends();
+  }
+
+  async clearTextureCache() {
+    await localCache.clearTextureCache();
+    if (this.world) {
+      this.world.clearTextureCache();
+    }
   }
 }
 

@@ -47,7 +47,7 @@ export class Scene3D extends Utils.EventEmitter {
   private terrainLoaded = false;
   private terrainHeights: number[] | null = null;
   private terrainSize = 0;
-  private terrainMaterials: (TerrainParams & { textureNames: string[] }) | null = null;
+  private terrainMaterials: (TerrainParams & { textureNames: string[]; normalTextureNames?: string[]; normalNames?: string[] }) | null = null;
   private terrainCompositionReady = false;
 
   // Sky, water and culling. Sky/water resources are created in init().
@@ -301,7 +301,7 @@ export class Scene3D extends Utils.EventEmitter {
       const a = y * (cells + 1) + x, b = a + 1, c = a + cells + 1, d = c + 1;
       indices.push(a, b, c, b, d, c);
     }
-    this.graphics.createMesh('terrain', vertices, indices, normals, texCoords);
+    this.graphics.createMesh('terrain', vertices, indices, normals, texCoords, tangentsFor({ vertices, indices, normals, texCoords }));
     this.terrainLoaded = true;
     this.terrainHeights = Array.from(heights, Number);
     this.terrainSize = size;
@@ -314,7 +314,7 @@ export class Scene3D extends Utils.EventEmitter {
    * measured against per-corner start heights and ranges (SW, SE, NW, NE). `textureNames` are the
    * graphics texture names of the four layers; any not loaded yet show a fallback colour.
    */
-  setTerrainMaterials(materials: TerrainParams & { textureNames: string[] }) {
+  setTerrainMaterials(materials: TerrainParams & { textureNames: string[]; normalTextureNames?: string[]; normalNames?: string[] }) {
     if (!materials || materials.startHeights?.length < 4 || materials.heightRanges?.length < 4) return false;
     this.terrainMaterials = materials;
     this.buildTerrainComposition();
@@ -428,6 +428,7 @@ export class Scene3D extends Utils.EventEmitter {
       // HUD prims are kept out of the world and drawn only by the HUD pass.
       hud: Boolean(config.hud),
       hudRoot: config.hudRoot ?? null,
+      billboard: Boolean(config.billboard),
       // Packed joint matrices (see skinning.ts packJointRows) for rigged meshes.
       skin: config.skin || null,
     };
@@ -561,7 +562,7 @@ export class Scene3D extends Utils.EventEmitter {
     if (!displayed) return null;
     const prims = [...this.objects.values()]
       .filter((object) => object.hud && object.hudRoot === displayed.rootId && object.visible !== false)
-      .map((object) => ({ object, local: this.calculateModelMatrix(object.position, object.rotation, object.scale) }));
+      .map((object) => ({ object, local: this.calculateModelMatrix(object.position, object.rotation, object.scale, object.billboard) }));
     if (!prims.length) return null;
     // Measure each prim's real mesh bounds (the unit cube when unknown) through the same matrix it is drawn with.
     const boxes = prims.map(({ object, local }) => {
@@ -829,7 +830,7 @@ export class Scene3D extends Utils.EventEmitter {
     if (!frustum) return false;
     const local = this.objectLocalBounds(object);
     if (!local) return false;
-    const model = this.calculateModelMatrix(object.position, object.rotation, object.scale);
+    const model = this.calculateModelMatrix(object.position, object.rotation, object.scale, object.billboard, this.camera?.getViewMatrix());
     const world = transformAABB(model, local.min, local.max);
     return testAABB(frustum, world.min, world.max) === OUTSIDE;
   }
@@ -847,7 +848,7 @@ export class Scene3D extends Utils.EventEmitter {
       if (!object.visible || object.hud) continue;
       // Meshes without known bounds are treated as the unit cube prims are scaled from.
       const local = this.objectLocalBounds(object) || UNIT_CUBE_BOUNDS;
-      const model = this.calculateModelMatrix(object.position, object.rotation, object.scale);
+      const model = this.calculateModelMatrix(object.position, object.rotation, object.scale, object.billboard, this.camera?.getViewMatrix());
       const distance = intersectRayOrientedBox(ray, model, local.min, local.max);
       if (distance === null || (best && distance >= best.distance)) continue;
       best = { id: object.id, distance, point: ray.origin.map((value: number, axis: number) => value + ray.direction[axis] * distance) };
@@ -892,15 +893,20 @@ export class Scene3D extends Utils.EventEmitter {
 
     if (this.terrainTextured && this.terrainMaterials) {
       const names = this.terrainMaterials.textureNames;
+      const normalNames = this.terrainMaterials.normalTextureNames || this.terrainMaterials.normalNames || [];
       const use = [0, 1, 2, 3].map((i) => (this.graphics.hasTexture(names[i]) ? 1 : 0));
       const detail: Record<string, any> = {};
       for (let i = 0; i < TERRAIN_LAYERS; i++) {
         detail[`uDetail${i}Name`] = names[i];
+        detail[`uDetailNormal${i}Name`] = normalNames[i] || '';
         detail[`uFallback${i}`] = new Float32Array(FALLBACK_LAYER_COLORS[i]);
       }
       this.graphics.drawMesh('terrain', 'terrain', {
         uModelMatrix: modelMatrix, uViewMatrix: viewMatrix, uProjectionMatrix: projectionMatrix, uNormalMatrix: normalMatrix,
         uLightPos: new Float32Array(light.position), uLightColor: new Float32Array(light.color), uAmbientColor: new Float32Array(this.ambientColor),
+        uSkyColor: new Float32Array(this.skyUniforms.skyColor),
+        uHazeHorizon: this.skyUniforms.hazeHorizon,
+        uHazeColor: new Float32Array(this.skyUniforms.hazeColor),
         uCompositionName: 'terrain:composition', uDetailUse: new Float32Array(use),
         uTileScale: this.terrainSize > 1 ? 256 / DETAIL_TILE_METRES : 16,
         ...detail,
@@ -947,7 +953,9 @@ export class Scene3D extends Utils.EventEmitter {
     const modelMatrix = options.model || this.calculateModelMatrix(
       object.position,
       object.rotation,
-      object.scale
+      object.scale,
+      object.billboard,
+      viewMatrix
     );
 
     const normalMatrix = this.mat3FromMat4(modelMatrix);
@@ -995,7 +1003,41 @@ export class Scene3D extends Utils.EventEmitter {
   /**
    * Calculate model matrix from transform
    */
-  private calculateModelMatrix(position: number[], rotation: number[], scale: number[]) {
+  private calculateModelMatrix(position: number[], rotation: number[], scale: number[], billboard: boolean = false, viewMatrix?: Float32Array) {
+    if (billboard) {
+      const view = viewMatrix || this.camera?.getViewMatrix();
+      if (view && view.length >= 16) {
+        const matrix = new Float32Array(16);
+        const sx = scale[0], sy = scale[1], sz = scale[2];
+
+        // Camera Right vector: [V[0], V[4], V[8]]
+        matrix[0] = view[0] * sx;
+        matrix[1] = view[4] * sx;
+        matrix[2] = view[8] * sx;
+        matrix[3] = 0;
+
+        // Camera Up vector: [V[1], V[5], V[9]]
+        matrix[4] = view[1] * sy;
+        matrix[5] = view[5] * sy;
+        matrix[6] = view[9] * sy;
+        matrix[7] = 0;
+
+        // Camera Back vector: [V[2], V[6], V[10]]
+        matrix[8] = view[2] * sz;
+        matrix[9] = view[6] * sz;
+        matrix[10] = view[10] * sz;
+        matrix[11] = 0;
+
+        // Translation
+        matrix[12] = position[0];
+        matrix[13] = position[1];
+        matrix[14] = position[2];
+        matrix[15] = 1;
+
+        return matrix;
+      }
+    }
+
     const matrix = this.mat4Identity();
 
     // The rotation helpers pre-multiply, so build S, then R, then T. Applying

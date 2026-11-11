@@ -19,6 +19,7 @@
     "@linkpoint/viewer-client": "0.1.0",
     "@linkpoint/viewer-store": "0.1.0",
     "@linkpoint/viewer-types": "0.1.0",
+    "@unified-llsd/typescript": "*",
     "@noble/hashes": "^2.4.0",
     "@tauri-apps/api": "^2.8.0",
     "@xmldom/xmldom": "0.9.12",
@@ -52,11 +53,11 @@
     "@types/sql.js": "^1.4.11",
     "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^5.0.4",
-    "electron": "^44.5.1",
+    "electron": "^44.9.1",
     "electron-builder": "^26.17.0",
     "jsdom": "^29.0.1",
     "typescript": "~5.8.2",
-    "vite": "7.3.6",
+    "vite": "7.3.7",
     "vitest": "4.1.11"
   }
 }
