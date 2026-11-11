@@ -226,12 +226,9 @@ android {
     lint {
         // Strict release safety gates: release and CI builds must fail on new
         // error/fatal findings.
-        checkReleaseBuilds = false
+        checkReleaseBuilds = true
         abortOnError = true
-        checkTestSources = false
         ignoreTestSources = true
-        checkDependencies = false
-        checkGeneratedSources = false
         disable += setOf("MissingTranslation", "ExtraTranslation", "SuspiciousIndentation")
 
         // Baseline is allowed for legacy debt only. Any additions/changes must
