@@ -386,7 +386,7 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
       path.resolve(cwd, '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, '../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
     ];
-    let vectorsDir = candidates.find(d => Boolean(d) && fs.existsSync(d)) || candidates[0];
+    const vectorsDir = candidates.find(d => Boolean(d) && fs.existsSync(d)) || candidates[0];
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
     const subdirs = fs.readdirSync(vectorsDir)

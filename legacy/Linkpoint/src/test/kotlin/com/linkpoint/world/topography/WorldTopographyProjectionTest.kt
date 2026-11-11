@@ -134,9 +134,12 @@ class WorldTopographyProjectionTest {
 
         // Bounding box projection
         val projectedBounds = sphere.getProjectedBounds(-10f, -10f, 0f, 10f, 10f, 10f)
-        assertTrue(projectedBounds.maxX > projectedBounds.minX)
-        assertTrue(projectedBounds.maxY > projectedBounds.minY)
-        assertTrue(projectedBounds.maxZ > projectedBounds.minZ)
+        assertEquals(-10f, projectedBounds.minX, delta)
+        assertEquals(10f, projectedBounds.maxX, delta)
+        assertEquals(-10f, projectedBounds.minY, delta)
+        assertEquals(10f, projectedBounds.maxY, delta)
+        assertEquals(0f, projectedBounds.minZ, delta)
+        assertEquals(10f, projectedBounds.maxZ, delta)
 
         // Neighbor handle lookup across non-linear spherical manifold
         val currentHandle = (0L shl 40) or (0L shl 8)
@@ -159,5 +162,25 @@ class WorldTopographyProjectionTest {
         assertEquals(localX, restored[0], 0.1f)
         assertEquals(localY, restored[1], 0.1f)
         assertEquals(localZ, restored[2], 0.1f)
+    }
+
+    @Test
+    fun testGeodesicDistanceAndHorizonCulling() {
+        val radius = 1000f
+        val ringworld = RingworldTopographyProjection(radius = radius)
+        val circumference = (2.0 * Math.PI * radius).toFloat()
+
+        // Ringworld X wrapping geodesic distance
+        val distRing = ringworld.calculateGeodesicDistance(10f, 20f, circumference - 10f, 20f)
+        assertEquals(20f, distRing, delta)
+
+        // Spherical geodesic distance and horizon culling
+        val sphere = SphericalTopographyProjection(radius = 100f)
+        val distSphere = sphere.calculateGeodesicDistance(0f, 0f, 0f, 50f)
+        assertEquals(50f, distSphere, 0.5f)
+
+        // Camera at 10m altitude, target near vs over horizon
+        assertFalse(sphere.isBeyondHorizon(0f, 0f, 10f, 0f, 20f, 0f, 2f))
+        assertTrue(sphere.isBeyondHorizon(0f, 0f, 10f, 0f, 200f, 0f, 2f))
     }
 }

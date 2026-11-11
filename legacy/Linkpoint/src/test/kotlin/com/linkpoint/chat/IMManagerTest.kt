@@ -1,5 +1,6 @@
 package com.linkpoint.chat
- 
+
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.linkpoint.linden.llmessage.IMType
 import com.linkpoint.protocol.capabilities.CapabilityManager
