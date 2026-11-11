@@ -521,6 +521,8 @@ def decompress_zerocoded(src: bytes) -> bytes:
 
 
 # Generated UDP Messages
+
+
 @dataclass
 class TestMessagePacket:
     message_name: str = "TestMessage"
@@ -5835,6 +5837,8 @@ class GameControlInputPacket:
 
 
 # Generated LLSD Capability Schemas
+
+
 @dataclass
 class AgentDomainCapabilitiesCapabilities:
     agent_id: Optional[str] = None
