@@ -22,7 +22,11 @@ TEST_VECTORS = [
     ("trailing_single_zero", bytes([0x00]), bytes([0x00])),
     ("all_non_zero", bytes([0x01, 0x02, 0x03, 0x04]), bytes([0x01, 0x02, 0x03, 0x04])),
     ("empty_input", bytes([]), bytes([])),
-    ("multiple_zero_runs", bytes([0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00]), bytes([0x01, 0x00, 0x00])),
+    (
+        "multiple_zero_runs",
+        bytes([0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00]),
+        bytes([0x01, 0x00, 0x00]),
+    ),
 ]
 
 
@@ -75,11 +79,12 @@ class TestDecompressionConformance(unittest.TestCase):
                 f"  {{ name: '{name}', src: new Uint8Array([{src_str}]), expected: new Uint8Array([{exp_str}]) }}"
             )
 
+        vectors_ts = ",\n".join(vector_entries)
         runner_code = f"""import {{ decompressZerocoded }} from './generated.ts';
 import process from 'node:process';
 
 const vectors = [
-{",\n".join(vector_entries)}
+{vectors_ts}
 ];
 
 function arraysEqual(a, b) {{
@@ -108,8 +113,11 @@ for (const v of vectors) {{
             text=True,
             cwd=out_dir,
         )
-        if res.returncode != 0 and ("bad option" in res.stderr or "experimental" in res.stderr):
+        if res.returncode != 0 and (
+            "bad option" in res.stderr or "experimental" in res.stderr
+        ):
             import re
+
             gen_ts = os.path.join(out_dir, "generated.ts")
             with open(gen_ts, "r", encoding="utf-8") as f:
                 ts_content = f.read()
@@ -147,14 +155,16 @@ for (const v of vectors) {{
         out_dir = os.path.join(self.test_dir, "rust")
         RustEmitter().emit(self.ast, out_dir)
 
-        shutil.copy(os.path.join(out_dir, "mod.rs"), os.path.join(out_dir, "generated.rs"))
+        shutil.copy(
+            os.path.join(out_dir, "mod.rs"), os.path.join(out_dir, "generated.rs")
+        )
 
         vector_entries = []
         for name, src, expected in TEST_VECTORS:
             src_str = ",".join(map(str, list(src)))
             exp_str = ",".join(map(str, list(expected)))
             vector_entries.append(
-                f"        Vector {{ name: \"{name}\", src: &[{src_str}], expected: &[{exp_str}] }},"
+                f'        Vector {{ name: "{name}", src: &[{src_str}], expected: &[{exp_str}] }},'
             )
 
         runner_code = f"""mod generated;
@@ -191,7 +201,9 @@ fn main() {{
             text=True,
             cwd=out_dir,
         )
-        self.assertEqual(comp.returncode, 0, f"rustc compilation failed:\nSTDERR: {comp.stderr}")
+        self.assertEqual(
+            comp.returncode, 0, f"rustc compilation failed:\nSTDERR: {comp.stderr}"
+        )
 
         res = subprocess.run([binary_file], capture_output=True, text=True)
         self.assertEqual(
@@ -216,9 +228,10 @@ fn main() {{
             vector_decls.append(f"static const uint8_t src_{i}[] = {{{src_str}}};")
             vector_decls.append(f"static const uint8_t exp_{i}[] = {{{exp_str}}};")
             vector_items.append(
-                f"    {{\"{name}\", src_{i}, {len(src)}, exp_{i}, {len(expected)}}}"
+                f'    {{"{name}", src_{i}, {len(src)}, exp_{i}, {len(expected)}}}'
             )
 
+        vectors_c = ",\n".join(vector_items)
         runner_code = f"""#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -236,7 +249,7 @@ typedef struct {{
 
 int main() {{
     Vector vectors[] = {{
-{",\n".join(vector_items)}
+{vectors_c}
     }};
     size_t num_vectors = sizeof(vectors) / sizeof(vectors[0]);
 
@@ -267,7 +280,9 @@ int main() {{
             capture_output=True,
             text=True,
         )
-        self.assertEqual(comp.returncode, 0, f"C compilation failed:\nSTDERR: {comp.stderr}")
+        self.assertEqual(
+            comp.returncode, 0, f"C compilation failed:\nSTDERR: {comp.stderr}"
+        )
 
         res = subprocess.run([binary_file], capture_output=True, text=True)
         self.assertEqual(
@@ -288,9 +303,7 @@ int main() {{
         for name, src, expected in TEST_VECTORS:
             src_str = ", ".join(map(str, list(src)))
             exp_str = ", ".join(map(str, list(expected)))
-            vector_entries.append(
-                f"    Vector('{name}', [{src_str}], [{exp_str}]),"
-            )
+            vector_entries.append(f"    Vector('{name}', [{src_str}], [{exp_str}]),")
 
         runner_code = f"""import 'dart:typed_data';
 import 'generated.dart';
@@ -355,7 +368,7 @@ void main() {{
             src_bytes = ", ".join(str(b if b < 128 else b - 256) for b in src)
             exp_bytes = ", ".join(str(b if b < 128 else b - 256) for b in expected)
             vector_entries.append(
-                f"            new Vector(\"{name}\", new byte[]{{{src_bytes}}}, new byte[]{{{exp_bytes}}}),"
+                f'            new Vector("{name}", new byte[]{{{src_bytes}}}, new byte[]{{{exp_bytes}}}),'
             )
 
         runner_code = f"""import com.linkpoint.protocol.java.generated.GeneratedProtocol;
@@ -406,7 +419,9 @@ public class TestRunner {{
             text=True,
             cwd=out_dir,
         )
-        self.assertEqual(comp.returncode, 0, f"javac compilation failed:\nSTDERR: {comp.stderr}")
+        self.assertEqual(
+            comp.returncode, 0, f"javac compilation failed:\nSTDERR: {comp.stderr}"
+        )
 
         res = subprocess.run(
             [java, "-cp", out_dir, "TestRunner"],
