@@ -9,6 +9,32 @@ HEADER_WARNING = """/*
  */
 """
 
+ZEROCODER_PSEUDOCODE_TEMPLATE = """
+ZeroCoder Decompression Algorithm Specification:
+------------------------------------------------
+Input: src (bytes array)
+Output: dest (bytes array)
+
+i = 0
+while i < len(src):
+    b = src[i]
+    if b == 0:
+        if i + 1 < len(src):
+            count = src[i + 1]
+            # When count == 0, 0x00 0x00 writes 0 bytes to dest (zero-count run length)
+            for k in 0..count:
+                dest.append(0)
+            i += 2
+        else:
+            # Trailing single 0x00 byte at end of input
+            dest.append(0)
+            i += 1
+    else:
+        dest.append(b)
+        i += 1
+return dest
+"""
+
 
 class BaseEmitter(ABC):
     """
@@ -25,6 +51,12 @@ class BaseEmitter(ABC):
         Emits generated code files.
         Returns a dict mapping file paths to file contents.
         """
+
+    def get_zerocoder_pseudocode(self) -> str:
+        """
+        Returns standard ZeroCoder decompression pseudocode specification.
+        """
+        return ZEROCODER_PSEUDOCODE_TEMPLATE
 
     def get_header_warning(self, comment_prefix: str = "//") -> str:
         if comment_prefix == "/*":

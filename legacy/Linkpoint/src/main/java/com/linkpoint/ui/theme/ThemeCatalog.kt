@@ -85,6 +85,8 @@ object ThemeCatalog {
                 File("packages/design-system/themes"),
                 File("packages/design-system/themes/community"),
                 File("Linkpoint/packages/design-system/themes"),
+                File("Linkpoint/packages/design-system/themes/community"),
+                File("legacy/Linkpoint/packages/design-system/themes"),
                 File("../packages/design-system/themes"),
                 File("../packages/design-system/themes/community"),
                 File("../../packages/design-system/themes"),
