@@ -42,6 +42,8 @@ void main() {
             'llsd-conformance', 'vectors'),
         path.join('Linkpoint', 'src', 'test', 'resources', 'llsd-conformance',
             'vectors'),
+        path.join('/app', 'Linkpoint', 'legacy', 'Linkpoint', 'src', 'test',
+            'resources', 'llsd-conformance', 'vectors'),
       ];
 
       Directory? vectorsDir;
