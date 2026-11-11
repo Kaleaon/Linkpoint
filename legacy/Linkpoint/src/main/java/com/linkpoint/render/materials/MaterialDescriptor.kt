@@ -1,6 +1,7 @@
 package com.linkpoint.render.materials
 
 import com.linkpoint.protocol.textures.TextureEntryParser
+import com.linkpoint.render.math.GlMatrix
 import java.util.UUID
 
 /** Backend-neutral material payload used by both Filament and GLES paths. */
@@ -59,7 +60,7 @@ data class MaterialDescriptor(
         }
 
         companion object {
-            val IDENTITY_MATRIX: FloatArray = FloatArray(16).also { android.opengl.Matrix.setIdentityM(it, 0) }
+            val IDENTITY_MATRIX: FloatArray = FloatArray(16).also { GlMatrix.setIdentityM(it, 0) }
             val IDENTITY = UvTransform(1f, 1f, 0f, 0f, 0f, precomputedMatrix = IDENTITY_MATRIX)
 
             fun computeMatrix(
@@ -70,13 +71,13 @@ data class MaterialDescriptor(
                 rotation: Float,
                 dest: FloatArray = FloatArray(16)
             ): FloatArray {
-                android.opengl.Matrix.setIdentityM(dest, 0)
-                android.opengl.Matrix.translateM(dest, 0, 0.5f + offsetS, 0.5f + offsetT, 0f)
+                GlMatrix.setIdentityM(dest, 0)
+                GlMatrix.translateM(dest, 0, 0.5f + offsetS, 0.5f + offsetT, 0f)
                 if (rotation != 0f) {
-                    android.opengl.Matrix.rotateM(dest, 0, Math.toDegrees(rotation.toDouble()).toFloat(), 0f, 0f, 1f)
+                    GlMatrix.rotateM(dest, 0, Math.toDegrees(rotation.toDouble()).toFloat(), 0f, 0f, 1f)
                 }
-                android.opengl.Matrix.scaleM(dest, 0, scaleS, scaleT, 1f)
-                android.opengl.Matrix.translateM(dest, 0, -0.5f, -0.5f, 0f)
+                GlMatrix.scaleM(dest, 0, scaleS, scaleT, 1f)
+                GlMatrix.translateM(dest, 0, -0.5f, -0.5f, 0f)
                 return dest
             }
         }

@@ -4,14 +4,15 @@ import PackageDescription
 let package = Package(
     name: "LLSDKit",
     platforms: [
-        .iOS(.v15),
-        .macOS(.v12)
+        .iOS(.v16),
+        .macOS(.v13)
     ],
     products: [
         .library(name: "LLSD", targets: ["LLSD"]),
         .library(name: "LLSDAssets", targets: ["LLSDAssets"]),
         .library(name: "LLSDXMLRPC", targets: ["LLSDXMLRPC"]),
         .library(name: "LLSDNetwork", targets: ["LLSDNetwork"]),
+        .library(name: "Ktheme", targets: ["Ktheme"]),
         .library(name: "LinkpointiOS", targets: ["LinkpointiOS"])
     ],
     dependencies: [],
@@ -33,8 +34,12 @@ let package = Package(
             dependencies: ["LLSD"]
         ),
         .target(
+            name: "Ktheme",
+            dependencies: []
+        ),
+        .target(
             name: "LinkpointiOS",
-            dependencies: ["LLSD", "LLSDAssets", "LLSDXMLRPC", "LLSDNetwork"]
+            dependencies: ["LLSD", "LLSDAssets", "LLSDXMLRPC", "LLSDNetwork", "Ktheme"]
         ),
         .testTarget(
             name: "LLSDTests",
@@ -53,8 +58,12 @@ let package = Package(
             dependencies: ["LLSDNetwork"]
         ),
         .testTarget(
+            name: "KthemeTests",
+            dependencies: ["Ktheme"]
+        ),
+        .testTarget(
             name: "LinkpointiOSTests",
-            dependencies: ["LinkpointiOS"]
+            dependencies: ["LinkpointiOS", "Ktheme"]
         )
     ]
 )
