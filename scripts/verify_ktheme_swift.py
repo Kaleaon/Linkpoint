@@ -38,8 +38,8 @@ def test_package_swift_includes_ktheme():
     with open(package_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    lib_err = "Ktheme library missing in Package.swift"
-    assert '.library(name: "Ktheme", targets: ["Ktheme"])' in content, lib_err
+    lib_check = '.library(name: "Ktheme", targets: ["Ktheme"])'
+    assert lib_check in content, "Ktheme library missing in Package.swift"
     assert 'name: "Ktheme"' in content, "Ktheme target missing in Package.swift"
     assert '"Ktheme"' in content, "Ktheme dependency missing in LinkpointiOS target"
     print(
@@ -96,8 +96,8 @@ def test_views_import_ktheme_no_hardcoded_colors():
 
         for pattern in forbidden_patterns:
             matches = re.findall(pattern, content)
-            pat_err = f"Forbidden hardcoded color pattern '{pattern}' found in {vf}: {matches}"
-            assert len(matches) == 0, pat_err
+            msg = f"Forbidden pattern '{pattern}' in {vf}: {matches}"
+            assert len(matches) == 0, msg
 
     print(
         "[PASS] Requirement 3: LoginView and MainTabView import Ktheme with zero hardcoded colors."
@@ -117,14 +117,10 @@ def test_main_tab_view_adaptive_navigation():
     with open(main_tab_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    h_err = "horizontalSizeClass missing"
-    assert "@Environment(\\.horizontalSizeClass)" in content, h_err
-    split_err = "NavigationSplitView layout missing for regular width displays"
-    assert "NavigationSplitView" in content, split_err
-    tab_err = "TabView layout missing for compact width displays"
-    assert "TabView" in content, tab_err
-    reg_err = "horizontalSizeClass condition missing"
-    assert "horizontalSizeClass == .regular" in content, reg_err
+    assert "@Environment(\\.horizontalSizeClass)" in content, "sizeClass missing"
+    assert "NavigationSplitView" in content, "NavigationSplitView missing"
+    assert "TabView" in content, "TabView layout missing for compact width displays"
+    assert "horizontalSizeClass == .regular" in content, "sizeClass condition missing"
 
     print(
         "[PASS] Requirements 4 & 5: MainTabView adapts between NavigationSplitView and TabView."

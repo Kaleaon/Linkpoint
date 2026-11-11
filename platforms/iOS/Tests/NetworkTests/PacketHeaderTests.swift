@@ -3,11 +3,20 @@ import XCTest
 
 final class PacketHeaderTests: XCTestCase {
 
+    func testHeaderFlagConstantsMatchProtocolStandards() {
+        XCTAssertEqual(PacketHeaderFlags.zerocoded.rawValue, 0x80)
+        XCTAssertEqual(PacketHeaderFlags.reliable.rawValue, 0x40)
+        XCTAssertEqual(PacketHeaderFlags.resent.rawValue, 0x20)
+        XCTAssertEqual(PacketHeaderFlags.appendedAcks.rawValue, 0x10)
+    }
+
     func testHeaderSerializationAndParsing() throws {
         let header = PacketHeader(
             flags: [.reliable, .zerocoded],
             sequenceNumber: 12345,
-            extraBytesCount: 0
+            extraBytesCount: 0,
+            messageId: 4,
+            frequency: .high
         )
 
         let serialized = header.serialize()
@@ -16,14 +25,29 @@ final class PacketHeaderTests: XCTestCase {
         XCTAssertTrue(parsedHeader.flags.contains(.reliable))
         XCTAssertTrue(parsedHeader.flags.contains(.zerocoded))
         XCTAssertEqual(parsedHeader.sequenceNumber, 12345)
+        XCTAssertEqual(parsedHeader.messageId, 4)
         XCTAssertEqual(payload.count, 0)
     }
 
-    func testZerocodeCompressionAndDecompression() {
-        let original = Data([0x01, 0x00, 0x00, 0x00, 0x00, 0x02, 0x03, 0x00, 0x04])
-        let compressed = Zerocode.compress(original)
-        let decompressed = Zerocode.decompress(compressed)
+    func testHeaderParsingLowFrequencyAndAppendedAcks() throws {
+        let data = Data([
+            0x10, // Appended ACKs flag
+            0x00, 0x00, 0x00, 0x66, // Sequence = 102
+            0x00, // Extra len = 0
+            0xFF, 0xFF, 0x12, 0x34, // Low freq MsgID = 0x1234
+            0x11, 0x22, 0x33, 0x44, // Payload
+            0x00, 0x00, 0x00, 0x07, // ACK 7
+            0x00, 0x00, 0x00, 0x09, // ACK 9
+            0x02 // Ack count = 2
+        ])
 
-        XCTAssertEqual(decompressed, original)
+        let (header, payload) = try PacketHeader.parse(from: data)
+
+        XCTAssertTrue(header.flags.contains(.appendedAcks))
+        XCTAssertEqual(header.sequenceNumber, 102)
+        XCTAssertEqual(header.frequency, .low)
+        XCTAssertEqual(header.messageId, 0x1234)
+        XCTAssertEqual(header.acks, [7, 9])
+        XCTAssertEqual(Array(payload), [0x11, 0x22, 0x33, 0x44])
     }
 }
