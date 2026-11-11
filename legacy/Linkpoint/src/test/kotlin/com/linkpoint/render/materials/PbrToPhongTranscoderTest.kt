@@ -154,7 +154,7 @@ class PbrToPhongTranscoderTest {
             }
         }
 
-        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+        val descriptor = GltfMaterialParser.parseLlsd(llsdData)
 
         assertEquals(0.7f, descriptor.baseColor.x, 0.01f)
         assertEquals(0.8f, descriptor.baseColor.y, 0.01f)
@@ -168,7 +168,44 @@ class PbrToPhongTranscoderTest {
         assertNotNull(descriptor.normalTexture)
         assertEquals(normUUID, descriptor.normalTexture?.declaredId)
 
-        // Constraint check: MetallicRoughness texture map is discarded for ES 2.0 sampler limits
+        assertNotNull(descriptor.metallicRoughnessTexture)
+        assertEquals(mrUUID, descriptor.metallicRoughnessTexture?.declaredId)
+    }
+
+    @Test
+    fun testPbrMaterialDecoderLLSDWithMetallicRoughnessDisabled() {
+        val texUUID = UUID.randomUUID()
+        val normUUID = UUID.randomUUID()
+        val mrUUID = UUID.randomUUID()
+
+        val llsdData = LLSDMap().apply {
+            this["Textures"] = LLSDMap().apply {
+                this["BaseColor"] = LLSDUUID(texUUID)
+                this["Normal"] = LLSDUUID(normUUID)
+                this["MetallicRoughness"] = LLSDUUID(mrUUID)
+            }
+        }
+
+        @Suppress("DEPRECATION")
+        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData, enableMetallicRoughness = false)
+
+        assertNotNull(descriptor.baseColorTexture)
+        assertNotNull(descriptor.normalTexture)
         assertNull(descriptor.metallicRoughnessTexture)
+    }
+
+    @Test
+    fun testPbrMaterialDecoderLLSDTopLevelKeys() {
+        val mrUUID = UUID.randomUUID()
+
+        val llsdData = LLSDMap().apply {
+            this["MetallicRoughnessTexture"] = LLSDUUID(mrUUID)
+        }
+
+        @Suppress("DEPRECATION")
+        val descriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+
+        assertNotNull(descriptor.metallicRoughnessTexture)
+        assertEquals(mrUUID, descriptor.metallicRoughnessTexture?.declaredId)
     }
 }
