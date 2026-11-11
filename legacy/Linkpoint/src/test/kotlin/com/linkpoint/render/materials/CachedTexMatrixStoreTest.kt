@@ -1,7 +1,6 @@
 package com.linkpoint.render.materials
 
 import com.linkpoint.render.lumiya.drawable.DrawableMeshStore
-import com.linkpoint.render.lumiya.drawable.DrawablePrimStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
