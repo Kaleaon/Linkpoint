@@ -120,11 +120,11 @@ json_patterns = [
     'packages/design-system/themes/*.json',
     'packages/design-system/themes/community/*.json',
     'legacy/ktheme-pr/themes/community/*.json',
-    'ktheme-pr/themes/community/*.json',
+    'ktheme-pr/themes/community/*.json'
 ]
 json_files = []
 for pat in json_patterns:
-    json_files.extend(glob.glob(pat))
+    json_files.extend(glob.glob(pat, recursive=True))
 
 json_themes = {}
 json_schema_errors = []
