@@ -46,7 +46,8 @@ object LoginResponseParser {
         val agentAccessMax: String?,
         val homeRegion: String?,
         val lookAt: List<Float>?,
-        val groupServerUri: String? = null
+        val groupServerUri: String? = null,
+        val assetServerUrl: String? = null
     )
 
     /**
@@ -65,8 +66,9 @@ object LoginResponseParser {
         val homeRegion = extractXmlValue(responseXml, "home")
         val lookAt = parseLookAt(responseXml)
         val groupServerUri = parseGroupServerUri(responseXml)
+        val assetServerUrl = parseAssetServerUrl(responseXml)
 
-        try { Log.i(TAG, "Parsed login response: ${buddyList.size} friends, ${inventorySkeleton.size} inventory folders, groupServerUri=$groupServerUri") } catch (_: Throwable) {}
+        try { Log.i(TAG, "Parsed login response: ${buddyList.size} friends, ${inventorySkeleton.size} inventory folders, groupServerUri=$groupServerUri, assetServerUrl=$assetServerUrl") } catch (_: Throwable) {}
 
         return ParsedLoginData(
             buddyList = buddyList,
@@ -75,8 +77,20 @@ object LoginResponseParser {
             agentAccessMax = agentAccessMax,
             homeRegion = homeRegion,
             lookAt = lookAt,
-            groupServerUri = groupServerUri
+            groupServerUri = groupServerUri,
+            assetServerUrl = assetServerUrl
         )
+    }
+
+    /**
+     * Parse asset_server_url / AssetServerURL from login response.
+     */
+    private fun parseAssetServerUrl(xml: String): String? {
+        return extractXmlValue(xml, "asset_server_url")
+            ?: extractXmlValue(xml, "asset_server")
+            ?: extractXmlValue(xml, "asset_server_uri")
+            ?: extractXmlValue(xml, "AssetServerURL")
+            ?: extractXmlValue(xml, "AssetServerURI")
     }
 
     /**
