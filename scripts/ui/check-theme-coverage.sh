@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-THEME_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+THEME_FILE="${THEME_FILE:-legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt}"
 [[ -f "$THEME_FILE" ]] || THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
 
 if [[ ! -f "$THEME_FILE" ]]; then
