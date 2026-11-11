@@ -31,6 +31,7 @@ EXCLUDE_DIRS = {
     "cmdline-temp",
     "platforms",
     "builds",
+    "build",
     "ktheme-pr",
     "node_modules",
     ".git",

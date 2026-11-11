@@ -1,6 +1,7 @@
 from tools.protocol_gen.emitters.c_emitter import CEmitter
 from tools.protocol_gen.emitters.csharp_emitter import CSharpEmitter
 from tools.protocol_gen.emitters.dart_emitter import DartEmitter
+from tools.protocol_gen.emitters.godot_emitter import GodotEmitter
 from tools.protocol_gen.emitters.java_emitter import JavaEmitter
 from tools.protocol_gen.emitters.kotlin_emitter import KotlinEmitter
 from tools.protocol_gen.emitters.python_emitter import PythonEmitter
@@ -18,6 +19,7 @@ EMITTERS = {
     "java": JavaEmitter(),
     "swift": SwiftEmitter(),
     "csharp": CSharpEmitter(),
+    "godot": GodotEmitter(),
 }
 
 __all__ = [
@@ -25,6 +27,7 @@ __all__ = [
     "CEmitter",
     "CSharpEmitter",
     "DartEmitter",
+    "GodotEmitter",
     "JavaEmitter",
     "KotlinEmitter",
     "PythonEmitter",

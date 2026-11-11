@@ -137,4 +137,29 @@ describe('runtime UI manager snapshots', () => {
     expect(nearbyListener).toHaveBeenCalledOnce();
     expect(parcelListener).toHaveBeenCalledOnce();
   });
+
+  it('manages friend online alerts and emits online_alert when friend status changes', () => {
+    const friends = new FriendsExtended();
+    const alertListener = vi.fn();
+    friends.on('online_alert', alertListener);
+
+    friends.addFriend('friend-1', { name: 'Alert Friend', onlineStatus: 'offline' });
+    expect(friends.getOnlineAlert('friend-1')).toBe(false);
+
+    friends.setOnlineAlert('friend-1', true);
+    expect(friends.getOnlineAlert('friend-1')).toBe(true);
+    expect(friends.getFriends()[0].onlineAlert).toBe(true);
+
+    // Updating status from offline to online triggers online_alert
+    friends.updateFriendStatus('friend-1', 'online');
+    expect(alertListener).toHaveBeenCalledWith(expect.objectContaining({
+      friendId: 'friend-1',
+      friendName: 'Alert Friend',
+      status: 'online',
+      message: 'Alert Friend is now online.',
+    }));
+
+    friends.setOnlineAlert('friend-1', false);
+    expect(friends.getOnlineAlert('friend-1')).toBe(false);
+  });
 });
