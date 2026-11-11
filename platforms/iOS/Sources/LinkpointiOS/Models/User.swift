@@ -43,6 +43,10 @@ public struct User: Codable, Identifiable {
         "\(firstName) \(lastName)"
     }
 
+    public var username: String {
+        "\(firstName.lowercased()).\(lastName.lowercased())"
+    }
+
     public static var sample: User {
         User(
             id: UUID().uuidString,

@@ -1,5 +1,7 @@
 import XCTest
+#if canImport(SwiftUI)
 import SwiftUI
+#endif
 @testable import Ktheme
 
 final class KthemeTests: XCTestCase {

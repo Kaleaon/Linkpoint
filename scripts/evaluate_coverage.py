@@ -140,7 +140,10 @@ def main():
     # 2. Web
     web_data = parse_lcov(args.web_report)
     if web_data is None:
-        for fallback in Path(".").glob("**/coverage/lcov.info"):
+        fallbacks = list(Path(".").glob("**/web-coverage/**/lcov.info")) + list(
+            Path(".").glob("**/coverage/lcov.info")
+        )
+        for fallback in fallbacks:
             web_data = parse_lcov(fallback)
             if web_data:
                 break
@@ -150,7 +153,16 @@ def main():
     # 3. Rust
     rust_data = parse_lcov(args.rust_report)
     if rust_data is None:
-        for fallback in [Path("coverage-rust.lcov"), Path("rust-lcov.info")]:
+        fallbacks = (
+            list(Path(".").glob("**/rust-coverage/**/lcov.info"))
+            + [Path("coverage-rust.lcov"), Path("rust-lcov.info")]
+            + [
+                p
+                for p in Path(".").glob("**/lcov.info")
+                if "web" not in str(p) and p.parent.name != "coverage"
+            ]
+        )
+        for fallback in fallbacks:
             rust_data = parse_lcov(fallback)
             if rust_data:
                 break
