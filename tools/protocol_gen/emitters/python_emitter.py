@@ -32,9 +32,9 @@ class PythonEmitter(BaseEmitter):
         for msg in ast.messages:
             out.append(f'    "{msg.name}": {msg.message_number},')
         out.append("}")
-        out.append("")
-        out.append("")
 
+        out.append("")
+        out.append("")
         out.append("""def decompress_zerocoded(src: bytes) -> bytes:
     dest = bytearray()
     i = 0
@@ -57,11 +57,13 @@ class PythonEmitter(BaseEmitter):
             dest.append(b)
             i += 1
     return bytes(dest)""")
-        out.append("")
-        out.append("")
 
+        out.append("")
+        out.append("")
         out.append("# Generated UDP Messages")
         for msg in ast.messages:
+            out.append("")
+            out.append("")
             out.append("@dataclass")
             out.append(f"class {msg.name}Packet:")
             out.append(f'    message_name: str = "{msg.name}"')
@@ -73,11 +75,13 @@ class PythonEmitter(BaseEmitter):
             out.append("")
             out.append("    def serialize(self) -> bytes:")
             out.append(f'        return struct.pack("<I", {msg.message_number})')
-            out.append("")
-            out.append("")
 
+        out.append("")
+        out.append("")
         out.append("# Generated LLSD Capability Schemas")
-        for i, schema in enumerate(ast.llsd_schemas):
+        for schema in ast.llsd_schemas:
+            out.append("")
+            out.append("")
             out.append("@dataclass")
             out.append(f"class {schema.title}Capabilities:")
             for p_name, prop in schema.properties.items():
@@ -93,10 +97,5 @@ class PythonEmitter(BaseEmitter):
                     py_type = "List[str]"
                     default_val = "field(default_factory=list)"
                 out.append(f"    {p_name}: {py_type} = {default_val}")
-            if i < len(ast.llsd_schemas) - 1:
-                out.append("")
-                out.append("")
-            else:
-                out.append("")
 
-        return "\n".join(out)
+        return "\n".join(out) + "\n"
