@@ -13,5 +13,8 @@
     "type": "git",
     "url": "https://github.com/Kaleaon/Linkpoint.git"
   },
-  "license": "LGPL-3.0-only"
+  "license": "LGPL-3.0-only",
+  "dependencies": {
+    "@unified-llsd/typescript": "*"
+  }
 }
