@@ -75,14 +75,11 @@ jobs:
   android:
     name: Task 2 - Android Kotlin Build & Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
     env:
-      GRADLE_OPTS: >-
-        -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
-        -Dkotlin.daemon.jvmargs="-Xmx1g"
-        -Dkotlin.compiler.execution.strategy=in-process
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC" -Dkotlin.daemon.jvmargs="-Xmx2048m -XX:+UseG1GC"
 
     steps:
       - name: Checkout repository
@@ -106,19 +103,6 @@ jobs:
             build-tools;35.0.0
             cmake;3.22.1
             ndk;26.3.11579264
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.android/build-cache
-            legacy/Linkpoint/.gradle
-          key: ${{ runner.os }}-gradle-android-${{ hashFiles('legacy/**/*.gradle*', 'legacy/**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-android-
-            ${{ runner.os }}-gradle-
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew legacy/gradlew legacy/Linkpoint/gradlew 2>/dev/null || true
@@ -144,19 +128,14 @@ jobs:
           bash scripts/ui/check-theme-coverage.sh
           bash scripts/ui/check-migration-matrix.sh
 
-      - name: Run unit tests and lint
-        run: (cd legacy && ./gradlew --no-daemon :Linkpoint:testStableDebugUnitTest :Linkpoint:lintStableDebug jacocoTestReport --stacktrace)
+      - name: Run unit tests and generate coverage
+        run: (cd legacy && ./gradlew :Linkpoint:testStableDebugUnitTest jacocoTestReport --stacktrace)
 
-      - name: Upload Android coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-coverage
-          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          if-no-files-found: ignore
+      - name: Run Android lint
+        run: (cd legacy && ./gradlew :Linkpoint:lintStableDebug --stacktrace)
 
       - name: Run Roborazzi Visual Snapshot Verification
-        run: (cd legacy && ./gradlew --no-daemon verifyRoborazziDebug)
+        run: (cd legacy && ./gradlew verifyRoborazziDebug)
 
       - name: Upload Roborazzi Visual Diffs
         if: failure()
@@ -166,7 +145,7 @@ jobs:
           path: legacy/Linkpoint/build/outputs/roborazzi/
 
       - name: Assemble Debug build
-        run: (cd legacy && ./gradlew --no-daemon :Linkpoint:assembleDebug --stacktrace)
+        run: (cd legacy && ./gradlew :Linkpoint:assembleDebug --stacktrace)
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -175,6 +154,14 @@ jobs:
           name: linkpoint-debug-${{ github.sha }}
           path: legacy/Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
+
+      - name: Upload Android coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage
+          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          if-no-files-found: ignore
 
   web:
     name: Task 3 - React & Web Workspace Checks
@@ -207,6 +194,9 @@ jobs:
 
       - name: Run web workspace validation
         run: npm run check:web
+
+      - name: Generate Web coverage report
+        run: npm run test:coverage
 
       - name: Upload Web coverage report
         uses: actions/upload-artifact@v4
