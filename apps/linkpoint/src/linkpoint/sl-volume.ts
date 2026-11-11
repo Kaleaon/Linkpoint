@@ -40,6 +40,7 @@ export const DEFAULT_DETAIL = 3;
 
 const MIN_DETAIL_FACES = 6;
 const MIN_LOD = 0.5;
+export const MIN_VERTEX_SEPARATION = 1e-4;
 const TABLE_SCALE = [1, 1, 1, 0.5, 0.707107, 0.53, 0.525, 0.5];
 
 const PROFILE_MASK = 0x0f;
@@ -159,9 +160,9 @@ function generateProfile(p: VolumeParams, pathOpen: boolean, detail: number, spl
       break;
     }
     case PROFILE_CIRCLE: {
-      let circleDetail = MIN_DETAIL_FACES * detail;
+      let circleDetail = Math.max(2, Math.floor(MIN_DETAIL_FACES * detail));
       if (hollow && holeType === HOLE_SQUARE) circleDetail = Math.ceil(circleDetail / 4) * 4;
-      genNGon(profile, p, Math.floor(circleDetail));
+      genNGon(profile, p, circleDetail);
       if (pathOpen) addCap(profile, 'top');
       if (profile.open && !hollow) addFace(profile, 0, profile.total - 1, 0, 'side', false);
       else addFace(profile, 0, profile.total, 0, 'side', false);
@@ -173,9 +174,9 @@ function generateProfile(p: VolumeParams, pathOpen: boolean, detail: number, spl
       break;
     }
     case PROFILE_HALF: {
-      let circleDetail = MIN_DETAIL_FACES * detail * 0.5;
+      let circleDetail = Math.max(2, Math.floor(MIN_DETAIL_FACES * detail * 0.5));
       if (hollow && holeType === HOLE_SQUARE) circleDetail = Math.ceil(circleDetail / 2) * 2;
-      genNGon(profile, p, Math.floor(circleDetail), 0.5, 0.5);
+      genNGon(profile, p, circleDetail, 0.5, 0.5);
       if (pathOpen) addCap(profile, 'top');
       if (profile.open && !hollow) addFace(profile, 0, profile.total - 1, 0, 'side', false);
       else addFace(profile, 0, profile.total, 0, 'side', false);
@@ -249,9 +250,13 @@ function pathNGon(p: VolumeParams, sides: number, endScale = 1, twistScale = 1):
     const r = lerp(radiusStart, radiusEnd, t);
     const c = Math.cos(ang) * r, s = Math.sin(ang) * r;
     const twist = lerp(twistBegin, twistEnd, t) * 2 * Math.PI - Math.PI;
+    const rawScaleX = holeX * lerp(taperXBegin, taperXEnd, t);
+    const rawScaleY = holeY * lerp(taperYBegin, taperYEnd, t);
+    const scaleX = Math.abs(rawScaleX) < MIN_VERTEX_SEPARATION ? (rawScaleX < 0 ? -MIN_VERTEX_SEPARATION : MIN_VERTEX_SEPARATION) : rawScaleX;
+    const scaleY = Math.abs(rawScaleY) < MIN_VERTEX_SEPARATION ? (rawScaleY < 0 ? -MIN_VERTEX_SEPARATION : MIN_VERTEX_SEPARATION) : rawScaleY;
     points.push({
       pos: [lerp(0, p.pathShearX, s) + lerp(-skew, skew, t) * 0.5, c + lerp(0, p.pathShearY, s), s],
-      scale: [holeX * lerp(taperXBegin, taperXEnd, t), holeY * lerp(taperYBegin, taperYEnd, t)],
+      scale: [scaleX, scaleY],
       texT: t,
       // twist about z first, then revolve about the x axis
       rotate: (v) => rotateAxis(rotateAxis(v, 'z', twist), 'x', ang),
@@ -273,7 +278,7 @@ function generatePath(p: VolumeParams, detail: number, split: number): Path {
   switch (p.pathCurve & 0xf0) {
     case PATH_CIRCLE: {
       const twistMag = Math.abs(p.pathTwistBegin - p.pathTwist);
-      const sides = Math.floor(Math.floor(MIN_DETAIL_FACES * detail + twistMag * 3.5 * (detail - 0.5)) * p.pathRevolutions);
+      const sides = Math.max(2, Math.floor(Math.floor(MIN_DETAIL_FACES * detail + twistMag * 3.5 * (detail - 0.5)) * p.pathRevolutions));
       if (sides > 0) path = pathNGon(p, sides);
       break;
     }
@@ -290,9 +295,13 @@ function generatePath(p: VolumeParams, detail: number, split: number): Path {
       for (let i = 0; i < np; i++) {
         const t = i / (np - 1);
         const a = Math.PI * p.pathTwist * t;
+        const rawScaleX = lerp(1, p.pathScaleX, t);
+        const rawScaleY = lerp(1, p.pathScaleY, t);
+        const scaleX = Math.abs(rawScaleX) < MIN_VERTEX_SEPARATION ? (rawScaleX < 0 ? -MIN_VERTEX_SEPARATION : MIN_VERTEX_SEPARATION) : rawScaleX;
+        const scaleY = Math.abs(rawScaleY) < MIN_VERTEX_SEPARATION ? (rawScaleY < 0 ? -MIN_VERTEX_SEPARATION : MIN_VERTEX_SEPARATION) : rawScaleY;
         path.points.push({
           pos: [0, lerp(0, -Math.sin(a) * 0.5, t), lerp(-0.5, Math.cos(a) * 0.5, t)],
-          scale: [lerp(1, p.pathScaleX, t), lerp(1, p.pathScaleY, t)],
+          scale: [scaleX, scaleY],
           texT: t,
           rotate: (v) => rotateAxis(v, 'x', a),
         });
@@ -306,9 +315,13 @@ function generatePath(p: VolumeParams, detail: number, split: number): Path {
       for (let i = 0; i < np; i++) {
         const t = lerp(p.pathBegin, p.pathEnd, i / (np - 1));
         const a = lerp(Math.PI * p.pathTwistBegin, Math.PI * p.pathTwist, t);
+        const rawScaleX = lerp(start[0], end[0], t);
+        const rawScaleY = lerp(start[1], end[1], t);
+        const scaleX = Math.abs(rawScaleX) < MIN_VERTEX_SEPARATION ? (rawScaleX < 0 ? -MIN_VERTEX_SEPARATION : MIN_VERTEX_SEPARATION) : rawScaleX;
+        const scaleY = Math.abs(rawScaleY) < MIN_VERTEX_SEPARATION ? (rawScaleY < 0 ? -MIN_VERTEX_SEPARATION : MIN_VERTEX_SEPARATION) : rawScaleY;
         path.points.push({
           pos: [lerp(0, p.pathShearX, t), lerp(0, p.pathShearY, t), t - 0.5],
-          scale: [lerp(start[0], end[0], t), lerp(start[1], end[1], t)],
+          scale: [scaleX, scaleY],
           texT: t,
           rotate: (v) => rotateAxis(v, 'z', a),
         });
@@ -364,21 +377,84 @@ function cullDegenerateTriangles(vertices: number[], indices: number[]): number[
   return clean;
 }
 
+let registeredWasmModule: any = null;
+let wasmInitPromise: Promise<boolean> | null = null;
+
+/**
+ * Register a loaded WASM module directly into the volume registry.
+ */
+export function registerVolumeWasm(mod: any): void {
+  if (mod && typeof mod.wasm_generate_volume === 'function') {
+    registeredWasmModule = mod;
+  } else if (mod && typeof mod.default?.wasm_generate_volume === 'function') {
+    registeredWasmModule = mod.default;
+  }
+}
+
+/**
+ * Check whether the WASM volume module is initialized and ready.
+ */
+export function isVolumeWasmInitialized(): boolean {
+  return Boolean(registeredWasmModule && typeof registeredWasmModule.wasm_generate_volume === 'function');
+}
+
+/**
+ * Reset the WASM volume module registry state.
+ */
+export function resetVolumeWasmRegistry(): void {
+  registeredWasmModule = null;
+  wasmInitPromise = null;
+}
+
+/**
+ * Asynchronously initialize the WebAssembly module registry for `@linkpoint/wasm`.
+ * Idempotent: duplicate initialization requests return the existing Promise/status.
+ */
+export async function initVolumeWasm(customModule?: any): Promise<boolean> {
+  if (customModule) {
+    registerVolumeWasm(customModule);
+    if (isVolumeWasmInitialized()) {
+      return true;
+    }
+  }
+
+  if (isVolumeWasmInitialized()) {
+    return true;
+  }
+
+  if (wasmInitPromise) {
+    return wasmInitPromise;
+  }
+
+  wasmInitPromise = (async () => {
+    try {
+      const mod = await import('@linkpoint/wasm');
+      registerVolumeWasm(mod);
+      if (isVolumeWasmInitialized()) {
+        return true;
+      }
+    } catch (_err) {
+      // Dynamic import failed; WASM unavailable in this runtime environment
+    }
+    return isVolumeWasmInitialized();
+  })();
+
+  return wasmInitPromise;
+}
+
 export function generateVolume(params: VolumeParams, detail = DEFAULT_DETAIL): VolumeFace[] {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const wasmModule = require('@linkpoint/wasm');
-    if (typeof wasmModule?.wasm_generate_volume === 'function') {
-      const json = wasmModule.wasm_generate_volume(JSON.stringify(params), detail);
+  if (registeredWasmModule && typeof registeredWasmModule.wasm_generate_volume === 'function') {
+    try {
+      const json = registeredWasmModule.wasm_generate_volume(JSON.stringify(params), detail);
       if (json) {
         const faces = JSON.parse(json) as VolumeFace[];
         if (Array.isArray(faces) && faces.length > 0) {
           return faces;
         }
       }
+    } catch (_err) {
+      // Fall back to TypeScript implementation if WASM execution fails
     }
-  } catch (_err) {
-    // Fall back to TypeScript implementation if WASM is uninitialized
   }
   return generateVolumeJS(params, detail);
 }
@@ -474,7 +550,9 @@ function buildCap(pf: ProfileFace, profile: Profile, path: Path, mesh: P3[], siz
   const flat = normalize(want);
   const normals: number[] = [];
   for (let i = 0; i < vertices.length / 3; i++) normals.push(flat[0], flat[1], flat[2]);
-  return { kind: pf.kind, vertices, normals, texCoords, indices: cullDegenerateTriangles(vertices, indices) };
+  const cleanIndices = cullDegenerateTriangles(vertices, indices);
+  if (!cleanIndices.length) return null;
+  return { kind: pf.kind, vertices, normals, texCoords, indices: cleanIndices };
 }
 
 function buildSide(pf: ProfileFace, profile: Profile, path: Path, mesh: P3[], sizeS: number, hollow: boolean): Omit<VolumeFace, 'faceIndex'> | null {
@@ -531,7 +609,9 @@ function buildSide(pf: ProfileFace, profile: Profile, path: Path, mesh: P3[], si
   if (!path.open && sizeT > 2) for (let s = 0; s < cols; s++) weld.push([s, (sizeT - 1) * cols + s]);
   const normals = smoothNormals(vertices, indices, weld);
   void hollow;
-  return { kind: pf.kind, vertices, normals, texCoords, indices: cullDegenerateTriangles(vertices, indices) };
+  const cleanIndices = cullDegenerateTriangles(vertices, indices);
+  if (!cleanIndices.length) return null;
+  return { kind: pf.kind, vertices, normals, texCoords, indices: cleanIndices };
 }
 
 /** Parameters from the simulator's unpacked ObjectUpdate shape fields (already in the viewer's units). */
