@@ -43,7 +43,9 @@ open class MeshManager(
     private val workerPool: SceneWorkerPool = SceneWorkerPool.getInstance(),
     val headerDecoder: MeshHeaderDecoder = MeshHeaderDecoder(),
     val decompressor: SafeMeshDecompressor = SafeMeshDecompressor(),
-    val lodResolver: CascadingLodResolver = CascadingLodResolver()
+    val lodResolver: CascadingLodResolver = CascadingLodResolver(),
+    val strategyManager: com.linkpoint.assets.transport.AssetFetchStrategyManager =
+        com.linkpoint.assets.transport.AssetFetchStrategyManager.createDefault(capabilityManager)
 ) {
     companion object {
         private const val TAG = "MeshManager"
@@ -157,12 +159,18 @@ open class MeshManager(
             ?: capabilityManager.getCapability(CapabilityManager.CAP_GET_MESH)
 
         if (meshUrl == null) {
-            Log.w(TAG, "Mesh download queued for retry: $meshId - No mesh capability available yet")
-            lastError = "No mesh capability available"
+            val strategyData = strategyManager.fetchAsset(meshId, AssetType.MESH)
+            if (strategyData != null && strategyData.isNotEmpty()) {
+                downloadCount.incrementAndGet()
+                downloadedBytes.addAndGet(strategyData.size.toLong())
+                cache.put(meshId, AssetType.MESH, strategyData)
+                return parseMeshOffThread(meshId, strategyData, lod)
+            }
+
+            Log.w(TAG, "Mesh download failed across transport strategy chain: $meshId")
+            lastError = "All transport strategies failed"
             lastErrorTime = System.currentTimeMillis()
             downloadFailCount.incrementAndGet()
-            capabilityPendingMeshes.offer(PendingMeshRequest(meshId, lod))
-            ensureMeshCapabilityRetryStarted()
             return null
         }
 
