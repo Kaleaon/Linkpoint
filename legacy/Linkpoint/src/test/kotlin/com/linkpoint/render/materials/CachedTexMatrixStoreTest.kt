@@ -16,12 +16,13 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testFaceMaterialIdentityFastPath() {
-        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
-
         val meshFace = DrawableMeshStore.FaceMaterial()
         assertTrue(meshFace.isDirty)
         val meshMatrix = meshFace.getMatrix()
         assertFalse(meshFace.isDirty)
+
+        // Identity fast path returns static identity matrix constant
+        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
         assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
     }
 
@@ -98,6 +99,12 @@ class CachedTexMatrixStoreTest {
 
         val matrix = face.getMatrix()
 
+        // Matrix columns for 2D affine transform around UV center (0.5, 0.5):
+        // Translate(0.5 + offsetS, 0.5 + offsetT) * Scale(scaleS, scaleT) * Translate(-0.5, -0.5)
+        // m[0] = scaleS
+        // m[5] = scaleT
+        // m[12] = 0.5 + offsetS - 0.5 * scaleS
+        // m[13] = 0.5 + offsetT - 0.5 * scaleT
         val expectedM12 = 0.5f + offsetS - 0.5f * scaleS
         val expectedM13 = 0.5f + offsetT - 0.5f * scaleT
 

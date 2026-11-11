@@ -128,24 +128,27 @@ class ThemeContrastAndSyncTest {
 
     private fun loadAllThemeJsons(): List<ThemeJson> {
         val root = findRepoRoot()
-        val candidatePaths = listOf(
-            root.resolve("packages/design-system/themes"),
-            root.resolve("packages/design-system/themes/community"),
-            root.resolve("ktheme-pr/themes/community"),
-            root.resolve("legacy/ktheme-pr/themes/community")
-        )
+        val designSystemPath = root.resolve("packages/design-system/themes")
+        val communityPath = listOf(
+            root.resolve("legacy/ktheme-pr/themes/community"),
+            root.resolve("ktheme-pr/themes/community")
+        ).firstOrNull { Files.isDirectory(it) } ?: root.resolve("legacy/ktheme-pr/themes/community")
 
-        val jsonFiles = mutableSetOf<Path>()
+        val jsonFiles = mutableListOf<Path>()
 
-        for (dir in candidatePaths) {
-            if (Files.isDirectory(dir)) {
-                Files.list(dir).use { stream ->
-                    stream.filter { Files.isRegularFile(it) && it.toString().endsWith(".json") }.forEach { jsonFiles.add(it) }
-                }
+        if (Files.isDirectory(designSystemPath)) {
+            Files.walk(designSystemPath).use { stream ->
+                stream.filter { Files.isRegularFile(it) && it.toString().endsWith(".json") }.forEach { jsonFiles.add(it) }
             }
         }
 
-        return jsonFiles.map { path ->
+        if (Files.isDirectory(communityPath)) {
+            Files.walk(communityPath).use { stream ->
+                stream.filter { Files.isRegularFile(it) && it.toString().endsWith(".json") }.forEach { jsonFiles.add(it) }
+            }
+        }
+
+        return jsonFiles.distinctBy { it.fileName }.map { path ->
             val content = String(Files.readAllBytes(path), StandardCharsets.UTF_8)
             val json = JSONObject(content)
 

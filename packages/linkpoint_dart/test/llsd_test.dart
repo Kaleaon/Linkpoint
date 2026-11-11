@@ -2,21 +2,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/linkpoint_dart.dart';
 
-Directory? _findVectorsDir() {
-  final candidates = [
-    '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
-    'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
-    '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
-    'Linkpoint/src/test/resources/llsd-conformance/vectors',
-    '/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
-  ];
-  for (final path in candidates) {
-    final dir = Directory(path);
-    if (dir.existsSync()) return dir;
-  }
-  return null;
-}
-
 void main() {
   group('LLSD Serialization & Conformance Tests', () {
     test('Serializes LLSD Map to XML', () {
@@ -47,7 +32,21 @@ void main() {
 
     test('Passes all 31 canonical LLSD test vectors in XML and Binary formats',
         () {
-      final vectorsDir = _findVectorsDir();
+      final candidates = [
+        '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
+        'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+        'Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
+      ];
+      Directory? vectorsDir;
+      for (final p in candidates) {
+        final d = Directory(p);
+        if (d.existsSync()) {
+          vectorsDir = d;
+          break;
+        }
+      }
       expect(vectorsDir != null && vectorsDir.existsSync(), isTrue,
           reason: 'Vectors directory must exist');
 
