@@ -41,8 +41,8 @@ class PythonEmitter(BaseEmitter):
     def _generate_python_code(self, ast: ProtocolAST) -> str:
         out = []
         out.append(self.get_header_warning("#"))
-        out.append("from dataclasses import dataclass, field")
         out.append("import struct")
+        out.append("from dataclasses import dataclass, field")
         out.append("from typing import Dict, List, Optional\n")
 
         out.append(f'TEMPLATE_VERSION = "{ast.version}"\n')
@@ -50,8 +50,10 @@ class PythonEmitter(BaseEmitter):
         out.append("REGISTERED_MESSAGES: Dict[str, int] = {")
         for msg in ast.messages:
             out.append(f'    "{msg.name}": {msg.message_number},')
-        out.append("}\n")
+        out.append("}")
 
+        out.append("")
+        out.append("")
         out.append("""def decompress_zerocoded(src: bytes) -> bytes:
     dest = bytearray()
     i = 0
@@ -65,7 +67,7 @@ class PythonEmitter(BaseEmitter):
                     dest.append(0)
                     i += 2
                 else:
-                    dest.extend(b'\\x00' * count)
+                    dest.extend(b"\\x00" * count)
                     i += 2
             else:
                 dest.append(0)
@@ -73,24 +75,32 @@ class PythonEmitter(BaseEmitter):
         else:
             dest.append(b)
             i += 1
-    return bytes(dest)
-""")
+    return bytes(dest)""")
 
+        out.append("")
+        out.append("")
         out.append("# Generated UDP Messages")
         for msg in ast.messages:
+            out.append("")
+            out.append("")
             out.append("@dataclass")
             out.append(f"class {msg.name}Packet:")
             out.append(f'    message_name: str = "{msg.name}"')
             out.append(f"    message_number: int = {msg.message_number}")
             out.append(f'    frequency: str = "{msg.frequency}"')
             out.append(
-                f"    is_zerocoded: bool = {'True' if msg.encoding == 'Zerocoded' else 'False'}\n"
+                f"    is_zerocoded: bool = {'True' if msg.encoding == 'Zerocoded' else 'False'}"
             )
+            out.append("")
             out.append("    def serialize(self) -> bytes:")
-            out.append(f"        return struct.pack('<I', {msg.message_number})\n")
+            out.append(f'        return struct.pack("<I", {msg.message_number})')
 
+        out.append("")
+        out.append("")
         out.append("# Generated LLSD Capability Schemas")
         for schema in ast.llsd_schemas:
+            out.append("")
+            out.append("")
             out.append("@dataclass")
             out.append(f"class {schema.title}Capabilities:")
             for p_name, prop in schema.properties.items():
@@ -106,6 +116,5 @@ class PythonEmitter(BaseEmitter):
                     py_type = "List[str]"
                     default_val = "field(default_factory=list)"
                 out.append(f"    {p_name}: {py_type} = {default_val}")
-            out.append("")
 
-        return "\n".join(out)
+        return "\n".join(out) + "\n"
