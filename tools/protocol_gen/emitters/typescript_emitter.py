@@ -38,15 +38,10 @@ class TypeScriptEmitter(BaseEmitter):
     if (b === 0) {
       if (i + 1 < src.length) {
         const count = src[i + 1];
-        if (count === 0) {
+        for (let k = 0; k < count; k++) {
           dest.push(0);
-          i += 2;
-        } else {
-          for (let k = 0; k < count; k++) {
-            dest.push(0);
-          }
-          i += 2;
         }
+        i += 2;
       } else {
         dest.push(0);
         i += 1;
