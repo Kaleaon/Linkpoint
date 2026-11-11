@@ -107,6 +107,8 @@ class UiCoverageValidatorTest {
         val root = findRepoRoot()
         val direct = root.resolve(relativePath)
         if (Files.exists(direct)) return direct
+        val legacyDirect = root.resolve("legacy").resolve(relativePath)
+        if (Files.exists(legacyDirect)) return legacyDirect
         error("Unable to resolve project path: $relativePath")
     }
 

@@ -1,7 +1,6 @@
 package com.linkpoint.render.materials
 
 import com.linkpoint.render.lumiya.drawable.DrawableMeshStore
-import com.linkpoint.render.lumiya.drawable.DrawablePrimStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -17,19 +16,13 @@ class CachedTexMatrixStoreTest {
 
     @Test
     fun testFaceMaterialIdentityFastPath() {
-        val primFace = DrawableMeshStore.FaceMaterial()
-        assertTrue(primFace.isDirty)
-        val matrix1 = primFace.getMatrix()
-        assertFalse(primFace.isDirty)
-
-        // Identity fast path returns static identity matrix constant
-        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
-        assertSame("Identity FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, matrix1)
-
         val meshFace = DrawableMeshStore.FaceMaterial()
         assertTrue(meshFace.isDirty)
         val meshMatrix = meshFace.getMatrix()
         assertFalse(meshFace.isDirty)
+
+        // Identity fast path returns static identity matrix constant
+        val identityRef = MaterialDescriptor.UvTransform.IDENTITY_MATRIX
         assertSame("Identity Mesh FaceMaterial should return shared IDENTITY_MATRIX constant", identityRef, meshMatrix)
     }
 
