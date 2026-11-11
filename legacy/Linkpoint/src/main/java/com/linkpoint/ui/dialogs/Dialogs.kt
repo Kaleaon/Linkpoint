@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -16,12 +17,16 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +37,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.adaptive.LocalWindowSizeClass
+import com.linkpoint.ui.components.linkpoint2.tokens.Linkpoint2
+import com.linkpoint.ui.theme.LinkpointTheme
 import java.util.UUID
 
 /**
@@ -186,6 +194,7 @@ fun GroupInviteDialog(
 /**
  * Object properties dialog
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ObjectPropertiesDialog(
     objectName: String,
@@ -196,49 +205,114 @@ fun ObjectPropertiesDialog(
     onTakeObject: (() -> Unit)? = null,
     onSitOnObject: (() -> Unit)? = null
 ) {
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(objectName) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (objectDescription.isNotBlank()) {
-                    Text(
-                        text = objectDescription,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+    val windowSizeClass = LocalWindowSizeClass.current
+    val colors = LinkpointTheme.colors
+    val tokens = Linkpoint2.tokens
 
-                InfoRow(label = "Owner", value = ownerName)
-                InfoRow(label = "Creator", value = creatorName)
+    if (windowSizeClass.isAtLeastMedium) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(0.85f).padding(16.dp),
+            shape = RoundedCornerShape(tokens.radii.lg),
+            color = colors.surface,
+            contentColor = colors.onSurface,
+            tonalElevation = 8.dp
+        ) {
+            ObjectPropertiesDialogContent(
+                objectName = objectName,
+                objectDescription = objectDescription,
+                ownerName = ownerName,
+                creatorName = creatorName,
+                onClose = onClose,
+                onTakeObject = onTakeObject,
+                onSitOnObject = onSitOnObject
+            )
+        }
+    } else {
+        ModalBottomSheet(
+            onDismissRequest = onClose,
+            containerColor = colors.surface,
+            contentColor = colors.onSurface
+        ) {
+            ObjectPropertiesDialogContent(
+                objectName = objectName,
+                objectDescription = objectDescription,
+                ownerName = ownerName,
+                creatorName = creatorName,
+                onClose = onClose,
+                onTakeObject = onTakeObject,
+                onSitOnObject = onSitOnObject
+            )
+        }
+    }
+}
+
+@Composable
+private fun ObjectPropertiesDialogContent(
+    objectName: String,
+    objectDescription: String,
+    ownerName: String,
+    creatorName: String,
+    onClose: () -> Unit,
+    onTakeObject: (() -> Unit)? = null,
+    onSitOnObject: (() -> Unit)? = null
+) {
+    val colors = LinkpointTheme.colors
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = objectName,
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.onSurface
+        )
+        if (objectDescription.isNotBlank()) {
+            Text(
+                text = objectDescription,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant
+            )
+        }
+        InfoRow(label = "Owner", value = ownerName)
+        InfoRow(label = "Creator", value = creatorName)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+        ) {
+            onSitOnObject?.let { sit ->
+                OutlinedButton(onClick = sit) {
+                    Text("Sit")
+                }
             }
-        },
-        confirmButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                onSitOnObject?.let { sit ->
-                    OutlinedButton(onClick = sit) {
-                        Text("Sit")
-                    }
+            onTakeObject?.let { take ->
+                OutlinedButton(onClick = take) {
+                    Text("Take")
                 }
-                onTakeObject?.let { take ->
-                    OutlinedButton(onClick = take) {
-                        Text("Take")
-                    }
-                }
-                Button(onClick = onClose) {
-                    Text("Close")
-                }
+            }
+            Button(
+                onClick = onClose,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.primary,
+                    contentColor = colors.onPrimary
+                )
+            ) {
+                Text("Close")
             }
         }
-    )
+    }
 }
 
 /**
  * Item properties dialog (inventory item)
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemPropertiesDialog(
     itemName: String,
@@ -250,58 +324,113 @@ fun ItemPropertiesDialog(
     onRez: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null
 ) {
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(itemName) },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                InfoRow(label = "Type", value = itemType)
-                InfoRow(label = "Creator", value = creatorName)
-                InfoRow(label = "Permissions", value = permissions)
+    val windowSizeClass = LocalWindowSizeClass.current
+    val colors = LinkpointTheme.colors
+    val tokens = Linkpoint2.tokens
+
+    if (windowSizeClass.isAtLeastMedium) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(0.85f).padding(16.dp),
+            shape = RoundedCornerShape(tokens.radii.lg),
+            color = colors.surface,
+            contentColor = colors.onSurface,
+            tonalElevation = 8.dp
+        ) {
+            ItemPropertiesDialogContent(
+                itemName = itemName,
+                itemType = itemType,
+                creatorName = creatorName,
+                permissions = permissions,
+                onClose = onClose,
+                onWear = onWear,
+                onRez = onRez,
+                onDelete = onDelete
+            )
+        }
+    } else {
+        ModalBottomSheet(
+            onDismissRequest = onClose,
+            containerColor = colors.surface,
+            contentColor = colors.onSurface
+        ) {
+            ItemPropertiesDialogContent(
+                itemName = itemName,
+                itemType = itemType,
+                creatorName = creatorName,
+                permissions = permissions,
+                onClose = onClose,
+                onWear = onWear,
+                onRez = onRez,
+                onDelete = onDelete
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemPropertiesDialogContent(
+    itemName: String,
+    itemType: String,
+    creatorName: String,
+    permissions: String,
+    onClose: () -> Unit,
+    onWear: (() -> Unit)? = null,
+    onRez: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null
+) {
+    val colors = LinkpointTheme.colors
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = itemName,
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.onSurface
+        )
+        InfoRow(label = "Type", value = itemType)
+        InfoRow(label = "Creator", value = creatorName)
+        InfoRow(label = "Permissions", value = permissions)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+        ) {
+            onWear?.let { wear ->
+                OutlinedButton(onClick = wear) {
+                    Text("Wear")
+                }
             }
-        },
-        confirmButton = {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    onWear?.let { wear ->
-                        OutlinedButton(onClick = wear, modifier = Modifier.weight(1f)) {
-                            Text("Wear")
-                        }
-                    }
-                    onRez?.let { rez ->
-                        OutlinedButton(onClick = rez, modifier = Modifier.weight(1f)) {
-                            Text("Rez")
-                        }
-                    }
+            onRez?.let { rez ->
+                OutlinedButton(onClick = rez) {
+                    Text("Rez")
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            }
+            onDelete?.let { delete ->
+                OutlinedButton(
+                    onClick = delete,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.error)
                 ) {
-                    onDelete?.let { delete ->
-                        OutlinedButton(
-                            onClick = delete,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Delete")
-                        }
-                    }
-                    Button(
-                        onClick = onClose,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Close")
-                    }
+                    Text("Delete")
                 }
+            }
+            Button(
+                onClick = onClose,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.primary,
+                    contentColor = colors.onPrimary
+                )
+            ) {
+                Text("Close")
             }
         }
-    )
+    }
 }
 
 /**

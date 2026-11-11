@@ -6,6 +6,8 @@ on:
     paths:
       - 'legacy/Linkpoint/src/**'
       - 'legacy/Linkpoint/tools/protocol/**'
+      - 'tools/protocol_gen/**'
+      - 'schemas/protocol/**'
       - 'docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md'
       - '.github/workflows/protocol-conformance.yml'
   pull_request:
@@ -13,6 +15,8 @@ on:
     paths:
       - 'legacy/Linkpoint/src/**'
       - 'legacy/Linkpoint/tools/protocol/**'
+      - 'tools/protocol_gen/**'
+      - 'schemas/protocol/**'
       - 'docs/AGENT_PARSABLE_MODERNIZATION_TASKLIST.md'
       - '.github/workflows/protocol-conformance.yml'
   workflow_dispatch:
@@ -51,6 +55,8 @@ jobs:
         run: bash scripts/run_polyglot_tests.sh
 
       - name: Run offline conformance layers
+        env:
+          STRICT_CONFORMANCE: '1'
         run: |
           set -euo pipefail
           chmod +x legacy/Linkpoint/tools/protocol/sync_master_template.sh \
