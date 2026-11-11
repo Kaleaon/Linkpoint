@@ -2,16 +2,38 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/src/ffi.dart';
+import 'package:path/path.dart' as path;
 
 File? _findFixtureFile() {
-  final candidates = [
-    '../../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    '../crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    'crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
-    '/app/Linkpoint/crates/linkpoint-protocol/fixtures/llsd_31_test_vectors.json',
+  final candidateParts = [
+    [
+      '..',
+      '..',
+      'crates',
+      'linkpoint-protocol',
+      'fixtures',
+      'llsd_31_test_vectors.json'
+    ],
+    [
+      '..',
+      'crates',
+      'linkpoint-protocol',
+      'fixtures',
+      'llsd_31_test_vectors.json'
+    ],
+    ['crates', 'linkpoint-protocol', 'fixtures', 'llsd_31_test_vectors.json'],
+    [
+      '/app',
+      'Linkpoint',
+      'crates',
+      'linkpoint-protocol',
+      'fixtures',
+      'llsd_31_test_vectors.json'
+    ],
   ];
-  for (final path in candidates) {
-    final file = File(path);
+  for (final parts in candidateParts) {
+    final filePath = path.joinAll(parts);
+    final file = File(filePath);
     if (file.existsSync()) return file;
   }
   return null;

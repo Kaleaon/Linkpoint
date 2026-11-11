@@ -212,31 +212,32 @@ mod tests {
     #[test]
     fn passes_all_31_canonical_test_vectors() {
         let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let mut vectors_dir = manifest_dir
-            .join("..")
-            .join("..")
-            .join("legacy")
-            .join("Linkpoint")
-            .join("src")
-            .join("test")
-            .join("resources")
-            .join("llsd-conformance")
-            .join("vectors");
-        if !vectors_dir.exists() {
-            vectors_dir = manifest_dir
-                .join("..")
-                .join("..")
-                .join("Linkpoint")
-                .join("src")
-                .join("test")
-                .join("resources")
-                .join("llsd-conformance")
-                .join("vectors");
+        let relative_candidates = [
+            "../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "../../Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "Linkpoint/src/test/resources/llsd-conformance/vectors",
+        ];
+
+        let mut vectors_dir = None;
+        for rel in &relative_candidates {
+            let subpath: PathBuf = rel.split(&['/', '\\'][..]).collect();
+            let candidate = manifest_dir.join(&subpath);
+            if candidate.exists() {
+                vectors_dir = Some(candidate);
+                break;
+            }
+            let cwd_candidate = PathBuf::from(&subpath);
+            if cwd_candidate.exists() {
+                vectors_dir = Some(cwd_candidate);
+                break;
+            }
         }
 
-        if !vectors_dir.exists() {
-            return;
-        }
+        let vectors_dir = match vectors_dir {
+            Some(dir) => dir,
+            None => return,
+        };
 
         let entries = std::fs::read_dir(&vectors_dir)
             .unwrap_or_else(|e| panic!("Failed to read vectors dir at {:?}: {}", vectors_dir, e));
