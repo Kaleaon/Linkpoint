@@ -39,8 +39,8 @@ EXCLUDE_DIRS = {
 }
 
 EXCLUDE_PREFIXES = (
-    "Linkpoint/src/test/resources",
     "legacy/Linkpoint/src/test/resources",
+    "Linkpoint/src/test/resources",
     "crates/quick-xml",
 )
 
