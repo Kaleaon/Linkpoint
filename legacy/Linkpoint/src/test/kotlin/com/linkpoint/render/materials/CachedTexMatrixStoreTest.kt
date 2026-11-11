@@ -1,7 +1,5 @@
 package com.linkpoint.render.materials
 
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import com.linkpoint.render.lumiya.drawable.DrawableMeshStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
