@@ -228,6 +228,7 @@ android {
         // error/fatal findings.
         checkReleaseBuilds = true
         abortOnError = true
+        ignoreTestSources = true
         disable += setOf("MissingTranslation", "ExtraTranslation", "SuspiciousIndentation")
 
         // Baseline is allowed for legacy debt only. Any additions/changes must

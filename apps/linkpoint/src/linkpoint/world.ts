@@ -72,6 +72,15 @@ export class WorldViewer extends Utils.EventEmitter {
       : 'Live simulator scene: streaming from grid…';
   }
 
+  public clearTextureCache(): void {
+    const keys = Array.from(this.decodedTextures.keys());
+    for (const key of keys) {
+      this.decodedTextures.delete(key);
+    }
+    this.decodedTextures.clear();
+    this.emit('textures_cleared');
+  }
+
   constructor(protocolManager: any) {
     super();
     this.protocol = protocolManager;
@@ -1254,15 +1263,14 @@ export class WorldViewer extends Utils.EventEmitter {
     for (const object of this.sceneObjects.values()) positions.set(object.id, this.worldTransform(object).position);
     const frames = this.particles.update(now, positions);
     const live = new Set<string>();
-    // A plane starts in XY. Match its normal to the view direction with the camera pitch/yaw.
-    const rotation = [Math.PI / 2 + this.camera3d.rotation[0], 0, -this.camera3d.rotation[1]];
     for (const particle of frames) {
       const id = `particle:${particle.id}`;
       live.add(id);
       const texture = particle.textureId && this.decodedTextures.has(particle.textureId) ? `texture:${particle.textureId}` : undefined;
       const config = {
-        mesh: 'particle-sprite', position: particle.position, rotation, scale: [particle.scale[0], particle.scale[1], 1],
+        mesh: 'particle-sprite', position: particle.position, scale: [particle.scale[0], particle.scale[1], 1],
         color: particle.color, texture, faces: [{ texture, color: particle.color, fullBright: particle.emissive, pbr: { alphaMode: 'BLEND' } }],
+        billboard: true,
       };
       if (this.scene3d.objects.has(id)) this.scene3d.updateObject(id, config); else this.scene3d.addObject(id, config);
     }

@@ -15,6 +15,7 @@
 
 # Generated files
 bin/
+obj/
 gen/
 out/
 build/
