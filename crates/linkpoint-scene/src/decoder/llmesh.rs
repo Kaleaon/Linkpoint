@@ -28,7 +28,12 @@ pub fn parse_llmesh_binary(data: &[u8]) -> Option<ParsedLLMesh> {
         0
     };
 
-    let num_faces = if data.len() > 198 {
+    let num_faces = if data.len() > 186
+        && u16::from_le_bytes([data[185], data[186]]) > 0
+        && u16::from_le_bytes([data[185], data[186]]) < 1000
+    {
+        u16::from_le_bytes([data[185], data[186]]) as usize
+    } else if data.len() > 198 {
         u16::from_le_bytes([data[197], data[198]]) as usize
     } else {
         0
