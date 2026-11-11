@@ -23,7 +23,8 @@ void main() {
 
     setUpAll(() {
       if (!LinkpointProtocolFFI.isAvailable) {
-        fail('FFI native library liblinkpoint_protocol is not available! Mandatory FFI build required.');
+        fail(
+            'FFI native library liblinkpoint_protocol is not available! Mandatory FFI build required.');
       }
       final fixtureFile = _findFixtureFile();
       if (fixtureFile == null) {
