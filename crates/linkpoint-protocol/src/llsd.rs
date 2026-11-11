@@ -212,19 +212,30 @@ mod tests {
     #[test]
     fn passes_all_31_canonical_test_vectors() {
         let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let candidates = [
-            manifest_dir.join("../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors"),
-            manifest_dir.join("legacy/Linkpoint/src/test/resources/llsd-conformance/vectors"),
-            manifest_dir.join("../../Linkpoint/src/test/resources/llsd-conformance/vectors"),
-            manifest_dir.join("Linkpoint/src/test/resources/llsd-conformance/vectors"),
-            PathBuf::from("legacy/Linkpoint/src/test/resources/llsd-conformance/vectors"),
-            PathBuf::from(
-                "/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
-            ),
+        let relative_candidates = [
+            "../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "../../Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "Linkpoint/src/test/resources/llsd-conformance/vectors",
         ];
-        let vectors_dir = candidates.into_iter().find(|p| p.exists());
+
+        let mut vectors_dir = None;
+        for rel in &relative_candidates {
+            let subpath: PathBuf = rel.split(&['/', '\\'][..]).collect();
+            let candidate = manifest_dir.join(&subpath);
+            if candidate.exists() {
+                vectors_dir = Some(candidate);
+                break;
+            }
+            let cwd_candidate = PathBuf::from(&subpath);
+            if cwd_candidate.exists() {
+                vectors_dir = Some(cwd_candidate);
+                break;
+            }
+        }
+
         let vectors_dir = match vectors_dir {
-            Some(d) => d,
+            Some(dir) => dir,
             None => return,
         };
 

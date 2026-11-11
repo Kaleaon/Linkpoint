@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from tools.protocol_gen.emitters.base import BaseEmitter
 from tools.protocol_gen.proto_ast.models import ProtocolAST
@@ -16,6 +17,24 @@ class PythonEmitter(BaseEmitter):
 
         with open(out_file, "w", encoding="utf-8", newline="\n") as f:
             f.write(code)
+
+        try:
+            subprocess.run(
+                ["ruff", "check", "--fix", out_file],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            subprocess.run(
+                ["ruff", "format", out_file],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            with open(out_file, "r", encoding="utf-8") as f:
+                code = f.read().replace("\r\n", "\n")
+        except Exception:
+            pass
 
         return {out_file: code}
 
@@ -44,12 +63,8 @@ class PythonEmitter(BaseEmitter):
         if b == 0:
             if i + 1 < src_len:
                 count = src[i + 1]
-                if count == 0:
-                    dest.append(0)
-                    i += 2
-                else:
-                    dest.extend(b"\\x00" * count)
-                    i += 2
+                dest.extend(b"\\x00" * count)
+                i += 2
             else:
                 dest.append(0)
                 i += 1
