@@ -155,6 +155,28 @@ class DrawableMeshStore {
 
     var avatarStore: DrawableAvatarStore? = null
 
+    private var transparentCameraX = 0f
+    private var transparentCameraY = 0f
+    private var transparentCameraZ = 0f
+
+    @JvmField
+    internal val transparentInstancesList = ArrayList<MeshInstance>()
+
+    @JvmField
+    internal val transparentComparator = Comparator<MeshInstance> { a, b ->
+        val dxA = a.modelMatrix[12] - transparentCameraX
+        val dyA = a.modelMatrix[13] - transparentCameraY
+        val dzA = a.modelMatrix[14] - transparentCameraZ
+        val distSqA = dxA * dxA + dyA * dyA + dzA * dzA
+
+        val dxB = b.modelMatrix[12] - transparentCameraX
+        val dyB = b.modelMatrix[13] - transparentCameraY
+        val dzB = b.modelMatrix[14] - transparentCameraZ
+        val distSqB = dxB * dxB + dyB * dyB + dzB * dzB
+
+        distSqB.compareTo(distSqA)
+    }
+
     // ── Compilation ──────────────────────────────────────────────────────
 
     fun upsertMeshPrim(
@@ -442,16 +464,22 @@ class DrawableMeshStore {
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
 
-        val sorted = instances.values
-            .filter { it.isTransparent && instanceInFrustum(ctx, it) }
-            .sortedByDescending {
-                val dx = it.modelMatrix[12] - ctx.cameraPositionX
-                val dy = it.modelMatrix[13] - ctx.cameraPositionY
-                val dz = it.modelMatrix[14] - ctx.cameraPositionZ
-                dx * dx + dy * dy + dz * dz
-            }
+        transparentCameraX = ctx.cameraPositionX
+        transparentCameraY = ctx.cameraPositionY
+        transparentCameraZ = ctx.cameraPositionZ
 
-        for (instance in sorted) {
+        transparentInstancesList.clear()
+        for (instance in instances.values) {
+            if (instance.isTransparent && instanceInFrustum(ctx, instance)) {
+                transparentInstancesList.add(instance)
+            }
+        }
+
+        transparentInstancesList.sortWith(transparentComparator)
+
+        val transparentCount = transparentInstancesList.size
+        for (i in 0 until transparentCount) {
+            val instance = transparentInstancesList[i]
             val hostAvatar = instance.hostAvatarId?.let { avatarStore?.getAvatar(it) }
             if (hostAvatar != null && hostAvatar.jointUBO != 0 && riggedProgram != null) {
                 riggedProgram.use()
