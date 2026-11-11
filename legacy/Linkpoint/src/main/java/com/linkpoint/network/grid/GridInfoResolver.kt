@@ -202,7 +202,7 @@ object GridInfoResolver {
 
         if (result.isEmpty()) {
             // XML or key-value regex parsing
-            val xmlTags = listOf("loginuri", "gridname", "gridnick", "welcome", "helperuri", "economy", "map", "search", "search_uri", "searchuri", "directory", "platform", "currency", "currency_symbol", "zero_currency")
+            val xmlTags = listOf("loginuri", "gridname", "gridnick", "welcome", "helperuri", "economy", "map", "search", "search_uri", "searchuri", "directory", "platform", "currency", "currency_symbol", "zero_currency", "asset_server_url", "asset_server", "assetserverurl", "assetserver", "asset_uri", "asseturi")
             for (tag in xmlTags) {
                 // Pattern 1: <tag>value</tag> or <tag_name>value</tag_name>
                 val tagPattern = Pattern.compile("<$tag>([^<]+)</$tag>", Pattern.CASE_INSENSITIVE)
@@ -279,6 +279,14 @@ object GridInfoResolver {
         val rawWelcomeUri = parsedMap["welcome"] ?: parsedMap["welcome_page"]
         val welcomeUri = if (isValidHttpUrl(rawWelcomeUri)) rawWelcomeUri else initialGrid?.welcomeUri
 
+        val rawAssetServerUrl = parsedMap["asset_server_url"]
+            ?: parsedMap["asset_server"]
+            ?: parsedMap["assetserverurl"]
+            ?: parsedMap["assetserver"]
+            ?: parsedMap["asset_uri"]
+            ?: parsedMap["asseturi"]
+        val assetServerUrl = if (isValidHttpUrl(rawAssetServerUrl)) rawAssetServerUrl else initialGrid?.assetServerUrl
+
         val id = initialGrid?.id ?: "grid_${gridNick.ifBlank { "custom" }}"
 
         return GridInfo(
@@ -298,7 +306,8 @@ object GridInfoResolver {
             mapUri = mapUri,
             searchUri = searchUri,
             welcomeUri = welcomeUri,
-            isResolved = true
+            isResolved = true,
+            assetServerUrl = assetServerUrl
         )
     }
 

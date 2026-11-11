@@ -3,12 +3,12 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn get_python_command() -> &'static str {
-    #[cfg(windows)]
-    let candidates = &["python", "py", "python3"];
-    #[cfg(not(windows))]
-    let candidates = &["python3", "python", "py"];
-
-    for cmd in candidates {
+    let cmds: &[&str] = if cfg!(windows) {
+        &["python", "py", "python3"]
+    } else {
+        &["python3", "python"]
+    };
+    for &cmd in cmds {
         if Command::new(cmd)
             .arg("--version")
             .output()
@@ -18,10 +18,7 @@ fn get_python_command() -> &'static str {
             return cmd;
         }
     }
-    #[cfg(windows)]
-    return "python";
-    #[cfg(not(windows))]
-    return "python3";
+    if cfg!(windows) { "python" } else { "python3" }
 }
 
 fn main() {
