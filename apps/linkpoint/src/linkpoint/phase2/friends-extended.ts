@@ -111,6 +111,7 @@ export class FriendsExtended extends Utils.EventEmitter {
       ...friendData,
       id: normalizedId,
       onlineStatus: this.normalizeStatus(friendData.onlineStatus ?? friendData.online ?? existing?.onlineStatus),
+      onlineAlert: Boolean(friendData.onlineAlert ?? existing?.onlineAlert ?? false),
     };
 
     this.friends.set(normalizedId, friend);
@@ -177,12 +178,57 @@ export class FriendsExtended extends Utils.EventEmitter {
 
       // Notify listeners
       if (oldStatus !== normalizedStatus) {
+        if (friend.onlineAlert) {
+          this.emit('online_alert', {
+            friendId: normalizedId,
+            friendName: friend.name,
+            status: normalizedStatus,
+            message: `${friend.name} is now ${normalizedStatus}.`,
+          });
+        }
         this.notifyStatusChange(normalizedId, normalizedStatus, oldStatus);
         this.emit('friend_updated', { ...friend });
       }
 
       console.log(`[FriendsExtended] Friend ${normalizedId} status: ${normalizedStatus}`);
     }
+  }
+
+  /**
+   * Set online alert for a friend
+   */
+  setOnlineAlert(friendId: string, enabled: boolean) {
+    if (!friendId || typeof friendId !== 'string') {
+      throw new Error('Valid friend ID required');
+    }
+    const normalizedId = this.normalizeId(friendId);
+    let friend = this.friends.get(normalizedId);
+    const alertEnabled = Boolean(enabled);
+    if (!friend) {
+      this.addFriend(normalizedId, { onlineAlert: alertEnabled });
+      friend = this.friends.get(normalizedId);
+    } else {
+      friend.onlineAlert = alertEnabled;
+      this.emit('friend_updated', { ...friend });
+    }
+    if (typeof this.protocol?.setOnlineAlert === 'function') {
+      try {
+        this.protocol.setOnlineAlert(normalizedId, alertEnabled);
+      } catch (err) {
+        console.warn('[FriendsExtended] protocol setOnlineAlert failed:', err);
+      }
+    }
+    console.log(`[FriendsExtended] Set online alert for ${friend.name}: ${alertEnabled}`);
+    return friend;
+  }
+
+  /**
+   * Get online alert status for a friend
+   */
+  getOnlineAlert(friendId: string): boolean {
+    if (!friendId) return false;
+    const normalizedId = this.normalizeId(friendId);
+    return Boolean(this.friends.get(normalizedId)?.onlineAlert);
   }
 
   /**
