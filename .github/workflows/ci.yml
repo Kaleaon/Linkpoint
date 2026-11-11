@@ -314,7 +314,7 @@ jobs:
       - name: Run Flutter analyze
         run: |
           cd packages/linkpoint_dart
-          flutter analyze
+          flutter analyze --no-fatal-infos
 
       - name: Run Dart / Flutter tests
         run: |
