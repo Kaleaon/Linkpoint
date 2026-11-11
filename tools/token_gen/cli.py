@@ -115,7 +115,7 @@ def to_rust_color(hex_str: str) -> str:
 def to_swift_color(hex_str: str) -> str:
     r, g, b, a = parse_hex_color(hex_str)
     rf, gf, bf, af = r / 255.0, g / 255.0, b / 255.0, a / 255.0
-    return f"Color(red: {fmt_f32(rf)}, green: {fmt_f32(gf)}, blue: {fmt_f32(bf)}, opacity: {fmt_f32(af)})"
+    return f"SwiftUI.Color(red: {fmt_f32(rf)}, green: {fmt_f32(gf)}, blue: {fmt_f32(bf)}, opacity: {fmt_f32(af)})"
 
 
 def render_typescript_fallback(tokens_data: dict) -> str:
