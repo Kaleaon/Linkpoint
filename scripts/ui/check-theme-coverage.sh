@@ -124,7 +124,7 @@ json_patterns = [
 ]
 json_files = []
 for pat in json_patterns:
-    json_files.extend(glob.glob(pat))
+    json_files.extend(glob.glob(pat, recursive=True))
 
 json_themes = {}
 json_schema_errors = []
