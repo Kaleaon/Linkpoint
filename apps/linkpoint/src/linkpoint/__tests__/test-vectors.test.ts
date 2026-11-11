@@ -113,6 +113,22 @@ describe('Canonical Shared Test Vectors Suite', () => {
         expect(numVerts).toBe(meshCase.expected.vertex_count);
       }
     });
+
+    it('verifies pre-processed Unified-LLSD geometry payload test vectors', () => {
+      const filePath = findVectorFile('mesh/preprocessed_mesh_vectors.json');
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
+      expect(data.version).toBe('1.0');
+      expect(Array.isArray(data.preprocessed_mesh_vectors)).toBe(true);
+
+      for (const pCase of data.preprocessed_mesh_vectors) {
+        const payload = pCase.payload;
+        expect(payload.format).toBe('unified-llsd-mesh-v1');
+        expect(payload.submeshes.length).toBe(pCase.expected.submesh_count);
+        expect(payload.submeshes[0].indices.length).toBe(pCase.expected.index_count);
+        expect(payload.lod_thresholds.high_threshold).toBe(pCase.expected.high_threshold);
+      }
+    });
   });
 
   describe('Texture Decoder Test Vectors', () => {
