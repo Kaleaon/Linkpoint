@@ -25,6 +25,7 @@ DEFAULT_TARGET_OUT_DIRS = {
     "java": "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java/generated",
     "swift": "platforms/iOS/Sources/LLSD/Generated",
     "csharp": "sdks/csharp/src/Generated",
+    "godot": "platforms/godot/gdextension/src/generated/protocol",
 }
 
 

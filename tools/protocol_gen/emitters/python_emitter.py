@@ -20,13 +20,19 @@ class PythonEmitter(BaseEmitter):
 
         try:
             subprocess.run(
+                ["ruff", "check", "--fix", out_file],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            subprocess.run(
                 ["ruff", "format", out_file],
                 check=False,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
             with open(out_file, "r", encoding="utf-8") as f:
-                code = f.read()
+                code = f.read().replace("\r\n", "\n")
         except Exception:
             pass
 
