@@ -376,10 +376,18 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
     const candidates = [
       path.resolve(__dirname, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(__dirname, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      path.resolve(__dirname, '../../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(process.cwd(), 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(process.cwd(), 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      path.resolve(process.cwd(), '../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(process.cwd(), 'apps/linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
     ];
+    let curr = __dirname;
+    for (let i = 0; i < 6; i++) {
+      candidates.push(path.resolve(curr, 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'));
+      candidates.push(path.resolve(curr, 'Linkpoint/src/test/resources/llsd-conformance/vectors'));
+      curr = path.dirname(curr);
+    }
     const vectorsDir = candidates.find(p => fs.existsSync(p)) || candidates[0];
     expect(fs.existsSync(vectorsDir)).toBe(true);
 
