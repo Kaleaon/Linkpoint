@@ -379,14 +379,23 @@ describe('LLSD Conformance Vectors (31 Canonical Vectors)', () => {
     const candidates = [
       path.resolve(cleanDir, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cleanDir, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      path.resolve(cleanDir, '../../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(rawDir, '../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(rawDir, '../../../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      path.resolve(rawDir, '../../../../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, 'Linkpoint/src/test/resources/llsd-conformance/vectors'),
+      path.resolve(cwd, '../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, 'apps/linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, '../../legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'),
       path.resolve(cwd, '../../Linkpoint/src/test/resources/llsd-conformance/vectors'),
     ];
+    let curr = cleanDir || rawDir;
+    for (let i = 0; i < 6; i++) {
+      candidates.push(path.resolve(curr, 'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors'));
+      candidates.push(path.resolve(curr, 'Linkpoint/src/test/resources/llsd-conformance/vectors'));
+      curr = path.dirname(curr);
+    }
     const vectorsDir = candidates.find(d => Boolean(d) && fs.existsSync(d)) || candidates[0];
     expect(fs.existsSync(vectorsDir)).toBe(true);
 

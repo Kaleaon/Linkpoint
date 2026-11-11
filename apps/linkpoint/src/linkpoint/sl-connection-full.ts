@@ -432,6 +432,12 @@ export class SLConnectionFull extends Utils.EventEmitter {
     await slBridge.sendFriendRequest(recipientId, message);
   }
 
+  async setOnlineAlert(friendId: string, enabled: boolean) {
+    if (this.connected && typeof (slBridge as any).setOnlineAlert === 'function') {
+      await (slBridge as any).setOnlineAlert(friendId, enabled);
+    }
+  }
+
   async fetchFriends() {
     if (!this.connected) return [];
     return slBridge.fetchFriends();
