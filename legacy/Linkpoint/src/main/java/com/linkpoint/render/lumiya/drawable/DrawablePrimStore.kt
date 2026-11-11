@@ -1,7 +1,7 @@
 package com.linkpoint.render.lumiya.drawable
 
 import android.opengl.GLES32
-import android.opengl.Matrix
+import com.linkpoint.render.math.GlMatrix as Matrix
 import com.linkpoint.protocol.messages.PrimShapeParams
 import com.linkpoint.protocol.textures.TextureEntryParser
 import com.linkpoint.render.lumiya.core.LumiyaRenderContext
@@ -118,7 +118,12 @@ class DrawablePrimStore {
     /** Per-prim instance snapshot data. */
     data class PrimInstance(
         val id: Long,
-        val modelMatrix: FloatArray = FloatArray(16).also { Matrix.setIdentityM(it, 0) },
+        val modelMatrix: FloatArray = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+        ),
         var shape: ShapeKind = ShapeKind.BOX,
         var hollow: Boolean = false,
         var scaleX: Float = 1f, var scaleY: Float = 1f, var scaleZ: Float = 1f,
@@ -131,11 +136,80 @@ class DrawablePrimStore {
 
     companion object {
         private val NULL_UUID = UUID(0L, 0L)
-        private val IDENTITY_TEX = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+        private val IDENTITY_TEX = floatArrayOf(
+            1f, 0f, 0f, 0f,
+            0f, 1f, 0f, 0f,
+            0f, 0f, 1f, 0f,
+            0f, 0f, 0f, 1f
+        )
 
         const val GLOW_THRESHOLD = 0.005f
         private const val DEFAULT_INITIAL_CAPACITY = 256
         private const val MAX_FACES_PER_PRIM = 16
+
+        fun setIdentityM(sm: FloatArray, smOffset: Int) {
+            for (i in 0..15) sm[smOffset + i] = 0f
+            sm[smOffset + 0] = 1f
+            sm[smOffset + 5] = 1f
+            sm[smOffset + 10] = 1f
+            sm[smOffset + 15] = 1f
+        }
+
+        fun translateM(m: FloatArray, mOffset: Int, x: Float, y: Float, z: Float) {
+            m[mOffset + 12] += m[mOffset + 0] * x + m[mOffset + 4] * y + m[mOffset + 8] * z
+            m[mOffset + 13] += m[mOffset + 1] * x + m[mOffset + 5] * y + m[mOffset + 9] * z
+            m[mOffset + 14] += m[mOffset + 2] * x + m[mOffset + 6] * y + m[mOffset + 10] * z
+            m[mOffset + 15] += m[mOffset + 3] * x + m[mOffset + 7] * y + m[mOffset + 11] * z
+        }
+
+        fun scaleM(m: FloatArray, mOffset: Int, x: Float, y: Float, z: Float) {
+            for (i in 0..3) {
+                m[mOffset + i] *= x
+                m[mOffset + 4 + i] *= y
+                m[mOffset + 8 + i] *= z
+            }
+        }
+
+        fun multiplyMM(
+            result: FloatArray, resultOffset: Int,
+            lhs: FloatArray, lhsOffset: Int,
+            rhs: FloatArray, rhsOffset: Int
+        ) {
+            for (i in 0..3) {
+                val rhs0 = rhs[rhsOffset + i * 4 + 0]
+                val rhs1 = rhs[rhsOffset + i * 4 + 1]
+                val rhs2 = rhs[rhsOffset + i * 4 + 2]
+                val rhs3 = rhs[rhsOffset + i * 4 + 3]
+
+                result[resultOffset + i * 4 + 0] = lhs[lhsOffset + 0] * rhs0 + lhs[lhsOffset + 4] * rhs1 + lhs[lhsOffset + 8] * rhs2 + lhs[lhsOffset + 12] * rhs3
+                result[resultOffset + i * 4 + 1] = lhs[lhsOffset + 1] * rhs0 + lhs[lhsOffset + 5] * rhs1 + lhs[lhsOffset + 9] * rhs2 + lhs[lhsOffset + 13] * rhs3
+                result[resultOffset + i * 4 + 2] = lhs[lhsOffset + 2] * rhs0 + lhs[lhsOffset + 6] * rhs1 + lhs[lhsOffset + 10] * rhs2 + lhs[lhsOffset + 14] * rhs3
+                result[resultOffset + i * 4 + 3] = lhs[lhsOffset + 3] * rhs0 + lhs[lhsOffset + 7] * rhs1 + lhs[lhsOffset + 11] * rhs2 + lhs[lhsOffset + 15] * rhs3
+            }
+        }
+
+        fun rotateM(m: FloatArray, offset: Int, a: Float, x: Float, y: Float, z: Float) {
+            val rad = Math.toRadians(a.toDouble())
+            val cos = Math.cos(rad).toFloat()
+            val sin = Math.sin(rad).toFloat()
+            if (x == 0f && y == 0f && (z == 1f || z == -1f)) {
+                val s = if (z < 0f) -sin else sin
+                val m0 = m[offset + 0]; val m1 = m[offset + 1]; val m2 = m[offset + 2]; val m3 = m[offset + 3]
+                val m4 = m[offset + 4]; val m5 = m[offset + 5]; val m6 = m[offset + 6]; val m7 = m[offset + 7]
+
+                m[offset + 0] = m0 * cos + m4 * s
+                m[offset + 1] = m1 * cos + m5 * s
+                m[offset + 2] = m2 * cos + m6 * s
+                m[offset + 3] = m3 * cos + m7 * s
+
+                m[offset + 4] = m4 * cos - m0 * s
+                m[offset + 5] = m5 * cos - m1 * s
+                m[offset + 6] = m6 * cos - m2 * s
+                m[offset + 7] = m7 * cos - m3 * s
+            } else {
+                android.opengl.Matrix.rotateM(m, offset, a, x, y, z)
+            }
+        }
     }
 
     // Thread-safe map of primId -> integer slot handle
@@ -161,7 +235,7 @@ class DrawablePrimStore {
     private var slotIsTransparent = BooleanArray(capacity)
     private var slotModelMatrices = FloatArray(capacity * 16).also {
         for (i in 0 until capacity) {
-            Matrix.setIdentityM(it, i * 16)
+            setIdentityM(it, i * 16)
         }
     }
 
@@ -246,7 +320,7 @@ class DrawablePrimStore {
         slotAabbHalfY[slot] = 0.5f
         slotAabbHalfZ[slot] = 0.5f
         slotIsTransparent[slot] = false
-        Matrix.setIdentityM(slotModelMatrices, slot * 16)
+        setIdentityM(slotModelMatrices, slot * 16)
 
         slotFaceCount[slot] = 1
         val base = slot * MAX_FACES_PER_PRIM
@@ -298,7 +372,7 @@ class DrawablePrimStore {
         slotModelMatrices = FloatArray(newCap * 16)
         System.arraycopy(oldModelMat, 0, slotModelMatrices, 0, capacity * 16)
         for (i in capacity until newCap) {
-            Matrix.setIdentityM(slotModelMatrices, i * 16)
+            setIdentityM(slotModelMatrices, i * 16)
         }
 
         slotFaceCount = slotFaceCount.copyOf(newCap)
@@ -347,9 +421,9 @@ class DrawablePrimStore {
     fun addPrim(id: Long, posX: Float, posY: Float, posZ: Float) {
         val slot = getOrAllocateSlot(id)
         val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
-        Matrix.scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
+        setIdentityM(slotModelMatrices, offset)
+        translateM(slotModelMatrices, offset, posX, posY, posZ)
+        scaleM(slotModelMatrices, offset, slotScaleX[slot], slotScaleY[slot], slotScaleZ[slot])
     }
 
     fun upsertPrim(
@@ -384,14 +458,14 @@ class DrawablePrimStore {
         }
 
         val offset = slot * 16
-        Matrix.setIdentityM(slotModelMatrices, offset)
-        Matrix.translateM(slotModelMatrices, offset, posX, posY, posZ)
+        setIdentityM(slotModelMatrices, offset)
+        translateM(slotModelMatrices, offset, posX, posY, posZ)
         if (rotation != null && rotation.size >= 16) {
             val tmp = FloatArray(16)
-            Matrix.multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
+            multiplyMM(tmp, 0, slotModelMatrices, offset, rotation, 0)
             System.arraycopy(tmp, 0, slotModelMatrices, offset, 16)
         }
-        Matrix.scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
+        scaleM(slotModelMatrices, offset, scaleX, scaleY, scaleZ)
 
         applyTextureEntry(slot, shape, slotHollow[slot], textureEntry)
     }
@@ -886,13 +960,13 @@ class DrawablePrimStore {
         val scS = faceScaleS[fIdx]
         val scT = faceScaleT[fIdx]
 
-        Matrix.setIdentityM(outMatrix, 0)
-        Matrix.translateM(outMatrix, 0, 0.5f + offS, 0.5f + offT, 0f)
+        setIdentityM(outMatrix, 0)
+        translateM(outMatrix, 0, 0.5f + offS, 0.5f + offT, 0f)
         if (rot != 0f) {
-            Matrix.rotateM(outMatrix, 0, Math.toDegrees(rot.toDouble()).toFloat(), 0f, 0f, 1f)
+            rotateM(outMatrix, 0, Math.toDegrees(rot.toDouble()).toFloat(), 0f, 0f, 1f)
         }
-        Matrix.scaleM(outMatrix, 0, scS, scT, 1f)
-        Matrix.translateM(outMatrix, 0, -0.5f, -0.5f, 0f)
+        scaleM(outMatrix, 0, scS, scT, 1f)
+        translateM(outMatrix, 0, -0.5f, -0.5f, 0f)
     }
 
     private fun ensureShapes(ctx: LumiyaRenderContext) {

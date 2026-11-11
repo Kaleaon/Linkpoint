@@ -37,6 +37,7 @@ void main() {
         '../../Linkpoint/src/test/resources/llsd-conformance/vectors',
         'legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
         'Linkpoint/src/test/resources/llsd-conformance/vectors',
+        '/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors',
       ];
       Directory? vectorsDir;
       for (final p in candidates) {

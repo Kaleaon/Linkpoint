@@ -92,6 +92,13 @@ export class CapabilitiesManager {
     return this.resolveCapability(name) !== null;
   }
 
+  /**
+   * Resolves the GroupNoticesList HTTP capability URL if exposed by the seed capabilities.
+   */
+  getGroupNoticesListUrl(): string | null {
+    return this.resolveCapability('GroupNoticesList');
+  }
+
   clearCache() {
     this.capabilities.clear();
   }
