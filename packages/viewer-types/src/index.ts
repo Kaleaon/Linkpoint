@@ -2,6 +2,18 @@
 // Do not edit by hand; Rust is the contract source of truth.
 export type GridKind = "second-life" | "opensim";
 
+export {
+  AlphaMode,
+  DetailLevel,
+  AssetSchemaConstants,
+  TextureTransformAdapter,
+  Vector2,
+  Vector3,
+  GLTFMaterialAdapter,
+  MeshBlockAdapter,
+  MeshAssetDecoder
+} from '@unified-llsd/typescript';
+
 export interface LoginRequest {
   readonly grid: GridKind;
   readonly loginUri: string;
