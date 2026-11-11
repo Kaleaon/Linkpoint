@@ -22,16 +22,22 @@ Modern iOS client for Second Life and OpenSimulator grids built with SwiftUI.
 
 ```
 iOS/
-├── App.swift                    # Main app entry point
-├── Models/
-│   └── User.swift              # User and Grid data models
-├── ViewModels/
-│   └── AuthViewModel.swift     # Authentication logic
-├── Views/
-│   ├── LoginView.swift         # Login screen
-│   └── MainTabView.swift       # Main app interface
 ├── Info.plist                  # App configuration
-└── README.md                   # This file
+├── Package.swift               # Swift Package Manager manifest
+├── README.md                   # This file
+├── Sources/
+│   ├── LLSD/                   # LLSD core protocol implementation
+│   ├── LLSDNetwork/            # Networking and circuit manager
+│   ├── LLSDXMLRPC/             # XML-RPC client
+│   └── LinkpointiOS/           # iOS client models and view models
+│       ├── Models/
+│       │   └── User.swift      # User and Grid data models
+│       └── ViewModels/
+│           └── AuthViewModel.swift # Authentication logic
+├── Tests/                      # Unit test suites
+└── Views/
+    ├── LoginView.swift         # Login screen
+    └── MainTabView.swift       # Main app interface
 ```
 
 ## Building

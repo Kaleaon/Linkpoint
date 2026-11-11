@@ -5,6 +5,10 @@ import com.linkpoint.protocol.llsd.LLSDArray
 import com.linkpoint.protocol.llsd.LLSDInteger
 import com.linkpoint.protocol.llsd.LLSDMap
 import com.linkpoint.protocol.llsd.LLSDReal
+import com.linkpoint.protocol.llsd.LLSDString
+import com.linkpoint.protocol.llsd.LLSDURI
+import com.linkpoint.protocol.llsd.LLSDUUID
+import com.linkpoint.protocol.llsd.LLSDValue
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -123,6 +127,7 @@ object GltfMaterialParser {
 
     /**
      * Parse an LLSDMap material payload into a [MaterialDescriptor].
+     * Supports glTF JSON overrides, legacy LLSD "Textures" sub-maps, and flat texture/factor keys.
      */
     fun parseLlsd(llsd: LLSDMap): MaterialDescriptor {
         val jsonString = llsd.getString("gltf_json") ?: llsd.getString("json")
@@ -130,33 +135,61 @@ object GltfMaterialParser {
             return parseJson(jsonString)
         }
 
-        // Direct LLSD map properties
-        val baseColorArr = llsd.getArray("base_color") ?: llsd.getArray("baseColorFactor")
-        val baseColor = if (baseColorArr != null && baseColorArr.size >= 4) {
-            MaterialDescriptor.Float4(
-                readFloat(baseColorArr, 0),
-                readFloat(baseColorArr, 1),
-                readFloat(baseColorArr, 2),
-                readFloat(baseColorArr, 3)
-            )
+        // Base color factor array
+        val baseColorArr = llsd.getArray("base_color")
+            ?: llsd.getArray("baseColorFactor")
+            ?: llsd.getArray("BaseColor")
+        val baseColor = if (baseColorArr != null && baseColorArr.size >= 3) {
+            val r = readFloat(baseColorArr, 0)
+            val g = readFloat(baseColorArr, 1)
+            val b = readFloat(baseColorArr, 2)
+            val a = if (baseColorArr.size >= 4) readFloat(baseColorArr, 3) else 1f
+            MaterialDescriptor.Float4(r, g, b, a)
         } else {
             MaterialDescriptor.Float4(1f, 1f, 1f, 1f)
         }
 
-        val metallic = llsd.getReal("metallic")?.toFloat() ?: llsd.getReal("metallicFactor")?.toFloat() ?: 1f
-        val roughness = llsd.getReal("roughness")?.toFloat() ?: llsd.getReal("roughnessFactor")?.toFloat() ?: 1f
+        val metallic = extractFloatFromLlsd(llsd, "metallic", "metallicFactor", "Metallic")
+            ?: 1f
+        val roughness = extractFloatFromLlsd(llsd, "roughness", "roughnessFactor", "Roughness")
+            ?: 0.5f
 
-        val baseColorId = llsd.getUUID("base_color_texture") ?: llsd.getUUID("baseColorTexture")
-        val normalId = llsd.getUUID("normal_texture") ?: llsd.getUUID("normalTexture")
-        val mrId = llsd.getUUID("metallic_roughness_texture") ?: llsd.getUUID("metallicRoughnessTexture")
-        val emissiveId = llsd.getUUID("emissive_texture") ?: llsd.getUUID("emissiveTexture")
-        val occlusionId = llsd.getUUID("occlusion_texture") ?: llsd.getUUID("occlusionTexture")
+        val texturesMap = llsd.getMap("Textures") ?: llsd.getMap("textures")
 
-        val baseColorRef = baseColorId?.let { MaterialDescriptor.TextureRef(it, it) }
-        val normalRef = normalId?.let { MaterialDescriptor.TextureRef(it, it) }
-        val mrRef = mrId?.let { MaterialDescriptor.TextureRef(it, it) }
-        val emissiveRef = emissiveId?.let { MaterialDescriptor.TextureRef(it, it) }
-        val occlusionRef = occlusionId?.let { MaterialDescriptor.TextureRef(it, it) }
+        val baseColorRef = resolveLlsdTextureRef(
+            texturesMap = texturesMap,
+            rootLlsd = llsd,
+            textureMapKeys = arrayOf("BaseColor", "baseColor", "base_color", "BaseColorTexture", "baseColorTexture", "base_color_texture"),
+            flatKeys = arrayOf("base_color_texture", "baseColorTexture", "BaseColorTexture", "BaseColor", "base_color", "baseColor")
+        )
+
+        val normalRef = resolveLlsdTextureRef(
+            texturesMap = texturesMap,
+            rootLlsd = llsd,
+            textureMapKeys = arrayOf("Normal", "normal", "normal_texture", "NormalTexture", "normalTexture"),
+            flatKeys = arrayOf("normal_texture", "normalTexture", "NormalTexture", "Normal", "normal")
+        )
+
+        val mrRef = resolveLlsdTextureRef(
+            texturesMap = texturesMap,
+            rootLlsd = llsd,
+            textureMapKeys = arrayOf("MetallicRoughness", "metallicRoughness", "metallic_roughness", "MetallicRoughnessTexture", "metallicRoughnessTexture", "metallic_roughness_texture"),
+            flatKeys = arrayOf("metallic_roughness_texture", "metallicRoughnessTexture", "MetallicRoughnessTexture", "MetallicRoughness", "metallic_roughness", "metallicRoughness")
+        )
+
+        val emissiveRef = resolveLlsdTextureRef(
+            texturesMap = texturesMap,
+            rootLlsd = llsd,
+            textureMapKeys = arrayOf("Emissive", "emissive", "emissive_texture", "EmissiveTexture", "emissiveTexture"),
+            flatKeys = arrayOf("emissive_texture", "emissiveTexture", "EmissiveTexture", "Emissive", "emissive")
+        )
+
+        val occlusionRef = resolveLlsdTextureRef(
+            texturesMap = texturesMap,
+            rootLlsd = llsd,
+            textureMapKeys = arrayOf("Occlusion", "occlusion", "occlusion_texture", "OcclusionTexture", "occlusionTexture"),
+            flatKeys = arrayOf("occlusion_texture", "occlusionTexture", "OcclusionTexture", "Occlusion", "occlusion")
+        )
 
         return MaterialDescriptor(
             baseColor = baseColor,
@@ -168,6 +201,52 @@ object GltfMaterialParser {
             emissiveTexture = emissiveRef,
             occlusionTexture = occlusionRef
         )
+    }
+
+    private fun extractUuid(value: LLSDValue?): UUID? = when (value) {
+        is LLSDUUID -> value.value
+        is LLSDString -> parseUuid(value.value)
+        is LLSDURI -> parseUuid(value.value)
+        else -> null
+    }
+
+    private fun extractUuidFromMap(map: LLSDMap?, vararg keys: String): UUID? {
+        if (map == null) return null
+        for (key in keys) {
+            val entry = map[key] ?: continue
+            val uuid = extractUuid(entry)
+            if (uuid != null) return uuid
+        }
+        return null
+    }
+
+    private fun resolveLlsdTextureRef(
+        texturesMap: LLSDMap?,
+        rootLlsd: LLSDMap,
+        textureMapKeys: Array<String>,
+        flatKeys: Array<String>
+    ): MaterialDescriptor.TextureRef? {
+        val uuidFromTextures = extractUuidFromMap(texturesMap, *textureMapKeys)
+        if (uuidFromTextures != null) {
+            return MaterialDescriptor.TextureRef(uuidFromTextures, uuidFromTextures)
+        }
+        val uuidFromFlat = extractUuidFromMap(rootLlsd, *flatKeys)
+        if (uuidFromFlat != null) {
+            return MaterialDescriptor.TextureRef(uuidFromFlat, uuidFromFlat)
+        }
+        return null
+    }
+
+    private fun extractFloatFromLlsd(map: LLSDMap, vararg keys: String): Float? {
+        for (key in keys) {
+            when (val v = map[key]) {
+                is LLSDReal -> return v.value.toFloat()
+                is LLSDInteger -> return v.value.toFloat()
+                is LLSDString -> v.value.toFloatOrNull()?.let { return it }
+                else -> {}
+            }
+        }
+        return null
     }
 
     private fun readFloat(arr: LLSDArray, index: Int): Float {
