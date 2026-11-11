@@ -4,9 +4,9 @@ use std::process::Command;
 
 fn get_python_command() -> &'static str {
     let cmds: &[&str] = if cfg!(windows) {
-        &["python", "python3", "py"]
+        &["python", "py", "python3"]
     } else {
-        &["python3", "python", "py"]
+        &["python3", "python"]
     };
     for &cmd in cmds {
         if Command::new(cmd)

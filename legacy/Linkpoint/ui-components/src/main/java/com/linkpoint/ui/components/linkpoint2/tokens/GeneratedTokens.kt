@@ -46,5 +46,22 @@ object GeneratedTokens {
         val OnUnreadBadge = Color(0xFF03212A)
         val HudBackground = Color(0xAA000000)
         val HudStroke = Color(0x33FFFFFF)
+        object Brand {
+            val Primary = Color(0xFF007AFF)
+            val Secondary = Color(0xFF5856D6)
+            val Accent = Color(0xFFAF52DE)
+        }
+        object Ui {
+            val Text = Color(0xFFFFFFFF)
+            val TextMuted = Color(0x99EBEBF5)
+            val TextSecondary = Color(0xFF8E8E93)
+            val Background = Color(0xFF000000)
+            val Surface = Color(0xFF1C1C1E)
+            val CardBackground = Color(0xFF2C2C2E)
+            val Error = Color(0xFFFF3B30)
+            val Disabled = Color(0xFF8E8E93)
+            val Shadow = Color(0x1A000000)
+            val ViewportPlaceholder = Color(0x4D8E8E93)
+        }
     }
 }
