@@ -18,11 +18,7 @@ fn get_python_command() -> &'static str {
             return cmd;
         }
     }
-    if cfg!(windows) {
-        "python"
-    } else {
-        "python3"
-    }
+    if cfg!(windows) { "python" } else { "python3" }
 }
 
 fn main() {
