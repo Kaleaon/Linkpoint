@@ -92,35 +92,54 @@ public struct LLSDNotation {
 
 // MARK: - Notation Parser Engine
 public struct LLSDNotationParser {
-    private let chars: [Character]
-    private var index: Int = 0
+    private let text: String
+    private let utf8: String.UTF8View
+    private var index: String.UTF8View.Index
 
     public init(text: String) {
-        self.chars = Array(text)
+        self.text = text
+        self.utf8 = text.utf8
+        self.index = text.utf8.startIndex
     }
 
-    private var isAtEnd: Bool { index >= chars.count }
+    private var isAtEnd: Bool { index >= utf8.endIndex }
 
     private mutating func skipWhitespace() {
         while !isAtEnd {
-            let c = chars[index]
-            if c == " " || c == "\t" || c == "\n" || c == "\r" {
-                index += 1
+            let b = utf8[index]
+            if b == 0x20 || b == 0x09 || b == 0x0A || b == 0x0D {
+                index = utf8.index(after: index)
             } else {
                 break
             }
         }
     }
 
-    private mutating func peek() -> Character? {
+    private func peek() -> UInt8? {
         if isAtEnd { return nil }
-        return chars[index]
+        return utf8[index]
     }
 
-    private mutating func advance() -> Character {
-        let c = chars[index]
-        index += 1
-        return c
+    private mutating func advance() -> UInt8 {
+        let byte = utf8[index]
+        index = utf8.index(after: index)
+        return byte
+    }
+
+    private mutating func advance(by count: Int) {
+        index = utf8.index(index, offsetBy: count, limitedBy: utf8.endIndex) ?? utf8.endIndex
+    }
+
+    private func peekString(_ prefix: String) -> Bool {
+        let prefixBytes = prefix.utf8
+        var cur = index
+        for byte in prefixBytes {
+            if cur >= utf8.endIndex || utf8[cur] != byte {
+                return false
+            }
+            cur = utf8.index(after: cur)
+        }
+        return true
     }
 
     public mutating func parseValue() throws -> LLSDValue {
@@ -128,11 +147,11 @@ public struct LLSDNotationParser {
         guard let c = peek() else { throw LLSDNotationError.unexpectedEOF }
 
         switch c {
-        case "!":
+        case UInt8(ascii: "!"):
             _ = advance()
             return .undefined
 
-        case "1", "t", "T":
+        case UInt8(ascii: "1"), UInt8(ascii: "t"), UInt8(ascii: "T"):
             if peekString("true") || peekString("TRUE") {
                 advance(by: 4)
             } else {
@@ -140,7 +159,7 @@ public struct LLSDNotationParser {
             }
             return .boolean(true)
 
-        case "0", "f", "F":
+        case UInt8(ascii: "0"), UInt8(ascii: "f"), UInt8(ascii: "F"):
             if peekString("false") || peekString("FALSE") {
                 advance(by: 5)
             } else {
@@ -148,21 +167,21 @@ public struct LLSDNotationParser {
             }
             return .boolean(false)
 
-        case "i":
+        case UInt8(ascii: "i"):
             _ = advance()
             let numStr = readUntilDelimiter()
             guard let val = Int32(numStr) else { throw LLSDNotationError.invalidNumber(numStr) }
             return .integer(val)
 
-        case "r":
+        case UInt8(ascii: "r"):
             _ = advance()
             let numStr = readUntilDelimiter()
             guard let val = Double(numStr) else { throw LLSDNotationError.invalidNumber(numStr) }
             return .real(val)
 
-        case "u":
+        case UInt8(ascii: "u"):
             _ = advance()
-            if peek() == "\"" || peek() == "'" {
+            if peek() == UInt8(ascii: "\"") || peek() == UInt8(ascii: "'") {
                 let uuidStr = try readQuotedString()
                 guard let u = UUID(uuidString: uuidStr) else { throw LLSDNotationError.invalidUUID(uuidStr) }
                 return .uuid(u)
@@ -172,9 +191,9 @@ public struct LLSDNotationParser {
                 return .uuid(u)
             }
 
-        case "d":
+        case UInt8(ascii: "d"):
             _ = advance()
-            if peek() == "\"" || peek() == "'" {
+            if peek() == UInt8(ascii: "\"") || peek() == UInt8(ascii: "'") {
                 let dateStr = try readQuotedString()
                 let formatter = ISO8601DateFormatter()
                 formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -188,7 +207,7 @@ public struct LLSDNotationParser {
                 return .date(Date(timeIntervalSince1970: sec))
             }
 
-        case "l":
+        case UInt8(ascii: "l"):
             _ = advance()
             let uriStr = try readQuotedString()
             guard let url = URL(string: uriStr) else {
@@ -196,7 +215,7 @@ public struct LLSDNotationParser {
             }
             return .uri(url)
 
-        case "s":
+        case UInt8(ascii: "s"):
             if peekString("s(") {
                 return try parseSizedString()
             } else {
@@ -205,7 +224,7 @@ public struct LLSDNotationParser {
                 return .string(str)
             }
 
-        case "b":
+        case UInt8(ascii: "b"):
             if peekString("b64\"") || peekString("b64'") {
                 advance(by: 3)
                 let base64 = try readQuotedString()
@@ -224,15 +243,15 @@ public struct LLSDNotationParser {
                 return .binary(str.data(using: .utf8) ?? Data())
             }
 
-        case "'", "\"":
+        case UInt8(ascii: "'"), UInt8(ascii: "\""):
             let str = try readQuotedString()
             return .string(str)
 
-        case "[":
+        case UInt8(ascii: "["):
             _ = advance()
             var elements: [LLSDValue] = []
             skipWhitespace()
-            if peek() == "]" {
+            if peek() == UInt8(ascii: "]") {
                 _ = advance()
                 return .array([])
             }
@@ -240,29 +259,30 @@ public struct LLSDNotationParser {
                 let elem = try parseValue()
                 elements.append(elem)
                 skipWhitespace()
-                if peek() == "," {
+                if peek() == UInt8(ascii: ",") {
                     _ = advance()
                     skipWhitespace()
                 }
-                if peek() == "]" {
+                if peek() == UInt8(ascii: "]") {
                     _ = advance()
                     break
                 }
             }
             return .array(elements)
 
-        case "{":
+        case UInt8(ascii: "{"):
             _ = advance()
             var map: [String: LLSDValue] = [:]
             skipWhitespace()
-            if peek() == "}" {
+            if peek() == UInt8(ascii: "}") {
                 _ = advance()
                 return .map([:])
             }
             while !isAtEnd {
                 skipWhitespace()
                 let key: String
-                if peek() == "'" || peek() == "\"" {
+                let pk = peek()
+                if pk == UInt8(ascii: "'") || pk == UInt8(ascii: "\"") {
                     key = try readQuotedString()
                 } else if peekString("s(") {
                     if case .string(let s) = try parseSizedString() {
@@ -274,18 +294,21 @@ public struct LLSDNotationParser {
                     key = readKeyName()
                 }
                 skipWhitespace()
-                guard peek() == ":" || peek() == "=" else {
-                    throw LLSDNotationError.unexpectedCharacter(peek() ?? " ", index)
+                let nextByte = peek()
+                guard nextByte == UInt8(ascii: ":") || nextByte == UInt8(ascii: "=") else {
+                    let char: Character = index < utf8.endIndex ? text[index] : " "
+                    let charOffset = text[..<index].count
+                    throw LLSDNotationError.unexpectedCharacter(char, charOffset)
                 }
                 _ = advance() // skip ':' or '='
                 let val = try parseValue()
                 map[key] = val
                 skipWhitespace()
-                if peek() == "," {
+                if peek() == UInt8(ascii: ",") {
                     _ = advance()
                     skipWhitespace()
                 }
-                if peek() == "}" {
+                if peek() == UInt8(ascii: "}") {
                     _ = advance()
                     break
                 }
@@ -293,48 +316,87 @@ public struct LLSDNotationParser {
             return .map(map)
 
         default:
-            throw LLSDNotationError.unexpectedCharacter(c, index)
+            let char: Character = index < utf8.endIndex ? text[index] : " "
+            let charOffset = text[..<index].count
+            throw LLSDNotationError.unexpectedCharacter(char, charOffset)
         }
-    }
-
-    private mutating func peekString(_ prefix: String) -> Bool {
-        let arr = Array(prefix)
-        guard index + arr.count <= chars.count else { return false }
-        for i in 0..<arr.count {
-            if chars[index + i] != arr[i] { return false }
-        }
-        return true
-    }
-
-    private mutating func advance(by count: Int) {
-        index += count
     }
 
     private mutating func readQuotedString() throws -> String {
-        guard let quote = peek(), quote == "'" || quote == "\"" else {
-            throw LLSDNotationError.unexpectedCharacter(peek() ?? " ", index)
+        guard let quote = peek(), quote == UInt8(ascii: "'") || quote == UInt8(ascii: "\"") else {
+            let char: Character = index < utf8.endIndex ? text[index] : " "
+            let charOffset = text[..<index].count
+            throw LLSDNotationError.unexpectedCharacter(char, charOffset)
         }
         _ = advance() // skip initial quote
-        var result = ""
+
+        let sliceStart = index
+        var cur = index
+        var hasEscapes = false
+
+        while cur < utf8.endIndex {
+            let b = utf8[cur]
+            if b == quote {
+                break
+            }
+            if b == UInt8(ascii: "\\") {
+                hasEscapes = true
+                break
+            }
+            cur = utf8.index(after: cur)
+        }
+
+        if !hasEscapes {
+            if cur >= utf8.endIndex {
+                throw LLSDNotationError.unexpectedEOF
+            }
+            let result = String(decoding: utf8[sliceStart..<cur], as: UTF8.self)
+            index = utf8.index(after: cur) // skip closing quote
+            return result
+        }
+
+        // Slow path for escaped characters
+        var result = String(decoding: utf8[sliceStart..<cur], as: UTF8.self)
+        index = cur
+
         while !isAtEnd {
-            let c = advance()
-            if c == quote {
+            let b = advance()
+            if b == quote {
                 return result
-            } else if c == "\\" {
+            } else if b == UInt8(ascii: "\\") {
                 if !isAtEnd {
                     let escaped = advance()
                     switch escaped {
-                    case "n": result.append("\n")
-                    case "r": result.append("\r")
-                    case "t": result.append("\t")
-                    case "\\": result.append("\\")
-                    case "'": result.append("'")
-                    case "\"": result.append("\"")
-                    default: result.append(escaped)
+                    case UInt8(ascii: "n"): result.append("\n")
+                    case UInt8(ascii: "r"): result.append("\r")
+                    case UInt8(ascii: "t"): result.append("\t")
+                    case UInt8(ascii: "\\"): result.append("\\")
+                    case UInt8(ascii: "'"): result.append("'")
+                    case UInt8(ascii: "\""): result.append("\"")
+                    default:
+                        if escaped < 128 {
+                            result.append(Character(UnicodeScalar(escaped)))
+                        } else {
+                            let prevIndex = utf8.index(before: index)
+                            let charEnd = text.index(after: prevIndex)
+                            let charStr = String(decoding: utf8[prevIndex..<charEnd], as: UTF8.self)
+                            result.append(charStr)
+                            index = charEnd
+                        }
                     }
                 }
             } else {
-                result.append(c)
+                let byteStart = utf8.index(before: index)
+                var nextCur = index
+                while nextCur < utf8.endIndex {
+                    let nb = utf8[nextCur]
+                    if nb == quote || nb == UInt8(ascii: "\\") {
+                        break
+                    }
+                    nextCur = utf8.index(after: nextCur)
+                }
+                result.append(String(decoding: utf8[byteStart..<nextCur], as: UTF8.self))
+                index = nextCur
             }
         }
         throw LLSDNotationError.unexpectedEOF
@@ -342,15 +404,18 @@ public struct LLSDNotationParser {
 
     private mutating func parseSizedString() throws -> LLSDValue {
         advance(by: 2) // skip 's('
-        var lenStr = ""
-        while !isAtEnd && peek() != ")" {
-            lenStr.append(advance())
+        let start = index
+        while !isAtEnd && peek() != UInt8(ascii: ")") {
+            _ = advance()
         }
-        guard peek() == ")" else { throw LLSDNotationError.unexpectedEOF }
+        guard peek() == UInt8(ascii: ")") else { throw LLSDNotationError.unexpectedEOF }
+        let lenStr = String(decoding: utf8[start..<index], as: UTF8.self)
         _ = advance() // skip ')'
         guard let len = Int(lenStr) else { throw LLSDNotationError.invalidNumber(lenStr) }
-        guard let quote = peek(), quote == "'" || quote == "\"" else {
-            throw LLSDNotationError.unexpectedCharacter(peek() ?? " ", index)
+        guard let quote = peek(), quote == UInt8(ascii: "'") || quote == UInt8(ascii: "\"") else {
+            let char: Character = index < utf8.endIndex ? text[index] : " "
+            let charOffset = text[..<index].count
+            throw LLSDNotationError.unexpectedCharacter(char, charOffset)
         }
         _ = advance()
         let str = readFixedLength(len)
@@ -360,15 +425,18 @@ public struct LLSDNotationParser {
 
     private mutating func parseSizedBinary() throws -> LLSDValue {
         advance(by: 2) // skip 'b('
-        var lenStr = ""
-        while !isAtEnd && peek() != ")" {
-            lenStr.append(advance())
+        let start = index
+        while !isAtEnd && peek() != UInt8(ascii: ")") {
+            _ = advance()
         }
-        guard peek() == ")" else { throw LLSDNotationError.unexpectedEOF }
+        guard peek() == UInt8(ascii: ")") else { throw LLSDNotationError.unexpectedEOF }
+        let lenStr = String(decoding: utf8[start..<index], as: UTF8.self)
         _ = advance() // skip ')'
         guard let len = Int(lenStr) else { throw LLSDNotationError.invalidNumber(lenStr) }
-        guard let quote = peek(), quote == "'" || quote == "\"" else {
-            throw LLSDNotationError.unexpectedCharacter(peek() ?? " ", index)
+        guard let quote = peek(), quote == UInt8(ascii: "'") || quote == UInt8(ascii: "\"") else {
+            let char: Character = index < utf8.endIndex ? text[index] : " "
+            let charOffset = text[..<index].count
+            throw LLSDNotationError.unexpectedCharacter(char, charOffset)
         }
         _ = advance()
         let str = readFixedLength(len)
@@ -377,36 +445,36 @@ public struct LLSDNotationParser {
     }
 
     private mutating func readUntilDelimiter() -> String {
-        var res = ""
+        let start = index
         while !isAtEnd {
-            guard let c = peek() else { break }
-            if c == " " || c == "\t" || c == "\n" || c == "\r" || c == "," || c == "]" || c == "}" {
+            guard let b = peek() else { break }
+            if b == UInt8(ascii: " ") || b == UInt8(ascii: "\t") || b == UInt8(ascii: "\n") || b == UInt8(ascii: "\r") || b == UInt8(ascii: ",") || b == UInt8(ascii: "]") || b == UInt8(ascii: "}") {
                 break
             }
-            res.append(advance())
+            _ = advance()
         }
-        return res
+        return String(decoding: utf8[start..<index], as: UTF8.self)
     }
 
     private mutating func readFixedLength(_ count: Int) -> String {
-        var res = ""
+        let start = index
         for _ in 0..<count {
             if isAtEnd { break }
-            res.append(advance())
+            index = text.index(after: index)
         }
-        return res
+        return String(decoding: utf8[start..<index], as: UTF8.self)
     }
 
     private mutating func readKeyName() -> String {
-        var res = ""
+        let start = index
         while !isAtEnd {
-            guard let c = peek() else { break }
-            if c == ":" || c == "=" || c == " " || c == "\t" || c == "\n" || c == "\r" {
+            guard let b = peek() else { break }
+            if b == UInt8(ascii: ":") || b == UInt8(ascii: "=") || b == UInt8(ascii: " ") || b == UInt8(ascii: "\t") || b == UInt8(ascii: "\n") || b == UInt8(ascii: "\r") {
                 break
             }
-            res.append(advance())
+            _ = advance()
         }
-        return res
+        return String(decoding: utf8[start..<index], as: UTF8.self)
     }
 
     private func dataFromHex(_ hex: String) throws -> Data {
