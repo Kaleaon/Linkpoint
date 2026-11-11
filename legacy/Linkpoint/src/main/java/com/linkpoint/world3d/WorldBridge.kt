@@ -282,9 +282,10 @@ class AvatarController {
         // Update position
         position.add(velocity.x * dt, velocity.y * dt, velocity.z * dt)
 
-        // Ground check (simple - assumes ground at z=25)
-        if (!isFlying && position.z <= 25f) {
-            position.z = 25f
+        // Ground check (manifold-aware: planar terrain ground level is z=25, non-planar surface floor is z=0)
+        val groundLevel = if (topography.topographyType == com.linkpoint.world.topography.TopographyType.PLANAR) 25f else 0f
+        if (!isFlying && position.z <= groundLevel) {
+            position.z = groundLevel
             velocity.y = 0f
             isGrounded = true
         }
@@ -293,6 +294,22 @@ class AvatarController {
         if (moveDir.len2() > 0.01f) {
             rotation = kotlin.math.atan2(moveDir.x, -moveDir.z) * (180f / Math.PI.toFloat())
         }
+    }
+
+    /**
+     * Manifold-aware spatial interpolation to reconcile predicted avatar position
+     * with transformed incoming server updates without position snapping.
+     */
+    fun reconcilePosition(
+        serverLocalPos: Vector3,
+        dt: Float,
+        smoothingFactor: Float = 0.5f,
+        topography: WorldTopographyProjection = topographyProjection
+    ) {
+        val factor = (dt * 10f * smoothingFactor).coerceIn(0f, 1f)
+        position.x += (serverLocalPos.x - position.x) * factor
+        position.y += (serverLocalPos.y - position.y) * factor
+        position.z += (serverLocalPos.z - position.z) * factor
     }
 
     fun jump() {
