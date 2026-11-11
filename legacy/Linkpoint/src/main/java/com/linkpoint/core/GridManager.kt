@@ -253,5 +253,6 @@ data class GridInfo(
     val logoUrl: String? = null,
     val status: String = "online",
     val isCustom: Boolean = false,
-    val isResolved: Boolean = false
+    val isResolved: Boolean = false,
+    val assetServerUrl: String? = null
 )

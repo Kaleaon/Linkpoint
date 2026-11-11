@@ -1,34 +1,91 @@
 import SwiftUI
+import Ktheme
+
+enum MainTabItem: String, CaseIterable, Identifiable {
+    case world = "World"
+    case inventory = "Inventory"
+    case chat = "Chat"
+    case profile = "Profile"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .world: return "globe"
+        case .inventory: return "folder"
+        case .chat: return "message"
+        case .profile: return "person"
+        }
+    }
+
+    var tag: Int {
+        switch self {
+        case .world: return 0
+        case .inventory: return 1
+        case .chat: return 2
+        case .profile: return 3
+        }
+    }
+}
 
 struct MainTabView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedTab = 0
+    @State private var selectedSidebarItem: MainTabItem? = .world
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        if horizontalSizeClass == .regular {
+            NavigationSplitView {
+                List(MainTabItem.allCases, selection: $selectedSidebarItem) { item in
+                    NavigationLink(value: item) {
+                        Label(item.rawValue, systemImage: item.icon)
+                    }
+                }
+                .navigationTitle("Linkpoint")
+            } detail: {
+                detailView(for: selectedSidebarItem ?? .world)
+            }
+        } else {
+            TabView(selection: $selectedTab) {
+                WorldView()
+                    .tabItem {
+                        Label("World", systemImage: "globe")
+                    }
+                    .tag(0)
+
+                InventoryView()
+                    .tabItem {
+                        Label("Inventory", systemImage: "folder")
+                    }
+                    .tag(1)
+
+                ChatView()
+                    .tabItem {
+                        Label("Chat", systemImage: "message")
+                    }
+                    .tag(2)
+
+                ProfileView()
+                    .tabItem {
+                        Label("Profile", systemImage: "person")
+                    }
+                    .tag(3)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func detailView(for item: MainTabItem) -> some View {
+        switch item {
+        case .world:
             WorldView()
-                .tabItem {
-                    Label("World", systemImage: "globe")
-                }
-                .tag(0)
-
+        case .inventory:
             InventoryView()
-                .tabItem {
-                    Label("Inventory", systemImage: "folder")
-                }
-                .tag(1)
-
+        case .chat:
             ChatView()
-                .tabItem {
-                    Label("Chat", systemImage: "message")
-                }
-                .tag(2)
-
+        case .profile:
             ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person")
-                }
-                .tag(3)
         }
     }
 }
@@ -37,28 +94,28 @@ struct WorldView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Ktheme.sceneBackground.ignoresSafeArea()
 
                 VStack {
                     Text("3D World View")
                         .font(.title)
-                        .foregroundColor(.white)
+                        .foregroundColor(Ktheme.textPrimary)
 
                     Text("OpenGL/Metal rendering will be implemented here")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Ktheme.textSecondary)
                         .padding()
 
                     // Placeholder for 3D rendering
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Ktheme.viewportPlaceholder)
                         .overlay(
                             VStack {
                                 Image(systemName: "cube.transparent")
                                     .resizable()
                                     .frame(width: 100, height: 100)
-                                    .foregroundColor(.white.opacity(0.5))
+                                    .foregroundColor(Ktheme.textMuted)
                                 Text("3D Viewport")
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(Ktheme.textMuted)
                             }
                         )
                 }
@@ -107,7 +164,7 @@ struct InventoryItemRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(Ktheme.brandPrimary)
                 .frame(width: 30)
 
             VStack(alignment: .leading) {
@@ -115,13 +172,13 @@ struct InventoryItemRow: View {
                     .font(.body)
                 Text(type)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Ktheme.textSecondary)
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(.secondary)
+                .foregroundColor(Ktheme.textSecondary)
                 .font(.caption)
         }
     }
@@ -154,7 +211,7 @@ struct ChatView: View {
 
                     Button(action: sendMessage) {
                         Image(systemName: "paperplane.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(Ktheme.brandPrimary)
                     }
                     .disabled(newMessage.isEmpty)
                 }
@@ -193,11 +250,11 @@ struct ChatMessageView: View {
                 Text(message.sender)
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.blue)
+                    .foregroundColor(Ktheme.brandPrimary)
 
                 Text(message.timestamp, style: .time)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Ktheme.textSecondary)
             }
 
             Text(message.content)
@@ -218,7 +275,7 @@ struct ProfileView: View {
                         Image(systemName: "person.circle.fill")
                             .resizable()
                             .frame(width: 60, height: 60)
-                            .foregroundColor(.blue)
+                            .foregroundColor(Ktheme.brandPrimary)
 
                         VStack(alignment: .leading) {
                             Text(authViewModel.currentUser?.fullName ?? "User")
@@ -226,7 +283,7 @@ struct ProfileView: View {
                                 .fontWeight(.bold)
                             Text("@\(authViewModel.currentUser?.username ?? "username")")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Ktheme.textSecondary)
                         }
                         .padding(.leading, 8)
                     }
@@ -250,7 +307,7 @@ struct ProfileView: View {
                         Text("Current Grid")
                         Spacer()
                         Text(authViewModel.selectedGrid.name)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Ktheme.textSecondary)
                     }
                 }
 
@@ -259,7 +316,7 @@ struct ProfileView: View {
                         HStack {
                             Spacer()
                             Text("Logout")
-                                .foregroundColor(.red)
+                                .foregroundColor(Ktheme.error)
                             Spacer()
                         }
                     }
