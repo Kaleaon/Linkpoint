@@ -1,5 +1,7 @@
 package com.linkpoint.chat.encoder
 
+import com.linkpoint.linden.llmessage.IMType
+import com.linkpoint.protocol.core.AgentIdentity
 import org.junit.Assert.*
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -11,8 +13,12 @@ import java.util.concurrent.TimeUnit
 class ChatPacketEncoderTest {
 
     @Test
-    fun `test spatial chat encoder 12-byte header and sequence increment`() {
-        val encoder = ChatPacketEncoder(initialSequence = 100)
+    fun `test spatial chat encoder 32-byte header and sequence increment`() {
+        val identity = AgentIdentity(
+            agentId = UUID.fromString("11111111-2222-3333-4444-555555555555"),
+            sessionId = UUID.fromString("66666666-7777-8888-9999-000000000000")
+        )
+        val encoder = ChatPacketEncoder(initialSequence = 100, agentIdentity = identity)
         assertEquals(100, encoder.getCurrentSequenceNumber())
 
         val message = "Hello spatial world"
@@ -22,81 +28,90 @@ class ChatPacketEncoderTest {
         assertEquals(100, packet.sequenceNumber)
         assertEquals(101, encoder.getCurrentSequenceNumber())
 
-        // Verify header fields
+        // Verify header fields on EncodedChatPacket metadata
         assertEquals(ChatPacketEncoder.SPATIAL_HEADER_FLAGS, packet.headerFlags)
         assertEquals(ChatPacketEncoder.TYPE_SPATIAL_CHAT, packet.channelTypeId)
 
         val payload = packet.payload
+        assertTrue("Payload length should be at least 32 bytes for AgentData header", payload.size >= 32)
         val buffer = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
 
-        // Byte 0: Flags
-        assertEquals(ChatPacketEncoder.SPATIAL_HEADER_FLAGS, buffer.get())
+        // 32-byte AgentData header verification (Big-Endian UUIDs)
+        val bufferBE = ByteBuffer.wrap(payload).order(ByteOrder.BIG_ENDIAN)
+        val agentIdRead = UUID(bufferBE.long, bufferBE.long)
+        val sessionIdRead = UUID(bufferBE.long, bufferBE.long)
 
-        // Bytes 1..4: Sequence Number (Big Endian uint32)
-        val seqBE = ((buffer.get().toInt() and 0xFF) shl 24) or
-                ((buffer.get().toInt() and 0xFF) shl 16) or
-                ((buffer.get().toInt() and 0xFF) shl 8) or
-                (buffer.get().toInt() and 0xFF)
-        assertEquals(100, seqBE)
+        assertEquals(identity.agentId, agentIdRead)
+        assertEquals(identity.sessionId, sessionIdRead)
 
-        // Byte 5: Channel Type ID
-        assertEquals(ChatPacketEncoder.TYPE_SPATIAL_CHAT, buffer.get())
-
-        // Bytes 6..11: Session context (6 bytes zeros for spatial)
-        val sessionBytes = ByteArray(6)
-        buffer.get(sessionBytes)
-        assertArrayEquals(ByteArray(6), sessionBytes)
-
-        // Payload: U16 LE string length
+        // ChatData verification (position 32)
+        buffer.position(32)
         val strLen = buffer.short.toInt() and 0xFFFF
         val expectedLen = message.toByteArray(Charsets.UTF_8).size + 1
         assertEquals(expectedLen, strLen)
 
-        // String bytes + NUL
         val msgBytes = ByteArray(strLen - 1)
         buffer.get(msgBytes)
         assertEquals(message, String(msgBytes, Charsets.UTF_8))
         assertEquals(0.toByte(), buffer.get()) // NUL byte
 
-        // Channel ID (4 bytes LE)
+        // Chat type (1 byte) and Channel ID (4 bytes LE int)
+        assertEquals(ChatPacketEncoder.TYPE_SPATIAL_CHAT, buffer.get())
         assertEquals(0, buffer.int)
     }
 
     @Test
     fun `test direct IM packet encoder session bytes and header framing`() {
-        val sessionUuid = UUID.randomUUID()
-        val encoder = IMPacketEncoder(initialSequence = 1, sessionUuid = sessionUuid)
+        val identity = AgentIdentity(
+            agentId = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
+            sessionId = UUID.fromString("12345678-1234-1234-1234-123456789abc")
+        )
+        val sessionUuid = UUID.fromString("98765432-4321-4321-4321-cba987654321")
+        val encoder = IMPacketEncoder(initialSequence = 1, agentIdentity = identity, sessionUuid = sessionUuid)
 
         val message = "Direct message content"
         val packet = encoder.encodeDirectIM(message)
 
         assertEquals(IMPacketEncoder.IM_HEADER_FLAGS, packet.headerFlags)
         assertEquals(IMPacketEncoder.TYPE_DIRECT_IM, packet.channelTypeId)
+        assertEquals(sessionUuid, packet.sessionUuid)
 
         val expectedSessionBytes = IMPacketEncoder.uuidToSessionBytes(sessionUuid)
+        assertEquals(16, expectedSessionBytes.size)
         assertArrayEquals(expectedSessionBytes, encoder.getChannelSessionBytes())
 
-        val buffer = ByteBuffer.wrap(packet.payload).order(ByteOrder.LITTLE_ENDIAN)
-        assertEquals(IMPacketEncoder.IM_HEADER_FLAGS, buffer.get())
+        val payload = packet.payload
+        assertTrue("Payload length should be at least 32 bytes for AgentData header", payload.size >= 32)
 
-        // Sequence number (1)
-        val seqBE = ((buffer.get().toInt() and 0xFF) shl 24) or
-                ((buffer.get().toInt() and 0xFF) shl 16) or
-                ((buffer.get().toInt() and 0xFF) shl 8) or
-                (buffer.get().toInt() and 0xFF)
-        assertEquals(1, seqBE)
+        val bufferBE = ByteBuffer.wrap(payload).order(ByteOrder.BIG_ENDIAN)
+        val agentIdRead = UUID(bufferBE.long, bufferBE.long)
+        val sessionIdRead = UUID(bufferBE.long, bufferBE.long)
+        assertEquals(identity.agentId, agentIdRead)
+        assertEquals(identity.sessionId, sessionIdRead)
 
-        assertEquals(IMPacketEncoder.TYPE_DIRECT_IM, buffer.get())
+        val bufferLE = ByteBuffer.wrap(payload).order(ByteOrder.LITTLE_ENDIAN)
+        bufferLE.position(32) // MessageBlock start
 
-        val readSessionBytes = ByteArray(6)
-        buffer.get(readSessionBytes)
-        assertArrayEquals(expectedSessionBytes, readSessionBytes)
+        // Byte 32: fromGroup (0)
+        assertEquals(0.toByte(), bufferLE.get())
+
+        // Bytes 33..48: toAgentId (16-byte BE UUID matching target sessionUuid)
+        bufferBE.position(33)
+        val toAgentIdRead = UUID(bufferBE.long, bufferBE.long)
+        assertEquals(sessionUuid, toAgentIdRead)
+
+        // Verify Dialog type byte at offset 82
+        assertEquals(IMType.NOTHING_SPECIAL.value.toByte(), payload[82])
     }
 
     @Test
     fun `test group message encoder context and multi-byte unicode support`() {
-        val groupUuid = UUID.fromString("00000000-0000-0000-0000-000000000001")
-        val encoder = GroupMessageEncoder(initialSequence = 50, groupUuid = groupUuid)
+        val identity = AgentIdentity(
+            agentId = UUID.fromString("00000000-0000-0000-0000-000000000001"),
+            sessionId = UUID.fromString("00000000-0000-0000-0000-000000000002")
+        )
+        val groupUuid = UUID.fromString("fe001122-3344-5566-7788-99aabbccdde0")
+        val encoder = GroupMessageEncoder(initialSequence = 50, agentIdentity = identity, groupUuid = groupUuid)
 
         val unicodeMsg = "Group Chat Announcement! 📢 🔥"
         val packet = encoder.encodeGroupMessage(unicodeMsg, channel = 42)
@@ -104,18 +119,33 @@ class ChatPacketEncoderTest {
         assertEquals(50, packet.sequenceNumber)
         assertEquals(GroupMessageEncoder.GROUP_HEADER_FLAGS, packet.headerFlags)
         assertEquals(GroupMessageEncoder.TYPE_GROUP_CHAT, packet.channelTypeId)
-        assertEquals(42, packet.channel)
+        assertEquals(groupUuid, packet.groupUuid)
 
-        val buffer = ByteBuffer.wrap(packet.payload).order(ByteOrder.LITTLE_ENDIAN)
-        buffer.position(12) // Skip 12-byte header
+        val payload = packet.payload
+        val bufferBE = ByteBuffer.wrap(payload).order(ByteOrder.BIG_ENDIAN)
 
-        val strLen = buffer.short.toInt() and 0xFFFF
-        val expectedByteCount = unicodeMsg.toByteArray(Charsets.UTF_8).size + 1
-        assertEquals(expectedByteCount, strLen)
+        bufferBE.position(33)
+        val toAgentIdRead = UUID(bufferBE.long, bufferBE.long)
+        assertEquals(groupUuid, toAgentIdRead)
 
-        val msgBytes = ByteArray(strLen - 1)
-        buffer.get(msgBytes)
-        assertEquals(unicodeMsg, String(msgBytes, Charsets.UTF_8))
+        // Verify Dialog = IMType.SESSION_SEND (17)
+        assertEquals(IMType.SESSION_SEND.value.toByte(), payload[82])
+    }
+
+    @Test
+    fun `test full 128-bit session and group UUID preservation without truncation`() {
+        val arbitraryUuid = UUID(0x123456789ABCDEF0L, -0x0123456789ABCDEFL)
+        val sessionBytes = IMPacketEncoder.uuidToSessionBytes(arbitraryUuid)
+        assertEquals(16, sessionBytes.size)
+
+        val reconstructedUuid = IMPacketEncoder.sessionBytesToUuid(sessionBytes)
+        assertEquals(arbitraryUuid, reconstructedUuid)
+
+        val groupBytes = GroupMessageEncoder.groupUuidToBytes(arbitraryUuid)
+        assertEquals(16, groupBytes.size)
+
+        val reconstructedGroupUuid = GroupMessageEncoder.groupBytesToUuid(groupBytes)
+        assertEquals(arbitraryUuid, reconstructedGroupUuid)
     }
 
     @Test

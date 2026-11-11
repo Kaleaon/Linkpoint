@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-THEME_FILE="legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
+THEME_FILE="${THEME_FILE:-legacy/Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt}"
 [[ -f "$THEME_FILE" ]] || THEME_FILE="Linkpoint/src/main/java/com/linkpoint/ui/theme/BuiltInThemes.kt"
 
 if [[ ! -f "$THEME_FILE" ]]; then
@@ -120,11 +120,11 @@ json_patterns = [
     'packages/design-system/themes/*.json',
     'packages/design-system/themes/community/*.json',
     'legacy/ktheme-pr/themes/community/*.json',
-    'ktheme-pr/themes/community/*.json',
+    'ktheme-pr/themes/community/*.json'
 ]
 json_files = []
 for pat in json_patterns:
-    json_files.extend(glob.glob(pat))
+    json_files.extend(glob.glob(pat, recursive=True))
 
 json_themes = {}
 json_schema_errors = []
