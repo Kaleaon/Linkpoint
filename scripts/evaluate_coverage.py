@@ -85,10 +85,12 @@ def main():
         type=Path,
         default=Path(
             "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-            if Path(
-                "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-            ).exists()
-            else "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        )
+        if Path(
+            "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        ).exists()
+        else Path(
+            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         ),
     )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))

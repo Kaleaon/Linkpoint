@@ -61,6 +61,8 @@ def _get_native_lib():
 
     candidate_paths = [
         os.path.join(base_dir, lib_name),
+        os.path.join(os.path.dirname(base_dir), lib_name),
+        os.path.join(os.getcwd(), lib_name),
         os.path.join(base_dir, "builds", "native", lib_name),
         os.path.join(os.getcwd(), "builds", "native", lib_name),
     ]

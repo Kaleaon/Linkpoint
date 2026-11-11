@@ -145,7 +145,11 @@ class SpatialIndex @JvmOverloads constructor(
      * linear scan when [useOctree] is false.
      */
     @Synchronized
-    fun queryFrustum(culler: FrustumCuller, maxResults: Int = MAX_RESULTS): List<SpatialEntry> {
+    fun queryFrustum(
+        culler: FrustumCuller,
+        maxResults: Int = MAX_RESULTS,
+        cameraLocalPos: FloatArray? = null
+    ): List<SpatialEntry> {
         val result = mutableListOf<SpatialEntry>()
         if (!useOctree) {
             // Diagnostic fallback: legacy linear scan
@@ -153,7 +157,14 @@ class SpatialIndex @JvmOverloads constructor(
                 if (result.size >= maxResults) break
                 val b = topographyProjection.getProjectedBounds(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ)
                 if (culler.isAABBVisible(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)) {
-                    result.add(entry)
+                    if (cameraLocalPos == null || cameraLocalPos.size < 3 ||
+                        !topographyProjection.isBeyondHorizon(
+                            cameraLocalPos[0], cameraLocalPos[1], cameraLocalPos[2],
+                            entry.posX, entry.posY, entry.posZ, maxOf(entry.halfExtentX, entry.halfExtentY, entry.halfExtentZ)
+                        )
+                    ) {
+                        result.add(entry)
+                    }
                 }
             }
             return result
@@ -161,7 +172,22 @@ class SpatialIndex @JvmOverloads constructor(
 
         // Hierarchical octree traversal
         val seenSet = HashSet<Long>(maxResults.coerceAtMost(entries.size + 16))
-        root.queryFrustum(culler, result, seenSet, maxResults, topographyProjection)
+        root.queryFrustum(culler, result, seenSet, maxResults, topographyProjection, cameraLocalPos)
+        return result
+    }
+
+    /**
+     * Query objects within a native surface geodesic distance range.
+     */
+    @Synchronized
+    fun queryGeodesicRange(
+        centerX: Float, centerY: Float, centerZ: Float,
+        maxGeodesicDistance: Float,
+        maxResults: Int = MAX_RESULTS
+    ): List<SpatialEntry> {
+        val result = mutableListOf<SpatialEntry>()
+        val seenSet = HashSet<Long>()
+        root.queryGeodesicRange(centerX, centerY, centerZ, maxGeodesicDistance, result, seenSet, maxResults, topographyProjection)
         return result
     }
 
@@ -367,12 +393,29 @@ class OctreeNode(
         result: MutableList<SpatialEntry>,
         seenSet: HashSet<Long>,
         maxResults: Int,
-        topographyProjection: WorldTopographyProjection = PlanarTopographyProjection()
+        topographyProjection: WorldTopographyProjection = PlanarTopographyProjection(),
+        cameraLocalPos: FloatArray? = null
     ) {
         if (result.size >= maxResults) return
+
+        if (cameraLocalPos != null && cameraLocalPos.size >= 3) {
+            val nodeCenterX = minX + sizeX / 2f
+            val nodeCenterY = minY + sizeY / 2f
+            val nodeCenterZ = minZ + sizeZ / 2f
+            val hx = sizeX / 2f; val hy = sizeY / 2f; val hz = sizeZ / 2f
+            val nodeRadius = Math.sqrt((hx * hx + hy * hy + hz * hz).toDouble()).toFloat()
+            if (topographyProjection.isBeyondHorizon(
+                    cameraLocalPos[0], cameraLocalPos[1], cameraLocalPos[2],
+                    nodeCenterX, nodeCenterY, nodeCenterZ, nodeRadius
+                )
+            ) {
+                return
+            }
+        }
+
         when (culler.classifyAABB(minX, minY, minZ, maxX, maxY, maxZ)) {
             FrustumResult.OUTSIDE -> return
-            FrustumResult.INSIDE -> collectAll(result, seenSet, maxResults)
+            FrustumResult.INSIDE -> collectAll(result, seenSet, maxResults, topographyProjection, cameraLocalPos)
             FrustumResult.INTERSECTS -> {
                 for (obj in objects) {
                     if (result.size >= maxResults) return
@@ -380,29 +423,84 @@ class OctreeNode(
                     if (!seenSet.contains(obj.id) &&
                         culler.isAABBVisible(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)
                     ) {
-                        seenSet.add(obj.id)
-                        result.add(obj)
+                        if (cameraLocalPos == null || cameraLocalPos.size < 3 ||
+                            !topographyProjection.isBeyondHorizon(
+                                cameraLocalPos[0], cameraLocalPos[1], cameraLocalPos[2],
+                                obj.posX, obj.posY, obj.posZ, maxOf(obj.halfExtentX, obj.halfExtentY, obj.halfExtentZ)
+                            )
+                        ) {
+                            seenSet.add(obj.id)
+                            result.add(obj)
+                        }
                     }
                 }
-                children?.forEach { it?.queryFrustum(culler, result, seenSet, maxResults, topographyProjection) }
+                children?.forEach { it?.queryFrustum(culler, result, seenSet, maxResults, topographyProjection, cameraLocalPos) }
             }
+        }
+    }
+
+    fun queryGeodesicRange(
+        centerX: Float, centerY: Float, centerZ: Float,
+        maxGeodesicDistance: Float,
+        result: MutableList<SpatialEntry>,
+        seenSet: HashSet<Long>,
+        maxResults: Int,
+        topographyProjection: WorldTopographyProjection
+    ) {
+        if (result.size >= maxResults) return
+
+        val nodeCenterX = minX + sizeX / 2f
+        val nodeCenterY = minY + sizeY / 2f
+        val hx = sizeX / 2f; val hy = sizeY / 2f
+        val nodeRadius = Math.hypot(hx.toDouble(), hy.toDouble()).toFloat()
+        val nodeDist = topographyProjection.calculateGeodesicDistance(centerX, centerY, nodeCenterX, nodeCenterY)
+
+        if (nodeDist > maxGeodesicDistance + nodeRadius) {
+            return
+        }
+
+        for (obj in objects) {
+            if (result.size >= maxResults) return
+            if (!seenSet.contains(obj.id)) {
+                val objDist = topographyProjection.calculateGeodesicDistance(centerX, centerY, obj.posX, obj.posY)
+                val objRadius = maxOf(obj.halfExtentX, obj.halfExtentY)
+                if (objDist <= maxGeodesicDistance + objRadius) {
+                    seenSet.add(obj.id)
+                    result.add(obj)
+                }
+            }
+        }
+
+        children?.forEach {
+            it?.queryGeodesicRange(centerX, centerY, centerZ, maxGeodesicDistance, result, seenSet, maxResults, topographyProjection)
         }
     }
 
     private fun collectAll(
         result: MutableList<SpatialEntry>,
         seenSet: HashSet<Long>,
-        maxResults: Int
+        maxResults: Int,
+        topographyProjection: WorldTopographyProjection = PlanarTopographyProjection(),
+        cameraLocalPos: FloatArray? = null
     ) {
         for (obj in objects) {
             if (result.size >= maxResults) return
+            if (cameraLocalPos != null && cameraLocalPos.size >= 3) {
+                if (topographyProjection.isBeyondHorizon(
+                        cameraLocalPos[0], cameraLocalPos[1], cameraLocalPos[2],
+                        obj.posX, obj.posY, obj.posZ, maxOf(obj.halfExtentX, obj.halfExtentY, obj.halfExtentZ)
+                    )
+                ) {
+                    continue
+                }
+            }
             if (seenSet.add(obj.id)) {
                 result.add(obj)
             }
         }
         children?.forEach { child ->
             if (result.size >= maxResults) return
-            child?.collectAll(result, seenSet, maxResults)
+            child?.collectAll(result, seenSet, maxResults, topographyProjection, cameraLocalPos)
         }
     }
 

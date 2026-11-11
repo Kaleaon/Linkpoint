@@ -505,12 +505,14 @@ export class Graphics3D extends Utils.EventEmitter {
       ['uNormalTextureName', 'uNormalTexture'], ['uEmissiveTextureName', 'uEmissiveTexture'],
       ['uCompositionName', 'uComposition'], ['uDetail0Name', 'uDetail0'], ['uDetail1Name', 'uDetail1'],
       ['uDetail2Name', 'uDetail2'], ['uDetail3Name', 'uDetail3'],
+      ['uDetailNormal0Name', 'uDetailNormal0'], ['uDetailNormal1Name', 'uDetailNormal1'],
+      ['uDetailNormal2Name', 'uDetailNormal2'], ['uDetailNormal3Name', 'uDetailNormal3'],
     ];
     let unit = 0;
     for (const [valueName, uniformName] of bindings) {
       const sampler = programInfo.uniforms[uniformName];
       if (!sampler) continue;
-      const fallback = uniformName === 'uNormalTexture' ? '__normal' : '__white';
+      const fallback = (uniformName === 'uNormalTexture' || uniformName.startsWith('uDetailNormal')) ? '__normal' : '__white';
       const val = uniforms[valueName];
       const texture = this.textures.get(val) || (val && this.textures.get(String(val).toLowerCase())) || this.textures.get(fallback);
       if (!texture) continue;

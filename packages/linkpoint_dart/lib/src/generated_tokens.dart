@@ -22,6 +22,8 @@ class _ColorTokens {
   final onUnreadBadge = const Color(0xFF03212A);
   final hudBackground = const Color(0xAA000000);
   final hudStroke = const Color(0x33FFFFFF);
+  final brand = const _BrandTokens();
+  final ui = const _UiTokens();
 }
 
 class _StatusTokens {
@@ -68,4 +70,27 @@ class _GlassTokens {
 
   final background = const Color(0x8C101C33);
   final stroke = const Color(0x14FFFFFF);
+}
+
+class _BrandTokens {
+  const _BrandTokens();
+
+  final primary = const Color(0xFF007AFF);
+  final secondary = const Color(0xFF5856D6);
+  final accent = const Color(0xFFAF52DE);
+}
+
+class _UiTokens {
+  const _UiTokens();
+
+  final text = const Color(0xFFFFFFFF);
+  final textMuted = const Color(0x99EBEBF5);
+  final textSecondary = const Color(0xFF8E8E93);
+  final background = const Color(0xFF000000);
+  final surface = const Color(0xFF1C1C1E);
+  final cardBackground = const Color(0xFF2C2C2E);
+  final error = const Color(0xFFFF3B30);
+  final disabled = const Color(0xFF8E8E93);
+  final shadow = const Color(0x1A000000);
+  final viewportPlaceholder = const Color(0x4D8E8E93);
 }
