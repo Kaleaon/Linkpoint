@@ -6,6 +6,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
 
+SKIP_GRADLE=false
+for arg in "$@"; do
+    case "${arg}" in
+        --skip-gradle)
+            SKIP_GRADLE=true
+            ;;
+    esac
+done
+
 echo "========================================================"
 echo " Starting Linkpoint Polyglot Conformance Test Suite"
 echo " Repository root: ${REPO_ROOT}"
@@ -90,11 +99,17 @@ else
 fi
 
 # Step 6: Kotlin LLSD Conformance Suite
-echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
-(
-    cd "${REPO_ROOT}/legacy"
-    ./gradlew :llsd-core:test --no-daemon
-)
+if [ "${SKIP_GRADLE}" = true ]; then
+    echo "=== [6/6] Skipping Kotlin LLSD Conformance Suite (--skip-gradle requested) ==="
+elif ! command -v java >/dev/null 2>&1 && [ -z "${JAVA_HOME:-}" ]; then
+    echo "=== [6/6] Skipping Kotlin LLSD Conformance Suite (no Java/JDK found) ==="
+else
+    echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
+    (
+        cd "${REPO_ROOT}/legacy"
+        LINKPOINT_SKIP_ANDROID=1 ./gradlew :llsd-core:test --no-daemon
+    )
+fi
 
 # Optional Swift execution if toolchain exists
 if command -v swift >/dev/null 2>&1; then

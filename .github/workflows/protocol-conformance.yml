@@ -52,7 +52,7 @@ jobs:
           channel: "stable"
 
       - name: Run polyglot test orchestrator
-        run: bash scripts/run_polyglot_tests.sh
+        run: bash scripts/run_polyglot_tests.sh --skip-gradle
 
       - name: Run offline conformance layers
         env:

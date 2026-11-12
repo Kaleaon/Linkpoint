@@ -19,8 +19,12 @@ def resolveAndroidSdkDir = {
     return null
 }
 
+def skipAndroid = System.getenv('LINKPOINT_SKIP_ANDROID') == '1' ||
+                  System.getenv('SKIP_ANDROID_BUILD') == '1' ||
+                  providers.gradleProperty('skipAndroidBuild').orNull == 'true'
+
 def sdkDir = resolveAndroidSdkDir()
-def hasAndroidSdk = sdkDir != null && sdkDir.exists() && (
+def hasAndroidSdk = !skipAndroid && sdkDir != null && sdkDir.exists() && (
     new File(sdkDir, 'ndk/26.3.11579264').exists() ||
     (System.getenv('ANDROID_NDK_HOME') != null && file(System.getenv('ANDROID_NDK_HOME')).exists() && (
         file(System.getenv('ANDROID_NDK_HOME')).name == '26.3.11579264' ||
