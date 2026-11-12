@@ -78,7 +78,7 @@ class IMManager(
     // Events
     private val _messageFlow = MutableSharedFlow<SLChatEvent>(replay = 1, extraBufferCapacity = 64)
     val messageFlow: SharedFlow<SLChatEvent> = _messageFlow
-    private val _sessionFlow = MutableSharedFlow<IMSessionEvent>(replay = 0, extraBufferCapacity = 16)
+    private val _sessionFlow = MutableSharedFlow<IMSessionEvent>(replay = 1, extraBufferCapacity = 16)
     val sessionFlow: SharedFlow<IMSessionEvent> = _sessionFlow
 
     // Active sessions list
