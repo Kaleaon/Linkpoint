@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'generated_tokens.dart';
 import 'session.dart';
 
@@ -31,7 +32,9 @@ class GridStatusBanner extends StatelessWidget {
           Text(
             isConnected ? 'Connected: $regionName' : 'Offline',
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -59,7 +62,9 @@ class ChatFeedWidget extends StatelessWidget {
                 TextSpan(
                   text: '${msg.fromName}: ',
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.indigoAccent),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigoAccent,
+                  ),
                 ),
                 TextSpan(
                   text: msg.body,
@@ -111,9 +116,7 @@ class _LinkpointViewerWidgetState extends State<LinkpointViewerWidget> {
           isConnected: widget.session.isConnected,
           regionName: snapshot?.regionName ?? 'None',
         ),
-        Expanded(
-          child: ChatFeedWidget(messages: _messages),
-        ),
+        Expanded(child: ChatFeedWidget(messages: _messages)),
       ],
     );
   }
