@@ -11,7 +11,7 @@
     "generate:protocol": "node scripts/generate_protocol.mjs",
     "check": "npm run generate:protocol && npm run check:contract && npm run check:web && npm run check:rust && npm run check:dart && npm run check:swift && npm run check:csharp",
     "check:contract": "bash scripts/check_viewer_contract.sh",
-    "check:web": "npm run typecheck && npm run test:web && npm run typecheck -w @linkpoint/app && npm run build -w @linkpoint/app",
+    "check:web": "npm run typecheck && npm run test:coverage && npm run typecheck -w @linkpoint/app && npm run build -w @linkpoint/app",
     "check:rust": "cargo fmt --all --check && cargo test --workspace --locked && cargo clippy --workspace --all-targets --locked -- -D warnings",
     "check:dart": "cd packages/linkpoint_dart && /opt/flutter/bin/flutter test",
     "check:swift": "cd platforms/iOS && (swift test || ! command -v swift >/dev/null 2>&1)",
