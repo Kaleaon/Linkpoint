@@ -9,10 +9,10 @@ using System.IO;
 
 namespace Linkpoint.Protocol
 {
-    public static class GeneratedProtocolCatalog
+    public static class GeneratedProtocol
     {
         public const string TemplateVersion = "2.0";
-        public static readonly IReadOnlyDictionary<string, uint> RegisteredMessages = new Dictionary<string, uint>
+        public static readonly Dictionary<string, uint> RegisteredMessages = new Dictionary<string, uint>
         {
             { "TestMessage", 1 },
             { "PacketAck", 4294967291 },
@@ -501,7 +501,8 @@ namespace Linkpoint.Protocol
 
         public static byte[] DecompressZerocoded(byte[] src)
         {
-            using var dest = new MemoryStream();
+            if (src == null) return Array.Empty<byte>();
+            List<byte> dest = new List<byte>(src.Length * 2);
             int i = 0;
             while (i < src.Length)
             {
@@ -510,6341 +511,10200 @@ namespace Linkpoint.Protocol
                 {
                     if (i + 1 < src.Length)
                     {
-                        byte count = src[i + 1];
+                        int count = src[i + 1];
                         if (count == 0)
                         {
-                            dest.WriteByte(0);
+                            dest.Add(0);
                             i += 2;
                         }
                         else
                         {
                             for (int k = 0; k < count; k++)
                             {
-                                dest.WriteByte(0);
+                                dest.Add(0);
                             }
                             i += 2;
                         }
                     }
                     else
                     {
-                        dest.WriteByte(0);
+                        dest.Add(0);
                         i += 1;
                     }
                 }
                 else
                 {
-                    dest.WriteByte(b);
+                    dest.Add(b);
                     i += 1;
                 }
             }
             return dest.ToArray();
         }
+
+        public static byte[] decompressZerocoded(byte[] src) => DecompressZerocoded(src);
+    }
+
+    public static class GeneratedProtocolCatalog
+    {
+        public const string TemplateVersion = GeneratedProtocol.TemplateVersion;
+        public static IReadOnlyDictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
+        public static byte[] DecompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
+        public static byte[] decompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
     }
 
     // Generated UDP Messages
     public class TestMessagePacket
     {
-        public string Name => "TestMessage";
-        public uint MessageNumber => 1;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TestMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 1;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PacketAckPacket
     {
-        public string Name => "PacketAck";
-        public uint MessageNumber => 4294967291;
-        public string Frequency => "Fixed";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PacketAck";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 4294967291;
+        public string Frequency { get; set; } = "Fixed";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class OpenCircuitPacket
     {
-        public string Name => "OpenCircuit";
-        public uint MessageNumber => 4294967292;
-        public string Frequency => "Fixed";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "OpenCircuit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 4294967292;
+        public string Frequency { get; set; } = "Fixed";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CloseCircuitPacket
     {
-        public string Name => "CloseCircuit";
-        public uint MessageNumber => 4294967293;
-        public string Frequency => "Fixed";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CloseCircuit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 4294967293;
+        public string Frequency { get; set; } = "Fixed";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class StartPingCheckPacket
     {
-        public string Name => "StartPingCheck";
-        public uint MessageNumber => 1;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "StartPingCheck";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 1;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CompletePingCheckPacket
     {
-        public string Name => "CompletePingCheck";
-        public uint MessageNumber => 2;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CompletePingCheck";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 2;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AddCircuitCodePacket
     {
-        public string Name => "AddCircuitCode";
-        public uint MessageNumber => 2;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AddCircuitCode";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 2;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UseCircuitCodePacket
     {
-        public string Name => "UseCircuitCode";
-        public uint MessageNumber => 3;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UseCircuitCode";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 3;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class NeighborListPacket
     {
-        public string Name => "NeighborList";
-        public uint MessageNumber => 3;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "NeighborList";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 3;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarTextureUpdatePacket
     {
-        public string Name => "AvatarTextureUpdate";
-        public uint MessageNumber => 4;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarTextureUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 4;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorMapUpdatePacket
     {
-        public string Name => "SimulatorMapUpdate";
-        public uint MessageNumber => 5;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimulatorMapUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 5;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorSetMapPacket
     {
-        public string Name => "SimulatorSetMap";
-        public uint MessageNumber => 6;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimulatorSetMap";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 6;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SubscribeLoadPacket
     {
-        public string Name => "SubscribeLoad";
-        public uint MessageNumber => 7;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SubscribeLoad";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 7;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UnsubscribeLoadPacket
     {
-        public string Name => "UnsubscribeLoad";
-        public uint MessageNumber => 8;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UnsubscribeLoad";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 8;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorReadyPacket
     {
-        public string Name => "SimulatorReady";
-        public uint MessageNumber => 9;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "SimulatorReady";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 9;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TelehubInfoPacket
     {
-        public string Name => "TelehubInfo";
-        public uint MessageNumber => 10;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TelehubInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 10;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorPresentAtLocationPacket
     {
-        public string Name => "SimulatorPresentAtLocation";
-        public uint MessageNumber => 11;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimulatorPresentAtLocation";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 11;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorLoadPacket
     {
-        public string Name => "SimulatorLoad";
-        public uint MessageNumber => 12;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimulatorLoad";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 12;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorShutdownRequestPacket
     {
-        public string Name => "SimulatorShutdownRequest";
-        public uint MessageNumber => 13;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimulatorShutdownRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 13;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionPresenceRequestByRegionIDPacket
     {
-        public string Name => "RegionPresenceRequestByRegionID";
-        public uint MessageNumber => 14;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RegionPresenceRequestByRegionID";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 14;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionPresenceRequestByHandlePacket
     {
-        public string Name => "RegionPresenceRequestByHandle";
-        public uint MessageNumber => 15;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RegionPresenceRequestByHandle";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 15;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionPresenceResponsePacket
     {
-        public string Name => "RegionPresenceResponse";
-        public uint MessageNumber => 16;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RegionPresenceResponse";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 16;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateSimulatorPacket
     {
-        public string Name => "UpdateSimulator";
-        public uint MessageNumber => 17;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UpdateSimulator";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 17;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LogDwellTimePacket
     {
-        public string Name => "LogDwellTime";
-        public uint MessageNumber => 18;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LogDwellTime";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 18;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FeatureDisabledPacket
     {
-        public string Name => "FeatureDisabled";
-        public uint MessageNumber => 19;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "FeatureDisabled";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 19;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LogFailedMoneyTransactionPacket
     {
-        public string Name => "LogFailedMoneyTransaction";
-        public uint MessageNumber => 20;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LogFailedMoneyTransaction";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 20;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UserReportInternalPacket
     {
-        public string Name => "UserReportInternal";
-        public uint MessageNumber => 21;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UserReportInternal";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 21;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetSimStatusInDatabasePacket
     {
-        public string Name => "SetSimStatusInDatabase";
-        public uint MessageNumber => 22;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetSimStatusInDatabase";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 22;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetSimPresenceInDatabasePacket
     {
-        public string Name => "SetSimPresenceInDatabase";
-        public uint MessageNumber => 23;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetSimPresenceInDatabase";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 23;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EconomyDataRequestPacket
     {
-        public string Name => "EconomyDataRequest";
-        public uint MessageNumber => 24;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EconomyDataRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 24;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EconomyDataPacket
     {
-        public string Name => "EconomyData";
-        public uint MessageNumber => 25;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "EconomyData";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 25;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPickerRequestPacket
     {
-        public string Name => "AvatarPickerRequest";
-        public uint MessageNumber => 26;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarPickerRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 26;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPickerRequestBackendPacket
     {
-        public string Name => "AvatarPickerRequestBackend";
-        public uint MessageNumber => 27;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarPickerRequestBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 27;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPickerReplyPacket
     {
-        public string Name => "AvatarPickerReply";
-        public uint MessageNumber => 28;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarPickerReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 28;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PlacesQueryPacket
     {
-        public string Name => "PlacesQuery";
-        public uint MessageNumber => 29;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "PlacesQuery";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 29;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PlacesReplyPacket
     {
-        public string Name => "PlacesReply";
-        public uint MessageNumber => 30;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "PlacesReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 30;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirFindQueryPacket
     {
-        public string Name => "DirFindQuery";
-        public uint MessageNumber => 31;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirFindQuery";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 31;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirFindQueryBackendPacket
     {
-        public string Name => "DirFindQueryBackend";
-        public uint MessageNumber => 32;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirFindQueryBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 32;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPlacesQueryPacket
     {
-        public string Name => "DirPlacesQuery";
-        public uint MessageNumber => 33;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPlacesQuery";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 33;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPlacesQueryBackendPacket
     {
-        public string Name => "DirPlacesQueryBackend";
-        public uint MessageNumber => 34;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPlacesQueryBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 34;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPlacesReplyPacket
     {
-        public string Name => "DirPlacesReply";
-        public uint MessageNumber => 35;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPlacesReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 35;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPeopleReplyPacket
     {
-        public string Name => "DirPeopleReply";
-        public uint MessageNumber => 36;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPeopleReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 36;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirEventsReplyPacket
     {
-        public string Name => "DirEventsReply";
-        public uint MessageNumber => 37;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirEventsReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 37;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirGroupsReplyPacket
     {
-        public string Name => "DirGroupsReply";
-        public uint MessageNumber => 38;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirGroupsReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 38;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirClassifiedQueryPacket
     {
-        public string Name => "DirClassifiedQuery";
-        public uint MessageNumber => 39;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirClassifiedQuery";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 39;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirClassifiedQueryBackendPacket
     {
-        public string Name => "DirClassifiedQueryBackend";
-        public uint MessageNumber => 40;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirClassifiedQueryBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 40;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirClassifiedReplyPacket
     {
-        public string Name => "DirClassifiedReply";
-        public uint MessageNumber => 41;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirClassifiedReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 41;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarClassifiedReplyPacket
     {
-        public string Name => "AvatarClassifiedReply";
-        public uint MessageNumber => 42;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarClassifiedReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 42;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ClassifiedInfoRequestPacket
     {
-        public string Name => "ClassifiedInfoRequest";
-        public uint MessageNumber => 43;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ClassifiedInfoRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 43;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ClassifiedInfoReplyPacket
     {
-        public string Name => "ClassifiedInfoReply";
-        public uint MessageNumber => 44;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ClassifiedInfoReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 44;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ClassifiedInfoUpdatePacket
     {
-        public string Name => "ClassifiedInfoUpdate";
-        public uint MessageNumber => 45;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ClassifiedInfoUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 45;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ClassifiedDeletePacket
     {
-        public string Name => "ClassifiedDelete";
-        public uint MessageNumber => 46;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ClassifiedDelete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 46;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ClassifiedGodDeletePacket
     {
-        public string Name => "ClassifiedGodDelete";
-        public uint MessageNumber => 47;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ClassifiedGodDelete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 47;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirLandQueryPacket
     {
-        public string Name => "DirLandQuery";
-        public uint MessageNumber => 48;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirLandQuery";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 48;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirLandQueryBackendPacket
     {
-        public string Name => "DirLandQueryBackend";
-        public uint MessageNumber => 49;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirLandQueryBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 49;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirLandReplyPacket
     {
-        public string Name => "DirLandReply";
-        public uint MessageNumber => 50;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirLandReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 50;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPopularQueryPacket
     {
-        public string Name => "DirPopularQuery";
-        public uint MessageNumber => 51;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPopularQuery";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 51;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPopularQueryBackendPacket
     {
-        public string Name => "DirPopularQueryBackend";
-        public uint MessageNumber => 52;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPopularQueryBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 52;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DirPopularReplyPacket
     {
-        public string Name => "DirPopularReply";
-        public uint MessageNumber => 53;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DirPopularReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 53;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelInfoRequestPacket
     {
-        public string Name => "ParcelInfoRequest";
-        public uint MessageNumber => 54;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelInfoRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 54;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelInfoReplyPacket
     {
-        public string Name => "ParcelInfoReply";
-        public uint MessageNumber => 55;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelInfoReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 55;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelObjectOwnersRequestPacket
     {
-        public string Name => "ParcelObjectOwnersRequest";
-        public uint MessageNumber => 56;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelObjectOwnersRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 56;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelObjectOwnersReplyPacket
     {
-        public string Name => "ParcelObjectOwnersReply";
-        public uint MessageNumber => 57;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelObjectOwnersReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 57;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupNoticesListRequestPacket
     {
-        public string Name => "GroupNoticesListRequest";
-        public uint MessageNumber => 58;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupNoticesListRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 58;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupNoticesListReplyPacket
     {
-        public string Name => "GroupNoticesListReply";
-        public uint MessageNumber => 59;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupNoticesListReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 59;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupNoticeRequestPacket
     {
-        public string Name => "GroupNoticeRequest";
-        public uint MessageNumber => 60;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupNoticeRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 60;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupNoticeAddPacket
     {
-        public string Name => "GroupNoticeAdd";
-        public uint MessageNumber => 61;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupNoticeAdd";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 61;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportRequestPacket
     {
-        public string Name => "TeleportRequest";
-        public uint MessageNumber => 62;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 62;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportLocationRequestPacket
     {
-        public string Name => "TeleportLocationRequest";
-        public uint MessageNumber => 63;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportLocationRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 63;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportLocalPacket
     {
-        public string Name => "TeleportLocal";
-        public uint MessageNumber => 64;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportLocal";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 64;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportLandmarkRequestPacket
     {
-        public string Name => "TeleportLandmarkRequest";
-        public uint MessageNumber => 65;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TeleportLandmarkRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 65;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportProgressPacket
     {
-        public string Name => "TeleportProgress";
-        public uint MessageNumber => 66;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportProgress";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 66;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DataHomeLocationRequestPacket
     {
-        public string Name => "DataHomeLocationRequest";
-        public uint MessageNumber => 67;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DataHomeLocationRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 67;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DataHomeLocationReplyPacket
     {
-        public string Name => "DataHomeLocationReply";
-        public uint MessageNumber => 68;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DataHomeLocationReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 68;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportFinishPacket
     {
-        public string Name => "TeleportFinish";
-        public uint MessageNumber => 69;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportFinish";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 69;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class StartLurePacket
     {
-        public string Name => "StartLure";
-        public uint MessageNumber => 70;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "StartLure";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 70;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportLureRequestPacket
     {
-        public string Name => "TeleportLureRequest";
-        public uint MessageNumber => 71;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportLureRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 71;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportCancelPacket
     {
-        public string Name => "TeleportCancel";
-        public uint MessageNumber => 72;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportCancel";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 72;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportStartPacket
     {
-        public string Name => "TeleportStart";
-        public uint MessageNumber => 73;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportStart";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 73;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportFailedPacket
     {
-        public string Name => "TeleportFailed";
-        public uint MessageNumber => 74;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportFailed";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 74;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UndoPacket
     {
-        public string Name => "Undo";
-        public uint MessageNumber => 75;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "Undo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 75;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RedoPacket
     {
-        public string Name => "Redo";
-        public uint MessageNumber => 76;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "Redo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 76;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UndoLandPacket
     {
-        public string Name => "UndoLand";
-        public uint MessageNumber => 77;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UndoLand";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 77;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentPausePacket
     {
-        public string Name => "AgentPause";
-        public uint MessageNumber => 78;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentPause";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 78;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentResumePacket
     {
-        public string Name => "AgentResume";
-        public uint MessageNumber => 79;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentResume";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 79;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentUpdatePacket
     {
-        public string Name => "AgentUpdate";
-        public uint MessageNumber => 4;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 4;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChatFromViewerPacket
     {
-        public string Name => "ChatFromViewer";
-        public uint MessageNumber => 80;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ChatFromViewer";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 80;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentThrottlePacket
     {
-        public string Name => "AgentThrottle";
-        public uint MessageNumber => 81;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentThrottle";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 81;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentFOVPacket
     {
-        public string Name => "AgentFOV";
-        public uint MessageNumber => 82;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentFOV";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 82;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentHeightWidthPacket
     {
-        public string Name => "AgentHeightWidth";
-        public uint MessageNumber => 83;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentHeightWidth";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 83;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentSetAppearancePacket
     {
-        public string Name => "AgentSetAppearance";
-        public uint MessageNumber => 84;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentSetAppearance";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 84;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentAnimationPacket
     {
-        public string Name => "AgentAnimation";
-        public uint MessageNumber => 5;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentAnimation";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 5;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentRequestSitPacket
     {
-        public string Name => "AgentRequestSit";
-        public uint MessageNumber => 6;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentRequestSit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 6;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentSitPacket
     {
-        public string Name => "AgentSit";
-        public uint MessageNumber => 7;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentSit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 7;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentQuitCopyPacket
     {
-        public string Name => "AgentQuitCopy";
-        public uint MessageNumber => 85;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentQuitCopy";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 85;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestImagePacket
     {
-        public string Name => "RequestImage";
-        public uint MessageNumber => 8;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestImage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 8;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ImageNotInDatabasePacket
     {
-        public string Name => "ImageNotInDatabase";
-        public uint MessageNumber => 86;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ImageNotInDatabase";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 86;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RebakeAvatarTexturesPacket
     {
-        public string Name => "RebakeAvatarTextures";
-        public uint MessageNumber => 87;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RebakeAvatarTextures";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 87;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetAlwaysRunPacket
     {
-        public string Name => "SetAlwaysRun";
-        public uint MessageNumber => 88;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetAlwaysRun";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 88;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectAddPacket
     {
-        public string Name => "ObjectAdd";
-        public uint MessageNumber => 1;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectAdd";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 1;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDeletePacket
     {
-        public string Name => "ObjectDelete";
-        public uint MessageNumber => 89;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectDelete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 89;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDuplicatePacket
     {
-        public string Name => "ObjectDuplicate";
-        public uint MessageNumber => 90;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectDuplicate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 90;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDuplicateOnRayPacket
     {
-        public string Name => "ObjectDuplicateOnRay";
-        public uint MessageNumber => 91;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectDuplicateOnRay";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 91;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MultipleObjectUpdatePacket
     {
-        public string Name => "MultipleObjectUpdate";
-        public uint MessageNumber => 2;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MultipleObjectUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 2;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestMultipleObjectsPacket
     {
-        public string Name => "RequestMultipleObjects";
-        public uint MessageNumber => 3;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RequestMultipleObjects";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 3;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectPositionPacket
     {
-        public string Name => "ObjectPosition";
-        public uint MessageNumber => 4;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectPosition";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 4;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectScalePacket
     {
-        public string Name => "ObjectScale";
-        public uint MessageNumber => 92;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectScale";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 92;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectRotationPacket
     {
-        public string Name => "ObjectRotation";
-        public uint MessageNumber => 93;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectRotation";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 93;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectFlagUpdatePacket
     {
-        public string Name => "ObjectFlagUpdate";
-        public uint MessageNumber => 94;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectFlagUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 94;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectClickActionPacket
     {
-        public string Name => "ObjectClickAction";
-        public uint MessageNumber => 95;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectClickAction";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 95;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectImagePacket
     {
-        public string Name => "ObjectImage";
-        public uint MessageNumber => 96;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectImage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 96;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectBypassModUpdatePacket
     {
-        public string Name => "ObjectBypassModUpdate";
-        public uint MessageNumber => 431;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectBypassModUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 431;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectMaterialPacket
     {
-        public string Name => "ObjectMaterial";
-        public uint MessageNumber => 97;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectMaterial";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 97;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectShapePacket
     {
-        public string Name => "ObjectShape";
-        public uint MessageNumber => 98;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectShape";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 98;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectExtraParamsPacket
     {
-        public string Name => "ObjectExtraParams";
-        public uint MessageNumber => 99;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectExtraParams";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 99;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectOwnerPacket
     {
-        public string Name => "ObjectOwner";
-        public uint MessageNumber => 100;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectOwner";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 100;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectGroupPacket
     {
-        public string Name => "ObjectGroup";
-        public uint MessageNumber => 101;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectGroup";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 101;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectBuyPacket
     {
-        public string Name => "ObjectBuy";
-        public uint MessageNumber => 102;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectBuy";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 102;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class BuyObjectInventoryPacket
     {
-        public string Name => "BuyObjectInventory";
-        public uint MessageNumber => 103;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "BuyObjectInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 103;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DerezContainerPacket
     {
-        public string Name => "DerezContainer";
-        public uint MessageNumber => 104;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DerezContainer";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 104;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectPermissionsPacket
     {
-        public string Name => "ObjectPermissions";
-        public uint MessageNumber => 105;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectPermissions";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 105;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectSaleInfoPacket
     {
-        public string Name => "ObjectSaleInfo";
-        public uint MessageNumber => 106;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectSaleInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 106;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectNamePacket
     {
-        public string Name => "ObjectName";
-        public uint MessageNumber => 107;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectName";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 107;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDescriptionPacket
     {
-        public string Name => "ObjectDescription";
-        public uint MessageNumber => 108;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectDescription";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 108;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectCategoryPacket
     {
-        public string Name => "ObjectCategory";
-        public uint MessageNumber => 109;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectCategory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 109;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectSelectPacket
     {
-        public string Name => "ObjectSelect";
-        public uint MessageNumber => 110;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectSelect";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 110;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDeselectPacket
     {
-        public string Name => "ObjectDeselect";
-        public uint MessageNumber => 111;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectDeselect";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 111;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectAttachPacket
     {
-        public string Name => "ObjectAttach";
-        public uint MessageNumber => 112;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectAttach";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 112;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDetachPacket
     {
-        public string Name => "ObjectDetach";
-        public uint MessageNumber => 113;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectDetach";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 113;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDropPacket
     {
-        public string Name => "ObjectDrop";
-        public uint MessageNumber => 114;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectDrop";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 114;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectLinkPacket
     {
-        public string Name => "ObjectLink";
-        public uint MessageNumber => 115;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectLink";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 115;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDelinkPacket
     {
-        public string Name => "ObjectDelink";
-        public uint MessageNumber => 116;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectDelink";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 116;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectGrabPacket
     {
-        public string Name => "ObjectGrab";
-        public uint MessageNumber => 117;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectGrab";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 117;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectGrabUpdatePacket
     {
-        public string Name => "ObjectGrabUpdate";
-        public uint MessageNumber => 118;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectGrabUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 118;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectDeGrabPacket
     {
-        public string Name => "ObjectDeGrab";
-        public uint MessageNumber => 119;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectDeGrab";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 119;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectSpinStartPacket
     {
-        public string Name => "ObjectSpinStart";
-        public uint MessageNumber => 120;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectSpinStart";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 120;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectSpinUpdatePacket
     {
-        public string Name => "ObjectSpinUpdate";
-        public uint MessageNumber => 121;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectSpinUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 121;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectSpinStopPacket
     {
-        public string Name => "ObjectSpinStop";
-        public uint MessageNumber => 122;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectSpinStop";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 122;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectExportSelectedPacket
     {
-        public string Name => "ObjectExportSelected";
-        public uint MessageNumber => 123;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectExportSelected";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 123;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ModifyLandPacket
     {
-        public string Name => "ModifyLand";
-        public uint MessageNumber => 124;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ModifyLand";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 124;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class VelocityInterpolateOnPacket
     {
-        public string Name => "VelocityInterpolateOn";
-        public uint MessageNumber => 125;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "VelocityInterpolateOn";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 125;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class VelocityInterpolateOffPacket
     {
-        public string Name => "VelocityInterpolateOff";
-        public uint MessageNumber => 126;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "VelocityInterpolateOff";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 126;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class StateSavePacket
     {
-        public string Name => "StateSave";
-        public uint MessageNumber => 127;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "StateSave";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 127;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ReportAutosaveCrashPacket
     {
-        public string Name => "ReportAutosaveCrash";
-        public uint MessageNumber => 128;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ReportAutosaveCrash";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 128;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimWideDeletesPacket
     {
-        public string Name => "SimWideDeletes";
-        public uint MessageNumber => 129;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimWideDeletes";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 129;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestObjectPropertiesFamilyPacket
     {
-        public string Name => "RequestObjectPropertiesFamily";
-        public uint MessageNumber => 5;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RequestObjectPropertiesFamily";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 5;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TrackAgentPacket
     {
-        public string Name => "TrackAgent";
-        public uint MessageNumber => 130;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TrackAgent";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 130;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ViewerStatsPacket
     {
-        public string Name => "ViewerStats";
-        public uint MessageNumber => 131;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ViewerStats";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 131;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptAnswerYesPacket
     {
-        public string Name => "ScriptAnswerYes";
-        public uint MessageNumber => 132;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptAnswerYes";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 132;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UserReportPacket
     {
-        public string Name => "UserReport";
-        public uint MessageNumber => 133;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UserReport";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 133;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AlertMessagePacket
     {
-        public string Name => "AlertMessage";
-        public uint MessageNumber => 134;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AlertMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 134;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentAlertMessagePacket
     {
-        public string Name => "AgentAlertMessage";
-        public uint MessageNumber => 135;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentAlertMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 135;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MeanCollisionAlertPacket
     {
-        public string Name => "MeanCollisionAlert";
-        public uint MessageNumber => 136;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MeanCollisionAlert";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 136;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ViewerFrozenMessagePacket
     {
-        public string Name => "ViewerFrozenMessage";
-        public uint MessageNumber => 137;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ViewerFrozenMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 137;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class HealthMessagePacket
     {
-        public string Name => "HealthMessage";
-        public uint MessageNumber => 138;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "HealthMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 138;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChatFromSimulatorPacket
     {
-        public string Name => "ChatFromSimulator";
-        public uint MessageNumber => 139;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ChatFromSimulator";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 139;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimStatsPacket
     {
-        public string Name => "SimStats";
-        public uint MessageNumber => 140;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimStats";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 140;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestRegionInfoPacket
     {
-        public string Name => "RequestRegionInfo";
-        public uint MessageNumber => 141;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestRegionInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 141;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionInfoPacket
     {
-        public string Name => "RegionInfo";
-        public uint MessageNumber => 142;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RegionInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 142;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GodUpdateRegionInfoPacket
     {
-        public string Name => "GodUpdateRegionInfo";
-        public uint MessageNumber => 143;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GodUpdateRegionInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 143;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class NearestLandingRegionRequestPacket
     {
-        public string Name => "NearestLandingRegionRequest";
-        public uint MessageNumber => 144;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "NearestLandingRegionRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 144;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class NearestLandingRegionReplyPacket
     {
-        public string Name => "NearestLandingRegionReply";
-        public uint MessageNumber => 145;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "NearestLandingRegionReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 145;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class NearestLandingRegionUpdatedPacket
     {
-        public string Name => "NearestLandingRegionUpdated";
-        public uint MessageNumber => 146;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "NearestLandingRegionUpdated";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 146;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TeleportLandingStatusChangedPacket
     {
-        public string Name => "TeleportLandingStatusChanged";
-        public uint MessageNumber => 147;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TeleportLandingStatusChanged";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 147;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionHandshakePacket
     {
-        public string Name => "RegionHandshake";
-        public uint MessageNumber => 148;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RegionHandshake";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 148;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionHandshakeReplyPacket
     {
-        public string Name => "RegionHandshakeReply";
-        public uint MessageNumber => 149;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RegionHandshakeReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 149;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CoarseLocationUpdatePacket
     {
-        public string Name => "CoarseLocationUpdate";
-        public uint MessageNumber => 6;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CoarseLocationUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 6;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ImageDataPacket
     {
-        public string Name => "ImageData";
-        public uint MessageNumber => 9;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ImageData";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 9;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ImagePacketPacket
     {
-        public string Name => "ImagePacket";
-        public uint MessageNumber => 10;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ImagePacket";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 10;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LayerDataPacket
     {
-        public string Name => "LayerData";
-        public uint MessageNumber => 11;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LayerData";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 11;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectUpdatePacket
     {
-        public string Name => "ObjectUpdate";
-        public uint MessageNumber => 12;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 12;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectUpdateCompressedPacket
     {
-        public string Name => "ObjectUpdateCompressed";
-        public uint MessageNumber => 13;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectUpdateCompressed";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 13;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectUpdateCachedPacket
     {
-        public string Name => "ObjectUpdateCached";
-        public uint MessageNumber => 14;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectUpdateCached";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 14;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ImprovedTerseObjectUpdatePacket
     {
-        public string Name => "ImprovedTerseObjectUpdate";
-        public uint MessageNumber => 15;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ImprovedTerseObjectUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 15;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class KillObjectPacket
     {
-        public string Name => "KillObject";
-        public uint MessageNumber => 16;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "KillObject";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 16;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CrossedRegionPacket
     {
-        public string Name => "CrossedRegion";
-        public uint MessageNumber => 7;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CrossedRegion";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 7;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimulatorViewerTimeMessagePacket
     {
-        public string Name => "SimulatorViewerTimeMessage";
-        public uint MessageNumber => 150;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimulatorViewerTimeMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 150;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EnableSimulatorPacket
     {
-        public string Name => "EnableSimulator";
-        public uint MessageNumber => 151;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EnableSimulator";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 151;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DisableSimulatorPacket
     {
-        public string Name => "DisableSimulator";
-        public uint MessageNumber => 152;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DisableSimulator";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 152;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ConfirmEnableSimulatorPacket
     {
-        public string Name => "ConfirmEnableSimulator";
-        public uint MessageNumber => 8;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ConfirmEnableSimulator";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 8;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TransferRequestPacket
     {
-        public string Name => "TransferRequest";
-        public uint MessageNumber => 153;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TransferRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 153;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TransferInfoPacket
     {
-        public string Name => "TransferInfo";
-        public uint MessageNumber => 154;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TransferInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 154;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TransferPacketPacket
     {
-        public string Name => "TransferPacket";
-        public uint MessageNumber => 17;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TransferPacket";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 17;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TransferAbortPacket
     {
-        public string Name => "TransferAbort";
-        public uint MessageNumber => 155;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TransferAbort";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 155;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestXferPacket
     {
-        public string Name => "RequestXfer";
-        public uint MessageNumber => 156;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RequestXfer";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 156;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SendXferPacketPacket
     {
-        public string Name => "SendXferPacket";
-        public uint MessageNumber => 18;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SendXferPacket";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 18;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ConfirmXferPacketPacket
     {
-        public string Name => "ConfirmXferPacket";
-        public uint MessageNumber => 19;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ConfirmXferPacket";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 19;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AbortXferPacket
     {
-        public string Name => "AbortXfer";
-        public uint MessageNumber => 157;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AbortXfer";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 157;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarAnimationPacket
     {
-        public string Name => "AvatarAnimation";
-        public uint MessageNumber => 20;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarAnimation";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 20;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarAppearancePacket
     {
-        public string Name => "AvatarAppearance";
-        public uint MessageNumber => 158;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarAppearance";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 158;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarSitResponsePacket
     {
-        public string Name => "AvatarSitResponse";
-        public uint MessageNumber => 21;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarSitResponse";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 21;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetFollowCamPropertiesPacket
     {
-        public string Name => "SetFollowCamProperties";
-        public uint MessageNumber => 159;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetFollowCamProperties";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 159;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ClearFollowCamPropertiesPacket
     {
-        public string Name => "ClearFollowCamProperties";
-        public uint MessageNumber => 160;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ClearFollowCamProperties";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 160;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CameraConstraintPacket
     {
-        public string Name => "CameraConstraint";
-        public uint MessageNumber => 22;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "CameraConstraint";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 22;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectPropertiesPacket
     {
-        public string Name => "ObjectProperties";
-        public uint MessageNumber => 9;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectProperties";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 9;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectPropertiesFamilyPacket
     {
-        public string Name => "ObjectPropertiesFamily";
-        public uint MessageNumber => 10;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ObjectPropertiesFamily";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 10;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestPayPricePacket
     {
-        public string Name => "RequestPayPrice";
-        public uint MessageNumber => 161;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestPayPrice";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 161;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PayPriceReplyPacket
     {
-        public string Name => "PayPriceReply";
-        public uint MessageNumber => 162;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PayPriceReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 162;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class KickUserPacket
     {
-        public string Name => "KickUser";
-        public uint MessageNumber => 163;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "KickUser";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 163;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class KickUserAckPacket
     {
-        public string Name => "KickUserAck";
-        public uint MessageNumber => 164;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "KickUserAck";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 164;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GodKickUserPacket
     {
-        public string Name => "GodKickUser";
-        public uint MessageNumber => 165;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GodKickUser";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 165;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SystemKickUserPacket
     {
-        public string Name => "SystemKickUser";
-        public uint MessageNumber => 166;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SystemKickUser";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 166;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EjectUserPacket
     {
-        public string Name => "EjectUser";
-        public uint MessageNumber => 167;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EjectUser";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 167;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FreezeUserPacket
     {
-        public string Name => "FreezeUser";
-        public uint MessageNumber => 168;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "FreezeUser";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 168;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPropertiesRequestPacket
     {
-        public string Name => "AvatarPropertiesRequest";
-        public uint MessageNumber => 169;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarPropertiesRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 169;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPropertiesRequestBackendPacket
     {
-        public string Name => "AvatarPropertiesRequestBackend";
-        public uint MessageNumber => 170;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarPropertiesRequestBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 170;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPropertiesReplyPacket
     {
-        public string Name => "AvatarPropertiesReply";
-        public uint MessageNumber => 171;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarPropertiesReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 171;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarInterestsReplyPacket
     {
-        public string Name => "AvatarInterestsReply";
-        public uint MessageNumber => 172;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarInterestsReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 172;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarGroupsReplyPacket
     {
-        public string Name => "AvatarGroupsReply";
-        public uint MessageNumber => 173;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarGroupsReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 173;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPropertiesUpdatePacket
     {
-        public string Name => "AvatarPropertiesUpdate";
-        public uint MessageNumber => 174;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarPropertiesUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 174;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarInterestsUpdatePacket
     {
-        public string Name => "AvatarInterestsUpdate";
-        public uint MessageNumber => 175;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AvatarInterestsUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 175;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarNotesReplyPacket
     {
-        public string Name => "AvatarNotesReply";
-        public uint MessageNumber => 176;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarNotesReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 176;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarNotesUpdatePacket
     {
-        public string Name => "AvatarNotesUpdate";
-        public uint MessageNumber => 177;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarNotesUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 177;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AvatarPicksReplyPacket
     {
-        public string Name => "AvatarPicksReply";
-        public uint MessageNumber => 178;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AvatarPicksReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 178;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventInfoRequestPacket
     {
-        public string Name => "EventInfoRequest";
-        public uint MessageNumber => 179;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EventInfoRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 179;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventInfoReplyPacket
     {
-        public string Name => "EventInfoReply";
-        public uint MessageNumber => 180;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EventInfoReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 180;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventNotificationAddRequestPacket
     {
-        public string Name => "EventNotificationAddRequest";
-        public uint MessageNumber => 181;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EventNotificationAddRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 181;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventNotificationRemoveRequestPacket
     {
-        public string Name => "EventNotificationRemoveRequest";
-        public uint MessageNumber => 182;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EventNotificationRemoveRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 182;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventGodDeletePacket
     {
-        public string Name => "EventGodDelete";
-        public uint MessageNumber => 183;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EventGodDelete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 183;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PickInfoReplyPacket
     {
-        public string Name => "PickInfoReply";
-        public uint MessageNumber => 184;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PickInfoReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 184;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PickInfoUpdatePacket
     {
-        public string Name => "PickInfoUpdate";
-        public uint MessageNumber => 185;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PickInfoUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 185;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PickDeletePacket
     {
-        public string Name => "PickDelete";
-        public uint MessageNumber => 186;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PickDelete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 186;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PickGodDeletePacket
     {
-        public string Name => "PickGodDelete";
-        public uint MessageNumber => 187;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PickGodDelete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 187;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptQuestionPacket
     {
-        public string Name => "ScriptQuestion";
-        public uint MessageNumber => 188;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptQuestion";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 188;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptControlChangePacket
     {
-        public string Name => "ScriptControlChange";
-        public uint MessageNumber => 189;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptControlChange";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 189;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptDialogPacket
     {
-        public string Name => "ScriptDialog";
-        public uint MessageNumber => 190;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ScriptDialog";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 190;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptDialogReplyPacket
     {
-        public string Name => "ScriptDialogReply";
-        public uint MessageNumber => 191;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ScriptDialogReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 191;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ForceScriptControlReleasePacket
     {
-        public string Name => "ForceScriptControlRelease";
-        public uint MessageNumber => 192;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ForceScriptControlRelease";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 192;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RevokePermissionsPacket
     {
-        public string Name => "RevokePermissions";
-        public uint MessageNumber => 193;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RevokePermissions";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 193;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LoadURLPacket
     {
-        public string Name => "LoadURL";
-        public uint MessageNumber => 194;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LoadURL";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 194;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptTeleportRequestPacket
     {
-        public string Name => "ScriptTeleportRequest";
-        public uint MessageNumber => 195;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptTeleportRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 195;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelOverlayPacket
     {
-        public string Name => "ParcelOverlay";
-        public uint MessageNumber => 196;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelOverlay";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 196;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelPropertiesRequestPacket
     {
-        public string Name => "ParcelPropertiesRequest";
-        public uint MessageNumber => 11;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelPropertiesRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 11;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelPropertiesRequestByIDPacket
     {
-        public string Name => "ParcelPropertiesRequestByID";
-        public uint MessageNumber => 197;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelPropertiesRequestByID";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 197;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelPropertiesPacket
     {
-        public string Name => "ParcelProperties";
-        public uint MessageNumber => 23;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelProperties";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 23;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelPropertiesUpdatePacket
     {
-        public string Name => "ParcelPropertiesUpdate";
-        public uint MessageNumber => 198;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelPropertiesUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 198;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelReturnObjectsPacket
     {
-        public string Name => "ParcelReturnObjects";
-        public uint MessageNumber => 199;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelReturnObjects";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 199;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelSetOtherCleanTimePacket
     {
-        public string Name => "ParcelSetOtherCleanTime";
-        public uint MessageNumber => 200;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelSetOtherCleanTime";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 200;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelDisableObjectsPacket
     {
-        public string Name => "ParcelDisableObjects";
-        public uint MessageNumber => 201;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelDisableObjects";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 201;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelSelectObjectsPacket
     {
-        public string Name => "ParcelSelectObjects";
-        public uint MessageNumber => 202;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelSelectObjects";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 202;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EstateCovenantRequestPacket
     {
-        public string Name => "EstateCovenantRequest";
-        public uint MessageNumber => 203;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EstateCovenantRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 203;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EstateCovenantReplyPacket
     {
-        public string Name => "EstateCovenantReply";
-        public uint MessageNumber => 204;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EstateCovenantReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 204;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ForceObjectSelectPacket
     {
-        public string Name => "ForceObjectSelect";
-        public uint MessageNumber => 205;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ForceObjectSelect";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 205;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelBuyPassPacket
     {
-        public string Name => "ParcelBuyPass";
-        public uint MessageNumber => 206;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelBuyPass";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 206;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelDeedToGroupPacket
     {
-        public string Name => "ParcelDeedToGroup";
-        public uint MessageNumber => 207;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelDeedToGroup";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 207;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelReclaimPacket
     {
-        public string Name => "ParcelReclaim";
-        public uint MessageNumber => 208;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelReclaim";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 208;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelClaimPacket
     {
-        public string Name => "ParcelClaim";
-        public uint MessageNumber => 209;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelClaim";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 209;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelJoinPacket
     {
-        public string Name => "ParcelJoin";
-        public uint MessageNumber => 210;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelJoin";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 210;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelDividePacket
     {
-        public string Name => "ParcelDivide";
-        public uint MessageNumber => 211;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelDivide";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 211;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelReleasePacket
     {
-        public string Name => "ParcelRelease";
-        public uint MessageNumber => 212;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelRelease";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 212;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelBuyPacket
     {
-        public string Name => "ParcelBuy";
-        public uint MessageNumber => 213;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelBuy";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 213;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelGodForceOwnerPacket
     {
-        public string Name => "ParcelGodForceOwner";
-        public uint MessageNumber => 214;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelGodForceOwner";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 214;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelAccessListRequestPacket
     {
-        public string Name => "ParcelAccessListRequest";
-        public uint MessageNumber => 215;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelAccessListRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 215;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelAccessListReplyPacket
     {
-        public string Name => "ParcelAccessListReply";
-        public uint MessageNumber => 216;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelAccessListReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 216;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelAccessListUpdatePacket
     {
-        public string Name => "ParcelAccessListUpdate";
-        public uint MessageNumber => 217;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ParcelAccessListUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 217;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelDwellRequestPacket
     {
-        public string Name => "ParcelDwellRequest";
-        public uint MessageNumber => 218;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelDwellRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 218;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelDwellReplyPacket
     {
-        public string Name => "ParcelDwellReply";
-        public uint MessageNumber => 219;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelDwellReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 219;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestParcelTransferPacket
     {
-        public string Name => "RequestParcelTransfer";
-        public uint MessageNumber => 220;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RequestParcelTransfer";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 220;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateParcelPacket
     {
-        public string Name => "UpdateParcel";
-        public uint MessageNumber => 221;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UpdateParcel";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 221;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveParcelPacket
     {
-        public string Name => "RemoveParcel";
-        public uint MessageNumber => 222;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveParcel";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 222;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MergeParcelPacket
     {
-        public string Name => "MergeParcel";
-        public uint MessageNumber => 223;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MergeParcel";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 223;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LogParcelChangesPacket
     {
-        public string Name => "LogParcelChanges";
-        public uint MessageNumber => 224;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "LogParcelChanges";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 224;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CheckParcelSalesPacket
     {
-        public string Name => "CheckParcelSales";
-        public uint MessageNumber => 225;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CheckParcelSales";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 225;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelSalesPacket
     {
-        public string Name => "ParcelSales";
-        public uint MessageNumber => 226;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelSales";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 226;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelGodMarkAsContentPacket
     {
-        public string Name => "ParcelGodMarkAsContent";
-        public uint MessageNumber => 227;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelGodMarkAsContent";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 227;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ViewerStartAuctionPacket
     {
-        public string Name => "ViewerStartAuction";
-        public uint MessageNumber => 228;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ViewerStartAuction";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 228;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class StartAuctionPacket
     {
-        public string Name => "StartAuction";
-        public uint MessageNumber => 229;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "StartAuction";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 229;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ConfirmAuctionStartPacket
     {
-        public string Name => "ConfirmAuctionStart";
-        public uint MessageNumber => 230;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ConfirmAuctionStart";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 230;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CompleteAuctionPacket
     {
-        public string Name => "CompleteAuction";
-        public uint MessageNumber => 231;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CompleteAuction";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 231;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CancelAuctionPacket
     {
-        public string Name => "CancelAuction";
-        public uint MessageNumber => 232;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CancelAuction";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 232;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CheckParcelAuctionsPacket
     {
-        public string Name => "CheckParcelAuctions";
-        public uint MessageNumber => 233;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CheckParcelAuctions";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 233;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelAuctionsPacket
     {
-        public string Name => "ParcelAuctions";
-        public uint MessageNumber => 234;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelAuctions";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 234;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UUIDNameRequestPacket
     {
-        public string Name => "UUIDNameRequest";
-        public uint MessageNumber => 235;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UUIDNameRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 235;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UUIDNameReplyPacket
     {
-        public string Name => "UUIDNameReply";
-        public uint MessageNumber => 236;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UUIDNameReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 236;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UUIDGroupNameRequestPacket
     {
-        public string Name => "UUIDGroupNameRequest";
-        public uint MessageNumber => 237;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UUIDGroupNameRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 237;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UUIDGroupNameReplyPacket
     {
-        public string Name => "UUIDGroupNameReply";
-        public uint MessageNumber => 238;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UUIDGroupNameReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 238;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChatPassPacket
     {
-        public string Name => "ChatPass";
-        public uint MessageNumber => 239;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ChatPass";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 239;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EdgeDataPacketPacket
     {
-        public string Name => "EdgeDataPacket";
-        public uint MessageNumber => 24;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "EdgeDataPacket";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 24;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimStatusPacket
     {
-        public string Name => "SimStatus";
-        public uint MessageNumber => 12;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimStatus";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 12;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChildAgentUpdatePacket
     {
-        public string Name => "ChildAgentUpdate";
-        public uint MessageNumber => 25;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ChildAgentUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 25;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChildAgentAlivePacket
     {
-        public string Name => "ChildAgentAlive";
-        public uint MessageNumber => 26;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ChildAgentAlive";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 26;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChildAgentPositionUpdatePacket
     {
-        public string Name => "ChildAgentPositionUpdate";
-        public uint MessageNumber => 27;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ChildAgentPositionUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 27;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChildAgentDyingPacket
     {
-        public string Name => "ChildAgentDying";
-        public uint MessageNumber => 240;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ChildAgentDying";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 240;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChildAgentUnknownPacket
     {
-        public string Name => "ChildAgentUnknown";
-        public uint MessageNumber => 241;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ChildAgentUnknown";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 241;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AtomicPassObjectPacket
     {
-        public string Name => "AtomicPassObject";
-        public uint MessageNumber => 28;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AtomicPassObject";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 28;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class KillChildAgentsPacket
     {
-        public string Name => "KillChildAgents";
-        public uint MessageNumber => 242;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "KillChildAgents";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 242;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GetScriptRunningPacket
     {
-        public string Name => "GetScriptRunning";
-        public uint MessageNumber => 243;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GetScriptRunning";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 243;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptRunningReplyPacket
     {
-        public string Name => "ScriptRunningReply";
-        public uint MessageNumber => 244;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptRunningReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 244;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetScriptRunningPacket
     {
-        public string Name => "SetScriptRunning";
-        public uint MessageNumber => 245;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetScriptRunning";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 245;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptResetPacket
     {
-        public string Name => "ScriptReset";
-        public uint MessageNumber => 246;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptReset";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 246;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptSensorRequestPacket
     {
-        public string Name => "ScriptSensorRequest";
-        public uint MessageNumber => 247;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ScriptSensorRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 247;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptSensorReplyPacket
     {
-        public string Name => "ScriptSensorReply";
-        public uint MessageNumber => 248;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ScriptSensorReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 248;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CompleteAgentMovementPacket
     {
-        public string Name => "CompleteAgentMovement";
-        public uint MessageNumber => 249;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CompleteAgentMovement";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 249;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentMovementCompletePacket
     {
-        public string Name => "AgentMovementComplete";
-        public uint MessageNumber => 250;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentMovementComplete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 250;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DataServerLogoutPacket
     {
-        public string Name => "DataServerLogout";
-        public uint MessageNumber => 251;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DataServerLogout";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 251;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LogoutRequestPacket
     {
-        public string Name => "LogoutRequest";
-        public uint MessageNumber => 252;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LogoutRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 252;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LogoutReplyPacket
     {
-        public string Name => "LogoutReply";
-        public uint MessageNumber => 253;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "LogoutReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 253;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ImprovedInstantMessagePacket
     {
-        public string Name => "ImprovedInstantMessage";
-        public uint MessageNumber => 254;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ImprovedInstantMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 254;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RetrieveInstantMessagesPacket
     {
-        public string Name => "RetrieveInstantMessages";
-        public uint MessageNumber => 255;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RetrieveInstantMessages";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 255;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FindAgentPacket
     {
-        public string Name => "FindAgent";
-        public uint MessageNumber => 256;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "FindAgent";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 256;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestGodlikePowersPacket
     {
-        public string Name => "RequestGodlikePowers";
-        public uint MessageNumber => 257;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestGodlikePowers";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 257;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GrantGodlikePowersPacket
     {
-        public string Name => "GrantGodlikePowers";
-        public uint MessageNumber => 258;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GrantGodlikePowers";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 258;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GodlikeMessagePacket
     {
-        public string Name => "GodlikeMessage";
-        public uint MessageNumber => 259;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GodlikeMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 259;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EstateOwnerMessagePacket
     {
-        public string Name => "EstateOwnerMessage";
-        public uint MessageNumber => 260;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "EstateOwnerMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 260;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GenericMessagePacket
     {
-        public string Name => "GenericMessage";
-        public uint MessageNumber => 261;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GenericMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 261;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GenericStreamingMessagePacket
     {
-        public string Name => "GenericStreamingMessage";
-        public uint MessageNumber => 31;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GenericStreamingMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 31;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LargeGenericMessagePacket
     {
-        public string Name => "LargeGenericMessage";
-        public uint MessageNumber => 430;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LargeGenericMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 430;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MuteListRequestPacket
     {
-        public string Name => "MuteListRequest";
-        public uint MessageNumber => 262;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MuteListRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 262;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateMuteListEntryPacket
     {
-        public string Name => "UpdateMuteListEntry";
-        public uint MessageNumber => 263;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UpdateMuteListEntry";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 263;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveMuteListEntryPacket
     {
-        public string Name => "RemoveMuteListEntry";
-        public uint MessageNumber => 264;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveMuteListEntry";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 264;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CopyInventoryFromNotecardPacket
     {
-        public string Name => "CopyInventoryFromNotecard";
-        public uint MessageNumber => 265;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "CopyInventoryFromNotecard";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 265;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateInventoryItemPacket
     {
-        public string Name => "UpdateInventoryItem";
-        public uint MessageNumber => 266;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UpdateInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 266;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateCreateInventoryItemPacket
     {
-        public string Name => "UpdateCreateInventoryItem";
-        public uint MessageNumber => 267;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UpdateCreateInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 267;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoveInventoryItemPacket
     {
-        public string Name => "MoveInventoryItem";
-        public uint MessageNumber => 268;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MoveInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 268;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CopyInventoryItemPacket
     {
-        public string Name => "CopyInventoryItem";
-        public uint MessageNumber => 269;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "CopyInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 269;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveInventoryItemPacket
     {
-        public string Name => "RemoveInventoryItem";
-        public uint MessageNumber => 270;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 270;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChangeInventoryItemFlagsPacket
     {
-        public string Name => "ChangeInventoryItemFlags";
-        public uint MessageNumber => 271;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ChangeInventoryItemFlags";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 271;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SaveAssetIntoInventoryPacket
     {
-        public string Name => "SaveAssetIntoInventory";
-        public uint MessageNumber => 272;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SaveAssetIntoInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 272;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateInventoryFolderPacket
     {
-        public string Name => "CreateInventoryFolder";
-        public uint MessageNumber => 273;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CreateInventoryFolder";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 273;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateInventoryFolderPacket
     {
-        public string Name => "UpdateInventoryFolder";
-        public uint MessageNumber => 274;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UpdateInventoryFolder";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 274;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoveInventoryFolderPacket
     {
-        public string Name => "MoveInventoryFolder";
-        public uint MessageNumber => 275;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MoveInventoryFolder";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 275;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveInventoryFolderPacket
     {
-        public string Name => "RemoveInventoryFolder";
-        public uint MessageNumber => 276;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveInventoryFolder";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 276;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FetchInventoryDescendentsPacket
     {
-        public string Name => "FetchInventoryDescendents";
-        public uint MessageNumber => 277;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "FetchInventoryDescendents";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 277;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class InventoryDescendentsPacket
     {
-        public string Name => "InventoryDescendents";
-        public uint MessageNumber => 278;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "InventoryDescendents";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 278;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FetchInventoryPacket
     {
-        public string Name => "FetchInventory";
-        public uint MessageNumber => 279;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "FetchInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 279;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FetchInventoryReplyPacket
     {
-        public string Name => "FetchInventoryReply";
-        public uint MessageNumber => 280;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "FetchInventoryReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 280;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class BulkUpdateInventoryPacket
     {
-        public string Name => "BulkUpdateInventory";
-        public uint MessageNumber => 281;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "BulkUpdateInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 281;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestInventoryAssetPacket
     {
-        public string Name => "RequestInventoryAsset";
-        public uint MessageNumber => 282;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestInventoryAsset";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 282;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class InventoryAssetResponsePacket
     {
-        public string Name => "InventoryAssetResponse";
-        public uint MessageNumber => 283;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "InventoryAssetResponse";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 283;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveInventoryObjectsPacket
     {
-        public string Name => "RemoveInventoryObjects";
-        public uint MessageNumber => 284;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveInventoryObjects";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 284;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PurgeInventoryDescendentsPacket
     {
-        public string Name => "PurgeInventoryDescendents";
-        public uint MessageNumber => 285;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "PurgeInventoryDescendents";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 285;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateTaskInventoryPacket
     {
-        public string Name => "UpdateTaskInventory";
-        public uint MessageNumber => 286;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UpdateTaskInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 286;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveTaskInventoryPacket
     {
-        public string Name => "RemoveTaskInventory";
-        public uint MessageNumber => 287;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RemoveTaskInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 287;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoveTaskInventoryPacket
     {
-        public string Name => "MoveTaskInventory";
-        public uint MessageNumber => 288;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MoveTaskInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 288;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestTaskInventoryPacket
     {
-        public string Name => "RequestTaskInventory";
-        public uint MessageNumber => 289;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestTaskInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 289;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ReplyTaskInventoryPacket
     {
-        public string Name => "ReplyTaskInventory";
-        public uint MessageNumber => 290;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ReplyTaskInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 290;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DeRezObjectPacket
     {
-        public string Name => "DeRezObject";
-        public uint MessageNumber => 291;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "DeRezObject";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 291;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DeRezAckPacket
     {
-        public string Name => "DeRezAck";
-        public uint MessageNumber => 292;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DeRezAck";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 292;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RezObjectPacket
     {
-        public string Name => "RezObject";
-        public uint MessageNumber => 293;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RezObject";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 293;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RezObjectFromNotecardPacket
     {
-        public string Name => "RezObjectFromNotecard";
-        public uint MessageNumber => 294;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RezObjectFromNotecard";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 294;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TransferInventoryPacket
     {
-        public string Name => "TransferInventory";
-        public uint MessageNumber => 295;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TransferInventory";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 295;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TransferInventoryAckPacket
     {
-        public string Name => "TransferInventoryAck";
-        public uint MessageNumber => 296;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "TransferInventoryAck";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 296;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AcceptFriendshipPacket
     {
-        public string Name => "AcceptFriendship";
-        public uint MessageNumber => 297;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AcceptFriendship";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 297;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DeclineFriendshipPacket
     {
-        public string Name => "DeclineFriendship";
-        public uint MessageNumber => 298;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DeclineFriendship";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 298;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class FormFriendshipPacket
     {
-        public string Name => "FormFriendship";
-        public uint MessageNumber => 299;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "FormFriendship";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 299;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TerminateFriendshipPacket
     {
-        public string Name => "TerminateFriendship";
-        public uint MessageNumber => 300;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TerminateFriendship";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 300;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class OfferCallingCardPacket
     {
-        public string Name => "OfferCallingCard";
-        public uint MessageNumber => 301;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "OfferCallingCard";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 301;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AcceptCallingCardPacket
     {
-        public string Name => "AcceptCallingCard";
-        public uint MessageNumber => 302;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AcceptCallingCard";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 302;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DeclineCallingCardPacket
     {
-        public string Name => "DeclineCallingCard";
-        public uint MessageNumber => 303;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DeclineCallingCard";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 303;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RezScriptPacket
     {
-        public string Name => "RezScript";
-        public uint MessageNumber => 304;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RezScript";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 304;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateInventoryItemPacket
     {
-        public string Name => "CreateInventoryItem";
-        public uint MessageNumber => 305;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "CreateInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 305;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateLandmarkForEventPacket
     {
-        public string Name => "CreateLandmarkForEvent";
-        public uint MessageNumber => 306;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "CreateLandmarkForEvent";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 306;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventLocationRequestPacket
     {
-        public string Name => "EventLocationRequest";
-        public uint MessageNumber => 307;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "EventLocationRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 307;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EventLocationReplyPacket
     {
-        public string Name => "EventLocationReply";
-        public uint MessageNumber => 308;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "EventLocationReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 308;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionHandleRequestPacket
     {
-        public string Name => "RegionHandleRequest";
-        public uint MessageNumber => 309;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RegionHandleRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 309;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RegionIDAndHandleReplyPacket
     {
-        public string Name => "RegionIDAndHandleReply";
-        public uint MessageNumber => 310;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RegionIDAndHandleReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 310;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoneyTransferRequestPacket
     {
-        public string Name => "MoneyTransferRequest";
-        public uint MessageNumber => 311;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MoneyTransferRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 311;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoneyTransferBackendPacket
     {
-        public string Name => "MoneyTransferBackend";
-        public uint MessageNumber => 312;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MoneyTransferBackend";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 312;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoneyBalanceRequestPacket
     {
-        public string Name => "MoneyBalanceRequest";
-        public uint MessageNumber => 313;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MoneyBalanceRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 313;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MoneyBalanceReplyPacket
     {
-        public string Name => "MoneyBalanceReply";
-        public uint MessageNumber => 314;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "MoneyBalanceReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 314;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RoutedMoneyBalanceReplyPacket
     {
-        public string Name => "RoutedMoneyBalanceReply";
-        public uint MessageNumber => 315;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RoutedMoneyBalanceReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 315;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ActivateGesturesPacket
     {
-        public string Name => "ActivateGestures";
-        public uint MessageNumber => 316;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ActivateGestures";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 316;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DeactivateGesturesPacket
     {
-        public string Name => "DeactivateGestures";
-        public uint MessageNumber => 317;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DeactivateGestures";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 317;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MuteListUpdatePacket
     {
-        public string Name => "MuteListUpdate";
-        public uint MessageNumber => 318;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MuteListUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 318;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UseCachedMuteListPacket
     {
-        public string Name => "UseCachedMuteList";
-        public uint MessageNumber => 319;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UseCachedMuteList";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 319;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GrantUserRightsPacket
     {
-        public string Name => "GrantUserRights";
-        public uint MessageNumber => 320;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GrantUserRights";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 320;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ChangeUserRightsPacket
     {
-        public string Name => "ChangeUserRights";
-        public uint MessageNumber => 321;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ChangeUserRights";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 321;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class OnlineNotificationPacket
     {
-        public string Name => "OnlineNotification";
-        public uint MessageNumber => 322;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "OnlineNotification";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 322;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class OfflineNotificationPacket
     {
-        public string Name => "OfflineNotification";
-        public uint MessageNumber => 323;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "OfflineNotification";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 323;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetStartLocationRequestPacket
     {
-        public string Name => "SetStartLocationRequest";
-        public uint MessageNumber => 324;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "SetStartLocationRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 324;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetStartLocationPacket
     {
-        public string Name => "SetStartLocation";
-        public uint MessageNumber => 325;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "SetStartLocation";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 325;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class NetTestPacket
     {
-        public string Name => "NetTest";
-        public uint MessageNumber => 326;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "NetTest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 326;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetCPURatioPacket
     {
-        public string Name => "SetCPURatio";
-        public uint MessageNumber => 327;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetCPURatio";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 327;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SimCrashedPacket
     {
-        public string Name => "SimCrashed";
-        public uint MessageNumber => 328;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SimCrashed";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 328;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class NameValuePairPacket
     {
-        public string Name => "NameValuePair";
-        public uint MessageNumber => 329;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "NameValuePair";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 329;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveNameValuePairPacket
     {
-        public string Name => "RemoveNameValuePair";
-        public uint MessageNumber => 330;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveNameValuePair";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 330;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateAttachmentPacket
     {
-        public string Name => "UpdateAttachment";
-        public uint MessageNumber => 331;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UpdateAttachment";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 331;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RemoveAttachmentPacket
     {
-        public string Name => "RemoveAttachment";
-        public uint MessageNumber => 332;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RemoveAttachment";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 332;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SoundTriggerPacket
     {
-        public string Name => "SoundTrigger";
-        public uint MessageNumber => 29;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SoundTrigger";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 29;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AttachedSoundPacket
     {
-        public string Name => "AttachedSound";
-        public uint MessageNumber => 13;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AttachedSound";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 13;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AttachedSoundGainChangePacket
     {
-        public string Name => "AttachedSoundGainChange";
-        public uint MessageNumber => 14;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AttachedSoundGainChange";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 14;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class PreloadSoundPacket
     {
-        public string Name => "PreloadSound";
-        public uint MessageNumber => 15;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "PreloadSound";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 15;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectAnimationPacket
     {
-        public string Name => "ObjectAnimation";
-        public uint MessageNumber => 30;
-        public string Frequency => "High";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectAnimation";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 30;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AssetUploadRequestPacket
     {
-        public string Name => "AssetUploadRequest";
-        public uint MessageNumber => 333;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AssetUploadRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 333;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AssetUploadCompletePacket
     {
-        public string Name => "AssetUploadComplete";
-        public uint MessageNumber => 334;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AssetUploadComplete";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 334;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EmailMessageRequestPacket
     {
-        public string Name => "EmailMessageRequest";
-        public uint MessageNumber => 335;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EmailMessageRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 335;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EmailMessageReplyPacket
     {
-        public string Name => "EmailMessageReply";
-        public uint MessageNumber => 336;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EmailMessageReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 336;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class InternalScriptMailPacket
     {
-        public string Name => "InternalScriptMail";
-        public uint MessageNumber => 16;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "InternalScriptMail";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 16;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptDataRequestPacket
     {
-        public string Name => "ScriptDataRequest";
-        public uint MessageNumber => 337;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptDataRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 337;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptDataReplyPacket
     {
-        public string Name => "ScriptDataReply";
-        public uint MessageNumber => 338;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptDataReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 338;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateGroupRequestPacket
     {
-        public string Name => "CreateGroupRequest";
-        public uint MessageNumber => 339;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "CreateGroupRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 339;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateGroupReplyPacket
     {
-        public string Name => "CreateGroupReply";
-        public uint MessageNumber => 340;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CreateGroupReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 340;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateGroupInfoPacket
     {
-        public string Name => "UpdateGroupInfo";
-        public uint MessageNumber => 341;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "UpdateGroupInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 341;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupRoleChangesPacket
     {
-        public string Name => "GroupRoleChanges";
-        public uint MessageNumber => 342;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupRoleChanges";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 342;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class JoinGroupRequestPacket
     {
-        public string Name => "JoinGroupRequest";
-        public uint MessageNumber => 343;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "JoinGroupRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 343;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class JoinGroupReplyPacket
     {
-        public string Name => "JoinGroupReply";
-        public uint MessageNumber => 344;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "JoinGroupReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 344;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EjectGroupMemberRequestPacket
     {
-        public string Name => "EjectGroupMemberRequest";
-        public uint MessageNumber => 345;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EjectGroupMemberRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 345;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class EjectGroupMemberReplyPacket
     {
-        public string Name => "EjectGroupMemberReply";
-        public uint MessageNumber => 346;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "EjectGroupMemberReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 346;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LeaveGroupRequestPacket
     {
-        public string Name => "LeaveGroupRequest";
-        public uint MessageNumber => 347;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LeaveGroupRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 347;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LeaveGroupReplyPacket
     {
-        public string Name => "LeaveGroupReply";
-        public uint MessageNumber => 348;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LeaveGroupReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 348;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class InviteGroupRequestPacket
     {
-        public string Name => "InviteGroupRequest";
-        public uint MessageNumber => 349;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "InviteGroupRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 349;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class InviteGroupResponsePacket
     {
-        public string Name => "InviteGroupResponse";
-        public uint MessageNumber => 350;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "InviteGroupResponse";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 350;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupProfileRequestPacket
     {
-        public string Name => "GroupProfileRequest";
-        public uint MessageNumber => 351;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupProfileRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 351;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupProfileReplyPacket
     {
-        public string Name => "GroupProfileReply";
-        public uint MessageNumber => 352;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupProfileReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 352;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupAccountSummaryRequestPacket
     {
-        public string Name => "GroupAccountSummaryRequest";
-        public uint MessageNumber => 353;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupAccountSummaryRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 353;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupAccountSummaryReplyPacket
     {
-        public string Name => "GroupAccountSummaryReply";
-        public uint MessageNumber => 354;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupAccountSummaryReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 354;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupAccountDetailsRequestPacket
     {
-        public string Name => "GroupAccountDetailsRequest";
-        public uint MessageNumber => 355;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupAccountDetailsRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 355;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupAccountDetailsReplyPacket
     {
-        public string Name => "GroupAccountDetailsReply";
-        public uint MessageNumber => 356;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupAccountDetailsReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 356;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupAccountTransactionsRequestPacket
     {
-        public string Name => "GroupAccountTransactionsRequest";
-        public uint MessageNumber => 357;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupAccountTransactionsRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 357;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupAccountTransactionsReplyPacket
     {
-        public string Name => "GroupAccountTransactionsReply";
-        public uint MessageNumber => 358;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupAccountTransactionsReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 358;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupActiveProposalsRequestPacket
     {
-        public string Name => "GroupActiveProposalsRequest";
-        public uint MessageNumber => 359;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupActiveProposalsRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 359;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupActiveProposalItemReplyPacket
     {
-        public string Name => "GroupActiveProposalItemReply";
-        public uint MessageNumber => 360;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupActiveProposalItemReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 360;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupVoteHistoryRequestPacket
     {
-        public string Name => "GroupVoteHistoryRequest";
-        public uint MessageNumber => 361;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupVoteHistoryRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 361;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupVoteHistoryItemReplyPacket
     {
-        public string Name => "GroupVoteHistoryItemReply";
-        public uint MessageNumber => 362;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupVoteHistoryItemReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 362;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class StartGroupProposalPacket
     {
-        public string Name => "StartGroupProposal";
-        public uint MessageNumber => 363;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "StartGroupProposal";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 363;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupProposalBallotPacket
     {
-        public string Name => "GroupProposalBallot";
-        public uint MessageNumber => 364;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupProposalBallot";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 364;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class TallyVotesPacket
     {
-        public string Name => "TallyVotes";
-        public uint MessageNumber => 365;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "TallyVotes";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 365;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupMembersRequestPacket
     {
-        public string Name => "GroupMembersRequest";
-        public uint MessageNumber => 366;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupMembersRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 366;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupMembersReplyPacket
     {
-        public string Name => "GroupMembersReply";
-        public uint MessageNumber => 367;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupMembersReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 367;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ActivateGroupPacket
     {
-        public string Name => "ActivateGroup";
-        public uint MessageNumber => 368;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ActivateGroup";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 368;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetGroupContributionPacket
     {
-        public string Name => "SetGroupContribution";
-        public uint MessageNumber => 369;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetGroupContribution";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 369;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SetGroupAcceptNoticesPacket
     {
-        public string Name => "SetGroupAcceptNotices";
-        public uint MessageNumber => 370;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SetGroupAcceptNotices";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 370;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupRoleDataRequestPacket
     {
-        public string Name => "GroupRoleDataRequest";
-        public uint MessageNumber => 371;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupRoleDataRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 371;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupRoleDataReplyPacket
     {
-        public string Name => "GroupRoleDataReply";
-        public uint MessageNumber => 372;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupRoleDataReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 372;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupRoleMembersRequestPacket
     {
-        public string Name => "GroupRoleMembersRequest";
-        public uint MessageNumber => 373;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupRoleMembersRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 373;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupRoleMembersReplyPacket
     {
-        public string Name => "GroupRoleMembersReply";
-        public uint MessageNumber => 374;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupRoleMembersReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 374;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupTitlesRequestPacket
     {
-        public string Name => "GroupTitlesRequest";
-        public uint MessageNumber => 375;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupTitlesRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 375;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupTitlesReplyPacket
     {
-        public string Name => "GroupTitlesReply";
-        public uint MessageNumber => 376;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupTitlesReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 376;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupTitleUpdatePacket
     {
-        public string Name => "GroupTitleUpdate";
-        public uint MessageNumber => 377;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupTitleUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 377;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupRoleUpdatePacket
     {
-        public string Name => "GroupRoleUpdate";
-        public uint MessageNumber => 378;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "GroupRoleUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 378;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LiveHelpGroupRequestPacket
     {
-        public string Name => "LiveHelpGroupRequest";
-        public uint MessageNumber => 379;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LiveHelpGroupRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 379;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LiveHelpGroupReplyPacket
     {
-        public string Name => "LiveHelpGroupReply";
-        public uint MessageNumber => 380;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LiveHelpGroupReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 380;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentWearablesRequestPacket
     {
-        public string Name => "AgentWearablesRequest";
-        public uint MessageNumber => 381;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentWearablesRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 381;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentWearablesUpdatePacket
     {
-        public string Name => "AgentWearablesUpdate";
-        public uint MessageNumber => 382;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentWearablesUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 382;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentIsNowWearingPacket
     {
-        public string Name => "AgentIsNowWearing";
-        public uint MessageNumber => 383;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentIsNowWearing";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 383;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentCachedTexturePacket
     {
-        public string Name => "AgentCachedTexture";
-        public uint MessageNumber => 384;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentCachedTexture";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 384;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentCachedTextureResponsePacket
     {
-        public string Name => "AgentCachedTextureResponse";
-        public uint MessageNumber => 385;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentCachedTextureResponse";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 385;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentDataUpdateRequestPacket
     {
-        public string Name => "AgentDataUpdateRequest";
-        public uint MessageNumber => 386;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "AgentDataUpdateRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 386;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentDataUpdatePacket
     {
-        public string Name => "AgentDataUpdate";
-        public uint MessageNumber => 387;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentDataUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 387;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GroupDataUpdatePacket
     {
-        public string Name => "GroupDataUpdate";
-        public uint MessageNumber => 388;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GroupDataUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 388;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentGroupDataUpdatePacket
     {
-        public string Name => "AgentGroupDataUpdate";
-        public uint MessageNumber => 389;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentGroupDataUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 389;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class AgentDropGroupPacket
     {
-        public string Name => "AgentDropGroup";
-        public uint MessageNumber => 390;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "AgentDropGroup";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 390;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LogTextMessagePacket
     {
-        public string Name => "LogTextMessage";
-        public uint MessageNumber => 391;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "LogTextMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 391;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ViewerEffectPacket
     {
-        public string Name => "ViewerEffect";
-        public uint MessageNumber => 17;
-        public string Frequency => "Medium";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "ViewerEffect";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 17;
+        public string Frequency { get; set; } = "Medium";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateTrustedCircuitPacket
     {
-        public string Name => "CreateTrustedCircuit";
-        public uint MessageNumber => 392;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CreateTrustedCircuit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 392;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DenyTrustedCircuitPacket
     {
-        public string Name => "DenyTrustedCircuit";
-        public uint MessageNumber => 393;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DenyTrustedCircuit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 393;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RequestTrustedCircuitPacket
     {
-        public string Name => "RequestTrustedCircuit";
-        public uint MessageNumber => 394;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RequestTrustedCircuit";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 394;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RezSingleAttachmentFromInvPacket
     {
-        public string Name => "RezSingleAttachmentFromInv";
-        public uint MessageNumber => 395;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RezSingleAttachmentFromInv";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 395;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RezMultipleAttachmentsFromInvPacket
     {
-        public string Name => "RezMultipleAttachmentsFromInv";
-        public uint MessageNumber => 396;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "RezMultipleAttachmentsFromInv";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 396;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class DetachAttachmentIntoInvPacket
     {
-        public string Name => "DetachAttachmentIntoInv";
-        public uint MessageNumber => 397;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "DetachAttachmentIntoInv";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 397;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateNewOutfitAttachmentsPacket
     {
-        public string Name => "CreateNewOutfitAttachments";
-        public uint MessageNumber => 398;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CreateNewOutfitAttachments";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 398;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UserInfoRequestPacket
     {
-        public string Name => "UserInfoRequest";
-        public uint MessageNumber => 399;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UserInfoRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 399;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UserInfoReplyPacket
     {
-        public string Name => "UserInfoReply";
-        public uint MessageNumber => 400;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UserInfoReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 400;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class UpdateUserInfoPacket
     {
-        public string Name => "UpdateUserInfo";
-        public uint MessageNumber => 401;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "UpdateUserInfo";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 401;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelRenamePacket
     {
-        public string Name => "ParcelRename";
-        public uint MessageNumber => 402;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelRename";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 402;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class InitiateDownloadPacket
     {
-        public string Name => "InitiateDownload";
-        public uint MessageNumber => 403;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "InitiateDownload";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 403;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SystemMessagePacket
     {
-        public string Name => "SystemMessage";
-        public uint MessageNumber => 404;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "SystemMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 404;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapLayerRequestPacket
     {
-        public string Name => "MapLayerRequest";
-        public uint MessageNumber => 405;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapLayerRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 405;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapLayerReplyPacket
     {
-        public string Name => "MapLayerReply";
-        public uint MessageNumber => 406;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapLayerReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 406;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapBlockRequestPacket
     {
-        public string Name => "MapBlockRequest";
-        public uint MessageNumber => 407;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapBlockRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 407;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapNameRequestPacket
     {
-        public string Name => "MapNameRequest";
-        public uint MessageNumber => 408;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapNameRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 408;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapBlockReplyPacket
     {
-        public string Name => "MapBlockReply";
-        public uint MessageNumber => 409;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapBlockReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 409;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapItemRequestPacket
     {
-        public string Name => "MapItemRequest";
-        public uint MessageNumber => 410;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapItemRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 410;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class MapItemReplyPacket
     {
-        public string Name => "MapItemReply";
-        public uint MessageNumber => 411;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "MapItemReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 411;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class SendPostcardPacket
     {
-        public string Name => "SendPostcard";
-        public uint MessageNumber => 412;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "SendPostcard";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 412;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RpcChannelRequestPacket
     {
-        public string Name => "RpcChannelRequest";
-        public uint MessageNumber => 413;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RpcChannelRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 413;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RpcChannelReplyPacket
     {
-        public string Name => "RpcChannelReply";
-        public uint MessageNumber => 414;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RpcChannelReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 414;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RpcScriptRequestInboundPacket
     {
-        public string Name => "RpcScriptRequestInbound";
-        public uint MessageNumber => 415;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RpcScriptRequestInbound";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 415;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RpcScriptRequestInboundForwardPacket
     {
-        public string Name => "RpcScriptRequestInboundForward";
-        public uint MessageNumber => 416;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RpcScriptRequestInboundForward";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 416;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RpcScriptReplyInboundPacket
     {
-        public string Name => "RpcScriptReplyInbound";
-        public uint MessageNumber => 417;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RpcScriptReplyInbound";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 417;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ScriptMailRegistrationPacket
     {
-        public string Name => "ScriptMailRegistration";
-        public uint MessageNumber => 418;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ScriptMailRegistration";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 418;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelMediaCommandMessagePacket
     {
-        public string Name => "ParcelMediaCommandMessage";
-        public uint MessageNumber => 419;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelMediaCommandMessage";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 419;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ParcelMediaUpdatePacket
     {
-        public string Name => "ParcelMediaUpdate";
-        public uint MessageNumber => 420;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ParcelMediaUpdate";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 420;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LandStatRequestPacket
     {
-        public string Name => "LandStatRequest";
-        public uint MessageNumber => 421;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LandStatRequest";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 421;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LandStatReplyPacket
     {
-        public string Name => "LandStatReply";
-        public uint MessageNumber => 422;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "LandStatReply";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 422;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ErrorPacket
     {
-        public string Name => "Error";
-        public uint MessageNumber => 423;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "Error";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 423;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class ObjectIncludeInSearchPacket
     {
-        public string Name => "ObjectIncludeInSearch";
-        public uint MessageNumber => 424;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "ObjectIncludeInSearch";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 424;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RezRestoreToWorldPacket
     {
-        public string Name => "RezRestoreToWorld";
-        public uint MessageNumber => 425;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RezRestoreToWorld";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 425;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class LinkInventoryItemPacket
     {
-        public string Name => "LinkInventoryItem";
-        public uint MessageNumber => 426;
-        public string Frequency => "Low";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "LinkInventoryItem";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 426;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class RetrieveIMsExtendedPacket
     {
-        public string Name => "RetrieveIMsExtended";
-        public uint MessageNumber => 427;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "RetrieveIMsExtended";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 427;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class JoinGroupRequestExtendedPacket
     {
-        public string Name => "JoinGroupRequestExtended";
-        public uint MessageNumber => 428;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "JoinGroupRequestExtended";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 428;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class CreateGroupRequestExtendedPacket
     {
-        public string Name => "CreateGroupRequestExtended";
-        public uint MessageNumber => 429;
-        public string Frequency => "Low";
-        public bool IsZerocoded => false;
+        public string MessageName { get; set; } = "CreateGroupRequestExtended";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 429;
+        public string Frequency { get; set; } = "Low";
+        public bool IsZerocoded { get; set; } = false;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
     public class GameControlInputPacket
     {
-        public string Name => "GameControlInput";
-        public uint MessageNumber => 32;
-        public string Frequency => "High";
-        public bool IsZerocoded => true;
+        public string MessageName { get; set; } = "GameControlInput";
+        public string Name => MessageName;
+        public uint MessageNumber { get; set; } = 32;
+        public string Frequency { get; set; } = "High";
+        public bool IsZerocoded { get; set; } = true;
 
         public byte[] Serialize()
         {
-            return BitConverter.GetBytes(MessageNumber);
+            using (MemoryStream ms = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(MessageNumber);
+                return ms.ToArray();
+            }
         }
+
+        public byte[] serialize() => Serialize();
     }
 
-    // Generated LLSD Capability Schemas
-    public class AgentDomainCapabilitiesCapabilities
+}
+
+namespace Linkpoint.Protocol.Generated
+{
+    public static class GeneratedProtocol
     {
-        public string? agent_id { get; set; }
-        public string? session_id { get; set; }
-        public string? display_name { get; set; }
-        public string? legacy_first_name { get; set; }
-        public string? legacy_last_name { get; set; }
-        public double? hover_height { get; set; }
-        public string? active_group_id { get; set; }
-        public string? maturity_rating { get; set; }
+        public const string TemplateVersion = Linkpoint.Protocol.GeneratedProtocol.TemplateVersion;
+        public static Dictionary<string, uint> RegisteredMessages => Linkpoint.Protocol.GeneratedProtocol.RegisteredMessages;
+        public static byte[] DecompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);
+        public static byte[] decompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);
     }
-
-    public class CapabilitiesRequestResponseCapabilities
-    {
-        public List<string>? capabilities { get; set; }
-        public string? seed_response { get; set; }
-        public string? fetch_inventory { get; set; }
-    }
-
-    public class EventQueueGetCapabilities
-    {
-        public int? ack { get; set; }
-        public List<string>? events { get; set; }
-    }
-
 }

@@ -5,7 +5,7 @@
 
 import Foundation
 
-public struct GeneratedProtocolCatalog {
+public struct GeneratedProtocol {
     public static let templateVersion: String = "2.0"
     public static let registeredMessages: [String: UInt32] = [
         "TestMessage": 1,
@@ -495,13 +495,42 @@ public struct GeneratedProtocolCatalog {
 
     public static func decompressZerocoded(_ src: Data) -> Data {
         var dest = Data()
+        let bytes = [UInt8](src)
         var i = 0
-        let srcArray = Array(src)
-        while i < srcArray.count {
-            let b = srcArray[i]
+        let len = bytes.count
+        while i < len {
+            let b = bytes[i]
             if b == 0 {
-                if i + 1 < srcArray.count {
-                    let count = Int(srcArray[i + 1])
+                if i + 1 < len {
+                    let count = Int(bytes[i + 1])
+                    if count == 0 {
+                        dest.append(0)
+                        i += 2
+                    } else {
+                        dest.append(contentsOf: [UInt8](repeating: 0, count: count))
+                        i += 2
+                    }
+                } else {
+                    dest.append(0)
+                    i += 1
+                }
+            } else {
+                dest.append(b)
+                i += 1
+            }
+        }
+        return dest
+    }
+
+    public static func decompressZerocoded(_ src: [UInt8]) -> [UInt8] {
+        var dest: [UInt8] = []
+        var i = 0
+        let len = src.count
+        while i < len {
+            let b = src[i]
+            if b == 0 {
+                if i + 1 < len {
+                    let count = Int(src[i + 1])
                     if count == 0 {
                         dest.append(0)
                         i += 2
@@ -522,6826 +551,13529 @@ public struct GeneratedProtocolCatalog {
     }
 }
 
+public typealias GeneratedProtocolCatalog = GeneratedProtocol
+
 // Generated UDP Messages
+// Message: TestMessage (Low 1)
 public struct TestMessagePacket {
-    public let name: String = "TestMessage"
-    public let messageNumber: UInt32 = 1
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TestMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 1
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TestMessage",
+        messageNumber: UInt32 = 1,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PacketAck (Fixed 4294967291)
 public struct PacketAckPacket {
-    public let name: String = "PacketAck"
-    public let messageNumber: UInt32 = 4294967291
-    public let frequency: String = "Fixed"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PacketAck"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 4294967291
+    public var frequency: String = "Fixed"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PacketAck",
+        messageNumber: UInt32 = 4294967291,
+        frequency: String = "Fixed",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: OpenCircuit (Fixed 4294967292)
 public struct OpenCircuitPacket {
-    public let name: String = "OpenCircuit"
-    public let messageNumber: UInt32 = 4294967292
-    public let frequency: String = "Fixed"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "OpenCircuit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 4294967292
+    public var frequency: String = "Fixed"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "OpenCircuit",
+        messageNumber: UInt32 = 4294967292,
+        frequency: String = "Fixed",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CloseCircuit (Fixed 4294967293)
 public struct CloseCircuitPacket {
-    public let name: String = "CloseCircuit"
-    public let messageNumber: UInt32 = 4294967293
-    public let frequency: String = "Fixed"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CloseCircuit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 4294967293
+    public var frequency: String = "Fixed"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CloseCircuit",
+        messageNumber: UInt32 = 4294967293,
+        frequency: String = "Fixed",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: StartPingCheck (High 1)
 public struct StartPingCheckPacket {
-    public let name: String = "StartPingCheck"
-    public let messageNumber: UInt32 = 1
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "StartPingCheck"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 1
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "StartPingCheck",
+        messageNumber: UInt32 = 1,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CompletePingCheck (High 2)
 public struct CompletePingCheckPacket {
-    public let name: String = "CompletePingCheck"
-    public let messageNumber: UInt32 = 2
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CompletePingCheck"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 2
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CompletePingCheck",
+        messageNumber: UInt32 = 2,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AddCircuitCode (Low 2)
 public struct AddCircuitCodePacket {
-    public let name: String = "AddCircuitCode"
-    public let messageNumber: UInt32 = 2
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AddCircuitCode"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 2
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AddCircuitCode",
+        messageNumber: UInt32 = 2,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UseCircuitCode (Low 3)
 public struct UseCircuitCodePacket {
-    public let name: String = "UseCircuitCode"
-    public let messageNumber: UInt32 = 3
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UseCircuitCode"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 3
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UseCircuitCode",
+        messageNumber: UInt32 = 3,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: NeighborList (High 3)
 public struct NeighborListPacket {
-    public let name: String = "NeighborList"
-    public let messageNumber: UInt32 = 3
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "NeighborList"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 3
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "NeighborList",
+        messageNumber: UInt32 = 3,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarTextureUpdate (Low 4)
 public struct AvatarTextureUpdatePacket {
-    public let name: String = "AvatarTextureUpdate"
-    public let messageNumber: UInt32 = 4
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarTextureUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 4
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarTextureUpdate",
+        messageNumber: UInt32 = 4,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorMapUpdate (Low 5)
 public struct SimulatorMapUpdatePacket {
-    public let name: String = "SimulatorMapUpdate"
-    public let messageNumber: UInt32 = 5
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimulatorMapUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 5
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorMapUpdate",
+        messageNumber: UInt32 = 5,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorSetMap (Low 6)
 public struct SimulatorSetMapPacket {
-    public let name: String = "SimulatorSetMap"
-    public let messageNumber: UInt32 = 6
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimulatorSetMap"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 6
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorSetMap",
+        messageNumber: UInt32 = 6,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SubscribeLoad (Low 7)
 public struct SubscribeLoadPacket {
-    public let name: String = "SubscribeLoad"
-    public let messageNumber: UInt32 = 7
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SubscribeLoad"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 7
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SubscribeLoad",
+        messageNumber: UInt32 = 7,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UnsubscribeLoad (Low 8)
 public struct UnsubscribeLoadPacket {
-    public let name: String = "UnsubscribeLoad"
-    public let messageNumber: UInt32 = 8
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UnsubscribeLoad"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 8
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UnsubscribeLoad",
+        messageNumber: UInt32 = 8,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorReady (Low 9)
 public struct SimulatorReadyPacket {
-    public let name: String = "SimulatorReady"
-    public let messageNumber: UInt32 = 9
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "SimulatorReady"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 9
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorReady",
+        messageNumber: UInt32 = 9,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TelehubInfo (Low 10)
 public struct TelehubInfoPacket {
-    public let name: String = "TelehubInfo"
-    public let messageNumber: UInt32 = 10
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TelehubInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 10
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TelehubInfo",
+        messageNumber: UInt32 = 10,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorPresentAtLocation (Low 11)
 public struct SimulatorPresentAtLocationPacket {
-    public let name: String = "SimulatorPresentAtLocation"
-    public let messageNumber: UInt32 = 11
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimulatorPresentAtLocation"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 11
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorPresentAtLocation",
+        messageNumber: UInt32 = 11,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorLoad (Low 12)
 public struct SimulatorLoadPacket {
-    public let name: String = "SimulatorLoad"
-    public let messageNumber: UInt32 = 12
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimulatorLoad"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 12
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorLoad",
+        messageNumber: UInt32 = 12,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorShutdownRequest (Low 13)
 public struct SimulatorShutdownRequestPacket {
-    public let name: String = "SimulatorShutdownRequest"
-    public let messageNumber: UInt32 = 13
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimulatorShutdownRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 13
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorShutdownRequest",
+        messageNumber: UInt32 = 13,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionPresenceRequestByRegionID (Low 14)
 public struct RegionPresenceRequestByRegionIDPacket {
-    public let name: String = "RegionPresenceRequestByRegionID"
-    public let messageNumber: UInt32 = 14
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RegionPresenceRequestByRegionID"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 14
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RegionPresenceRequestByRegionID",
+        messageNumber: UInt32 = 14,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionPresenceRequestByHandle (Low 15)
 public struct RegionPresenceRequestByHandlePacket {
-    public let name: String = "RegionPresenceRequestByHandle"
-    public let messageNumber: UInt32 = 15
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RegionPresenceRequestByHandle"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 15
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RegionPresenceRequestByHandle",
+        messageNumber: UInt32 = 15,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionPresenceResponse (Low 16)
 public struct RegionPresenceResponsePacket {
-    public let name: String = "RegionPresenceResponse"
-    public let messageNumber: UInt32 = 16
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RegionPresenceResponse"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 16
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RegionPresenceResponse",
+        messageNumber: UInt32 = 16,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateSimulator (Low 17)
 public struct UpdateSimulatorPacket {
-    public let name: String = "UpdateSimulator"
-    public let messageNumber: UInt32 = 17
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UpdateSimulator"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 17
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateSimulator",
+        messageNumber: UInt32 = 17,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LogDwellTime (Low 18)
 public struct LogDwellTimePacket {
-    public let name: String = "LogDwellTime"
-    public let messageNumber: UInt32 = 18
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LogDwellTime"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 18
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LogDwellTime",
+        messageNumber: UInt32 = 18,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FeatureDisabled (Low 19)
 public struct FeatureDisabledPacket {
-    public let name: String = "FeatureDisabled"
-    public let messageNumber: UInt32 = 19
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "FeatureDisabled"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 19
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "FeatureDisabled",
+        messageNumber: UInt32 = 19,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LogFailedMoneyTransaction (Low 20)
 public struct LogFailedMoneyTransactionPacket {
-    public let name: String = "LogFailedMoneyTransaction"
-    public let messageNumber: UInt32 = 20
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LogFailedMoneyTransaction"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 20
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LogFailedMoneyTransaction",
+        messageNumber: UInt32 = 20,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UserReportInternal (Low 21)
 public struct UserReportInternalPacket {
-    public let name: String = "UserReportInternal"
-    public let messageNumber: UInt32 = 21
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UserReportInternal"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 21
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UserReportInternal",
+        messageNumber: UInt32 = 21,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetSimStatusInDatabase (Low 22)
 public struct SetSimStatusInDatabasePacket {
-    public let name: String = "SetSimStatusInDatabase"
-    public let messageNumber: UInt32 = 22
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetSimStatusInDatabase"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 22
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetSimStatusInDatabase",
+        messageNumber: UInt32 = 22,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetSimPresenceInDatabase (Low 23)
 public struct SetSimPresenceInDatabasePacket {
-    public let name: String = "SetSimPresenceInDatabase"
-    public let messageNumber: UInt32 = 23
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetSimPresenceInDatabase"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 23
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetSimPresenceInDatabase",
+        messageNumber: UInt32 = 23,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EconomyDataRequest (Low 24)
 public struct EconomyDataRequestPacket {
-    public let name: String = "EconomyDataRequest"
-    public let messageNumber: UInt32 = 24
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EconomyDataRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 24
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EconomyDataRequest",
+        messageNumber: UInt32 = 24,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EconomyData (Low 25)
 public struct EconomyDataPacket {
-    public let name: String = "EconomyData"
-    public let messageNumber: UInt32 = 25
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "EconomyData"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 25
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "EconomyData",
+        messageNumber: UInt32 = 25,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPickerRequest (Low 26)
 public struct AvatarPickerRequestPacket {
-    public let name: String = "AvatarPickerRequest"
-    public let messageNumber: UInt32 = 26
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarPickerRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 26
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPickerRequest",
+        messageNumber: UInt32 = 26,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPickerRequestBackend (Low 27)
 public struct AvatarPickerRequestBackendPacket {
-    public let name: String = "AvatarPickerRequestBackend"
-    public let messageNumber: UInt32 = 27
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarPickerRequestBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 27
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPickerRequestBackend",
+        messageNumber: UInt32 = 27,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPickerReply (Low 28)
 public struct AvatarPickerReplyPacket {
-    public let name: String = "AvatarPickerReply"
-    public let messageNumber: UInt32 = 28
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarPickerReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 28
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPickerReply",
+        messageNumber: UInt32 = 28,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PlacesQuery (Low 29)
 public struct PlacesQueryPacket {
-    public let name: String = "PlacesQuery"
-    public let messageNumber: UInt32 = 29
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "PlacesQuery"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 29
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "PlacesQuery",
+        messageNumber: UInt32 = 29,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PlacesReply (Low 30)
 public struct PlacesReplyPacket {
-    public let name: String = "PlacesReply"
-    public let messageNumber: UInt32 = 30
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "PlacesReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 30
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "PlacesReply",
+        messageNumber: UInt32 = 30,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirFindQuery (Low 31)
 public struct DirFindQueryPacket {
-    public let name: String = "DirFindQuery"
-    public let messageNumber: UInt32 = 31
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirFindQuery"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 31
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirFindQuery",
+        messageNumber: UInt32 = 31,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirFindQueryBackend (Low 32)
 public struct DirFindQueryBackendPacket {
-    public let name: String = "DirFindQueryBackend"
-    public let messageNumber: UInt32 = 32
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirFindQueryBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 32
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirFindQueryBackend",
+        messageNumber: UInt32 = 32,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPlacesQuery (Low 33)
 public struct DirPlacesQueryPacket {
-    public let name: String = "DirPlacesQuery"
-    public let messageNumber: UInt32 = 33
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPlacesQuery"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 33
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPlacesQuery",
+        messageNumber: UInt32 = 33,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPlacesQueryBackend (Low 34)
 public struct DirPlacesQueryBackendPacket {
-    public let name: String = "DirPlacesQueryBackend"
-    public let messageNumber: UInt32 = 34
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPlacesQueryBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 34
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPlacesQueryBackend",
+        messageNumber: UInt32 = 34,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPlacesReply (Low 35)
 public struct DirPlacesReplyPacket {
-    public let name: String = "DirPlacesReply"
-    public let messageNumber: UInt32 = 35
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPlacesReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 35
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPlacesReply",
+        messageNumber: UInt32 = 35,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPeopleReply (Low 36)
 public struct DirPeopleReplyPacket {
-    public let name: String = "DirPeopleReply"
-    public let messageNumber: UInt32 = 36
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPeopleReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 36
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPeopleReply",
+        messageNumber: UInt32 = 36,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirEventsReply (Low 37)
 public struct DirEventsReplyPacket {
-    public let name: String = "DirEventsReply"
-    public let messageNumber: UInt32 = 37
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirEventsReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 37
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirEventsReply",
+        messageNumber: UInt32 = 37,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirGroupsReply (Low 38)
 public struct DirGroupsReplyPacket {
-    public let name: String = "DirGroupsReply"
-    public let messageNumber: UInt32 = 38
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirGroupsReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 38
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirGroupsReply",
+        messageNumber: UInt32 = 38,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirClassifiedQuery (Low 39)
 public struct DirClassifiedQueryPacket {
-    public let name: String = "DirClassifiedQuery"
-    public let messageNumber: UInt32 = 39
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirClassifiedQuery"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 39
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirClassifiedQuery",
+        messageNumber: UInt32 = 39,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirClassifiedQueryBackend (Low 40)
 public struct DirClassifiedQueryBackendPacket {
-    public let name: String = "DirClassifiedQueryBackend"
-    public let messageNumber: UInt32 = 40
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirClassifiedQueryBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 40
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirClassifiedQueryBackend",
+        messageNumber: UInt32 = 40,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirClassifiedReply (Low 41)
 public struct DirClassifiedReplyPacket {
-    public let name: String = "DirClassifiedReply"
-    public let messageNumber: UInt32 = 41
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirClassifiedReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 41
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirClassifiedReply",
+        messageNumber: UInt32 = 41,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarClassifiedReply (Low 42)
 public struct AvatarClassifiedReplyPacket {
-    public let name: String = "AvatarClassifiedReply"
-    public let messageNumber: UInt32 = 42
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarClassifiedReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 42
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarClassifiedReply",
+        messageNumber: UInt32 = 42,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ClassifiedInfoRequest (Low 43)
 public struct ClassifiedInfoRequestPacket {
-    public let name: String = "ClassifiedInfoRequest"
-    public let messageNumber: UInt32 = 43
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ClassifiedInfoRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 43
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ClassifiedInfoRequest",
+        messageNumber: UInt32 = 43,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ClassifiedInfoReply (Low 44)
 public struct ClassifiedInfoReplyPacket {
-    public let name: String = "ClassifiedInfoReply"
-    public let messageNumber: UInt32 = 44
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ClassifiedInfoReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 44
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ClassifiedInfoReply",
+        messageNumber: UInt32 = 44,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ClassifiedInfoUpdate (Low 45)
 public struct ClassifiedInfoUpdatePacket {
-    public let name: String = "ClassifiedInfoUpdate"
-    public let messageNumber: UInt32 = 45
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ClassifiedInfoUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 45
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ClassifiedInfoUpdate",
+        messageNumber: UInt32 = 45,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ClassifiedDelete (Low 46)
 public struct ClassifiedDeletePacket {
-    public let name: String = "ClassifiedDelete"
-    public let messageNumber: UInt32 = 46
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ClassifiedDelete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 46
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ClassifiedDelete",
+        messageNumber: UInt32 = 46,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ClassifiedGodDelete (Low 47)
 public struct ClassifiedGodDeletePacket {
-    public let name: String = "ClassifiedGodDelete"
-    public let messageNumber: UInt32 = 47
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ClassifiedGodDelete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 47
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ClassifiedGodDelete",
+        messageNumber: UInt32 = 47,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirLandQuery (Low 48)
 public struct DirLandQueryPacket {
-    public let name: String = "DirLandQuery"
-    public let messageNumber: UInt32 = 48
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirLandQuery"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 48
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirLandQuery",
+        messageNumber: UInt32 = 48,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirLandQueryBackend (Low 49)
 public struct DirLandQueryBackendPacket {
-    public let name: String = "DirLandQueryBackend"
-    public let messageNumber: UInt32 = 49
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirLandQueryBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 49
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirLandQueryBackend",
+        messageNumber: UInt32 = 49,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirLandReply (Low 50)
 public struct DirLandReplyPacket {
-    public let name: String = "DirLandReply"
-    public let messageNumber: UInt32 = 50
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirLandReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 50
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirLandReply",
+        messageNumber: UInt32 = 50,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPopularQuery (Low 51)
 public struct DirPopularQueryPacket {
-    public let name: String = "DirPopularQuery"
-    public let messageNumber: UInt32 = 51
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPopularQuery"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 51
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPopularQuery",
+        messageNumber: UInt32 = 51,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPopularQueryBackend (Low 52)
 public struct DirPopularQueryBackendPacket {
-    public let name: String = "DirPopularQueryBackend"
-    public let messageNumber: UInt32 = 52
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPopularQueryBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 52
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPopularQueryBackend",
+        messageNumber: UInt32 = 52,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DirPopularReply (Low 53)
 public struct DirPopularReplyPacket {
-    public let name: String = "DirPopularReply"
-    public let messageNumber: UInt32 = 53
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DirPopularReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 53
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DirPopularReply",
+        messageNumber: UInt32 = 53,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelInfoRequest (Low 54)
 public struct ParcelInfoRequestPacket {
-    public let name: String = "ParcelInfoRequest"
-    public let messageNumber: UInt32 = 54
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelInfoRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 54
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelInfoRequest",
+        messageNumber: UInt32 = 54,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelInfoReply (Low 55)
 public struct ParcelInfoReplyPacket {
-    public let name: String = "ParcelInfoReply"
-    public let messageNumber: UInt32 = 55
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelInfoReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 55
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelInfoReply",
+        messageNumber: UInt32 = 55,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelObjectOwnersRequest (Low 56)
 public struct ParcelObjectOwnersRequestPacket {
-    public let name: String = "ParcelObjectOwnersRequest"
-    public let messageNumber: UInt32 = 56
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelObjectOwnersRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 56
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelObjectOwnersRequest",
+        messageNumber: UInt32 = 56,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelObjectOwnersReply (Low 57)
 public struct ParcelObjectOwnersReplyPacket {
-    public let name: String = "ParcelObjectOwnersReply"
-    public let messageNumber: UInt32 = 57
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelObjectOwnersReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 57
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelObjectOwnersReply",
+        messageNumber: UInt32 = 57,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupNoticesListRequest (Low 58)
 public struct GroupNoticesListRequestPacket {
-    public let name: String = "GroupNoticesListRequest"
-    public let messageNumber: UInt32 = 58
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupNoticesListRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 58
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupNoticesListRequest",
+        messageNumber: UInt32 = 58,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupNoticesListReply (Low 59)
 public struct GroupNoticesListReplyPacket {
-    public let name: String = "GroupNoticesListReply"
-    public let messageNumber: UInt32 = 59
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupNoticesListReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 59
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupNoticesListReply",
+        messageNumber: UInt32 = 59,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupNoticeRequest (Low 60)
 public struct GroupNoticeRequestPacket {
-    public let name: String = "GroupNoticeRequest"
-    public let messageNumber: UInt32 = 60
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupNoticeRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 60
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupNoticeRequest",
+        messageNumber: UInt32 = 60,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupNoticeAdd (Low 61)
 public struct GroupNoticeAddPacket {
-    public let name: String = "GroupNoticeAdd"
-    public let messageNumber: UInt32 = 61
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupNoticeAdd"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 61
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupNoticeAdd",
+        messageNumber: UInt32 = 61,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportRequest (Low 62)
 public struct TeleportRequestPacket {
-    public let name: String = "TeleportRequest"
-    public let messageNumber: UInt32 = 62
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 62
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportRequest",
+        messageNumber: UInt32 = 62,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportLocationRequest (Low 63)
 public struct TeleportLocationRequestPacket {
-    public let name: String = "TeleportLocationRequest"
-    public let messageNumber: UInt32 = 63
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportLocationRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 63
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportLocationRequest",
+        messageNumber: UInt32 = 63,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportLocal (Low 64)
 public struct TeleportLocalPacket {
-    public let name: String = "TeleportLocal"
-    public let messageNumber: UInt32 = 64
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportLocal"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 64
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportLocal",
+        messageNumber: UInt32 = 64,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportLandmarkRequest (Low 65)
 public struct TeleportLandmarkRequestPacket {
-    public let name: String = "TeleportLandmarkRequest"
-    public let messageNumber: UInt32 = 65
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TeleportLandmarkRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 65
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportLandmarkRequest",
+        messageNumber: UInt32 = 65,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportProgress (Low 66)
 public struct TeleportProgressPacket {
-    public let name: String = "TeleportProgress"
-    public let messageNumber: UInt32 = 66
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportProgress"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 66
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportProgress",
+        messageNumber: UInt32 = 66,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DataHomeLocationRequest (Low 67)
 public struct DataHomeLocationRequestPacket {
-    public let name: String = "DataHomeLocationRequest"
-    public let messageNumber: UInt32 = 67
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DataHomeLocationRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 67
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DataHomeLocationRequest",
+        messageNumber: UInt32 = 67,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DataHomeLocationReply (Low 68)
 public struct DataHomeLocationReplyPacket {
-    public let name: String = "DataHomeLocationReply"
-    public let messageNumber: UInt32 = 68
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DataHomeLocationReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 68
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DataHomeLocationReply",
+        messageNumber: UInt32 = 68,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportFinish (Low 69)
 public struct TeleportFinishPacket {
-    public let name: String = "TeleportFinish"
-    public let messageNumber: UInt32 = 69
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportFinish"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 69
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportFinish",
+        messageNumber: UInt32 = 69,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: StartLure (Low 70)
 public struct StartLurePacket {
-    public let name: String = "StartLure"
-    public let messageNumber: UInt32 = 70
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "StartLure"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 70
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "StartLure",
+        messageNumber: UInt32 = 70,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportLureRequest (Low 71)
 public struct TeleportLureRequestPacket {
-    public let name: String = "TeleportLureRequest"
-    public let messageNumber: UInt32 = 71
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportLureRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 71
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportLureRequest",
+        messageNumber: UInt32 = 71,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportCancel (Low 72)
 public struct TeleportCancelPacket {
-    public let name: String = "TeleportCancel"
-    public let messageNumber: UInt32 = 72
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportCancel"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 72
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportCancel",
+        messageNumber: UInt32 = 72,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportStart (Low 73)
 public struct TeleportStartPacket {
-    public let name: String = "TeleportStart"
-    public let messageNumber: UInt32 = 73
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportStart"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 73
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportStart",
+        messageNumber: UInt32 = 73,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportFailed (Low 74)
 public struct TeleportFailedPacket {
-    public let name: String = "TeleportFailed"
-    public let messageNumber: UInt32 = 74
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportFailed"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 74
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportFailed",
+        messageNumber: UInt32 = 74,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: Undo (Low 75)
 public struct UndoPacket {
-    public let name: String = "Undo"
-    public let messageNumber: UInt32 = 75
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "Undo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 75
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "Undo",
+        messageNumber: UInt32 = 75,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: Redo (Low 76)
 public struct RedoPacket {
-    public let name: String = "Redo"
-    public let messageNumber: UInt32 = 76
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "Redo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 76
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "Redo",
+        messageNumber: UInt32 = 76,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UndoLand (Low 77)
 public struct UndoLandPacket {
-    public let name: String = "UndoLand"
-    public let messageNumber: UInt32 = 77
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UndoLand"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 77
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UndoLand",
+        messageNumber: UInt32 = 77,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentPause (Low 78)
 public struct AgentPausePacket {
-    public let name: String = "AgentPause"
-    public let messageNumber: UInt32 = 78
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentPause"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 78
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentPause",
+        messageNumber: UInt32 = 78,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentResume (Low 79)
 public struct AgentResumePacket {
-    public let name: String = "AgentResume"
-    public let messageNumber: UInt32 = 79
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentResume"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 79
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentResume",
+        messageNumber: UInt32 = 79,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentUpdate (High 4)
 public struct AgentUpdatePacket {
-    public let name: String = "AgentUpdate"
-    public let messageNumber: UInt32 = 4
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 4
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentUpdate",
+        messageNumber: UInt32 = 4,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChatFromViewer (Low 80)
 public struct ChatFromViewerPacket {
-    public let name: String = "ChatFromViewer"
-    public let messageNumber: UInt32 = 80
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ChatFromViewer"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 80
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ChatFromViewer",
+        messageNumber: UInt32 = 80,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentThrottle (Low 81)
 public struct AgentThrottlePacket {
-    public let name: String = "AgentThrottle"
-    public let messageNumber: UInt32 = 81
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentThrottle"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 81
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentThrottle",
+        messageNumber: UInt32 = 81,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentFOV (Low 82)
 public struct AgentFOVPacket {
-    public let name: String = "AgentFOV"
-    public let messageNumber: UInt32 = 82
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentFOV"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 82
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentFOV",
+        messageNumber: UInt32 = 82,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentHeightWidth (Low 83)
 public struct AgentHeightWidthPacket {
-    public let name: String = "AgentHeightWidth"
-    public let messageNumber: UInt32 = 83
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentHeightWidth"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 83
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentHeightWidth",
+        messageNumber: UInt32 = 83,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentSetAppearance (Low 84)
 public struct AgentSetAppearancePacket {
-    public let name: String = "AgentSetAppearance"
-    public let messageNumber: UInt32 = 84
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentSetAppearance"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 84
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentSetAppearance",
+        messageNumber: UInt32 = 84,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentAnimation (High 5)
 public struct AgentAnimationPacket {
-    public let name: String = "AgentAnimation"
-    public let messageNumber: UInt32 = 5
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentAnimation"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 5
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentAnimation",
+        messageNumber: UInt32 = 5,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentRequestSit (High 6)
 public struct AgentRequestSitPacket {
-    public let name: String = "AgentRequestSit"
-    public let messageNumber: UInt32 = 6
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentRequestSit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 6
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentRequestSit",
+        messageNumber: UInt32 = 6,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentSit (High 7)
 public struct AgentSitPacket {
-    public let name: String = "AgentSit"
-    public let messageNumber: UInt32 = 7
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentSit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 7
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentSit",
+        messageNumber: UInt32 = 7,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentQuitCopy (Low 85)
 public struct AgentQuitCopyPacket {
-    public let name: String = "AgentQuitCopy"
-    public let messageNumber: UInt32 = 85
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentQuitCopy"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 85
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentQuitCopy",
+        messageNumber: UInt32 = 85,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestImage (High 8)
 public struct RequestImagePacket {
-    public let name: String = "RequestImage"
-    public let messageNumber: UInt32 = 8
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestImage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 8
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestImage",
+        messageNumber: UInt32 = 8,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ImageNotInDatabase (Low 86)
 public struct ImageNotInDatabasePacket {
-    public let name: String = "ImageNotInDatabase"
-    public let messageNumber: UInt32 = 86
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ImageNotInDatabase"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 86
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ImageNotInDatabase",
+        messageNumber: UInt32 = 86,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RebakeAvatarTextures (Low 87)
 public struct RebakeAvatarTexturesPacket {
-    public let name: String = "RebakeAvatarTextures"
-    public let messageNumber: UInt32 = 87
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RebakeAvatarTextures"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 87
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RebakeAvatarTextures",
+        messageNumber: UInt32 = 87,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetAlwaysRun (Low 88)
 public struct SetAlwaysRunPacket {
-    public let name: String = "SetAlwaysRun"
-    public let messageNumber: UInt32 = 88
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetAlwaysRun"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 88
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetAlwaysRun",
+        messageNumber: UInt32 = 88,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectAdd (Medium 1)
 public struct ObjectAddPacket {
-    public let name: String = "ObjectAdd"
-    public let messageNumber: UInt32 = 1
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectAdd"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 1
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectAdd",
+        messageNumber: UInt32 = 1,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDelete (Low 89)
 public struct ObjectDeletePacket {
-    public let name: String = "ObjectDelete"
-    public let messageNumber: UInt32 = 89
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectDelete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 89
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDelete",
+        messageNumber: UInt32 = 89,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDuplicate (Low 90)
 public struct ObjectDuplicatePacket {
-    public let name: String = "ObjectDuplicate"
-    public let messageNumber: UInt32 = 90
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectDuplicate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 90
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDuplicate",
+        messageNumber: UInt32 = 90,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDuplicateOnRay (Low 91)
 public struct ObjectDuplicateOnRayPacket {
-    public let name: String = "ObjectDuplicateOnRay"
-    public let messageNumber: UInt32 = 91
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectDuplicateOnRay"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 91
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDuplicateOnRay",
+        messageNumber: UInt32 = 91,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MultipleObjectUpdate (Medium 2)
 public struct MultipleObjectUpdatePacket {
-    public let name: String = "MultipleObjectUpdate"
-    public let messageNumber: UInt32 = 2
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MultipleObjectUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 2
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MultipleObjectUpdate",
+        messageNumber: UInt32 = 2,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestMultipleObjects (Medium 3)
 public struct RequestMultipleObjectsPacket {
-    public let name: String = "RequestMultipleObjects"
-    public let messageNumber: UInt32 = 3
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RequestMultipleObjects"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 3
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RequestMultipleObjects",
+        messageNumber: UInt32 = 3,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectPosition (Medium 4)
 public struct ObjectPositionPacket {
-    public let name: String = "ObjectPosition"
-    public let messageNumber: UInt32 = 4
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectPosition"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 4
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectPosition",
+        messageNumber: UInt32 = 4,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectScale (Low 92)
 public struct ObjectScalePacket {
-    public let name: String = "ObjectScale"
-    public let messageNumber: UInt32 = 92
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectScale"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 92
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectScale",
+        messageNumber: UInt32 = 92,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectRotation (Low 93)
 public struct ObjectRotationPacket {
-    public let name: String = "ObjectRotation"
-    public let messageNumber: UInt32 = 93
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectRotation"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 93
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectRotation",
+        messageNumber: UInt32 = 93,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectFlagUpdate (Low 94)
 public struct ObjectFlagUpdatePacket {
-    public let name: String = "ObjectFlagUpdate"
-    public let messageNumber: UInt32 = 94
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectFlagUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 94
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectFlagUpdate",
+        messageNumber: UInt32 = 94,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectClickAction (Low 95)
 public struct ObjectClickActionPacket {
-    public let name: String = "ObjectClickAction"
-    public let messageNumber: UInt32 = 95
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectClickAction"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 95
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectClickAction",
+        messageNumber: UInt32 = 95,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectImage (Low 96)
 public struct ObjectImagePacket {
-    public let name: String = "ObjectImage"
-    public let messageNumber: UInt32 = 96
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectImage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 96
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectImage",
+        messageNumber: UInt32 = 96,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectBypassModUpdate (Low 431)
 public struct ObjectBypassModUpdatePacket {
-    public let name: String = "ObjectBypassModUpdate"
-    public let messageNumber: UInt32 = 431
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectBypassModUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 431
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectBypassModUpdate",
+        messageNumber: UInt32 = 431,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectMaterial (Low 97)
 public struct ObjectMaterialPacket {
-    public let name: String = "ObjectMaterial"
-    public let messageNumber: UInt32 = 97
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectMaterial"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 97
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectMaterial",
+        messageNumber: UInt32 = 97,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectShape (Low 98)
 public struct ObjectShapePacket {
-    public let name: String = "ObjectShape"
-    public let messageNumber: UInt32 = 98
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectShape"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 98
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectShape",
+        messageNumber: UInt32 = 98,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectExtraParams (Low 99)
 public struct ObjectExtraParamsPacket {
-    public let name: String = "ObjectExtraParams"
-    public let messageNumber: UInt32 = 99
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectExtraParams"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 99
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectExtraParams",
+        messageNumber: UInt32 = 99,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectOwner (Low 100)
 public struct ObjectOwnerPacket {
-    public let name: String = "ObjectOwner"
-    public let messageNumber: UInt32 = 100
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectOwner"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 100
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectOwner",
+        messageNumber: UInt32 = 100,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectGroup (Low 101)
 public struct ObjectGroupPacket {
-    public let name: String = "ObjectGroup"
-    public let messageNumber: UInt32 = 101
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectGroup"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 101
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectGroup",
+        messageNumber: UInt32 = 101,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectBuy (Low 102)
 public struct ObjectBuyPacket {
-    public let name: String = "ObjectBuy"
-    public let messageNumber: UInt32 = 102
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectBuy"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 102
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectBuy",
+        messageNumber: UInt32 = 102,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: BuyObjectInventory (Low 103)
 public struct BuyObjectInventoryPacket {
-    public let name: String = "BuyObjectInventory"
-    public let messageNumber: UInt32 = 103
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "BuyObjectInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 103
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "BuyObjectInventory",
+        messageNumber: UInt32 = 103,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DerezContainer (Low 104)
 public struct DerezContainerPacket {
-    public let name: String = "DerezContainer"
-    public let messageNumber: UInt32 = 104
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DerezContainer"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 104
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DerezContainer",
+        messageNumber: UInt32 = 104,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectPermissions (Low 105)
 public struct ObjectPermissionsPacket {
-    public let name: String = "ObjectPermissions"
-    public let messageNumber: UInt32 = 105
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectPermissions"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 105
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectPermissions",
+        messageNumber: UInt32 = 105,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectSaleInfo (Low 106)
 public struct ObjectSaleInfoPacket {
-    public let name: String = "ObjectSaleInfo"
-    public let messageNumber: UInt32 = 106
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectSaleInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 106
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectSaleInfo",
+        messageNumber: UInt32 = 106,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectName (Low 107)
 public struct ObjectNamePacket {
-    public let name: String = "ObjectName"
-    public let messageNumber: UInt32 = 107
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectName"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 107
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectName",
+        messageNumber: UInt32 = 107,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDescription (Low 108)
 public struct ObjectDescriptionPacket {
-    public let name: String = "ObjectDescription"
-    public let messageNumber: UInt32 = 108
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectDescription"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 108
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDescription",
+        messageNumber: UInt32 = 108,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectCategory (Low 109)
 public struct ObjectCategoryPacket {
-    public let name: String = "ObjectCategory"
-    public let messageNumber: UInt32 = 109
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectCategory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 109
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectCategory",
+        messageNumber: UInt32 = 109,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectSelect (Low 110)
 public struct ObjectSelectPacket {
-    public let name: String = "ObjectSelect"
-    public let messageNumber: UInt32 = 110
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectSelect"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 110
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectSelect",
+        messageNumber: UInt32 = 110,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDeselect (Low 111)
 public struct ObjectDeselectPacket {
-    public let name: String = "ObjectDeselect"
-    public let messageNumber: UInt32 = 111
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectDeselect"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 111
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDeselect",
+        messageNumber: UInt32 = 111,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectAttach (Low 112)
 public struct ObjectAttachPacket {
-    public let name: String = "ObjectAttach"
-    public let messageNumber: UInt32 = 112
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectAttach"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 112
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectAttach",
+        messageNumber: UInt32 = 112,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDetach (Low 113)
 public struct ObjectDetachPacket {
-    public let name: String = "ObjectDetach"
-    public let messageNumber: UInt32 = 113
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectDetach"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 113
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDetach",
+        messageNumber: UInt32 = 113,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDrop (Low 114)
 public struct ObjectDropPacket {
-    public let name: String = "ObjectDrop"
-    public let messageNumber: UInt32 = 114
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectDrop"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 114
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDrop",
+        messageNumber: UInt32 = 114,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectLink (Low 115)
 public struct ObjectLinkPacket {
-    public let name: String = "ObjectLink"
-    public let messageNumber: UInt32 = 115
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectLink"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 115
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectLink",
+        messageNumber: UInt32 = 115,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDelink (Low 116)
 public struct ObjectDelinkPacket {
-    public let name: String = "ObjectDelink"
-    public let messageNumber: UInt32 = 116
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectDelink"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 116
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDelink",
+        messageNumber: UInt32 = 116,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectGrab (Low 117)
 public struct ObjectGrabPacket {
-    public let name: String = "ObjectGrab"
-    public let messageNumber: UInt32 = 117
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectGrab"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 117
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectGrab",
+        messageNumber: UInt32 = 117,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectGrabUpdate (Low 118)
 public struct ObjectGrabUpdatePacket {
-    public let name: String = "ObjectGrabUpdate"
-    public let messageNumber: UInt32 = 118
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectGrabUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 118
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectGrabUpdate",
+        messageNumber: UInt32 = 118,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectDeGrab (Low 119)
 public struct ObjectDeGrabPacket {
-    public let name: String = "ObjectDeGrab"
-    public let messageNumber: UInt32 = 119
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectDeGrab"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 119
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectDeGrab",
+        messageNumber: UInt32 = 119,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectSpinStart (Low 120)
 public struct ObjectSpinStartPacket {
-    public let name: String = "ObjectSpinStart"
-    public let messageNumber: UInt32 = 120
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectSpinStart"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 120
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectSpinStart",
+        messageNumber: UInt32 = 120,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectSpinUpdate (Low 121)
 public struct ObjectSpinUpdatePacket {
-    public let name: String = "ObjectSpinUpdate"
-    public let messageNumber: UInt32 = 121
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectSpinUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 121
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectSpinUpdate",
+        messageNumber: UInt32 = 121,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectSpinStop (Low 122)
 public struct ObjectSpinStopPacket {
-    public let name: String = "ObjectSpinStop"
-    public let messageNumber: UInt32 = 122
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectSpinStop"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 122
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectSpinStop",
+        messageNumber: UInt32 = 122,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectExportSelected (Low 123)
 public struct ObjectExportSelectedPacket {
-    public let name: String = "ObjectExportSelected"
-    public let messageNumber: UInt32 = 123
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectExportSelected"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 123
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectExportSelected",
+        messageNumber: UInt32 = 123,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ModifyLand (Low 124)
 public struct ModifyLandPacket {
-    public let name: String = "ModifyLand"
-    public let messageNumber: UInt32 = 124
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ModifyLand"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 124
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ModifyLand",
+        messageNumber: UInt32 = 124,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: VelocityInterpolateOn (Low 125)
 public struct VelocityInterpolateOnPacket {
-    public let name: String = "VelocityInterpolateOn"
-    public let messageNumber: UInt32 = 125
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "VelocityInterpolateOn"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 125
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "VelocityInterpolateOn",
+        messageNumber: UInt32 = 125,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: VelocityInterpolateOff (Low 126)
 public struct VelocityInterpolateOffPacket {
-    public let name: String = "VelocityInterpolateOff"
-    public let messageNumber: UInt32 = 126
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "VelocityInterpolateOff"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 126
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "VelocityInterpolateOff",
+        messageNumber: UInt32 = 126,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: StateSave (Low 127)
 public struct StateSavePacket {
-    public let name: String = "StateSave"
-    public let messageNumber: UInt32 = 127
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "StateSave"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 127
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "StateSave",
+        messageNumber: UInt32 = 127,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ReportAutosaveCrash (Low 128)
 public struct ReportAutosaveCrashPacket {
-    public let name: String = "ReportAutosaveCrash"
-    public let messageNumber: UInt32 = 128
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ReportAutosaveCrash"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 128
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ReportAutosaveCrash",
+        messageNumber: UInt32 = 128,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimWideDeletes (Low 129)
 public struct SimWideDeletesPacket {
-    public let name: String = "SimWideDeletes"
-    public let messageNumber: UInt32 = 129
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimWideDeletes"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 129
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimWideDeletes",
+        messageNumber: UInt32 = 129,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestObjectPropertiesFamily (Medium 5)
 public struct RequestObjectPropertiesFamilyPacket {
-    public let name: String = "RequestObjectPropertiesFamily"
-    public let messageNumber: UInt32 = 5
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RequestObjectPropertiesFamily"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 5
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RequestObjectPropertiesFamily",
+        messageNumber: UInt32 = 5,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TrackAgent (Low 130)
 public struct TrackAgentPacket {
-    public let name: String = "TrackAgent"
-    public let messageNumber: UInt32 = 130
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TrackAgent"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 130
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TrackAgent",
+        messageNumber: UInt32 = 130,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ViewerStats (Low 131)
 public struct ViewerStatsPacket {
-    public let name: String = "ViewerStats"
-    public let messageNumber: UInt32 = 131
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ViewerStats"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 131
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ViewerStats",
+        messageNumber: UInt32 = 131,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptAnswerYes (Low 132)
 public struct ScriptAnswerYesPacket {
-    public let name: String = "ScriptAnswerYes"
-    public let messageNumber: UInt32 = 132
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptAnswerYes"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 132
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptAnswerYes",
+        messageNumber: UInt32 = 132,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UserReport (Low 133)
 public struct UserReportPacket {
-    public let name: String = "UserReport"
-    public let messageNumber: UInt32 = 133
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UserReport"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 133
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UserReport",
+        messageNumber: UInt32 = 133,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AlertMessage (Low 134)
 public struct AlertMessagePacket {
-    public let name: String = "AlertMessage"
-    public let messageNumber: UInt32 = 134
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AlertMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 134
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AlertMessage",
+        messageNumber: UInt32 = 134,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentAlertMessage (Low 135)
 public struct AgentAlertMessagePacket {
-    public let name: String = "AgentAlertMessage"
-    public let messageNumber: UInt32 = 135
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentAlertMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 135
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentAlertMessage",
+        messageNumber: UInt32 = 135,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MeanCollisionAlert (Low 136)
 public struct MeanCollisionAlertPacket {
-    public let name: String = "MeanCollisionAlert"
-    public let messageNumber: UInt32 = 136
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MeanCollisionAlert"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 136
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MeanCollisionAlert",
+        messageNumber: UInt32 = 136,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ViewerFrozenMessage (Low 137)
 public struct ViewerFrozenMessagePacket {
-    public let name: String = "ViewerFrozenMessage"
-    public let messageNumber: UInt32 = 137
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ViewerFrozenMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 137
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ViewerFrozenMessage",
+        messageNumber: UInt32 = 137,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: HealthMessage (Low 138)
 public struct HealthMessagePacket {
-    public let name: String = "HealthMessage"
-    public let messageNumber: UInt32 = 138
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "HealthMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 138
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "HealthMessage",
+        messageNumber: UInt32 = 138,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChatFromSimulator (Low 139)
 public struct ChatFromSimulatorPacket {
-    public let name: String = "ChatFromSimulator"
-    public let messageNumber: UInt32 = 139
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ChatFromSimulator"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 139
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ChatFromSimulator",
+        messageNumber: UInt32 = 139,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimStats (Low 140)
 public struct SimStatsPacket {
-    public let name: String = "SimStats"
-    public let messageNumber: UInt32 = 140
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimStats"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 140
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimStats",
+        messageNumber: UInt32 = 140,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestRegionInfo (Low 141)
 public struct RequestRegionInfoPacket {
-    public let name: String = "RequestRegionInfo"
-    public let messageNumber: UInt32 = 141
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestRegionInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 141
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestRegionInfo",
+        messageNumber: UInt32 = 141,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionInfo (Low 142)
 public struct RegionInfoPacket {
-    public let name: String = "RegionInfo"
-    public let messageNumber: UInt32 = 142
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RegionInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 142
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RegionInfo",
+        messageNumber: UInt32 = 142,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GodUpdateRegionInfo (Low 143)
 public struct GodUpdateRegionInfoPacket {
-    public let name: String = "GodUpdateRegionInfo"
-    public let messageNumber: UInt32 = 143
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GodUpdateRegionInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 143
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GodUpdateRegionInfo",
+        messageNumber: UInt32 = 143,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: NearestLandingRegionRequest (Low 144)
 public struct NearestLandingRegionRequestPacket {
-    public let name: String = "NearestLandingRegionRequest"
-    public let messageNumber: UInt32 = 144
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "NearestLandingRegionRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 144
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "NearestLandingRegionRequest",
+        messageNumber: UInt32 = 144,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: NearestLandingRegionReply (Low 145)
 public struct NearestLandingRegionReplyPacket {
-    public let name: String = "NearestLandingRegionReply"
-    public let messageNumber: UInt32 = 145
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "NearestLandingRegionReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 145
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "NearestLandingRegionReply",
+        messageNumber: UInt32 = 145,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: NearestLandingRegionUpdated (Low 146)
 public struct NearestLandingRegionUpdatedPacket {
-    public let name: String = "NearestLandingRegionUpdated"
-    public let messageNumber: UInt32 = 146
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "NearestLandingRegionUpdated"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 146
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "NearestLandingRegionUpdated",
+        messageNumber: UInt32 = 146,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TeleportLandingStatusChanged (Low 147)
 public struct TeleportLandingStatusChangedPacket {
-    public let name: String = "TeleportLandingStatusChanged"
-    public let messageNumber: UInt32 = 147
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TeleportLandingStatusChanged"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 147
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TeleportLandingStatusChanged",
+        messageNumber: UInt32 = 147,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionHandshake (Low 148)
 public struct RegionHandshakePacket {
-    public let name: String = "RegionHandshake"
-    public let messageNumber: UInt32 = 148
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RegionHandshake"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 148
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RegionHandshake",
+        messageNumber: UInt32 = 148,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionHandshakeReply (Low 149)
 public struct RegionHandshakeReplyPacket {
-    public let name: String = "RegionHandshakeReply"
-    public let messageNumber: UInt32 = 149
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RegionHandshakeReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 149
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RegionHandshakeReply",
+        messageNumber: UInt32 = 149,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CoarseLocationUpdate (Medium 6)
 public struct CoarseLocationUpdatePacket {
-    public let name: String = "CoarseLocationUpdate"
-    public let messageNumber: UInt32 = 6
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CoarseLocationUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 6
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CoarseLocationUpdate",
+        messageNumber: UInt32 = 6,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ImageData (High 9)
 public struct ImageDataPacket {
-    public let name: String = "ImageData"
-    public let messageNumber: UInt32 = 9
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ImageData"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 9
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ImageData",
+        messageNumber: UInt32 = 9,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ImagePacket (High 10)
 public struct ImagePacketPacket {
-    public let name: String = "ImagePacket"
-    public let messageNumber: UInt32 = 10
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ImagePacket"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 10
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ImagePacket",
+        messageNumber: UInt32 = 10,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LayerData (High 11)
 public struct LayerDataPacket {
-    public let name: String = "LayerData"
-    public let messageNumber: UInt32 = 11
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LayerData"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 11
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LayerData",
+        messageNumber: UInt32 = 11,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectUpdate (High 12)
 public struct ObjectUpdatePacket {
-    public let name: String = "ObjectUpdate"
-    public let messageNumber: UInt32 = 12
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 12
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectUpdate",
+        messageNumber: UInt32 = 12,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectUpdateCompressed (High 13)
 public struct ObjectUpdateCompressedPacket {
-    public let name: String = "ObjectUpdateCompressed"
-    public let messageNumber: UInt32 = 13
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectUpdateCompressed"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 13
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectUpdateCompressed",
+        messageNumber: UInt32 = 13,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectUpdateCached (High 14)
 public struct ObjectUpdateCachedPacket {
-    public let name: String = "ObjectUpdateCached"
-    public let messageNumber: UInt32 = 14
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectUpdateCached"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 14
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectUpdateCached",
+        messageNumber: UInt32 = 14,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ImprovedTerseObjectUpdate (High 15)
 public struct ImprovedTerseObjectUpdatePacket {
-    public let name: String = "ImprovedTerseObjectUpdate"
-    public let messageNumber: UInt32 = 15
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ImprovedTerseObjectUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 15
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ImprovedTerseObjectUpdate",
+        messageNumber: UInt32 = 15,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: KillObject (High 16)
 public struct KillObjectPacket {
-    public let name: String = "KillObject"
-    public let messageNumber: UInt32 = 16
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "KillObject"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 16
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "KillObject",
+        messageNumber: UInt32 = 16,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CrossedRegion (Medium 7)
 public struct CrossedRegionPacket {
-    public let name: String = "CrossedRegion"
-    public let messageNumber: UInt32 = 7
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CrossedRegion"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 7
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CrossedRegion",
+        messageNumber: UInt32 = 7,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimulatorViewerTimeMessage (Low 150)
 public struct SimulatorViewerTimeMessagePacket {
-    public let name: String = "SimulatorViewerTimeMessage"
-    public let messageNumber: UInt32 = 150
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimulatorViewerTimeMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 150
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimulatorViewerTimeMessage",
+        messageNumber: UInt32 = 150,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EnableSimulator (Low 151)
 public struct EnableSimulatorPacket {
-    public let name: String = "EnableSimulator"
-    public let messageNumber: UInt32 = 151
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EnableSimulator"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 151
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EnableSimulator",
+        messageNumber: UInt32 = 151,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DisableSimulator (Low 152)
 public struct DisableSimulatorPacket {
-    public let name: String = "DisableSimulator"
-    public let messageNumber: UInt32 = 152
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DisableSimulator"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 152
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DisableSimulator",
+        messageNumber: UInt32 = 152,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ConfirmEnableSimulator (Medium 8)
 public struct ConfirmEnableSimulatorPacket {
-    public let name: String = "ConfirmEnableSimulator"
-    public let messageNumber: UInt32 = 8
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ConfirmEnableSimulator"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 8
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ConfirmEnableSimulator",
+        messageNumber: UInt32 = 8,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TransferRequest (Low 153)
 public struct TransferRequestPacket {
-    public let name: String = "TransferRequest"
-    public let messageNumber: UInt32 = 153
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TransferRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 153
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TransferRequest",
+        messageNumber: UInt32 = 153,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TransferInfo (Low 154)
 public struct TransferInfoPacket {
-    public let name: String = "TransferInfo"
-    public let messageNumber: UInt32 = 154
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TransferInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 154
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TransferInfo",
+        messageNumber: UInt32 = 154,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TransferPacket (High 17)
 public struct TransferPacketPacket {
-    public let name: String = "TransferPacket"
-    public let messageNumber: UInt32 = 17
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TransferPacket"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 17
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TransferPacket",
+        messageNumber: UInt32 = 17,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TransferAbort (Low 155)
 public struct TransferAbortPacket {
-    public let name: String = "TransferAbort"
-    public let messageNumber: UInt32 = 155
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TransferAbort"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 155
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TransferAbort",
+        messageNumber: UInt32 = 155,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestXfer (Low 156)
 public struct RequestXferPacket {
-    public let name: String = "RequestXfer"
-    public let messageNumber: UInt32 = 156
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RequestXfer"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 156
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RequestXfer",
+        messageNumber: UInt32 = 156,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SendXferPacket (High 18)
 public struct SendXferPacketPacket {
-    public let name: String = "SendXferPacket"
-    public let messageNumber: UInt32 = 18
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SendXferPacket"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 18
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SendXferPacket",
+        messageNumber: UInt32 = 18,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ConfirmXferPacket (High 19)
 public struct ConfirmXferPacketPacket {
-    public let name: String = "ConfirmXferPacket"
-    public let messageNumber: UInt32 = 19
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ConfirmXferPacket"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 19
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ConfirmXferPacket",
+        messageNumber: UInt32 = 19,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AbortXfer (Low 157)
 public struct AbortXferPacket {
-    public let name: String = "AbortXfer"
-    public let messageNumber: UInt32 = 157
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AbortXfer"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 157
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AbortXfer",
+        messageNumber: UInt32 = 157,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarAnimation (High 20)
 public struct AvatarAnimationPacket {
-    public let name: String = "AvatarAnimation"
-    public let messageNumber: UInt32 = 20
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarAnimation"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 20
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarAnimation",
+        messageNumber: UInt32 = 20,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarAppearance (Low 158)
 public struct AvatarAppearancePacket {
-    public let name: String = "AvatarAppearance"
-    public let messageNumber: UInt32 = 158
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarAppearance"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 158
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarAppearance",
+        messageNumber: UInt32 = 158,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarSitResponse (High 21)
 public struct AvatarSitResponsePacket {
-    public let name: String = "AvatarSitResponse"
-    public let messageNumber: UInt32 = 21
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarSitResponse"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 21
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarSitResponse",
+        messageNumber: UInt32 = 21,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetFollowCamProperties (Low 159)
 public struct SetFollowCamPropertiesPacket {
-    public let name: String = "SetFollowCamProperties"
-    public let messageNumber: UInt32 = 159
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetFollowCamProperties"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 159
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetFollowCamProperties",
+        messageNumber: UInt32 = 159,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ClearFollowCamProperties (Low 160)
 public struct ClearFollowCamPropertiesPacket {
-    public let name: String = "ClearFollowCamProperties"
-    public let messageNumber: UInt32 = 160
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ClearFollowCamProperties"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 160
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ClearFollowCamProperties",
+        messageNumber: UInt32 = 160,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CameraConstraint (High 22)
 public struct CameraConstraintPacket {
-    public let name: String = "CameraConstraint"
-    public let messageNumber: UInt32 = 22
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "CameraConstraint"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 22
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "CameraConstraint",
+        messageNumber: UInt32 = 22,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectProperties (Medium 9)
 public struct ObjectPropertiesPacket {
-    public let name: String = "ObjectProperties"
-    public let messageNumber: UInt32 = 9
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectProperties"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 9
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectProperties",
+        messageNumber: UInt32 = 9,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectPropertiesFamily (Medium 10)
 public struct ObjectPropertiesFamilyPacket {
-    public let name: String = "ObjectPropertiesFamily"
-    public let messageNumber: UInt32 = 10
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ObjectPropertiesFamily"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 10
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectPropertiesFamily",
+        messageNumber: UInt32 = 10,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestPayPrice (Low 161)
 public struct RequestPayPricePacket {
-    public let name: String = "RequestPayPrice"
-    public let messageNumber: UInt32 = 161
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestPayPrice"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 161
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestPayPrice",
+        messageNumber: UInt32 = 161,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PayPriceReply (Low 162)
 public struct PayPriceReplyPacket {
-    public let name: String = "PayPriceReply"
-    public let messageNumber: UInt32 = 162
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PayPriceReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 162
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PayPriceReply",
+        messageNumber: UInt32 = 162,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: KickUser (Low 163)
 public struct KickUserPacket {
-    public let name: String = "KickUser"
-    public let messageNumber: UInt32 = 163
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "KickUser"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 163
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "KickUser",
+        messageNumber: UInt32 = 163,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: KickUserAck (Low 164)
 public struct KickUserAckPacket {
-    public let name: String = "KickUserAck"
-    public let messageNumber: UInt32 = 164
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "KickUserAck"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 164
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "KickUserAck",
+        messageNumber: UInt32 = 164,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GodKickUser (Low 165)
 public struct GodKickUserPacket {
-    public let name: String = "GodKickUser"
-    public let messageNumber: UInt32 = 165
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GodKickUser"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 165
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GodKickUser",
+        messageNumber: UInt32 = 165,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SystemKickUser (Low 166)
 public struct SystemKickUserPacket {
-    public let name: String = "SystemKickUser"
-    public let messageNumber: UInt32 = 166
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SystemKickUser"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 166
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SystemKickUser",
+        messageNumber: UInt32 = 166,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EjectUser (Low 167)
 public struct EjectUserPacket {
-    public let name: String = "EjectUser"
-    public let messageNumber: UInt32 = 167
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EjectUser"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 167
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EjectUser",
+        messageNumber: UInt32 = 167,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FreezeUser (Low 168)
 public struct FreezeUserPacket {
-    public let name: String = "FreezeUser"
-    public let messageNumber: UInt32 = 168
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "FreezeUser"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 168
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "FreezeUser",
+        messageNumber: UInt32 = 168,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPropertiesRequest (Low 169)
 public struct AvatarPropertiesRequestPacket {
-    public let name: String = "AvatarPropertiesRequest"
-    public let messageNumber: UInt32 = 169
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarPropertiesRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 169
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPropertiesRequest",
+        messageNumber: UInt32 = 169,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPropertiesRequestBackend (Low 170)
 public struct AvatarPropertiesRequestBackendPacket {
-    public let name: String = "AvatarPropertiesRequestBackend"
-    public let messageNumber: UInt32 = 170
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarPropertiesRequestBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 170
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPropertiesRequestBackend",
+        messageNumber: UInt32 = 170,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPropertiesReply (Low 171)
 public struct AvatarPropertiesReplyPacket {
-    public let name: String = "AvatarPropertiesReply"
-    public let messageNumber: UInt32 = 171
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarPropertiesReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 171
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPropertiesReply",
+        messageNumber: UInt32 = 171,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarInterestsReply (Low 172)
 public struct AvatarInterestsReplyPacket {
-    public let name: String = "AvatarInterestsReply"
-    public let messageNumber: UInt32 = 172
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarInterestsReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 172
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarInterestsReply",
+        messageNumber: UInt32 = 172,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarGroupsReply (Low 173)
 public struct AvatarGroupsReplyPacket {
-    public let name: String = "AvatarGroupsReply"
-    public let messageNumber: UInt32 = 173
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarGroupsReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 173
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarGroupsReply",
+        messageNumber: UInt32 = 173,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPropertiesUpdate (Low 174)
 public struct AvatarPropertiesUpdatePacket {
-    public let name: String = "AvatarPropertiesUpdate"
-    public let messageNumber: UInt32 = 174
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarPropertiesUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 174
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPropertiesUpdate",
+        messageNumber: UInt32 = 174,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarInterestsUpdate (Low 175)
 public struct AvatarInterestsUpdatePacket {
-    public let name: String = "AvatarInterestsUpdate"
-    public let messageNumber: UInt32 = 175
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AvatarInterestsUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 175
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarInterestsUpdate",
+        messageNumber: UInt32 = 175,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarNotesReply (Low 176)
 public struct AvatarNotesReplyPacket {
-    public let name: String = "AvatarNotesReply"
-    public let messageNumber: UInt32 = 176
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarNotesReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 176
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarNotesReply",
+        messageNumber: UInt32 = 176,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarNotesUpdate (Low 177)
 public struct AvatarNotesUpdatePacket {
-    public let name: String = "AvatarNotesUpdate"
-    public let messageNumber: UInt32 = 177
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarNotesUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 177
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarNotesUpdate",
+        messageNumber: UInt32 = 177,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AvatarPicksReply (Low 178)
 public struct AvatarPicksReplyPacket {
-    public let name: String = "AvatarPicksReply"
-    public let messageNumber: UInt32 = 178
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AvatarPicksReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 178
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AvatarPicksReply",
+        messageNumber: UInt32 = 178,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventInfoRequest (Low 179)
 public struct EventInfoRequestPacket {
-    public let name: String = "EventInfoRequest"
-    public let messageNumber: UInt32 = 179
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EventInfoRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 179
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EventInfoRequest",
+        messageNumber: UInt32 = 179,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventInfoReply (Low 180)
 public struct EventInfoReplyPacket {
-    public let name: String = "EventInfoReply"
-    public let messageNumber: UInt32 = 180
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EventInfoReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 180
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EventInfoReply",
+        messageNumber: UInt32 = 180,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventNotificationAddRequest (Low 181)
 public struct EventNotificationAddRequestPacket {
-    public let name: String = "EventNotificationAddRequest"
-    public let messageNumber: UInt32 = 181
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EventNotificationAddRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 181
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EventNotificationAddRequest",
+        messageNumber: UInt32 = 181,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventNotificationRemoveRequest (Low 182)
 public struct EventNotificationRemoveRequestPacket {
-    public let name: String = "EventNotificationRemoveRequest"
-    public let messageNumber: UInt32 = 182
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EventNotificationRemoveRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 182
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EventNotificationRemoveRequest",
+        messageNumber: UInt32 = 182,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventGodDelete (Low 183)
 public struct EventGodDeletePacket {
-    public let name: String = "EventGodDelete"
-    public let messageNumber: UInt32 = 183
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EventGodDelete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 183
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EventGodDelete",
+        messageNumber: UInt32 = 183,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PickInfoReply (Low 184)
 public struct PickInfoReplyPacket {
-    public let name: String = "PickInfoReply"
-    public let messageNumber: UInt32 = 184
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PickInfoReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 184
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PickInfoReply",
+        messageNumber: UInt32 = 184,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PickInfoUpdate (Low 185)
 public struct PickInfoUpdatePacket {
-    public let name: String = "PickInfoUpdate"
-    public let messageNumber: UInt32 = 185
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PickInfoUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 185
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PickInfoUpdate",
+        messageNumber: UInt32 = 185,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PickDelete (Low 186)
 public struct PickDeletePacket {
-    public let name: String = "PickDelete"
-    public let messageNumber: UInt32 = 186
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PickDelete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 186
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PickDelete",
+        messageNumber: UInt32 = 186,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PickGodDelete (Low 187)
 public struct PickGodDeletePacket {
-    public let name: String = "PickGodDelete"
-    public let messageNumber: UInt32 = 187
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PickGodDelete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 187
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PickGodDelete",
+        messageNumber: UInt32 = 187,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptQuestion (Low 188)
 public struct ScriptQuestionPacket {
-    public let name: String = "ScriptQuestion"
-    public let messageNumber: UInt32 = 188
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptQuestion"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 188
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptQuestion",
+        messageNumber: UInt32 = 188,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptControlChange (Low 189)
 public struct ScriptControlChangePacket {
-    public let name: String = "ScriptControlChange"
-    public let messageNumber: UInt32 = 189
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptControlChange"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 189
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptControlChange",
+        messageNumber: UInt32 = 189,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptDialog (Low 190)
 public struct ScriptDialogPacket {
-    public let name: String = "ScriptDialog"
-    public let messageNumber: UInt32 = 190
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ScriptDialog"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 190
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptDialog",
+        messageNumber: UInt32 = 190,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptDialogReply (Low 191)
 public struct ScriptDialogReplyPacket {
-    public let name: String = "ScriptDialogReply"
-    public let messageNumber: UInt32 = 191
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ScriptDialogReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 191
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptDialogReply",
+        messageNumber: UInt32 = 191,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ForceScriptControlRelease (Low 192)
 public struct ForceScriptControlReleasePacket {
-    public let name: String = "ForceScriptControlRelease"
-    public let messageNumber: UInt32 = 192
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ForceScriptControlRelease"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 192
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ForceScriptControlRelease",
+        messageNumber: UInt32 = 192,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RevokePermissions (Low 193)
 public struct RevokePermissionsPacket {
-    public let name: String = "RevokePermissions"
-    public let messageNumber: UInt32 = 193
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RevokePermissions"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 193
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RevokePermissions",
+        messageNumber: UInt32 = 193,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LoadURL (Low 194)
 public struct LoadURLPacket {
-    public let name: String = "LoadURL"
-    public let messageNumber: UInt32 = 194
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LoadURL"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 194
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LoadURL",
+        messageNumber: UInt32 = 194,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptTeleportRequest (Low 195)
 public struct ScriptTeleportRequestPacket {
-    public let name: String = "ScriptTeleportRequest"
-    public let messageNumber: UInt32 = 195
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptTeleportRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 195
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptTeleportRequest",
+        messageNumber: UInt32 = 195,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelOverlay (Low 196)
 public struct ParcelOverlayPacket {
-    public let name: String = "ParcelOverlay"
-    public let messageNumber: UInt32 = 196
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelOverlay"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 196
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelOverlay",
+        messageNumber: UInt32 = 196,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelPropertiesRequest (Medium 11)
 public struct ParcelPropertiesRequestPacket {
-    public let name: String = "ParcelPropertiesRequest"
-    public let messageNumber: UInt32 = 11
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelPropertiesRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 11
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelPropertiesRequest",
+        messageNumber: UInt32 = 11,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelPropertiesRequestByID (Low 197)
 public struct ParcelPropertiesRequestByIDPacket {
-    public let name: String = "ParcelPropertiesRequestByID"
-    public let messageNumber: UInt32 = 197
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelPropertiesRequestByID"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 197
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelPropertiesRequestByID",
+        messageNumber: UInt32 = 197,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelProperties (High 23)
 public struct ParcelPropertiesPacket {
-    public let name: String = "ParcelProperties"
-    public let messageNumber: UInt32 = 23
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelProperties"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 23
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelProperties",
+        messageNumber: UInt32 = 23,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelPropertiesUpdate (Low 198)
 public struct ParcelPropertiesUpdatePacket {
-    public let name: String = "ParcelPropertiesUpdate"
-    public let messageNumber: UInt32 = 198
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelPropertiesUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 198
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelPropertiesUpdate",
+        messageNumber: UInt32 = 198,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelReturnObjects (Low 199)
 public struct ParcelReturnObjectsPacket {
-    public let name: String = "ParcelReturnObjects"
-    public let messageNumber: UInt32 = 199
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelReturnObjects"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 199
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelReturnObjects",
+        messageNumber: UInt32 = 199,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelSetOtherCleanTime (Low 200)
 public struct ParcelSetOtherCleanTimePacket {
-    public let name: String = "ParcelSetOtherCleanTime"
-    public let messageNumber: UInt32 = 200
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelSetOtherCleanTime"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 200
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelSetOtherCleanTime",
+        messageNumber: UInt32 = 200,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelDisableObjects (Low 201)
 public struct ParcelDisableObjectsPacket {
-    public let name: String = "ParcelDisableObjects"
-    public let messageNumber: UInt32 = 201
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelDisableObjects"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 201
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelDisableObjects",
+        messageNumber: UInt32 = 201,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelSelectObjects (Low 202)
 public struct ParcelSelectObjectsPacket {
-    public let name: String = "ParcelSelectObjects"
-    public let messageNumber: UInt32 = 202
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelSelectObjects"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 202
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelSelectObjects",
+        messageNumber: UInt32 = 202,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EstateCovenantRequest (Low 203)
 public struct EstateCovenantRequestPacket {
-    public let name: String = "EstateCovenantRequest"
-    public let messageNumber: UInt32 = 203
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EstateCovenantRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 203
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EstateCovenantRequest",
+        messageNumber: UInt32 = 203,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EstateCovenantReply (Low 204)
 public struct EstateCovenantReplyPacket {
-    public let name: String = "EstateCovenantReply"
-    public let messageNumber: UInt32 = 204
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EstateCovenantReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 204
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EstateCovenantReply",
+        messageNumber: UInt32 = 204,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ForceObjectSelect (Low 205)
 public struct ForceObjectSelectPacket {
-    public let name: String = "ForceObjectSelect"
-    public let messageNumber: UInt32 = 205
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ForceObjectSelect"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 205
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ForceObjectSelect",
+        messageNumber: UInt32 = 205,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelBuyPass (Low 206)
 public struct ParcelBuyPassPacket {
-    public let name: String = "ParcelBuyPass"
-    public let messageNumber: UInt32 = 206
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelBuyPass"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 206
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelBuyPass",
+        messageNumber: UInt32 = 206,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelDeedToGroup (Low 207)
 public struct ParcelDeedToGroupPacket {
-    public let name: String = "ParcelDeedToGroup"
-    public let messageNumber: UInt32 = 207
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelDeedToGroup"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 207
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelDeedToGroup",
+        messageNumber: UInt32 = 207,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelReclaim (Low 208)
 public struct ParcelReclaimPacket {
-    public let name: String = "ParcelReclaim"
-    public let messageNumber: UInt32 = 208
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelReclaim"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 208
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelReclaim",
+        messageNumber: UInt32 = 208,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelClaim (Low 209)
 public struct ParcelClaimPacket {
-    public let name: String = "ParcelClaim"
-    public let messageNumber: UInt32 = 209
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelClaim"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 209
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelClaim",
+        messageNumber: UInt32 = 209,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelJoin (Low 210)
 public struct ParcelJoinPacket {
-    public let name: String = "ParcelJoin"
-    public let messageNumber: UInt32 = 210
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelJoin"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 210
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelJoin",
+        messageNumber: UInt32 = 210,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelDivide (Low 211)
 public struct ParcelDividePacket {
-    public let name: String = "ParcelDivide"
-    public let messageNumber: UInt32 = 211
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelDivide"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 211
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelDivide",
+        messageNumber: UInt32 = 211,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelRelease (Low 212)
 public struct ParcelReleasePacket {
-    public let name: String = "ParcelRelease"
-    public let messageNumber: UInt32 = 212
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelRelease"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 212
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelRelease",
+        messageNumber: UInt32 = 212,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelBuy (Low 213)
 public struct ParcelBuyPacket {
-    public let name: String = "ParcelBuy"
-    public let messageNumber: UInt32 = 213
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelBuy"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 213
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelBuy",
+        messageNumber: UInt32 = 213,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelGodForceOwner (Low 214)
 public struct ParcelGodForceOwnerPacket {
-    public let name: String = "ParcelGodForceOwner"
-    public let messageNumber: UInt32 = 214
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelGodForceOwner"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 214
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelGodForceOwner",
+        messageNumber: UInt32 = 214,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelAccessListRequest (Low 215)
 public struct ParcelAccessListRequestPacket {
-    public let name: String = "ParcelAccessListRequest"
-    public let messageNumber: UInt32 = 215
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelAccessListRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 215
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelAccessListRequest",
+        messageNumber: UInt32 = 215,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelAccessListReply (Low 216)
 public struct ParcelAccessListReplyPacket {
-    public let name: String = "ParcelAccessListReply"
-    public let messageNumber: UInt32 = 216
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelAccessListReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 216
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelAccessListReply",
+        messageNumber: UInt32 = 216,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelAccessListUpdate (Low 217)
 public struct ParcelAccessListUpdatePacket {
-    public let name: String = "ParcelAccessListUpdate"
-    public let messageNumber: UInt32 = 217
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ParcelAccessListUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 217
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelAccessListUpdate",
+        messageNumber: UInt32 = 217,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelDwellRequest (Low 218)
 public struct ParcelDwellRequestPacket {
-    public let name: String = "ParcelDwellRequest"
-    public let messageNumber: UInt32 = 218
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelDwellRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 218
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelDwellRequest",
+        messageNumber: UInt32 = 218,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelDwellReply (Low 219)
 public struct ParcelDwellReplyPacket {
-    public let name: String = "ParcelDwellReply"
-    public let messageNumber: UInt32 = 219
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelDwellReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 219
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelDwellReply",
+        messageNumber: UInt32 = 219,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestParcelTransfer (Low 220)
 public struct RequestParcelTransferPacket {
-    public let name: String = "RequestParcelTransfer"
-    public let messageNumber: UInt32 = 220
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RequestParcelTransfer"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 220
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RequestParcelTransfer",
+        messageNumber: UInt32 = 220,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateParcel (Low 221)
 public struct UpdateParcelPacket {
-    public let name: String = "UpdateParcel"
-    public let messageNumber: UInt32 = 221
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UpdateParcel"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 221
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateParcel",
+        messageNumber: UInt32 = 221,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveParcel (Low 222)
 public struct RemoveParcelPacket {
-    public let name: String = "RemoveParcel"
-    public let messageNumber: UInt32 = 222
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveParcel"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 222
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveParcel",
+        messageNumber: UInt32 = 222,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MergeParcel (Low 223)
 public struct MergeParcelPacket {
-    public let name: String = "MergeParcel"
-    public let messageNumber: UInt32 = 223
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MergeParcel"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 223
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MergeParcel",
+        messageNumber: UInt32 = 223,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LogParcelChanges (Low 224)
 public struct LogParcelChangesPacket {
-    public let name: String = "LogParcelChanges"
-    public let messageNumber: UInt32 = 224
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "LogParcelChanges"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 224
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "LogParcelChanges",
+        messageNumber: UInt32 = 224,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CheckParcelSales (Low 225)
 public struct CheckParcelSalesPacket {
-    public let name: String = "CheckParcelSales"
-    public let messageNumber: UInt32 = 225
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CheckParcelSales"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 225
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CheckParcelSales",
+        messageNumber: UInt32 = 225,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelSales (Low 226)
 public struct ParcelSalesPacket {
-    public let name: String = "ParcelSales"
-    public let messageNumber: UInt32 = 226
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelSales"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 226
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelSales",
+        messageNumber: UInt32 = 226,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelGodMarkAsContent (Low 227)
 public struct ParcelGodMarkAsContentPacket {
-    public let name: String = "ParcelGodMarkAsContent"
-    public let messageNumber: UInt32 = 227
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelGodMarkAsContent"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 227
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelGodMarkAsContent",
+        messageNumber: UInt32 = 227,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ViewerStartAuction (Low 228)
 public struct ViewerStartAuctionPacket {
-    public let name: String = "ViewerStartAuction"
-    public let messageNumber: UInt32 = 228
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ViewerStartAuction"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 228
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ViewerStartAuction",
+        messageNumber: UInt32 = 228,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: StartAuction (Low 229)
 public struct StartAuctionPacket {
-    public let name: String = "StartAuction"
-    public let messageNumber: UInt32 = 229
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "StartAuction"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 229
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "StartAuction",
+        messageNumber: UInt32 = 229,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ConfirmAuctionStart (Low 230)
 public struct ConfirmAuctionStartPacket {
-    public let name: String = "ConfirmAuctionStart"
-    public let messageNumber: UInt32 = 230
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ConfirmAuctionStart"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 230
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ConfirmAuctionStart",
+        messageNumber: UInt32 = 230,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CompleteAuction (Low 231)
 public struct CompleteAuctionPacket {
-    public let name: String = "CompleteAuction"
-    public let messageNumber: UInt32 = 231
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CompleteAuction"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 231
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CompleteAuction",
+        messageNumber: UInt32 = 231,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CancelAuction (Low 232)
 public struct CancelAuctionPacket {
-    public let name: String = "CancelAuction"
-    public let messageNumber: UInt32 = 232
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CancelAuction"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 232
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CancelAuction",
+        messageNumber: UInt32 = 232,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CheckParcelAuctions (Low 233)
 public struct CheckParcelAuctionsPacket {
-    public let name: String = "CheckParcelAuctions"
-    public let messageNumber: UInt32 = 233
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CheckParcelAuctions"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 233
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CheckParcelAuctions",
+        messageNumber: UInt32 = 233,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelAuctions (Low 234)
 public struct ParcelAuctionsPacket {
-    public let name: String = "ParcelAuctions"
-    public let messageNumber: UInt32 = 234
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelAuctions"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 234
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelAuctions",
+        messageNumber: UInt32 = 234,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UUIDNameRequest (Low 235)
 public struct UUIDNameRequestPacket {
-    public let name: String = "UUIDNameRequest"
-    public let messageNumber: UInt32 = 235
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UUIDNameRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 235
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UUIDNameRequest",
+        messageNumber: UInt32 = 235,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UUIDNameReply (Low 236)
 public struct UUIDNameReplyPacket {
-    public let name: String = "UUIDNameReply"
-    public let messageNumber: UInt32 = 236
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UUIDNameReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 236
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UUIDNameReply",
+        messageNumber: UInt32 = 236,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UUIDGroupNameRequest (Low 237)
 public struct UUIDGroupNameRequestPacket {
-    public let name: String = "UUIDGroupNameRequest"
-    public let messageNumber: UInt32 = 237
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UUIDGroupNameRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 237
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UUIDGroupNameRequest",
+        messageNumber: UInt32 = 237,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UUIDGroupNameReply (Low 238)
 public struct UUIDGroupNameReplyPacket {
-    public let name: String = "UUIDGroupNameReply"
-    public let messageNumber: UInt32 = 238
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UUIDGroupNameReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 238
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UUIDGroupNameReply",
+        messageNumber: UInt32 = 238,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChatPass (Low 239)
 public struct ChatPassPacket {
-    public let name: String = "ChatPass"
-    public let messageNumber: UInt32 = 239
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ChatPass"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 239
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ChatPass",
+        messageNumber: UInt32 = 239,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EdgeDataPacket (High 24)
 public struct EdgeDataPacketPacket {
-    public let name: String = "EdgeDataPacket"
-    public let messageNumber: UInt32 = 24
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "EdgeDataPacket"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 24
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "EdgeDataPacket",
+        messageNumber: UInt32 = 24,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimStatus (Medium 12)
 public struct SimStatusPacket {
-    public let name: String = "SimStatus"
-    public let messageNumber: UInt32 = 12
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimStatus"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 12
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimStatus",
+        messageNumber: UInt32 = 12,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChildAgentUpdate (High 25)
 public struct ChildAgentUpdatePacket {
-    public let name: String = "ChildAgentUpdate"
-    public let messageNumber: UInt32 = 25
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ChildAgentUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 25
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ChildAgentUpdate",
+        messageNumber: UInt32 = 25,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChildAgentAlive (High 26)
 public struct ChildAgentAlivePacket {
-    public let name: String = "ChildAgentAlive"
-    public let messageNumber: UInt32 = 26
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ChildAgentAlive"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 26
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ChildAgentAlive",
+        messageNumber: UInt32 = 26,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChildAgentPositionUpdate (High 27)
 public struct ChildAgentPositionUpdatePacket {
-    public let name: String = "ChildAgentPositionUpdate"
-    public let messageNumber: UInt32 = 27
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ChildAgentPositionUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 27
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ChildAgentPositionUpdate",
+        messageNumber: UInt32 = 27,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChildAgentDying (Low 240)
 public struct ChildAgentDyingPacket {
-    public let name: String = "ChildAgentDying"
-    public let messageNumber: UInt32 = 240
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ChildAgentDying"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 240
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ChildAgentDying",
+        messageNumber: UInt32 = 240,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChildAgentUnknown (Low 241)
 public struct ChildAgentUnknownPacket {
-    public let name: String = "ChildAgentUnknown"
-    public let messageNumber: UInt32 = 241
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ChildAgentUnknown"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 241
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ChildAgentUnknown",
+        messageNumber: UInt32 = 241,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AtomicPassObject (High 28)
 public struct AtomicPassObjectPacket {
-    public let name: String = "AtomicPassObject"
-    public let messageNumber: UInt32 = 28
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AtomicPassObject"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 28
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AtomicPassObject",
+        messageNumber: UInt32 = 28,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: KillChildAgents (Low 242)
 public struct KillChildAgentsPacket {
-    public let name: String = "KillChildAgents"
-    public let messageNumber: UInt32 = 242
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "KillChildAgents"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 242
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "KillChildAgents",
+        messageNumber: UInt32 = 242,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GetScriptRunning (Low 243)
 public struct GetScriptRunningPacket {
-    public let name: String = "GetScriptRunning"
-    public let messageNumber: UInt32 = 243
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GetScriptRunning"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 243
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GetScriptRunning",
+        messageNumber: UInt32 = 243,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptRunningReply (Low 244)
 public struct ScriptRunningReplyPacket {
-    public let name: String = "ScriptRunningReply"
-    public let messageNumber: UInt32 = 244
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptRunningReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 244
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptRunningReply",
+        messageNumber: UInt32 = 244,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetScriptRunning (Low 245)
 public struct SetScriptRunningPacket {
-    public let name: String = "SetScriptRunning"
-    public let messageNumber: UInt32 = 245
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetScriptRunning"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 245
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetScriptRunning",
+        messageNumber: UInt32 = 245,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptReset (Low 246)
 public struct ScriptResetPacket {
-    public let name: String = "ScriptReset"
-    public let messageNumber: UInt32 = 246
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptReset"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 246
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptReset",
+        messageNumber: UInt32 = 246,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptSensorRequest (Low 247)
 public struct ScriptSensorRequestPacket {
-    public let name: String = "ScriptSensorRequest"
-    public let messageNumber: UInt32 = 247
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ScriptSensorRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 247
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptSensorRequest",
+        messageNumber: UInt32 = 247,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptSensorReply (Low 248)
 public struct ScriptSensorReplyPacket {
-    public let name: String = "ScriptSensorReply"
-    public let messageNumber: UInt32 = 248
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ScriptSensorReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 248
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptSensorReply",
+        messageNumber: UInt32 = 248,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CompleteAgentMovement (Low 249)
 public struct CompleteAgentMovementPacket {
-    public let name: String = "CompleteAgentMovement"
-    public let messageNumber: UInt32 = 249
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CompleteAgentMovement"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 249
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CompleteAgentMovement",
+        messageNumber: UInt32 = 249,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentMovementComplete (Low 250)
 public struct AgentMovementCompletePacket {
-    public let name: String = "AgentMovementComplete"
-    public let messageNumber: UInt32 = 250
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentMovementComplete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 250
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentMovementComplete",
+        messageNumber: UInt32 = 250,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DataServerLogout (Low 251)
 public struct DataServerLogoutPacket {
-    public let name: String = "DataServerLogout"
-    public let messageNumber: UInt32 = 251
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DataServerLogout"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 251
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DataServerLogout",
+        messageNumber: UInt32 = 251,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LogoutRequest (Low 252)
 public struct LogoutRequestPacket {
-    public let name: String = "LogoutRequest"
-    public let messageNumber: UInt32 = 252
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LogoutRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 252
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LogoutRequest",
+        messageNumber: UInt32 = 252,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LogoutReply (Low 253)
 public struct LogoutReplyPacket {
-    public let name: String = "LogoutReply"
-    public let messageNumber: UInt32 = 253
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "LogoutReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 253
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "LogoutReply",
+        messageNumber: UInt32 = 253,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ImprovedInstantMessage (Low 254)
 public struct ImprovedInstantMessagePacket {
-    public let name: String = "ImprovedInstantMessage"
-    public let messageNumber: UInt32 = 254
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ImprovedInstantMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 254
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ImprovedInstantMessage",
+        messageNumber: UInt32 = 254,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RetrieveInstantMessages (Low 255)
 public struct RetrieveInstantMessagesPacket {
-    public let name: String = "RetrieveInstantMessages"
-    public let messageNumber: UInt32 = 255
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RetrieveInstantMessages"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 255
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RetrieveInstantMessages",
+        messageNumber: UInt32 = 255,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FindAgent (Low 256)
 public struct FindAgentPacket {
-    public let name: String = "FindAgent"
-    public let messageNumber: UInt32 = 256
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "FindAgent"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 256
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "FindAgent",
+        messageNumber: UInt32 = 256,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestGodlikePowers (Low 257)
 public struct RequestGodlikePowersPacket {
-    public let name: String = "RequestGodlikePowers"
-    public let messageNumber: UInt32 = 257
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestGodlikePowers"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 257
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestGodlikePowers",
+        messageNumber: UInt32 = 257,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GrantGodlikePowers (Low 258)
 public struct GrantGodlikePowersPacket {
-    public let name: String = "GrantGodlikePowers"
-    public let messageNumber: UInt32 = 258
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GrantGodlikePowers"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 258
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GrantGodlikePowers",
+        messageNumber: UInt32 = 258,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GodlikeMessage (Low 259)
 public struct GodlikeMessagePacket {
-    public let name: String = "GodlikeMessage"
-    public let messageNumber: UInt32 = 259
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GodlikeMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 259
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GodlikeMessage",
+        messageNumber: UInt32 = 259,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EstateOwnerMessage (Low 260)
 public struct EstateOwnerMessagePacket {
-    public let name: String = "EstateOwnerMessage"
-    public let messageNumber: UInt32 = 260
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "EstateOwnerMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 260
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "EstateOwnerMessage",
+        messageNumber: UInt32 = 260,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GenericMessage (Low 261)
 public struct GenericMessagePacket {
-    public let name: String = "GenericMessage"
-    public let messageNumber: UInt32 = 261
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GenericMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 261
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GenericMessage",
+        messageNumber: UInt32 = 261,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GenericStreamingMessage (High 31)
 public struct GenericStreamingMessagePacket {
-    public let name: String = "GenericStreamingMessage"
-    public let messageNumber: UInt32 = 31
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GenericStreamingMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 31
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GenericStreamingMessage",
+        messageNumber: UInt32 = 31,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LargeGenericMessage (Low 430)
 public struct LargeGenericMessagePacket {
-    public let name: String = "LargeGenericMessage"
-    public let messageNumber: UInt32 = 430
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LargeGenericMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 430
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LargeGenericMessage",
+        messageNumber: UInt32 = 430,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MuteListRequest (Low 262)
 public struct MuteListRequestPacket {
-    public let name: String = "MuteListRequest"
-    public let messageNumber: UInt32 = 262
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MuteListRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 262
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MuteListRequest",
+        messageNumber: UInt32 = 262,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateMuteListEntry (Low 263)
 public struct UpdateMuteListEntryPacket {
-    public let name: String = "UpdateMuteListEntry"
-    public let messageNumber: UInt32 = 263
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UpdateMuteListEntry"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 263
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateMuteListEntry",
+        messageNumber: UInt32 = 263,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveMuteListEntry (Low 264)
 public struct RemoveMuteListEntryPacket {
-    public let name: String = "RemoveMuteListEntry"
-    public let messageNumber: UInt32 = 264
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveMuteListEntry"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 264
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveMuteListEntry",
+        messageNumber: UInt32 = 264,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CopyInventoryFromNotecard (Low 265)
 public struct CopyInventoryFromNotecardPacket {
-    public let name: String = "CopyInventoryFromNotecard"
-    public let messageNumber: UInt32 = 265
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "CopyInventoryFromNotecard"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 265
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "CopyInventoryFromNotecard",
+        messageNumber: UInt32 = 265,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateInventoryItem (Low 266)
 public struct UpdateInventoryItemPacket {
-    public let name: String = "UpdateInventoryItem"
-    public let messageNumber: UInt32 = 266
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UpdateInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 266
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateInventoryItem",
+        messageNumber: UInt32 = 266,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateCreateInventoryItem (Low 267)
 public struct UpdateCreateInventoryItemPacket {
-    public let name: String = "UpdateCreateInventoryItem"
-    public let messageNumber: UInt32 = 267
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UpdateCreateInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 267
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateCreateInventoryItem",
+        messageNumber: UInt32 = 267,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoveInventoryItem (Low 268)
 public struct MoveInventoryItemPacket {
-    public let name: String = "MoveInventoryItem"
-    public let messageNumber: UInt32 = 268
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MoveInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 268
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MoveInventoryItem",
+        messageNumber: UInt32 = 268,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CopyInventoryItem (Low 269)
 public struct CopyInventoryItemPacket {
-    public let name: String = "CopyInventoryItem"
-    public let messageNumber: UInt32 = 269
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "CopyInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 269
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "CopyInventoryItem",
+        messageNumber: UInt32 = 269,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveInventoryItem (Low 270)
 public struct RemoveInventoryItemPacket {
-    public let name: String = "RemoveInventoryItem"
-    public let messageNumber: UInt32 = 270
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 270
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveInventoryItem",
+        messageNumber: UInt32 = 270,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChangeInventoryItemFlags (Low 271)
 public struct ChangeInventoryItemFlagsPacket {
-    public let name: String = "ChangeInventoryItemFlags"
-    public let messageNumber: UInt32 = 271
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ChangeInventoryItemFlags"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 271
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ChangeInventoryItemFlags",
+        messageNumber: UInt32 = 271,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SaveAssetIntoInventory (Low 272)
 public struct SaveAssetIntoInventoryPacket {
-    public let name: String = "SaveAssetIntoInventory"
-    public let messageNumber: UInt32 = 272
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SaveAssetIntoInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 272
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SaveAssetIntoInventory",
+        messageNumber: UInt32 = 272,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateInventoryFolder (Low 273)
 public struct CreateInventoryFolderPacket {
-    public let name: String = "CreateInventoryFolder"
-    public let messageNumber: UInt32 = 273
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CreateInventoryFolder"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 273
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CreateInventoryFolder",
+        messageNumber: UInt32 = 273,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateInventoryFolder (Low 274)
 public struct UpdateInventoryFolderPacket {
-    public let name: String = "UpdateInventoryFolder"
-    public let messageNumber: UInt32 = 274
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UpdateInventoryFolder"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 274
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateInventoryFolder",
+        messageNumber: UInt32 = 274,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoveInventoryFolder (Low 275)
 public struct MoveInventoryFolderPacket {
-    public let name: String = "MoveInventoryFolder"
-    public let messageNumber: UInt32 = 275
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MoveInventoryFolder"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 275
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MoveInventoryFolder",
+        messageNumber: UInt32 = 275,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveInventoryFolder (Low 276)
 public struct RemoveInventoryFolderPacket {
-    public let name: String = "RemoveInventoryFolder"
-    public let messageNumber: UInt32 = 276
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveInventoryFolder"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 276
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveInventoryFolder",
+        messageNumber: UInt32 = 276,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FetchInventoryDescendents (Low 277)
 public struct FetchInventoryDescendentsPacket {
-    public let name: String = "FetchInventoryDescendents"
-    public let messageNumber: UInt32 = 277
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "FetchInventoryDescendents"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 277
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "FetchInventoryDescendents",
+        messageNumber: UInt32 = 277,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: InventoryDescendents (Low 278)
 public struct InventoryDescendentsPacket {
-    public let name: String = "InventoryDescendents"
-    public let messageNumber: UInt32 = 278
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "InventoryDescendents"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 278
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "InventoryDescendents",
+        messageNumber: UInt32 = 278,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FetchInventory (Low 279)
 public struct FetchInventoryPacket {
-    public let name: String = "FetchInventory"
-    public let messageNumber: UInt32 = 279
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "FetchInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 279
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "FetchInventory",
+        messageNumber: UInt32 = 279,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FetchInventoryReply (Low 280)
 public struct FetchInventoryReplyPacket {
-    public let name: String = "FetchInventoryReply"
-    public let messageNumber: UInt32 = 280
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "FetchInventoryReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 280
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "FetchInventoryReply",
+        messageNumber: UInt32 = 280,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: BulkUpdateInventory (Low 281)
 public struct BulkUpdateInventoryPacket {
-    public let name: String = "BulkUpdateInventory"
-    public let messageNumber: UInt32 = 281
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "BulkUpdateInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 281
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "BulkUpdateInventory",
+        messageNumber: UInt32 = 281,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestInventoryAsset (Low 282)
 public struct RequestInventoryAssetPacket {
-    public let name: String = "RequestInventoryAsset"
-    public let messageNumber: UInt32 = 282
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestInventoryAsset"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 282
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestInventoryAsset",
+        messageNumber: UInt32 = 282,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: InventoryAssetResponse (Low 283)
 public struct InventoryAssetResponsePacket {
-    public let name: String = "InventoryAssetResponse"
-    public let messageNumber: UInt32 = 283
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "InventoryAssetResponse"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 283
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "InventoryAssetResponse",
+        messageNumber: UInt32 = 283,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveInventoryObjects (Low 284)
 public struct RemoveInventoryObjectsPacket {
-    public let name: String = "RemoveInventoryObjects"
-    public let messageNumber: UInt32 = 284
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveInventoryObjects"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 284
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveInventoryObjects",
+        messageNumber: UInt32 = 284,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PurgeInventoryDescendents (Low 285)
 public struct PurgeInventoryDescendentsPacket {
-    public let name: String = "PurgeInventoryDescendents"
-    public let messageNumber: UInt32 = 285
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "PurgeInventoryDescendents"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 285
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "PurgeInventoryDescendents",
+        messageNumber: UInt32 = 285,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateTaskInventory (Low 286)
 public struct UpdateTaskInventoryPacket {
-    public let name: String = "UpdateTaskInventory"
-    public let messageNumber: UInt32 = 286
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UpdateTaskInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 286
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateTaskInventory",
+        messageNumber: UInt32 = 286,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveTaskInventory (Low 287)
 public struct RemoveTaskInventoryPacket {
-    public let name: String = "RemoveTaskInventory"
-    public let messageNumber: UInt32 = 287
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RemoveTaskInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 287
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveTaskInventory",
+        messageNumber: UInt32 = 287,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoveTaskInventory (Low 288)
 public struct MoveTaskInventoryPacket {
-    public let name: String = "MoveTaskInventory"
-    public let messageNumber: UInt32 = 288
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MoveTaskInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 288
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MoveTaskInventory",
+        messageNumber: UInt32 = 288,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestTaskInventory (Low 289)
 public struct RequestTaskInventoryPacket {
-    public let name: String = "RequestTaskInventory"
-    public let messageNumber: UInt32 = 289
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestTaskInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 289
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestTaskInventory",
+        messageNumber: UInt32 = 289,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ReplyTaskInventory (Low 290)
 public struct ReplyTaskInventoryPacket {
-    public let name: String = "ReplyTaskInventory"
-    public let messageNumber: UInt32 = 290
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ReplyTaskInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 290
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ReplyTaskInventory",
+        messageNumber: UInt32 = 290,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DeRezObject (Low 291)
 public struct DeRezObjectPacket {
-    public let name: String = "DeRezObject"
-    public let messageNumber: UInt32 = 291
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "DeRezObject"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 291
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "DeRezObject",
+        messageNumber: UInt32 = 291,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DeRezAck (Low 292)
 public struct DeRezAckPacket {
-    public let name: String = "DeRezAck"
-    public let messageNumber: UInt32 = 292
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DeRezAck"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 292
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DeRezAck",
+        messageNumber: UInt32 = 292,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RezObject (Low 293)
 public struct RezObjectPacket {
-    public let name: String = "RezObject"
-    public let messageNumber: UInt32 = 293
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RezObject"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 293
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RezObject",
+        messageNumber: UInt32 = 293,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RezObjectFromNotecard (Low 294)
 public struct RezObjectFromNotecardPacket {
-    public let name: String = "RezObjectFromNotecard"
-    public let messageNumber: UInt32 = 294
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RezObjectFromNotecard"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 294
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RezObjectFromNotecard",
+        messageNumber: UInt32 = 294,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TransferInventory (Low 295)
 public struct TransferInventoryPacket {
-    public let name: String = "TransferInventory"
-    public let messageNumber: UInt32 = 295
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TransferInventory"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 295
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TransferInventory",
+        messageNumber: UInt32 = 295,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TransferInventoryAck (Low 296)
 public struct TransferInventoryAckPacket {
-    public let name: String = "TransferInventoryAck"
-    public let messageNumber: UInt32 = 296
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "TransferInventoryAck"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 296
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "TransferInventoryAck",
+        messageNumber: UInt32 = 296,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AcceptFriendship (Low 297)
 public struct AcceptFriendshipPacket {
-    public let name: String = "AcceptFriendship"
-    public let messageNumber: UInt32 = 297
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AcceptFriendship"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 297
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AcceptFriendship",
+        messageNumber: UInt32 = 297,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DeclineFriendship (Low 298)
 public struct DeclineFriendshipPacket {
-    public let name: String = "DeclineFriendship"
-    public let messageNumber: UInt32 = 298
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DeclineFriendship"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 298
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DeclineFriendship",
+        messageNumber: UInt32 = 298,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: FormFriendship (Low 299)
 public struct FormFriendshipPacket {
-    public let name: String = "FormFriendship"
-    public let messageNumber: UInt32 = 299
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "FormFriendship"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 299
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "FormFriendship",
+        messageNumber: UInt32 = 299,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TerminateFriendship (Low 300)
 public struct TerminateFriendshipPacket {
-    public let name: String = "TerminateFriendship"
-    public let messageNumber: UInt32 = 300
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TerminateFriendship"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 300
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TerminateFriendship",
+        messageNumber: UInt32 = 300,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: OfferCallingCard (Low 301)
 public struct OfferCallingCardPacket {
-    public let name: String = "OfferCallingCard"
-    public let messageNumber: UInt32 = 301
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "OfferCallingCard"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 301
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "OfferCallingCard",
+        messageNumber: UInt32 = 301,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AcceptCallingCard (Low 302)
 public struct AcceptCallingCardPacket {
-    public let name: String = "AcceptCallingCard"
-    public let messageNumber: UInt32 = 302
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AcceptCallingCard"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 302
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AcceptCallingCard",
+        messageNumber: UInt32 = 302,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DeclineCallingCard (Low 303)
 public struct DeclineCallingCardPacket {
-    public let name: String = "DeclineCallingCard"
-    public let messageNumber: UInt32 = 303
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DeclineCallingCard"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 303
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DeclineCallingCard",
+        messageNumber: UInt32 = 303,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RezScript (Low 304)
 public struct RezScriptPacket {
-    public let name: String = "RezScript"
-    public let messageNumber: UInt32 = 304
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RezScript"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 304
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RezScript",
+        messageNumber: UInt32 = 304,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateInventoryItem (Low 305)
 public struct CreateInventoryItemPacket {
-    public let name: String = "CreateInventoryItem"
-    public let messageNumber: UInt32 = 305
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "CreateInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 305
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "CreateInventoryItem",
+        messageNumber: UInt32 = 305,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateLandmarkForEvent (Low 306)
 public struct CreateLandmarkForEventPacket {
-    public let name: String = "CreateLandmarkForEvent"
-    public let messageNumber: UInt32 = 306
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "CreateLandmarkForEvent"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 306
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "CreateLandmarkForEvent",
+        messageNumber: UInt32 = 306,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventLocationRequest (Low 307)
 public struct EventLocationRequestPacket {
-    public let name: String = "EventLocationRequest"
-    public let messageNumber: UInt32 = 307
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "EventLocationRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 307
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "EventLocationRequest",
+        messageNumber: UInt32 = 307,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EventLocationReply (Low 308)
 public struct EventLocationReplyPacket {
-    public let name: String = "EventLocationReply"
-    public let messageNumber: UInt32 = 308
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "EventLocationReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 308
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "EventLocationReply",
+        messageNumber: UInt32 = 308,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionHandleRequest (Low 309)
 public struct RegionHandleRequestPacket {
-    public let name: String = "RegionHandleRequest"
-    public let messageNumber: UInt32 = 309
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RegionHandleRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 309
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RegionHandleRequest",
+        messageNumber: UInt32 = 309,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RegionIDAndHandleReply (Low 310)
 public struct RegionIDAndHandleReplyPacket {
-    public let name: String = "RegionIDAndHandleReply"
-    public let messageNumber: UInt32 = 310
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RegionIDAndHandleReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 310
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RegionIDAndHandleReply",
+        messageNumber: UInt32 = 310,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoneyTransferRequest (Low 311)
 public struct MoneyTransferRequestPacket {
-    public let name: String = "MoneyTransferRequest"
-    public let messageNumber: UInt32 = 311
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MoneyTransferRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 311
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MoneyTransferRequest",
+        messageNumber: UInt32 = 311,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoneyTransferBackend (Low 312)
 public struct MoneyTransferBackendPacket {
-    public let name: String = "MoneyTransferBackend"
-    public let messageNumber: UInt32 = 312
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MoneyTransferBackend"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 312
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MoneyTransferBackend",
+        messageNumber: UInt32 = 312,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoneyBalanceRequest (Low 313)
 public struct MoneyBalanceRequestPacket {
-    public let name: String = "MoneyBalanceRequest"
-    public let messageNumber: UInt32 = 313
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MoneyBalanceRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 313
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MoneyBalanceRequest",
+        messageNumber: UInt32 = 313,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MoneyBalanceReply (Low 314)
 public struct MoneyBalanceReplyPacket {
-    public let name: String = "MoneyBalanceReply"
-    public let messageNumber: UInt32 = 314
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "MoneyBalanceReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 314
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "MoneyBalanceReply",
+        messageNumber: UInt32 = 314,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RoutedMoneyBalanceReply (Low 315)
 public struct RoutedMoneyBalanceReplyPacket {
-    public let name: String = "RoutedMoneyBalanceReply"
-    public let messageNumber: UInt32 = 315
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RoutedMoneyBalanceReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 315
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RoutedMoneyBalanceReply",
+        messageNumber: UInt32 = 315,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ActivateGestures (Low 316)
 public struct ActivateGesturesPacket {
-    public let name: String = "ActivateGestures"
-    public let messageNumber: UInt32 = 316
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ActivateGestures"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 316
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ActivateGestures",
+        messageNumber: UInt32 = 316,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DeactivateGestures (Low 317)
 public struct DeactivateGesturesPacket {
-    public let name: String = "DeactivateGestures"
-    public let messageNumber: UInt32 = 317
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DeactivateGestures"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 317
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DeactivateGestures",
+        messageNumber: UInt32 = 317,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MuteListUpdate (Low 318)
 public struct MuteListUpdatePacket {
-    public let name: String = "MuteListUpdate"
-    public let messageNumber: UInt32 = 318
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MuteListUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 318
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MuteListUpdate",
+        messageNumber: UInt32 = 318,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UseCachedMuteList (Low 319)
 public struct UseCachedMuteListPacket {
-    public let name: String = "UseCachedMuteList"
-    public let messageNumber: UInt32 = 319
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UseCachedMuteList"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 319
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UseCachedMuteList",
+        messageNumber: UInt32 = 319,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GrantUserRights (Low 320)
 public struct GrantUserRightsPacket {
-    public let name: String = "GrantUserRights"
-    public let messageNumber: UInt32 = 320
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GrantUserRights"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 320
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GrantUserRights",
+        messageNumber: UInt32 = 320,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ChangeUserRights (Low 321)
 public struct ChangeUserRightsPacket {
-    public let name: String = "ChangeUserRights"
-    public let messageNumber: UInt32 = 321
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ChangeUserRights"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 321
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ChangeUserRights",
+        messageNumber: UInt32 = 321,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: OnlineNotification (Low 322)
 public struct OnlineNotificationPacket {
-    public let name: String = "OnlineNotification"
-    public let messageNumber: UInt32 = 322
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "OnlineNotification"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 322
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "OnlineNotification",
+        messageNumber: UInt32 = 322,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: OfflineNotification (Low 323)
 public struct OfflineNotificationPacket {
-    public let name: String = "OfflineNotification"
-    public let messageNumber: UInt32 = 323
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "OfflineNotification"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 323
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "OfflineNotification",
+        messageNumber: UInt32 = 323,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetStartLocationRequest (Low 324)
 public struct SetStartLocationRequestPacket {
-    public let name: String = "SetStartLocationRequest"
-    public let messageNumber: UInt32 = 324
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "SetStartLocationRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 324
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "SetStartLocationRequest",
+        messageNumber: UInt32 = 324,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetStartLocation (Low 325)
 public struct SetStartLocationPacket {
-    public let name: String = "SetStartLocation"
-    public let messageNumber: UInt32 = 325
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "SetStartLocation"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 325
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "SetStartLocation",
+        messageNumber: UInt32 = 325,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: NetTest (Low 326)
 public struct NetTestPacket {
-    public let name: String = "NetTest"
-    public let messageNumber: UInt32 = 326
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "NetTest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 326
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "NetTest",
+        messageNumber: UInt32 = 326,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetCPURatio (Low 327)
 public struct SetCPURatioPacket {
-    public let name: String = "SetCPURatio"
-    public let messageNumber: UInt32 = 327
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetCPURatio"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 327
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetCPURatio",
+        messageNumber: UInt32 = 327,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SimCrashed (Low 328)
 public struct SimCrashedPacket {
-    public let name: String = "SimCrashed"
-    public let messageNumber: UInt32 = 328
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SimCrashed"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 328
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SimCrashed",
+        messageNumber: UInt32 = 328,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: NameValuePair (Low 329)
 public struct NameValuePairPacket {
-    public let name: String = "NameValuePair"
-    public let messageNumber: UInt32 = 329
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "NameValuePair"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 329
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "NameValuePair",
+        messageNumber: UInt32 = 329,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveNameValuePair (Low 330)
 public struct RemoveNameValuePairPacket {
-    public let name: String = "RemoveNameValuePair"
-    public let messageNumber: UInt32 = 330
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveNameValuePair"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 330
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveNameValuePair",
+        messageNumber: UInt32 = 330,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateAttachment (Low 331)
 public struct UpdateAttachmentPacket {
-    public let name: String = "UpdateAttachment"
-    public let messageNumber: UInt32 = 331
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UpdateAttachment"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 331
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateAttachment",
+        messageNumber: UInt32 = 331,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RemoveAttachment (Low 332)
 public struct RemoveAttachmentPacket {
-    public let name: String = "RemoveAttachment"
-    public let messageNumber: UInt32 = 332
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RemoveAttachment"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 332
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RemoveAttachment",
+        messageNumber: UInt32 = 332,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SoundTrigger (High 29)
 public struct SoundTriggerPacket {
-    public let name: String = "SoundTrigger"
-    public let messageNumber: UInt32 = 29
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SoundTrigger"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 29
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SoundTrigger",
+        messageNumber: UInt32 = 29,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AttachedSound (Medium 13)
 public struct AttachedSoundPacket {
-    public let name: String = "AttachedSound"
-    public let messageNumber: UInt32 = 13
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AttachedSound"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 13
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AttachedSound",
+        messageNumber: UInt32 = 13,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AttachedSoundGainChange (Medium 14)
 public struct AttachedSoundGainChangePacket {
-    public let name: String = "AttachedSoundGainChange"
-    public let messageNumber: UInt32 = 14
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AttachedSoundGainChange"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 14
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AttachedSoundGainChange",
+        messageNumber: UInt32 = 14,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: PreloadSound (Medium 15)
 public struct PreloadSoundPacket {
-    public let name: String = "PreloadSound"
-    public let messageNumber: UInt32 = 15
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "PreloadSound"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 15
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "PreloadSound",
+        messageNumber: UInt32 = 15,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectAnimation (High 30)
 public struct ObjectAnimationPacket {
-    public let name: String = "ObjectAnimation"
-    public let messageNumber: UInt32 = 30
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectAnimation"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 30
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectAnimation",
+        messageNumber: UInt32 = 30,
+        frequency: String = "High",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AssetUploadRequest (Low 333)
 public struct AssetUploadRequestPacket {
-    public let name: String = "AssetUploadRequest"
-    public let messageNumber: UInt32 = 333
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AssetUploadRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 333
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AssetUploadRequest",
+        messageNumber: UInt32 = 333,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AssetUploadComplete (Low 334)
 public struct AssetUploadCompletePacket {
-    public let name: String = "AssetUploadComplete"
-    public let messageNumber: UInt32 = 334
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AssetUploadComplete"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 334
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AssetUploadComplete",
+        messageNumber: UInt32 = 334,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EmailMessageRequest (Low 335)
 public struct EmailMessageRequestPacket {
-    public let name: String = "EmailMessageRequest"
-    public let messageNumber: UInt32 = 335
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EmailMessageRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 335
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EmailMessageRequest",
+        messageNumber: UInt32 = 335,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EmailMessageReply (Low 336)
 public struct EmailMessageReplyPacket {
-    public let name: String = "EmailMessageReply"
-    public let messageNumber: UInt32 = 336
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EmailMessageReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 336
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EmailMessageReply",
+        messageNumber: UInt32 = 336,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: InternalScriptMail (Medium 16)
 public struct InternalScriptMailPacket {
-    public let name: String = "InternalScriptMail"
-    public let messageNumber: UInt32 = 16
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "InternalScriptMail"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 16
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "InternalScriptMail",
+        messageNumber: UInt32 = 16,
+        frequency: String = "Medium",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptDataRequest (Low 337)
 public struct ScriptDataRequestPacket {
-    public let name: String = "ScriptDataRequest"
-    public let messageNumber: UInt32 = 337
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptDataRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 337
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptDataRequest",
+        messageNumber: UInt32 = 337,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptDataReply (Low 338)
 public struct ScriptDataReplyPacket {
-    public let name: String = "ScriptDataReply"
-    public let messageNumber: UInt32 = 338
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptDataReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 338
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptDataReply",
+        messageNumber: UInt32 = 338,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateGroupRequest (Low 339)
 public struct CreateGroupRequestPacket {
-    public let name: String = "CreateGroupRequest"
-    public let messageNumber: UInt32 = 339
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "CreateGroupRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 339
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "CreateGroupRequest",
+        messageNumber: UInt32 = 339,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateGroupReply (Low 340)
 public struct CreateGroupReplyPacket {
-    public let name: String = "CreateGroupReply"
-    public let messageNumber: UInt32 = 340
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CreateGroupReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 340
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CreateGroupReply",
+        messageNumber: UInt32 = 340,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateGroupInfo (Low 341)
 public struct UpdateGroupInfoPacket {
-    public let name: String = "UpdateGroupInfo"
-    public let messageNumber: UInt32 = 341
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "UpdateGroupInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 341
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateGroupInfo",
+        messageNumber: UInt32 = 341,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupRoleChanges (Low 342)
 public struct GroupRoleChangesPacket {
-    public let name: String = "GroupRoleChanges"
-    public let messageNumber: UInt32 = 342
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupRoleChanges"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 342
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupRoleChanges",
+        messageNumber: UInt32 = 342,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: JoinGroupRequest (Low 343)
 public struct JoinGroupRequestPacket {
-    public let name: String = "JoinGroupRequest"
-    public let messageNumber: UInt32 = 343
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "JoinGroupRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 343
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "JoinGroupRequest",
+        messageNumber: UInt32 = 343,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: JoinGroupReply (Low 344)
 public struct JoinGroupReplyPacket {
-    public let name: String = "JoinGroupReply"
-    public let messageNumber: UInt32 = 344
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "JoinGroupReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 344
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "JoinGroupReply",
+        messageNumber: UInt32 = 344,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EjectGroupMemberRequest (Low 345)
 public struct EjectGroupMemberRequestPacket {
-    public let name: String = "EjectGroupMemberRequest"
-    public let messageNumber: UInt32 = 345
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EjectGroupMemberRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 345
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EjectGroupMemberRequest",
+        messageNumber: UInt32 = 345,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: EjectGroupMemberReply (Low 346)
 public struct EjectGroupMemberReplyPacket {
-    public let name: String = "EjectGroupMemberReply"
-    public let messageNumber: UInt32 = 346
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "EjectGroupMemberReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 346
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "EjectGroupMemberReply",
+        messageNumber: UInt32 = 346,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LeaveGroupRequest (Low 347)
 public struct LeaveGroupRequestPacket {
-    public let name: String = "LeaveGroupRequest"
-    public let messageNumber: UInt32 = 347
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LeaveGroupRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 347
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LeaveGroupRequest",
+        messageNumber: UInt32 = 347,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LeaveGroupReply (Low 348)
 public struct LeaveGroupReplyPacket {
-    public let name: String = "LeaveGroupReply"
-    public let messageNumber: UInt32 = 348
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LeaveGroupReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 348
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LeaveGroupReply",
+        messageNumber: UInt32 = 348,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: InviteGroupRequest (Low 349)
 public struct InviteGroupRequestPacket {
-    public let name: String = "InviteGroupRequest"
-    public let messageNumber: UInt32 = 349
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "InviteGroupRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 349
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "InviteGroupRequest",
+        messageNumber: UInt32 = 349,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: InviteGroupResponse (Low 350)
 public struct InviteGroupResponsePacket {
-    public let name: String = "InviteGroupResponse"
-    public let messageNumber: UInt32 = 350
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "InviteGroupResponse"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 350
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "InviteGroupResponse",
+        messageNumber: UInt32 = 350,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupProfileRequest (Low 351)
 public struct GroupProfileRequestPacket {
-    public let name: String = "GroupProfileRequest"
-    public let messageNumber: UInt32 = 351
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupProfileRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 351
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupProfileRequest",
+        messageNumber: UInt32 = 351,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupProfileReply (Low 352)
 public struct GroupProfileReplyPacket {
-    public let name: String = "GroupProfileReply"
-    public let messageNumber: UInt32 = 352
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupProfileReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 352
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupProfileReply",
+        messageNumber: UInt32 = 352,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupAccountSummaryRequest (Low 353)
 public struct GroupAccountSummaryRequestPacket {
-    public let name: String = "GroupAccountSummaryRequest"
-    public let messageNumber: UInt32 = 353
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupAccountSummaryRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 353
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupAccountSummaryRequest",
+        messageNumber: UInt32 = 353,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupAccountSummaryReply (Low 354)
 public struct GroupAccountSummaryReplyPacket {
-    public let name: String = "GroupAccountSummaryReply"
-    public let messageNumber: UInt32 = 354
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupAccountSummaryReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 354
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupAccountSummaryReply",
+        messageNumber: UInt32 = 354,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupAccountDetailsRequest (Low 355)
 public struct GroupAccountDetailsRequestPacket {
-    public let name: String = "GroupAccountDetailsRequest"
-    public let messageNumber: UInt32 = 355
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupAccountDetailsRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 355
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupAccountDetailsRequest",
+        messageNumber: UInt32 = 355,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupAccountDetailsReply (Low 356)
 public struct GroupAccountDetailsReplyPacket {
-    public let name: String = "GroupAccountDetailsReply"
-    public let messageNumber: UInt32 = 356
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupAccountDetailsReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 356
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupAccountDetailsReply",
+        messageNumber: UInt32 = 356,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupAccountTransactionsRequest (Low 357)
 public struct GroupAccountTransactionsRequestPacket {
-    public let name: String = "GroupAccountTransactionsRequest"
-    public let messageNumber: UInt32 = 357
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupAccountTransactionsRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 357
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupAccountTransactionsRequest",
+        messageNumber: UInt32 = 357,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupAccountTransactionsReply (Low 358)
 public struct GroupAccountTransactionsReplyPacket {
-    public let name: String = "GroupAccountTransactionsReply"
-    public let messageNumber: UInt32 = 358
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupAccountTransactionsReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 358
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupAccountTransactionsReply",
+        messageNumber: UInt32 = 358,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupActiveProposalsRequest (Low 359)
 public struct GroupActiveProposalsRequestPacket {
-    public let name: String = "GroupActiveProposalsRequest"
-    public let messageNumber: UInt32 = 359
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupActiveProposalsRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 359
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupActiveProposalsRequest",
+        messageNumber: UInt32 = 359,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupActiveProposalItemReply (Low 360)
 public struct GroupActiveProposalItemReplyPacket {
-    public let name: String = "GroupActiveProposalItemReply"
-    public let messageNumber: UInt32 = 360
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupActiveProposalItemReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 360
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupActiveProposalItemReply",
+        messageNumber: UInt32 = 360,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupVoteHistoryRequest (Low 361)
 public struct GroupVoteHistoryRequestPacket {
-    public let name: String = "GroupVoteHistoryRequest"
-    public let messageNumber: UInt32 = 361
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupVoteHistoryRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 361
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupVoteHistoryRequest",
+        messageNumber: UInt32 = 361,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupVoteHistoryItemReply (Low 362)
 public struct GroupVoteHistoryItemReplyPacket {
-    public let name: String = "GroupVoteHistoryItemReply"
-    public let messageNumber: UInt32 = 362
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupVoteHistoryItemReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 362
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupVoteHistoryItemReply",
+        messageNumber: UInt32 = 362,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: StartGroupProposal (Low 363)
 public struct StartGroupProposalPacket {
-    public let name: String = "StartGroupProposal"
-    public let messageNumber: UInt32 = 363
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "StartGroupProposal"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 363
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "StartGroupProposal",
+        messageNumber: UInt32 = 363,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupProposalBallot (Low 364)
 public struct GroupProposalBallotPacket {
-    public let name: String = "GroupProposalBallot"
-    public let messageNumber: UInt32 = 364
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupProposalBallot"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 364
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupProposalBallot",
+        messageNumber: UInt32 = 364,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: TallyVotes (Low 365)
 public struct TallyVotesPacket {
-    public let name: String = "TallyVotes"
-    public let messageNumber: UInt32 = 365
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "TallyVotes"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 365
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "TallyVotes",
+        messageNumber: UInt32 = 365,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupMembersRequest (Low 366)
 public struct GroupMembersRequestPacket {
-    public let name: String = "GroupMembersRequest"
-    public let messageNumber: UInt32 = 366
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupMembersRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 366
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupMembersRequest",
+        messageNumber: UInt32 = 366,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupMembersReply (Low 367)
 public struct GroupMembersReplyPacket {
-    public let name: String = "GroupMembersReply"
-    public let messageNumber: UInt32 = 367
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupMembersReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 367
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupMembersReply",
+        messageNumber: UInt32 = 367,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ActivateGroup (Low 368)
 public struct ActivateGroupPacket {
-    public let name: String = "ActivateGroup"
-    public let messageNumber: UInt32 = 368
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ActivateGroup"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 368
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ActivateGroup",
+        messageNumber: UInt32 = 368,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetGroupContribution (Low 369)
 public struct SetGroupContributionPacket {
-    public let name: String = "SetGroupContribution"
-    public let messageNumber: UInt32 = 369
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetGroupContribution"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 369
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetGroupContribution",
+        messageNumber: UInt32 = 369,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SetGroupAcceptNotices (Low 370)
 public struct SetGroupAcceptNoticesPacket {
-    public let name: String = "SetGroupAcceptNotices"
-    public let messageNumber: UInt32 = 370
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SetGroupAcceptNotices"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 370
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SetGroupAcceptNotices",
+        messageNumber: UInt32 = 370,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupRoleDataRequest (Low 371)
 public struct GroupRoleDataRequestPacket {
-    public let name: String = "GroupRoleDataRequest"
-    public let messageNumber: UInt32 = 371
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupRoleDataRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 371
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupRoleDataRequest",
+        messageNumber: UInt32 = 371,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupRoleDataReply (Low 372)
 public struct GroupRoleDataReplyPacket {
-    public let name: String = "GroupRoleDataReply"
-    public let messageNumber: UInt32 = 372
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupRoleDataReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 372
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupRoleDataReply",
+        messageNumber: UInt32 = 372,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupRoleMembersRequest (Low 373)
 public struct GroupRoleMembersRequestPacket {
-    public let name: String = "GroupRoleMembersRequest"
-    public let messageNumber: UInt32 = 373
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupRoleMembersRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 373
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupRoleMembersRequest",
+        messageNumber: UInt32 = 373,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupRoleMembersReply (Low 374)
 public struct GroupRoleMembersReplyPacket {
-    public let name: String = "GroupRoleMembersReply"
-    public let messageNumber: UInt32 = 374
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupRoleMembersReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 374
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupRoleMembersReply",
+        messageNumber: UInt32 = 374,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupTitlesRequest (Low 375)
 public struct GroupTitlesRequestPacket {
-    public let name: String = "GroupTitlesRequest"
-    public let messageNumber: UInt32 = 375
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupTitlesRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 375
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupTitlesRequest",
+        messageNumber: UInt32 = 375,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupTitlesReply (Low 376)
 public struct GroupTitlesReplyPacket {
-    public let name: String = "GroupTitlesReply"
-    public let messageNumber: UInt32 = 376
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupTitlesReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 376
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupTitlesReply",
+        messageNumber: UInt32 = 376,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupTitleUpdate (Low 377)
 public struct GroupTitleUpdatePacket {
-    public let name: String = "GroupTitleUpdate"
-    public let messageNumber: UInt32 = 377
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupTitleUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 377
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupTitleUpdate",
+        messageNumber: UInt32 = 377,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupRoleUpdate (Low 378)
 public struct GroupRoleUpdatePacket {
-    public let name: String = "GroupRoleUpdate"
-    public let messageNumber: UInt32 = 378
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "GroupRoleUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 378
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "GroupRoleUpdate",
+        messageNumber: UInt32 = 378,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LiveHelpGroupRequest (Low 379)
 public struct LiveHelpGroupRequestPacket {
-    public let name: String = "LiveHelpGroupRequest"
-    public let messageNumber: UInt32 = 379
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LiveHelpGroupRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 379
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LiveHelpGroupRequest",
+        messageNumber: UInt32 = 379,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LiveHelpGroupReply (Low 380)
 public struct LiveHelpGroupReplyPacket {
-    public let name: String = "LiveHelpGroupReply"
-    public let messageNumber: UInt32 = 380
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LiveHelpGroupReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 380
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LiveHelpGroupReply",
+        messageNumber: UInt32 = 380,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentWearablesRequest (Low 381)
 public struct AgentWearablesRequestPacket {
-    public let name: String = "AgentWearablesRequest"
-    public let messageNumber: UInt32 = 381
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentWearablesRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 381
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentWearablesRequest",
+        messageNumber: UInt32 = 381,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentWearablesUpdate (Low 382)
 public struct AgentWearablesUpdatePacket {
-    public let name: String = "AgentWearablesUpdate"
-    public let messageNumber: UInt32 = 382
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentWearablesUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 382
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentWearablesUpdate",
+        messageNumber: UInt32 = 382,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentIsNowWearing (Low 383)
 public struct AgentIsNowWearingPacket {
-    public let name: String = "AgentIsNowWearing"
-    public let messageNumber: UInt32 = 383
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentIsNowWearing"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 383
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentIsNowWearing",
+        messageNumber: UInt32 = 383,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentCachedTexture (Low 384)
 public struct AgentCachedTexturePacket {
-    public let name: String = "AgentCachedTexture"
-    public let messageNumber: UInt32 = 384
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentCachedTexture"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 384
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentCachedTexture",
+        messageNumber: UInt32 = 384,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentCachedTextureResponse (Low 385)
 public struct AgentCachedTextureResponsePacket {
-    public let name: String = "AgentCachedTextureResponse"
-    public let messageNumber: UInt32 = 385
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentCachedTextureResponse"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 385
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentCachedTextureResponse",
+        messageNumber: UInt32 = 385,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentDataUpdateRequest (Low 386)
 public struct AgentDataUpdateRequestPacket {
-    public let name: String = "AgentDataUpdateRequest"
-    public let messageNumber: UInt32 = 386
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "AgentDataUpdateRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 386
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "AgentDataUpdateRequest",
+        messageNumber: UInt32 = 386,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentDataUpdate (Low 387)
 public struct AgentDataUpdatePacket {
-    public let name: String = "AgentDataUpdate"
-    public let messageNumber: UInt32 = 387
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentDataUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 387
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentDataUpdate",
+        messageNumber: UInt32 = 387,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GroupDataUpdate (Low 388)
 public struct GroupDataUpdatePacket {
-    public let name: String = "GroupDataUpdate"
-    public let messageNumber: UInt32 = 388
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GroupDataUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 388
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GroupDataUpdate",
+        messageNumber: UInt32 = 388,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentGroupDataUpdate (Low 389)
 public struct AgentGroupDataUpdatePacket {
-    public let name: String = "AgentGroupDataUpdate"
-    public let messageNumber: UInt32 = 389
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentGroupDataUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 389
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentGroupDataUpdate",
+        messageNumber: UInt32 = 389,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: AgentDropGroup (Low 390)
 public struct AgentDropGroupPacket {
-    public let name: String = "AgentDropGroup"
-    public let messageNumber: UInt32 = 390
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "AgentDropGroup"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 390
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "AgentDropGroup",
+        messageNumber: UInt32 = 390,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LogTextMessage (Low 391)
 public struct LogTextMessagePacket {
-    public let name: String = "LogTextMessage"
-    public let messageNumber: UInt32 = 391
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "LogTextMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 391
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "LogTextMessage",
+        messageNumber: UInt32 = 391,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ViewerEffect (Medium 17)
 public struct ViewerEffectPacket {
-    public let name: String = "ViewerEffect"
-    public let messageNumber: UInt32 = 17
-    public let frequency: String = "Medium"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "ViewerEffect"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 17
+    public var frequency: String = "Medium"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "ViewerEffect",
+        messageNumber: UInt32 = 17,
+        frequency: String = "Medium",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateTrustedCircuit (Low 392)
 public struct CreateTrustedCircuitPacket {
-    public let name: String = "CreateTrustedCircuit"
-    public let messageNumber: UInt32 = 392
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CreateTrustedCircuit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 392
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CreateTrustedCircuit",
+        messageNumber: UInt32 = 392,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DenyTrustedCircuit (Low 393)
 public struct DenyTrustedCircuitPacket {
-    public let name: String = "DenyTrustedCircuit"
-    public let messageNumber: UInt32 = 393
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DenyTrustedCircuit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 393
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DenyTrustedCircuit",
+        messageNumber: UInt32 = 393,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RequestTrustedCircuit (Low 394)
 public struct RequestTrustedCircuitPacket {
-    public let name: String = "RequestTrustedCircuit"
-    public let messageNumber: UInt32 = 394
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RequestTrustedCircuit"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 394
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RequestTrustedCircuit",
+        messageNumber: UInt32 = 394,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RezSingleAttachmentFromInv (Low 395)
 public struct RezSingleAttachmentFromInvPacket {
-    public let name: String = "RezSingleAttachmentFromInv"
-    public let messageNumber: UInt32 = 395
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RezSingleAttachmentFromInv"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 395
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RezSingleAttachmentFromInv",
+        messageNumber: UInt32 = 395,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RezMultipleAttachmentsFromInv (Low 396)
 public struct RezMultipleAttachmentsFromInvPacket {
-    public let name: String = "RezMultipleAttachmentsFromInv"
-    public let messageNumber: UInt32 = 396
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "RezMultipleAttachmentsFromInv"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 396
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "RezMultipleAttachmentsFromInv",
+        messageNumber: UInt32 = 396,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: DetachAttachmentIntoInv (Low 397)
 public struct DetachAttachmentIntoInvPacket {
-    public let name: String = "DetachAttachmentIntoInv"
-    public let messageNumber: UInt32 = 397
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "DetachAttachmentIntoInv"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 397
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "DetachAttachmentIntoInv",
+        messageNumber: UInt32 = 397,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateNewOutfitAttachments (Low 398)
 public struct CreateNewOutfitAttachmentsPacket {
-    public let name: String = "CreateNewOutfitAttachments"
-    public let messageNumber: UInt32 = 398
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CreateNewOutfitAttachments"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 398
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CreateNewOutfitAttachments",
+        messageNumber: UInt32 = 398,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UserInfoRequest (Low 399)
 public struct UserInfoRequestPacket {
-    public let name: String = "UserInfoRequest"
-    public let messageNumber: UInt32 = 399
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UserInfoRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 399
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UserInfoRequest",
+        messageNumber: UInt32 = 399,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UserInfoReply (Low 400)
 public struct UserInfoReplyPacket {
-    public let name: String = "UserInfoReply"
-    public let messageNumber: UInt32 = 400
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UserInfoReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 400
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UserInfoReply",
+        messageNumber: UInt32 = 400,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: UpdateUserInfo (Low 401)
 public struct UpdateUserInfoPacket {
-    public let name: String = "UpdateUserInfo"
-    public let messageNumber: UInt32 = 401
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "UpdateUserInfo"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 401
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "UpdateUserInfo",
+        messageNumber: UInt32 = 401,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelRename (Low 402)
 public struct ParcelRenamePacket {
-    public let name: String = "ParcelRename"
-    public let messageNumber: UInt32 = 402
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelRename"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 402
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelRename",
+        messageNumber: UInt32 = 402,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: InitiateDownload (Low 403)
 public struct InitiateDownloadPacket {
-    public let name: String = "InitiateDownload"
-    public let messageNumber: UInt32 = 403
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "InitiateDownload"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 403
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "InitiateDownload",
+        messageNumber: UInt32 = 403,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SystemMessage (Low 404)
 public struct SystemMessagePacket {
-    public let name: String = "SystemMessage"
-    public let messageNumber: UInt32 = 404
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "SystemMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 404
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "SystemMessage",
+        messageNumber: UInt32 = 404,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapLayerRequest (Low 405)
 public struct MapLayerRequestPacket {
-    public let name: String = "MapLayerRequest"
-    public let messageNumber: UInt32 = 405
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapLayerRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 405
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapLayerRequest",
+        messageNumber: UInt32 = 405,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapLayerReply (Low 406)
 public struct MapLayerReplyPacket {
-    public let name: String = "MapLayerReply"
-    public let messageNumber: UInt32 = 406
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapLayerReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 406
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapLayerReply",
+        messageNumber: UInt32 = 406,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapBlockRequest (Low 407)
 public struct MapBlockRequestPacket {
-    public let name: String = "MapBlockRequest"
-    public let messageNumber: UInt32 = 407
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapBlockRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 407
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapBlockRequest",
+        messageNumber: UInt32 = 407,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapNameRequest (Low 408)
 public struct MapNameRequestPacket {
-    public let name: String = "MapNameRequest"
-    public let messageNumber: UInt32 = 408
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapNameRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 408
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapNameRequest",
+        messageNumber: UInt32 = 408,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapBlockReply (Low 409)
 public struct MapBlockReplyPacket {
-    public let name: String = "MapBlockReply"
-    public let messageNumber: UInt32 = 409
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapBlockReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 409
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapBlockReply",
+        messageNumber: UInt32 = 409,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapItemRequest (Low 410)
 public struct MapItemRequestPacket {
-    public let name: String = "MapItemRequest"
-    public let messageNumber: UInt32 = 410
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapItemRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 410
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapItemRequest",
+        messageNumber: UInt32 = 410,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: MapItemReply (Low 411)
 public struct MapItemReplyPacket {
-    public let name: String = "MapItemReply"
-    public let messageNumber: UInt32 = 411
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "MapItemReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 411
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "MapItemReply",
+        messageNumber: UInt32 = 411,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: SendPostcard (Low 412)
 public struct SendPostcardPacket {
-    public let name: String = "SendPostcard"
-    public let messageNumber: UInt32 = 412
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "SendPostcard"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 412
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "SendPostcard",
+        messageNumber: UInt32 = 412,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RpcChannelRequest (Low 413)
 public struct RpcChannelRequestPacket {
-    public let name: String = "RpcChannelRequest"
-    public let messageNumber: UInt32 = 413
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RpcChannelRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 413
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RpcChannelRequest",
+        messageNumber: UInt32 = 413,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RpcChannelReply (Low 414)
 public struct RpcChannelReplyPacket {
-    public let name: String = "RpcChannelReply"
-    public let messageNumber: UInt32 = 414
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RpcChannelReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 414
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RpcChannelReply",
+        messageNumber: UInt32 = 414,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RpcScriptRequestInbound (Low 415)
 public struct RpcScriptRequestInboundPacket {
-    public let name: String = "RpcScriptRequestInbound"
-    public let messageNumber: UInt32 = 415
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RpcScriptRequestInbound"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 415
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RpcScriptRequestInbound",
+        messageNumber: UInt32 = 415,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RpcScriptRequestInboundForward (Low 416)
 public struct RpcScriptRequestInboundForwardPacket {
-    public let name: String = "RpcScriptRequestInboundForward"
-    public let messageNumber: UInt32 = 416
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RpcScriptRequestInboundForward"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 416
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RpcScriptRequestInboundForward",
+        messageNumber: UInt32 = 416,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RpcScriptReplyInbound (Low 417)
 public struct RpcScriptReplyInboundPacket {
-    public let name: String = "RpcScriptReplyInbound"
-    public let messageNumber: UInt32 = 417
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RpcScriptReplyInbound"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 417
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RpcScriptReplyInbound",
+        messageNumber: UInt32 = 417,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ScriptMailRegistration (Low 418)
 public struct ScriptMailRegistrationPacket {
-    public let name: String = "ScriptMailRegistration"
-    public let messageNumber: UInt32 = 418
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ScriptMailRegistration"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 418
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ScriptMailRegistration",
+        messageNumber: UInt32 = 418,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelMediaCommandMessage (Low 419)
 public struct ParcelMediaCommandMessagePacket {
-    public let name: String = "ParcelMediaCommandMessage"
-    public let messageNumber: UInt32 = 419
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelMediaCommandMessage"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 419
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelMediaCommandMessage",
+        messageNumber: UInt32 = 419,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ParcelMediaUpdate (Low 420)
 public struct ParcelMediaUpdatePacket {
-    public let name: String = "ParcelMediaUpdate"
-    public let messageNumber: UInt32 = 420
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ParcelMediaUpdate"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 420
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ParcelMediaUpdate",
+        messageNumber: UInt32 = 420,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LandStatRequest (Low 421)
 public struct LandStatRequestPacket {
-    public let name: String = "LandStatRequest"
-    public let messageNumber: UInt32 = 421
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LandStatRequest"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 421
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LandStatRequest",
+        messageNumber: UInt32 = 421,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LandStatReply (Low 422)
 public struct LandStatReplyPacket {
-    public let name: String = "LandStatReply"
-    public let messageNumber: UInt32 = 422
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "LandStatReply"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 422
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "LandStatReply",
+        messageNumber: UInt32 = 422,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: Error (Low 423)
 public struct ErrorPacket {
-    public let name: String = "Error"
-    public let messageNumber: UInt32 = 423
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "Error"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 423
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "Error",
+        messageNumber: UInt32 = 423,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: ObjectIncludeInSearch (Low 424)
 public struct ObjectIncludeInSearchPacket {
-    public let name: String = "ObjectIncludeInSearch"
-    public let messageNumber: UInt32 = 424
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "ObjectIncludeInSearch"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 424
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "ObjectIncludeInSearch",
+        messageNumber: UInt32 = 424,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RezRestoreToWorld (Low 425)
 public struct RezRestoreToWorldPacket {
-    public let name: String = "RezRestoreToWorld"
-    public let messageNumber: UInt32 = 425
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RezRestoreToWorld"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 425
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RezRestoreToWorld",
+        messageNumber: UInt32 = 425,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: LinkInventoryItem (Low 426)
 public struct LinkInventoryItemPacket {
-    public let name: String = "LinkInventoryItem"
-    public let messageNumber: UInt32 = 426
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "LinkInventoryItem"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 426
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "LinkInventoryItem",
+        messageNumber: UInt32 = 426,
+        frequency: String = "Low",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: RetrieveIMsExtended (Low 427)
 public struct RetrieveIMsExtendedPacket {
-    public let name: String = "RetrieveIMsExtended"
-    public let messageNumber: UInt32 = 427
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "RetrieveIMsExtended"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 427
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "RetrieveIMsExtended",
+        messageNumber: UInt32 = 427,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: JoinGroupRequestExtended (Low 428)
 public struct JoinGroupRequestExtendedPacket {
-    public let name: String = "JoinGroupRequestExtended"
-    public let messageNumber: UInt32 = 428
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "JoinGroupRequestExtended"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 428
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "JoinGroupRequestExtended",
+        messageNumber: UInt32 = 428,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: CreateGroupRequestExtended (Low 429)
 public struct CreateGroupRequestExtendedPacket {
-    public let name: String = "CreateGroupRequestExtended"
-    public let messageNumber: UInt32 = 429
-    public let frequency: String = "Low"
-    public let isZerocoded: Bool = false
+    public var messageName: String = "CreateGroupRequestExtended"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 429
+    public var frequency: String = "Low"
+    public var isZerocoded: Bool = false
 
-    public init() {}
+    public init(
+        messageName: String = "CreateGroupRequestExtended",
+        messageNumber: UInt32 = 429,
+        frequency: String = "Low",
+        isZerocoded: Bool = false
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }
 
+// Message: GameControlInput (High 32)
 public struct GameControlInputPacket {
-    public let name: String = "GameControlInput"
-    public let messageNumber: UInt32 = 32
-    public let frequency: String = "High"
-    public let isZerocoded: Bool = true
+    public var messageName: String = "GameControlInput"
+    public var name: String { messageName }
+    public var messageNumber: UInt32 = 32
+    public var frequency: String = "High"
+    public var isZerocoded: Bool = true
 
-    public init() {}
+    public init(
+        messageName: String = "GameControlInput",
+        messageNumber: UInt32 = 32,
+        frequency: String = "High",
+        isZerocoded: Bool = true
+    ) {
+        self.messageName = messageName
+        self.messageNumber = messageNumber
+        self.frequency = frequency
+        self.isZerocoded = isZerocoded
+    }
 
     public func serialize() -> Data {
+        var data = Data()
         var num = messageNumber.littleEndian
-        return Data(bytes: &num, count: MemoryLayout<UInt32>.size)
-    }
-}
-
-// Generated LLSD Capability Schemas
-public struct AgentDomainCapabilitiesCapabilities: Codable {
-    public var agent_id: String?
-    public var session_id: String?
-    public var display_name: String?
-    public var legacy_first_name: String?
-    public var legacy_last_name: String?
-    public var hover_height: Double?
-    public var active_group_id: String?
-    public var maturity_rating: String?
-
-    public init(
-        agent_id: String? = nil,
-        session_id: String? = nil,
-        display_name: String? = nil,
-        legacy_first_name: String? = nil,
-        legacy_last_name: String? = nil,
-        hover_height: Double? = nil,
-        active_group_id: String? = nil,
-        maturity_rating: String? = nil
-    ) {
-        self.agent_id = agent_id
-        self.session_id = session_id
-        self.display_name = display_name
-        self.legacy_first_name = legacy_first_name
-        self.legacy_last_name = legacy_last_name
-        self.hover_height = hover_height
-        self.active_group_id = active_group_id
-        self.maturity_rating = maturity_rating
-    }
-}
-
-public struct CapabilitiesRequestResponseCapabilities: Codable {
-    public var capabilities: [String]?
-    public var seed_response: String?
-    public var fetch_inventory: String?
-
-    public init(
-        capabilities: [String]? = nil,
-        seed_response: String? = nil,
-        fetch_inventory: String? = nil
-    ) {
-        self.capabilities = capabilities
-        self.seed_response = seed_response
-        self.fetch_inventory = fetch_inventory
-    }
-}
-
-public struct EventQueueGetCapabilities: Codable {
-    public var ack: Int?
-    public var events: [String]?
-
-    public init(
-        ack: Int? = nil,
-        events: [String]? = nil
-    ) {
-        self.ack = ack
-        self.events = events
+        data.append(Data(bytes: &num, count: MemoryLayout<UInt32>.size))
+        return data
     }
 }

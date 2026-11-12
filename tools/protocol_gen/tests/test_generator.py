@@ -76,25 +76,46 @@ version 2.0
         zero_run_uncompressed = decompress_fn(zero_run_compressed)
         self.assertEqual(zero_run_uncompressed, bytes([0x01, 0x02]))
 
-    def test_swift_emitter_code_structure(self):
+    def test_swift_emitter(self):
         ast = TemplateParser().parse(self.sample_template)
-        from tools.protocol_gen.emitters.swift_emitter import SwiftEmitter
+        emitter = EMITTERS["swift"]
+        out_dir = os.path.join(self.test_dir, "swift")
+        results = emitter.emit(ast, out_dir)
 
-        emitter = SwiftEmitter()
-        code = emitter._generate_swift_code(ast)
-        self.assertIn("struct GeneratedProtocolCatalog", code)
-        self.assertIn("struct TestPacketPacket", code)
-        self.assertIn("func decompressZerocoded", code)
+        proto_file = os.path.join(out_dir, "GeneratedProtocol.swift")
+        llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.swift")
 
-    def test_csharp_emitter_code_structure(self):
+        self.assertIn(proto_file, results)
+        self.assertIn(llsd_file, results)
+
+        proto_content = results[proto_file]
+        self.assertIn("public struct GeneratedProtocol", proto_content)
+        self.assertIn(
+            "public typealias GeneratedProtocolCatalog = GeneratedProtocol",
+            proto_content,
+        )
+        self.assertIn("func decompressZerocoded", proto_content)
+        self.assertIn("public struct TestPacketPacket", proto_content)
+        self.assertIn("func serialize() -> Data", proto_content)
+
+    def test_csharp_emitter(self):
         ast = TemplateParser().parse(self.sample_template)
-        from tools.protocol_gen.emitters.csharp_emitter import CSharpEmitter
+        emitter = EMITTERS["csharp"]
+        out_dir = os.path.join(self.test_dir, "csharp")
+        results = emitter.emit(ast, out_dir)
 
-        emitter = CSharpEmitter()
-        code = emitter._generate_csharp_code(ast)
-        self.assertIn("namespace Linkpoint.Protocol", code)
-        self.assertIn("class TestPacketPacket", code)
-        self.assertIn("DecompressZerocoded", code)
+        proto_file = os.path.join(out_dir, "GeneratedProtocol.cs")
+        llsd_file = os.path.join(out_dir, "GeneratedLLSDCapabilities.cs")
+
+        self.assertIn(proto_file, results)
+        self.assertIn(llsd_file, results)
+
+        proto_content = results[proto_file]
+        self.assertIn("public static class GeneratedProtocol", proto_content)
+        self.assertIn("public static class GeneratedProtocolCatalog", proto_content)
+        self.assertIn("DecompressZerocoded", proto_content)
+        self.assertIn("public class TestPacketPacket", proto_content)
+        self.assertIn("public byte[] Serialize()", proto_content)
 
 
 if __name__ == "__main__":
