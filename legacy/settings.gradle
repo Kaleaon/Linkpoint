@@ -1,4 +1,12 @@
 include('llsd-core')
 project(':llsd-core').projectDir = file('LLSD-KOTLIN')
-includeBuild('Linkpoint')
+
+def hasAndroidSdk = System.getenv('ANDROID_HOME') != null ||
+                    System.getenv('ANDROID_SDK_ROOT') != null ||
+                    file('Linkpoint/local.properties').exists() ||
+                    file('local.properties').exists()
+
+if (hasAndroidSdk && file('Linkpoint').exists()) {
+    includeBuild('Linkpoint')
+}
 

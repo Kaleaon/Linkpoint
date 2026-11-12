@@ -6,7 +6,7 @@ fn get_python_command() -> &'static str {
     let cmds: &[&str] = if cfg!(windows) {
         &["python", "py", "python3"]
     } else {
-        &["python3", "python"]
+        &["python3", "python", "py"]
     };
     for &cmd in cmds {
         if Command::new(cmd)
@@ -18,11 +18,7 @@ fn get_python_command() -> &'static str {
             return cmd;
         }
     }
-    if cfg!(windows) {
-        "python"
-    } else {
-        "python3"
-    }
+    if cfg!(windows) { "python" } else { "python3" }
 }
 
 fn main() {
