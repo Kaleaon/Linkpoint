@@ -73,7 +73,7 @@ class DrawableMeshStore {
         var isDirty: Boolean = true
             private set
 
-        var scaleS: Float = scaleS
+        var scaleS: Float = 1f
             set(value) {
                 if (field != value) {
                     field = value
@@ -81,7 +81,7 @@ class DrawableMeshStore {
                 }
             }
 
-        var scaleT: Float = scaleT
+        var scaleT: Float = 1f
             set(value) {
                 if (field != value) {
                     field = value
@@ -89,7 +89,7 @@ class DrawableMeshStore {
                 }
             }
 
-        var offsetS: Float = offsetS
+        var offsetS: Float = 0f
             set(value) {
                 if (field != value) {
                     field = value
@@ -97,7 +97,7 @@ class DrawableMeshStore {
                 }
             }
 
-        var offsetT: Float = offsetT
+        var offsetT: Float = 0f
             set(value) {
                 if (field != value) {
                     field = value
@@ -105,13 +105,21 @@ class DrawableMeshStore {
                 }
             }
 
-        var rotation: Float = rotation
+        var rotation: Float = 0f
             set(value) {
                 if (field != value) {
                     field = value
                     isDirty = true
                 }
             }
+
+        init {
+            this.scaleS = scaleS
+            this.scaleT = scaleT
+            this.offsetS = offsetS
+            this.offsetT = offsetT
+            this.rotation = rotation
+        }
 
         private val matrixBuffer = FloatArray(16)
         @Volatile
@@ -154,6 +162,28 @@ class DrawableMeshStore {
     private var bufferManager: GLBufferManager? = null
 
     var avatarStore: DrawableAvatarStore? = null
+
+    private var transparentCameraX = 0f
+    private var transparentCameraY = 0f
+    private var transparentCameraZ = 0f
+
+    @JvmField
+    internal val transparentInstancesList = ArrayList<MeshInstance>()
+
+    @JvmField
+    internal val transparentComparator = Comparator<MeshInstance> { a, b ->
+        val dxA = a.modelMatrix[12] - transparentCameraX
+        val dyA = a.modelMatrix[13] - transparentCameraY
+        val dzA = a.modelMatrix[14] - transparentCameraZ
+        val distSqA = dxA * dxA + dyA * dyA + dzA * dzA
+
+        val dxB = b.modelMatrix[12] - transparentCameraX
+        val dyB = b.modelMatrix[13] - transparentCameraY
+        val dzB = b.modelMatrix[14] - transparentCameraZ
+        val distSqB = dxB * dxB + dyB * dyB + dzB * dzB
+
+        distSqB.compareTo(distSqA)
+    }
 
     // ── Compilation ──────────────────────────────────────────────────────
 
@@ -442,16 +472,22 @@ class DrawableMeshStore {
             ctx.ambientColorR, ctx.ambientColorG, ctx.ambientColorB
         )
 
-        val sorted = instances.values
-            .filter { it.isTransparent && instanceInFrustum(ctx, it) }
-            .sortedByDescending {
-                val dx = it.modelMatrix[12] - ctx.cameraPositionX
-                val dy = it.modelMatrix[13] - ctx.cameraPositionY
-                val dz = it.modelMatrix[14] - ctx.cameraPositionZ
-                dx * dx + dy * dy + dz * dz
-            }
+        transparentCameraX = ctx.cameraPositionX
+        transparentCameraY = ctx.cameraPositionY
+        transparentCameraZ = ctx.cameraPositionZ
 
-        for (instance in sorted) {
+        transparentInstancesList.clear()
+        for (instance in instances.values) {
+            if (instance.isTransparent && instanceInFrustum(ctx, instance)) {
+                transparentInstancesList.add(instance)
+            }
+        }
+
+        transparentInstancesList.sortWith(transparentComparator)
+
+        val transparentCount = transparentInstancesList.size
+        for (i in 0 until transparentCount) {
+            val instance = transparentInstancesList[i]
             val hostAvatar = instance.hostAvatarId?.let { avatarStore?.getAvatar(it) }
             if (hostAvatar != null && hostAvatar.jointUBO != 0 && riggedProgram != null) {
                 riggedProgram.use()

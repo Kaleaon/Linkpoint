@@ -59,6 +59,7 @@ export default function ContactsScreen() {
     app.friends.on("friend_added", bump);
     app.friends.on("friend_updated", bump);
     app.friends.on("friend_removed", bump);
+    app.friends.on("online_alert", bump);
     app.protocol.on("friends_loaded", bump);
     setContacts(app.contacts.list());
     return () => {
@@ -66,11 +67,13 @@ export default function ContactsScreen() {
       app.friends.off("friend_added", bump);
       app.friends.off("friend_updated", bump);
       app.friends.off("friend_removed", bump);
+      app.friends.off("online_alert", bump);
       app.protocol.off("friends_loaded", bump);
     };
   }, []);
 
   const friends = app.friends.getFriends();
+  const friendMap = useMemo(() => new Map(friends.map((f) => [f.id, f])), [friends]);
   const onlineIds = useMemo(() => new Set(friends.filter((f) => f.onlineStatus === "online").map((f) => f.id)), [friends]);
   const unsaved = friends.filter((friend) => !app.contacts.has(friend.id));
   const selected = selectedId ? contacts.find((c) => c.id === selectedId) || null : null;
@@ -148,7 +151,7 @@ export default function ContactsScreen() {
       ) : null}
 
       {tab === "ADD FROM SL" ? (
-        <FriendsToAdd friends={unsaved} total={friends.length} onlineIds={onlineIds} busy={busy} button={button} onSave={saveFriends} loggedIn={app.auth.isLoggedIn()} />
+        <FriendsToAdd friends={unsaved} total={friends.length} onlineIds={onlineIds} busy={busy} button={button} onSave={saveFriends} loggedIn={app.auth.isLoggedIn()} run={run} say={say} />
       ) : (
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 8 }}>
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search contacts" aria-label="Search contacts" style={{ minHeight: 36, padding: "0 10px", border: `1px solid ${V.outv}`, borderRadius: V.rs, background: V.surf, color: V.ink, font: `400 12.5px/1 ${t.font}` }} />
@@ -184,6 +187,7 @@ export default function ContactsScreen() {
                         {[contact.note, ...contact.links.map((link) => link.label)].filter(Boolean).join(" · ") || "No note or links yet"}
                       </small>
                     </span>
+                    {friendMap.get(contact.id)?.onlineAlert ? <span title="Online alerts enabled" style={{ color: V.pri, fontSize: 10, fontWeight: 700, letterSpacing: ".08em" }}>ALERT</span> : null}
                     {contact.googleResourceName ? <span title="Copied to Google Contacts" style={{ color: V.pri, fontSize: 10, fontWeight: 700, letterSpacing: ".08em" }}>GOOGLE</span> : null}
                   </button>
                 </li>
@@ -199,7 +203,7 @@ export default function ContactsScreen() {
   );
 }
 
-function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedIn }) {
+function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedIn, run, say }) {
   const { V, t } = useTheme();
   const { actions } = useApp();
 
@@ -224,7 +228,7 @@ function FriendsToAdd({ friends, total, onlineIds, busy, button, onSave, loggedI
         title="No friends loaded"
         description="No friends have been loaded from the grid yet."
         actionLabel="REFRESH FRIENDS"
-        onAction={() => app.friends.refresh?.()}
+        onAction={() => run(async () => { await app.friends.refresh(); say("info", "Friends list updated."); })}
       />
     );
   }
@@ -332,6 +336,30 @@ function ContactDetail({ contact, online, googleEnabled, busy, run, say, button,
             </div>
           );
         })}
+      </div>
+
+      <div style={{ display: "grid", gap: 6 }}>
+        <span style={label}>FRIEND ONLINE ALERTS</span>
+        <div style={{ font: `400 11.5px/1.5 ${t.font}`, color: V.ink2 }}>
+          {Boolean(app.friends.getFriends().find((f) => f.id === contact.id)?.onlineAlert)
+            ? "Online alerts are ON for this friend. You will be notified when they log in or out."
+            : "Online alerts are OFF for this friend. Turn on alerts to receive notifications when they log in or out."}
+        </div>
+        <button
+          type="button"
+          disabled={busy}
+          aria-pressed={Boolean(app.friends.getFriends().find((f) => f.id === contact.id)?.onlineAlert)}
+          aria-label={`Toggle online alert for ${contact.name}`}
+          style={{ ...button(Boolean(app.friends.getFriends().find((f) => f.id === contact.id)?.onlineAlert)), justifySelf: "start" }}
+          onClick={() => run(async () => {
+            const currentAlert = Boolean(app.friends.getFriends().find((f) => f.id === contact.id)?.onlineAlert);
+            const nextAlert = !currentAlert;
+            app.friends.setOnlineAlert(contact.id, nextAlert);
+            say("info", `Online alert ${nextAlert ? "enabled" : "disabled"} for ${contact.name}.`);
+          })}
+        >
+          {Boolean(app.friends.getFriends().find((f) => f.id === contact.id)?.onlineAlert) ? "DISABLE ONLINE ALERT" : "ENABLE ONLINE ALERT"}
+        </button>
       </div>
 
       {googleEnabled ? (
