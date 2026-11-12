@@ -36,9 +36,11 @@ EXCLUDE_DIRS = {
     "node_modules",
     ".git",
     "target",
+    "build",
 }
 
 EXCLUDE_PREFIXES = (
+    "legacy/Linkpoint/build",
     "legacy/Linkpoint/src/test/resources",
     "Linkpoint/src/test/resources",
     "legacy/Linkpoint/src/test/resources",
