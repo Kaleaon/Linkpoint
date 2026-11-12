@@ -12,6 +12,7 @@ permissions:
 
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: "true"
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 concurrency:
@@ -290,8 +291,6 @@ jobs:
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2

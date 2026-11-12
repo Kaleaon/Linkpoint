@@ -21,6 +21,7 @@ permissions:
 
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: "true"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

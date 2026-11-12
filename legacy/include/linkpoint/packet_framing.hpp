@@ -9,10 +9,10 @@
 
 namespace linkpoint::protocol {
 
-constexpr uint8_t PACKET_FLAG_ZEROCODED = 0x01;
-constexpr uint8_t PACKET_FLAG_RELIABLE  = 0x02;
-constexpr uint8_t PACKET_FLAG_RESENT    = 0x04;
-constexpr uint8_t PACKET_FLAG_ACKS      = 0x08;
+constexpr uint8_t PACKET_FLAG_ZEROCODED = 0x80;
+constexpr uint8_t PACKET_FLAG_RELIABLE  = 0x40;
+constexpr uint8_t PACKET_FLAG_RESENT    = 0x20;
+constexpr uint8_t PACKET_FLAG_ACKS      = 0x10;
 
 struct PacketHeader {
     uint8_t flags{0};

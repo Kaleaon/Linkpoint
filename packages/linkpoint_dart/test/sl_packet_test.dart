@@ -56,5 +56,15 @@ void main() {
       expect(header2.messageId, 0x1234);
       expect(header2.acks, [7, 9]);
     });
+
+    test('Header parsing parses flags, sequence, messageId, extraBytes', () {
+      final raw =
+          Uint8List.fromList([0x40, 0x00, 0x00, 0x00, 0x05, 0x00, 0x10]);
+      final header = SLPacketCodec.parseHeader(raw);
+      expect(header.isReliable, true);
+      expect(header.isZerocoded, false);
+      expect(header.sequenceNumber, 5);
+      expect(header.messageId, 16);
+    });
   });
 }
