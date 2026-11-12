@@ -37,7 +37,13 @@ class LLMeshConverter {
       final bd = ByteData.sublistView(bytes, 63, 65);
       numVerts = bd.getUint16(0, Endian.little);
     }
-    if (bytes.length > 198) {
+    if (bytes.length > 186 &&
+        ByteData.sublistView(bytes, 185, 187).getUint16(0, Endian.little) > 0 &&
+        ByteData.sublistView(bytes, 185, 187).getUint16(0, Endian.little) <
+            1000) {
+      final bd = ByteData.sublistView(bytes, 185, 187);
+      numFaces = bd.getUint16(0, Endian.little);
+    } else if (bytes.length > 198) {
       final bd = ByteData.sublistView(bytes, 197, 199);
       numFaces = bd.getUint16(0, Endian.little);
     }

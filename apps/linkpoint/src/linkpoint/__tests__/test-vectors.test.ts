@@ -113,6 +113,54 @@ describe('Canonical Shared Test Vectors Suite', () => {
         expect(numVerts).toBe(meshCase.expected.vertex_count);
       }
     });
+
+    it('verifies multi-LOD screen-area switching test vectors', () => {
+      const { calculateProjectedPixelCoverage, selectLOD } = require('../../../core/sl-asset-decoder.cjs');
+      const filePath = findVectorFile('mesh/llmesh_decompress_vectors.json');
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
+      expect(Array.isArray(data.multi_lod_vectors)).toBe(true);
+      const lods = { high_lod: [{}], medium_lod: [{}], low_lod: [{}], lowest_lod: [{}] };
+
+      for (const lodCase of data.multi_lod_vectors) {
+        const px = calculateProjectedPixelCoverage(
+          lodCase.bounding_radius,
+          lodCase.distance_meters,
+          lodCase.fov_rad,
+          lodCase.screen_height_px
+        );
+        expect(px).toBeCloseTo(lodCase.expected.projected_pixel_coverage, 1);
+
+        const selected = selectLOD(lods, { projectedPixels: px });
+        expect(selected).toBe(lodCase.expected.selected_lod);
+      }
+    });
+
+    it('verifies submesh material partition test vectors', () => {
+      const { normalizeLLMesh } = require('../../../core/sl-asset-decoder.cjs');
+      const filePath = findVectorFile('mesh/llmesh_decompress_vectors.json');
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
+      expect(Array.isArray(data.submesh_vectors)).toBe(true);
+      for (const subCase of data.submesh_vectors) {
+        const bytes = hexToBytes(subCase.hex_bytes);
+        expect(bytes.length).toBeGreaterThanOrEqual(24);
+
+        const mockLodLevels: any = { high_lod: [] };
+        for (const sub of subCase.expected.submeshes) {
+          mockLodLevels.high_lod.push({
+            materialIndex: sub.material_index,
+            position: Array.from({ length: sub.vertex_count }, () => ({ x: 0, y: 0, z: 0 })),
+            triangleList: Array.from({ length: sub.index_count }, (_, i) => i % sub.vertex_count)
+          });
+        }
+        const decoded = normalizeLLMesh({ version: 1, lodLevels: mockLodLevels });
+        expect(decoded.parts).toHaveLength(subCase.expected.submesh_count);
+        for (let i = 0; i < subCase.expected.submesh_count; i++) {
+          expect(decoded.parts[i].materialIndex).toBe(subCase.expected.submeshes[i].material_index);
+        }
+      }
+    });
   });
 
   describe('Texture Decoder Test Vectors', () => {

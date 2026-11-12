@@ -193,6 +193,7 @@ build_output.txt
 /artifacts/
 /coverage/
 **/coverage/
+!**/com/linkpoint/ui/coverage/
 /LLSD-KOTLIN/cache/
 *.lcov
 lcov.info
