@@ -1,7 +1,7 @@
 package com.linkpoint.linden.llrender
 
 import com.linkpoint.linden.llimage.ImageRaw
-import com.linkpoint.linden.llmath.Matrix4
+import com.linkpoint.scene.math.Matrix4
 
 enum class CubeFace(val index: Int) {
     POSITIVE_X(0), NEGATIVE_X(1),
