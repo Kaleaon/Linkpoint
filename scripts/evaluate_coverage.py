@@ -60,8 +60,12 @@ def parse_lcov(lcov_path: Path):
                 line = line.strip()
                 if line.startswith("SF:"):
                     source_file = line.split(":", 1)[1]
-                    skip_file = "generated" in source_file.lower()
-                elif line == "end_of_record":
+                    skip_file = (
+                        "generated" in source_file.lower()
+                        or "/generated/" in source_file
+                        or source_file.endswith("/generated/mod.rs")
+                    )
+                elif line.startswith("end_of_record"):
                     skip_file = False
                 elif not skip_file:
                     if line.startswith("LF:"):
@@ -174,9 +178,10 @@ def main():
             [
                 Path("coverage-rust.lcov"),
                 Path("rust-lcov.info"),
+                Path("lcov.info"),
+                Path("coverage-artifacts/rust-coverage/lcov.info"),
             ]
             + list(Path(".").glob("**/rust*/**/lcov.info"))
-            + [Path("lcov.info")]
         )
         for fallback in rust_fallbacks:
             rust_data = parse_lcov(fallback)
