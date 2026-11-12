@@ -170,6 +170,11 @@ class PbrToPhongTranscoderTest {
 
         assertNotNull(descriptor.metallicRoughnessTexture)
         assertEquals(mrUUID, descriptor.metallicRoughnessTexture?.declaredId)
+
+        @Suppress("DEPRECATION")
+        val pbrDescriptor = PbrMaterialDecoder.decodeFromLLSD(llsdData)
+        assertNotNull(pbrDescriptor.metallicRoughnessTexture)
+        assertEquals(mrUUID, pbrDescriptor.metallicRoughnessTexture?.declaredId)
     }
 
     @Test
