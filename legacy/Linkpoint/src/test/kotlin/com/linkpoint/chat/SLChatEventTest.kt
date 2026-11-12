@@ -6,11 +6,9 @@ import com.linkpoint.protocol.messages.MessageEventListener
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.teleport.TeleportManager
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.yield
 import org.junit.Assert.*
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -91,35 +89,26 @@ class SLChatEventTest {
 
     @Test
     fun `test handleIncomingIM emits typed SLChatEvent through messageFlow`() = runBlocking {
-        val sessionId = UUID.randomUUID()
-        val senderId = UUID.randomUUID()
-
-        val events = mutableListOf<SLChatEvent>()
-        val collectJob = launch {
-            imManager.messageFlow.take(1).collect { events.add(it) }
-        }
-        yield()
-
-        imManager.handleIncomingIM(
-            fromAgentId = senderId,
-            fromName = "Friend Avatar",
-            message = "Wants to be friends",
-            sessionId = sessionId,
-            dialogType = IMType.FRIENDSHIP_OFFERED,
-            timestamp = 2000L
-        )
-
         withTimeout(5000) {
-            collectJob.join()
-        }
+            val sessionId = UUID.randomUUID()
+            val senderId = UUID.randomUUID()
 
-        assertEquals(1, events.size)
-        val emittedEvent = events[0]
-        assertTrue("Emitted event should be FriendshipOffer", emittedEvent is SLChatEvent.FriendshipOffer)
-        val offer = emittedEvent as SLChatEvent.FriendshipOffer
-        assertEquals(senderId, offer.fromAgentId)
-        assertEquals("Friend Avatar", offer.fromName)
-        assertEquals(CardActionState.PENDING, offer.actionState)
+            imManager.handleIncomingIM(
+                fromAgentId = senderId,
+                fromName = "Friend Avatar",
+                message = "Wants to be friends",
+                sessionId = sessionId,
+                dialogType = IMType.FRIENDSHIP_OFFERED,
+                timestamp = 2000L
+            )
+
+            val emittedEvent = imManager.messageFlow.first()
+            assertTrue("Emitted event should be FriendshipOffer", emittedEvent is SLChatEvent.FriendshipOffer)
+            val offer = emittedEvent as SLChatEvent.FriendshipOffer
+            assertEquals(senderId, offer.fromAgentId)
+            assertEquals("Friend Avatar", offer.fromName)
+            assertEquals(CardActionState.PENDING, offer.actionState)
+        }
     }
 
     @Test
