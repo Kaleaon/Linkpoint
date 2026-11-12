@@ -1,8 +1,10 @@
 /**
- * Avatar Vertex Shader for GPU Linear Blend Skinning using Uniform Buffer Objects (UBO).
+ * Avatar Vertex Shader for GPU Linear Blend Skinning using Uniform Buffer Objects (UBO)
+ * and Data Texture Morph Target Blending.
  *
- * Supports up to 128 joint matrices per palette stored in the SkinningPaletteBlock UBO.
- * Transforms vertex position and normal on GPU using a_bone_indices and a_bone_weights attributes.
+ * Supports up to 128 joint matrices per palette stored in the SkinningPaletteBlock UBO,
+ * and up to 32 active morph target deltas per vertex sampled from 2D Data Textures
+ * weighted by the VisualParamBlock UBO.
  */
 export const AVATAR_SKINNING_VERT_SHADER = `#version 300 es
 precision highp float;
@@ -18,6 +20,13 @@ layout(std140) uniform SkinningPaletteBlock {
     mat4 u_joint_matrices[128];
 };
 
+layout(std140) uniform VisualParamBlock {
+    vec4 u_morph_weights[8];
+    int u_active_morph_count;
+};
+
+uniform sampler2D u_morph_delta_texture;
+
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
@@ -28,6 +37,29 @@ out vec2 vTexCoord;
 out vec3 vPosition;
 
 void main() {
+    vec3 morphedPosition = aPosition;
+
+    if (u_active_morph_count > 0) {
+        vec3 morphOffset = vec3(0.0);
+        int maxMorphs = u_active_morph_count;
+        if (maxMorphs > 32) { maxMorphs = 32; }
+
+        for (int i = 0; i < 32; i++) {
+            if (i >= maxMorphs) break;
+            int vecIdx = i / 4;
+            int compIdx = i % 4;
+            float weight = (compIdx == 0) ? u_morph_weights[vecIdx].x :
+                          ((compIdx == 1) ? u_morph_weights[vecIdx].y :
+                          ((compIdx == 2) ? u_morph_weights[vecIdx].z : u_morph_weights[vecIdx].w));
+
+            if (abs(weight) > 0.0001) {
+                vec3 delta = texelFetch(u_morph_delta_texture, ivec2(gl_VertexID, i), 0).xyz;
+                morphOffset += delta * weight;
+            }
+        }
+        morphedPosition += morphOffset;
+    }
+
     ivec4 indices = ivec4(a_bone_indices + 0.5);
     vec4 weights = a_bone_weights;
 
@@ -43,7 +75,7 @@ void main() {
         skinMatrix = mat4(1.0);
     }
 
-    vec4 skinnedPosition = skinMatrix * vec4(aPosition, 1.0);
+    vec4 skinnedPosition = skinMatrix * vec4(morphedPosition, 1.0);
     mat3 skinNormalMatrix = mat3(skinMatrix);
     vec3 skinnedNormal = skinNormalMatrix * aNormal;
 

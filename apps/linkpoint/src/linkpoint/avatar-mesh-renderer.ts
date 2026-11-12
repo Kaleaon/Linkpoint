@@ -6,7 +6,7 @@
  * GPU linear blend skinning execution.
  */
 
-import { BENTO_MAX_PALETTE_JOINTS, SkinningPaletteUBO, AvatarSkeletonState } from './avatar-skeleton-state';
+import { BENTO_MAX_PALETTE_JOINTS, SkinningPaletteUBO, VisualParamUBO, AvatarSkeletonState } from './avatar-skeleton-state';
 import { AVATAR_SKINNING_VERT_SHADER, AVATAR_SKINNING_VERT_SHADER_LEGACY } from './avatar_skinning.vert';
 
 export interface VertexAttributeLayout {
@@ -33,12 +33,82 @@ export interface RenderSubmeshPartition {
   remappedBoneIndices: Float32Array;
 }
 
+export interface MorphTargetData {
+  name: string;
+  deltas: Float32Array; // 3 floats per vertex (dx, dy, dz)
+}
+
+/**
+ * Package morph target delta arrays into 2D floating-point WebGL2 Data Textures for avatar body parts.
+ *
+ * Texture layout:
+ * Width: vertexCount
+ * Height: maxMorphs (up to 32 active morph target deltas per vertex)
+ * Format: RGBA32F (4 floats per texel: dx, dy, dz, 0.0)
+ */
+export function createMorphTargetDataTexture(
+  gl: WebGL2RenderingContext | WebGLRenderingContext,
+  vertexCount: number,
+  morphTargets: MorphTargetData[],
+  maxMorphs: number = 32
+): WebGLTexture | null {
+  if (typeof WebGL2RenderingContext === 'undefined' || !(gl instanceof WebGL2RenderingContext)) {
+    return null;
+  }
+  const gl2 = gl as WebGL2RenderingContext;
+  const activeCount = Math.min(morphTargets.length, maxMorphs);
+  const height = Math.max(1, activeCount);
+  const width = vertexCount;
+
+  const dataArray = new Float32Array(width * height * 4);
+
+  for (let m = 0; m < activeCount; m++) {
+    const deltas = morphTargets[m].deltas;
+    const rowOffset = m * width * 4;
+    for (let v = 0; v < width; v++) {
+      const texelOffset = rowOffset + v * 4;
+      const v3 = v * 3;
+      if (v3 + 2 < deltas.length) {
+        dataArray[texelOffset] = deltas[v3];
+        dataArray[texelOffset + 1] = deltas[v3 + 1];
+        dataArray[texelOffset + 2] = deltas[v3 + 2];
+        dataArray[texelOffset + 3] = 0.0;
+      }
+    }
+  }
+
+  const texture = gl2.createTexture();
+  if (!texture) return null;
+
+  gl2.bindTexture(gl2.TEXTURE_2D, texture);
+  gl2.texImage2D(
+    gl2.TEXTURE_2D,
+    0,
+    gl2.RGBA32F,
+    width,
+    height,
+    0,
+    gl2.RGBA,
+    gl2.FLOAT,
+    dataArray
+  );
+  gl2.texParameteri(gl2.TEXTURE_2D, gl2.TEXTURE_MIN_FILTER, gl2.NEAREST);
+  gl2.texParameteri(gl2.TEXTURE_2D, gl2.TEXTURE_MAG_FILTER, gl2.NEAREST);
+  gl2.texParameteri(gl2.TEXTURE_2D, gl2.TEXTURE_WRAP_S, gl2.CLAMP_TO_EDGE);
+  gl2.texParameteri(gl2.TEXTURE_2D, gl2.TEXTURE_WRAP_T, gl2.CLAMP_TO_EDGE);
+  gl2.bindTexture(gl2.TEXTURE_2D, null);
+
+  return texture;
+}
+
 export class AvatarMeshRenderer {
   private gl: WebGLRenderingContext | WebGL2RenderingContext;
   private isUboSupported: boolean = false;
   private uboBuffer: WebGLBuffer | null = null;
+  private visualParamUboBuffer: WebGLBuffer | null = null;
   private shaderProgram: WebGLProgram | null = null;
   private uboBlockBinding: number = 0;
+  private visualParamBlockBinding: number = 1;
 
   constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
     this.gl = gl;
@@ -72,7 +142,18 @@ export class AvatarMeshRenderer {
     return this.uboBuffer;
   }
 
-  /** Attach UBO block binding point to program. */
+  /** Initialize GPU UBO buffer for visual parameter weight uploads. */
+  initVisualParamUbo(): WebGLBuffer | null {
+    if (!this.isUboSupported) return null;
+    const gl2 = this.gl as WebGL2RenderingContext;
+    this.visualParamUboBuffer = gl2.createBuffer();
+    gl2.bindBuffer(gl2.UNIFORM_BUFFER, this.visualParamUboBuffer);
+    gl2.bufferData(gl2.UNIFORM_BUFFER, 144, gl2.DYNAMIC_DRAW);
+    gl2.bindBuffer(gl2.UNIFORM_BUFFER, null);
+    return this.visualParamUboBuffer;
+  }
+
+  /** Attach UBO block binding point to program for joint palettes. */
   bindProgramUbo(program: WebGLProgram, blockName: string = 'SkinningPaletteBlock', bindingPoint: number = 0): void {
     if (!this.isUboSupported) return;
     const gl2 = this.gl as WebGL2RenderingContext;
@@ -80,6 +161,17 @@ export class AvatarMeshRenderer {
     if (blockIndex !== gl2.INVALID_INDEX) {
       gl2.uniformBlockBinding(program, blockIndex, bindingPoint);
       this.uboBlockBinding = bindingPoint;
+    }
+  }
+
+  /** Attach UBO block binding point to program for visual parameters. */
+  bindProgramVisualParamUbo(program: WebGLProgram, blockName: string = 'VisualParamBlock', bindingPoint: number = 1): void {
+    if (!this.isUboSupported) return;
+    const gl2 = this.gl as WebGL2RenderingContext;
+    const blockIndex = gl2.getUniformBlockIndex(program, blockName);
+    if (blockIndex !== gl2.INVALID_INDEX) {
+      gl2.uniformBlockBinding(program, blockIndex, bindingPoint);
+      this.visualParamBlockBinding = bindingPoint;
     }
   }
 
@@ -169,18 +261,34 @@ export class AvatarMeshRenderer {
     return result;
   }
 
-  /** Render skinned avatar mesh using UBO palette uploads or fallback path. */
+  /** Render skinned avatar mesh using UBO palette uploads, visual parameter UBOs, and morph textures or fallback path. */
   renderAvatarMesh(
     skeletonState: AvatarSkeletonState,
     submesh: RenderSubmeshPartition,
-    drawCallback: (paletteIndex: number) => void
+    drawCallback: (paletteIndex: number) => void,
+    morphTexture?: WebGLTexture | null,
+    textureUnit: number = 1
   ): void {
     const palette = skeletonState.getPaletteUbo(submesh.paletteIndex);
+    const visualParam = skeletonState.getVisualParamUbo();
 
-    if (this.isUboSupported && this.uboBuffer) {
+    if (this.isUboSupported) {
       const gl2 = this.gl as WebGL2RenderingContext;
-      palette.uploadToGpu(gl2, this.uboBuffer);
-      palette.bindToBindingPoint(gl2, this.uboBuffer, this.uboBlockBinding);
+
+      if (this.uboBuffer) {
+        palette.uploadToGpu(gl2, this.uboBuffer);
+        palette.bindToBindingPoint(gl2, this.uboBuffer, this.uboBlockBinding);
+      }
+
+      if (this.visualParamUboBuffer && visualParam) {
+        visualParam.uploadToGpu(gl2, this.visualParamUboBuffer);
+        visualParam.bindToBindingPoint(gl2, this.visualParamUboBuffer, this.visualParamBlockBinding);
+      }
+
+      if (morphTexture) {
+        gl2.activeTexture(gl2.TEXTURE0 + textureUnit);
+        gl2.bindTexture(gl2.TEXTURE_2D, morphTexture);
+      }
     }
 
     drawCallback(submesh.paletteIndex);
