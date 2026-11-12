@@ -84,8 +84,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -134,6 +132,14 @@ jobs:
       - name: Run Android lint
         run: (cd legacy && ./gradlew :Linkpoint:lintStableDebug --stacktrace)
 
+      - name: Upload Android coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage
+          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          if-no-files-found: ignore
+
       - name: Run Roborazzi Visual Snapshot Verification
         run: (cd legacy && ./gradlew verifyRoborazziDebug)
 
@@ -154,13 +160,6 @@ jobs:
           name: linkpoint-debug-${{ github.sha }}
           path: legacy/Linkpoint/build/outputs/apk/*/debug/*.apk
           retention-days: 14
-
-      - name: Upload Android coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-coverage
-          path: legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          if-no-files-found: ignore
 
   web:
     name: Task 3 - React & Web Workspace Checks
