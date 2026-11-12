@@ -109,12 +109,12 @@ class CachedTexMatrixStoreTest {
         val expectedM12 = 0.5f + offsetS - 0.5f * scaleS
         val expectedM13 = 0.5f + offsetT - 0.5f * scaleT
 
-        assertEquals(scaleS, matrix[0], 1e-5f)
-        assertEquals(scaleT, matrix[5], 1e-5f)
-        assertEquals(1.0f, matrix[10], 1e-5f)
-        assertEquals(1.0f, matrix[15], 1e-5f)
-        assertEquals(expectedM12, matrix[12], 1e-5f)
-        assertEquals(expectedM13, matrix[13], 1e-5f)
+        assertEquals(scaleS.toDouble(), matrix[0].toDouble(), 1e-5)
+        assertEquals(scaleT.toDouble(), matrix[5].toDouble(), 1e-5)
+        assertEquals(1.0, matrix[10].toDouble(), 1e-5)
+        assertEquals(1.0, matrix[15].toDouble(), 1e-5)
+        assertEquals(expectedM12.toDouble(), matrix[12].toDouble(), 1e-5)
+        assertEquals(expectedM13.toDouble(), matrix[13].toDouble(), 1e-5)
     }
 
     @Test

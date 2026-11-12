@@ -87,7 +87,7 @@ class StateComponentsSnapshotTest(
         }
 
         val snapshotName = "${componentName}_${deviceName}_${themeName}"
-        val outputDir = File("build/outputs/roborazzi")
+        val outputDir = File("src/test/snapshots")
         if (!outputDir.exists()) {
             outputDir.mkdirs()
         }
