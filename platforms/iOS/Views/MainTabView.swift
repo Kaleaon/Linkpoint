@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 import Ktheme
 
@@ -30,11 +31,14 @@ enum MainTabItem: String, CaseIterable, Identifiable {
 
 struct MainTabView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+#if os(iOS)
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+#endif
     @State private var selectedTab = 0
     @State private var selectedSidebarItem: MainTabItem? = .world
 
     var body: some View {
+#if os(iOS)
         if horizontalSizeClass == .regular {
             NavigationSplitView {
                 List(MainTabItem.allCases, selection: $selectedSidebarItem) { item in
@@ -73,6 +77,18 @@ struct MainTabView: View {
                     .tag(3)
             }
         }
+#else
+        NavigationSplitView {
+            List(MainTabItem.allCases, selection: $selectedSidebarItem) { item in
+                NavigationLink(value: item) {
+                    Label(item.rawValue, systemImage: item.icon)
+                }
+            }
+            .navigationTitle("Linkpoint")
+        } detail: {
+            detailView(for: selectedSidebarItem ?? .world)
+        }
+#endif
     }
 
     @ViewBuilder
@@ -333,3 +349,4 @@ struct MainTabView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+#endif
