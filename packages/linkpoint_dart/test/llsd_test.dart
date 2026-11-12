@@ -40,6 +40,8 @@ void main() {
       final relativeCandidates = [
         path.join('..', '..', 'legacy', 'Linkpoint', 'src', 'test', 'resources',
             'llsd-conformance', 'vectors'),
+        path.join('..', 'legacy', 'Linkpoint', 'src', 'test', 'resources',
+            'llsd-conformance', 'vectors'),
         path.join('..', '..', 'Linkpoint', 'src', 'test', 'resources',
             'llsd-conformance', 'vectors'),
         path.join('legacy', 'Linkpoint', 'src', 'test', 'resources',
@@ -61,7 +63,13 @@ void main() {
 
       expect(vectorsDir != null && vectorsDir.existsSync(), isTrue,
           reason: 'Vectors directory must exist');
-      final subdirs = vectorsDir!.listSync().whereType<Directory>().toList()
+
+      final subdirs = vectorsDir!
+          .listSync()
+          .whereType<Directory>()
+          .where(
+              (d) => !d.path.split(Platform.pathSeparator).last.startsWith('.'))
+          .toList()
         ..sort((a, b) => a.path.compareTo(b.path));
 
       expect(subdirs.length, equals(31),

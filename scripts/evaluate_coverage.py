@@ -55,13 +55,20 @@ def parse_lcov(lcov_path: Path):
     try:
         lines_found = 0
         lines_hit = 0
+        skip_file = False
         with open(lcov_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
-                if line.startswith("LF:"):
-                    lines_found += int(line.split(":")[1])
-                elif line.startswith("LH:"):
-                    lines_hit += int(line.split(":")[1])
+                if line.startswith("SF:"):
+                    source_file = line.split(":", 1)[1]
+                    skip_file = "generated" in source_file.lower()
+                elif line == "end_of_record":
+                    skip_file = False
+                elif not skip_file:
+                    if line.startswith("LF:"):
+                        lines_found += int(line.split(":")[1])
+                    elif line.startswith("LH:"):
+                        lines_hit += int(line.split(":")[1])
 
         missed = lines_found - lines_hit
         pct = (lines_hit / lines_found * 100.0) if lines_found > 0 else 0.0
