@@ -7,7 +7,7 @@
 const METHODS = new Set([
   'sendChat', 'sendChatBatch', 'sendInstantMessage', 'sendGroupMessage', 'sendFriendRequest',
   'teleport', 'touchObject', 'sit', 'stand', 'setMovement', 'getBalance', 'payObject',
-  'respondScriptDialog', 'acceptLure', 'acceptInventoryOffer', 'declineInventoryOffer', 'acceptGroupInvite', 'declineGroupInvite', 'dismissInteraction',
+  'respondScriptDialog', 'acceptLure', 'acceptInventoryOffer', 'declineInventoryOffer', 'offerItem', 'acceptGroupInvite', 'declineGroupInvite', 'dismissInteraction',
   'fetchAnimation', 'getMapBlocks', 'getFriends', 'getGroups', 'getInventory', 'getDiagnostics',
   'getSceneObjects', 'getSceneSnapshot', 'searchDir',
   'wearItem', 'wearOutfit', 'requestMuteList', 'updateMuteListEntry', 'removeMuteListEntry',
