@@ -1,8 +1,8 @@
 include('llsd-core')
 project(':llsd-core').projectDir = file('LLSD-KOTLIN')
 
-def hasAndroidSdk = System.getenv('ANDROID_HOME') != null ||
-                    System.getenv('ANDROID_SDK_ROOT') != null ||
+def androidHome = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+def hasAndroidSdk = (androidHome != null && file("${androidHome}/platforms/android-35").exists()) ||
                     file('Linkpoint/local.properties').exists() ||
                     file('local.properties').exists()
 
