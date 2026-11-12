@@ -8,12 +8,14 @@ void main() {
       final events = <ViewerEvent>[];
       session.events.listen(events.add);
 
-      session.handleLogin(const LoginRequest(
-        grid: 'second-life',
-        loginUri: 'https://login.agni.lindenlab.com/cgi-bin/login.cgi',
-        username: 'Test User',
-        password: 'password',
-      ));
+      session.handleLogin(
+        const LoginRequest(
+          grid: 'second-life',
+          loginUri: 'https://login.agni.lindenlab.com/cgi-bin/login.cgi',
+          username: 'Test User',
+          password: 'password',
+        ),
+      );
 
       expect(session.isConnected, true);
       expect(session.currentSnapshot?.regionName, 'Welcome Island');
@@ -24,8 +26,10 @@ void main() {
       await Future.delayed(Duration.zero);
 
       expect(session.isConnected, false);
-      expect(events.length,
-          4); // Connecting, Connected, ChatReceived, Disconnected
+      expect(
+        events.length,
+        4,
+      ); // Connecting, Connected, ChatReceived, Disconnected
     });
   });
 }

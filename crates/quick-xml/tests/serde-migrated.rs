@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use std::fmt::Debug;
 
 use quick_xml::de::from_str;

@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 fn main() {
     use quick_xml::events::Event;
     use quick_xml::Reader;

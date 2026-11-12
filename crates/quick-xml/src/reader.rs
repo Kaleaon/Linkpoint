@@ -12,7 +12,6 @@ use crate::errors::{Error, Result};
 use crate::events::attributes::Attribute;
 use crate::events::{BytesCData, BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 
-
 #[derive(Clone)]
 enum TagState {
     Opened,
