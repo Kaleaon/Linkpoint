@@ -56,8 +56,7 @@ pub fn convert_llmesh_to_gltf_json(mesh: &ParsedLLMesh) -> String {
     let pos_offset = buffer_bytes.len();
     let mut min_pos = [f32::MAX, f32::MAX, f32::MAX];
     let mut max_pos = [f32::MIN, f32::MIN, f32::MIN];
-    #[allow(unknown_lints, clippy::chunks_exact_to_as_chunks)]
-    for chunk in mesh.positions.chunks_exact(3) {
+    for chunk in mesh.positions.as_chunks::<3>().0 {
         for i in 0..3 {
             if chunk[i] < min_pos[i] {
                 min_pos[i] = chunk[i];
