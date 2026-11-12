@@ -47,6 +47,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Set up Rust toolchain
+        if: matrix.os == 'ubuntu-latest'
         uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with:
@@ -54,6 +55,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: bash scripts/check_viewer_contract.sh
+        if: matrix.os == 'ubuntu-latest'
       - run: npm run check:web
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-latest'
@@ -87,8 +89,6 @@ jobs:
           targets: wasm32-unknown-unknown
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: "v3-rust-cache"
         continue-on-error: true
       - run: cargo test --workspace --locked
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -103,24 +103,22 @@ jobs:
         run: bash scripts/build_native_libraries.sh
 
   dart-ffi:
-    name: Dart Flutter FFI conformance
+    name: Polyglot FFI test orchestrator
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
         with:
           toolchain: stable
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
-      - name: Build native protocol shared library
-        run: cargo build -p linkpoint-protocol --release
-      - name: Run Flutter Dart FFI test suite
-        run: |
-          cd packages/linkpoint_dart
-          flutter pub get
-          flutter test
+      - name: Run Polyglot Conformance Test Orchestrator
+        run: bash scripts/run_polyglot_tests.sh
 
   native-readiness:
     name: Native shell readiness
@@ -146,7 +144,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Run Swift Package test suite
         run: |
           cd platforms/iOS

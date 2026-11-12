@@ -42,21 +42,21 @@ class LinkpointProtocolFFI {
 
   static DynamicLibrary _loadLibrary() {
     if (_lib != null) return _lib!;
-    final libName = Platform.isLinux
-        ? 'liblinkpoint_protocol.so'
-        : (Platform.isMacOS
-            ? 'liblinkpoint_protocol.dylib'
-            : 'linkpoint_protocol.dll');
-
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    if (Platform.isLinux) {
       final searchPaths = [
-        libName,
-        '../../target/release/$libName',
-        '../target/release/$libName',
-        'target/release/$libName',
-        '../../target/debug/$libName',
-        '../target/debug/$libName',
-        'target/debug/$libName',
+        'liblinkpoint_protocol.so',
+        'builds/native/liblinkpoint_protocol.so',
+        '../../builds/native/liblinkpoint_protocol.so',
+        '../builds/native/liblinkpoint_protocol.so',
+        '/app/Linkpoint/builds/native/liblinkpoint_protocol.so',
+        '../../target/release/liblinkpoint_protocol.so',
+        '../target/release/liblinkpoint_protocol.so',
+        'target/release/liblinkpoint_protocol.so',
+        '../../target/debug/liblinkpoint_protocol.so',
+        '../target/debug/liblinkpoint_protocol.so',
+        'target/debug/liblinkpoint_protocol.so',
+        '/app/Linkpoint/target/release/liblinkpoint_protocol.so',
+        '/app/Linkpoint/target/debug/liblinkpoint_protocol.so',
       ];
       for (final p in searchPaths) {
         if (File(p).existsSync()) {
@@ -66,27 +66,55 @@ class LinkpointProtocolFFI {
           } catch (_) {}
         }
       }
-
-      var curr = Directory.current;
-      for (var i = 0; i < 10; i++) {
-        for (final rel in [
-          'target/release/$libName',
-          'target/debug/$libName'
-        ]) {
-          final cand = File('${curr.path}/$rel');
-          if (cand.existsSync()) {
-            try {
-              _lib = DynamicLibrary.open(cand.path);
-              return _lib!;
-            } catch (_) {}
-          }
+      _lib = DynamicLibrary.open('liblinkpoint_protocol.so');
+    } else if (Platform.isMacOS) {
+      final searchPaths = [
+        'liblinkpoint_protocol.dylib',
+        'builds/native/liblinkpoint_protocol.dylib',
+        '../../builds/native/liblinkpoint_protocol.dylib',
+        '../builds/native/liblinkpoint_protocol.dylib',
+        '/app/Linkpoint/builds/native/liblinkpoint_protocol.dylib',
+        '../../target/release/liblinkpoint_protocol.dylib',
+        '../target/release/liblinkpoint_protocol.dylib',
+        'target/release/liblinkpoint_protocol.dylib',
+        '../../target/debug/liblinkpoint_protocol.dylib',
+        '../target/debug/liblinkpoint_protocol.dylib',
+        'target/debug/liblinkpoint_protocol.dylib',
+        '/app/Linkpoint/target/release/liblinkpoint_protocol.dylib',
+      ];
+      for (final p in searchPaths) {
+        if (File(p).existsSync()) {
+          try {
+            _lib = DynamicLibrary.open(p);
+            return _lib!;
+          } catch (_) {}
         }
-        final parent = curr.parent;
-        if (parent.path == curr.path) break;
-        curr = parent;
       }
-
-      _lib = DynamicLibrary.open(libName);
+      _lib = DynamicLibrary.open('liblinkpoint_protocol.dylib');
+    } else if (Platform.isWindows) {
+      final searchPaths = [
+        'linkpoint_protocol.dll',
+        'builds/native/linkpoint_protocol.dll',
+        '../../builds/native/linkpoint_protocol.dll',
+        '../builds/native/linkpoint_protocol.dll',
+        '/app/Linkpoint/builds/native/linkpoint_protocol.dll',
+        '../../target/release/linkpoint_protocol.dll',
+        '../target/release/linkpoint_protocol.dll',
+        'target/release/linkpoint_protocol.dll',
+        '../../target/debug/linkpoint_protocol.dll',
+        '../target/debug/linkpoint_protocol.dll',
+        'target/debug/linkpoint_protocol.dll',
+        '/app/Linkpoint/target/release/linkpoint_protocol.dll',
+      ];
+      for (final p in searchPaths) {
+        if (File(p).existsSync()) {
+          try {
+            _lib = DynamicLibrary.open(p);
+            return _lib!;
+          } catch (_) {}
+        }
+      }
+      _lib = DynamicLibrary.open('linkpoint_protocol.dll');
     } else {
       _lib = DynamicLibrary.process();
     }
@@ -117,8 +145,7 @@ class LinkpointProtocolFFI {
     final lib = _loadLibrary();
     final freeFn =
         lib.lookupFunction<NativeLinkpointFreeBuffer, DartLinkpointFreeBuffer>(
-      'linkpoint_free_buffer',
-    );
+            'linkpoint_free_buffer');
     freeFn(buf);
   }
 
@@ -145,8 +172,7 @@ class LinkpointProtocolFFI {
   }
 
   static List<int> _extractAndFreeBinaryResult(
-    Pointer<LlsdResultBufferStruct> resBuf,
-  ) {
+      Pointer<LlsdResultBufferStruct> resBuf) {
     if (resBuf == nullptr) {
       throw Exception('FFI returned null buffer');
     }
