@@ -36,6 +36,8 @@ void main() {
       final relativeCandidates = [
         path.join('..', '..', 'legacy', 'Linkpoint', 'src', 'test', 'resources',
             'llsd-conformance', 'vectors'),
+        path.join('..', 'legacy', 'Linkpoint', 'src', 'test', 'resources',
+            'llsd-conformance', 'vectors'),
         path.join('..', '..', 'Linkpoint', 'src', 'test', 'resources',
             'llsd-conformance', 'vectors'),
         path.join('legacy', 'Linkpoint', 'src', 'test', 'resources',
