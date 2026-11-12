@@ -76,6 +76,24 @@ version 2.0
         zero_run_uncompressed = decompress_fn(zero_run_compressed)
         self.assertEqual(zero_run_uncompressed, bytes([0x01, 0x02]))
 
+    def test_swift_emitter_code_structure(self):
+        ast = TemplateParser().parse(self.sample_template)
+        from tools.protocol_gen.emitters.swift_emitter import SwiftEmitter
+        emitter = SwiftEmitter()
+        code = emitter._generate_swift_code(ast)
+        self.assertIn("struct GeneratedProtocolCatalog", code)
+        self.assertIn("struct TestPacketPacket", code)
+        self.assertIn("func decompressZerocoded", code)
+
+    def test_csharp_emitter_code_structure(self):
+        ast = TemplateParser().parse(self.sample_template)
+        from tools.protocol_gen.emitters.csharp_emitter import CSharpEmitter
+        emitter = CSharpEmitter()
+        code = emitter._generate_csharp_code(ast)
+        self.assertIn("namespace Linkpoint.Protocol", code)
+        self.assertIn("class TestPacketPacket", code)
+        self.assertIn("DecompressZerocoded", code)
+
 
 if __name__ == "__main__":
     unittest.main()
