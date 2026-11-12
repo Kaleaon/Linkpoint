@@ -6,8 +6,11 @@ import com.linkpoint.protocol.messages.MessageEventListener
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.teleport.TeleportManager
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.*
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -91,6 +94,13 @@ class SLChatEventTest {
         val sessionId = UUID.randomUUID()
         val senderId = UUID.randomUUID()
 
+        val deferred = CompletableDeferred<SLChatEvent>()
+        val job = launch(Dispatchers.Unconfined) {
+            imManager.messageFlow.collect {
+                deferred.complete(it)
+            }
+        }
+
         imManager.handleIncomingIM(
             fromAgentId = senderId,
             fromName = "Friend Avatar",
@@ -100,7 +110,9 @@ class SLChatEventTest {
             timestamp = 2000L
         )
 
-        val emittedEvent = imManager.messageFlow.first()
+        val emittedEvent = withTimeout(5000L) { deferred.await() }
+        job.cancel()
+
         assertTrue("Emitted event should be FriendshipOffer", emittedEvent is SLChatEvent.FriendshipOffer)
         val offer = emittedEvent as SLChatEvent.FriendshipOffer
         assertEquals(senderId, offer.fromAgentId)
