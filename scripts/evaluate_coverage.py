@@ -159,7 +159,12 @@ def main():
     # 3. Rust
     rust_data = parse_lcov(args.rust_report)
     if rust_data is None:
-        for fallback in [Path("coverage-rust.lcov"), Path("rust-lcov.info")]:
+        for fallback in [
+            Path("coverage-rust.lcov"),
+            Path("rust-lcov.info"),
+            Path("coverage-artifacts/rust-coverage/lcov.info"),
+            *Path(".").glob("**/rust*/**/lcov.info"),
+        ]:
             rust_data = parse_lcov(fallback)
             if rust_data:
                 break
