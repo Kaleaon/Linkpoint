@@ -48,10 +48,28 @@ class LLMeshConverter {
       numFaces = bd.getUint16(0, Endian.little);
     }
 
-    final positions =
-        Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]);
-    final normals =
-        Float32List.fromList([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
+    final positions = Float32List.fromList([
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+    ]);
+    final normals = Float32List.fromList([
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+    ]);
     final uvs = Float32List.fromList([0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
     final indices = Uint16List.fromList([0, 1, 2]);
 
@@ -119,15 +137,9 @@ class LLMeshConverter {
         'data:application/octet-stream;base64,${base64.encode(rawBytes)}';
 
     final gltfMap = {
-      'asset': {
-        'generator': 'Linkpoint Dart Asset Pipeline',
-        'version': '2.0',
-      },
+      'asset': {'generator': 'Linkpoint Dart Asset Pipeline', 'version': '2.0'},
       'buffers': [
-        {
-          'byteLength': rawBytes.length,
-          'uri': base64Uri,
-        }
+        {'byteLength': rawBytes.length, 'uri': base64Uri},
       ],
       'bufferViews': [
         {
@@ -192,28 +204,21 @@ class LLMeshConverter {
           'name': 'LLMesh',
           'primitives': [
             {
-              'attributes': {
-                'POSITION': 0,
-                'NORMAL': 1,
-                'TEXCOORD_0': 2,
-              },
+              'attributes': {'POSITION': 0, 'NORMAL': 1, 'TEXCOORD_0': 2},
               'indices': 3,
               'mode': 4,
-            }
+            },
           ],
-        }
+        },
       ],
       'nodes': [
-        {
-          'name': 'LLMeshNode',
-          'mesh': 0,
-        }
+        {'name': 'LLMeshNode', 'mesh': 0},
       ],
       'scenes': [
         {
           'name': 'LLMeshScene',
           'nodes': [0],
-        }
+        },
       ],
       'scene': 0,
     };

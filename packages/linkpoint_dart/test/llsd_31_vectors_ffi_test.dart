@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkpoint_dart/src/ffi.dart';
 import 'package:path/path.dart' as path;
@@ -12,14 +13,14 @@ File? _findFixtureFile() {
       'crates',
       'linkpoint-protocol',
       'fixtures',
-      'llsd_31_test_vectors.json'
+      'llsd_31_test_vectors.json',
     ],
     [
       '..',
       'crates',
       'linkpoint-protocol',
       'fixtures',
-      'llsd_31_test_vectors.json'
+      'llsd_31_test_vectors.json',
     ],
     ['crates', 'linkpoint-protocol', 'fixtures', 'llsd_31_test_vectors.json'],
     [
@@ -28,7 +29,7 @@ File? _findFixtureFile() {
       'crates',
       'linkpoint-protocol',
       'fixtures',
-      'llsd_31_test_vectors.json'
+      'llsd_31_test_vectors.json',
     ],
   ];
   for (final parts in candidateParts) {
@@ -78,15 +79,24 @@ void main() {
         expect(xmlDec, isNotNull, reason: 'Vector #$id ($name) parseXml');
 
         final notationEnc = LinkpointProtocolFFI.serializeNotation(jsonStr);
-        expect(notationEnc, isNotEmpty,
-            reason: 'Vector #$id ($name) serializeNotation');
+        expect(
+          notationEnc,
+          isNotEmpty,
+          reason: 'Vector #$id ($name) serializeNotation',
+        );
         final notationDec = LinkpointProtocolFFI.parseNotation(notationEnc);
-        expect(notationDec, isNotNull,
-            reason: 'Vector #$id ($name) parseNotation');
+        expect(
+          notationDec,
+          isNotNull,
+          reason: 'Vector #$id ($name) parseNotation',
+        );
 
         final binaryEnc = LinkpointProtocolFFI.serializeBinary(jsonStr);
-        expect(binaryEnc, isNotEmpty,
-            reason: 'Vector #$id ($name) serializeBinary');
+        expect(
+          binaryEnc,
+          isNotEmpty,
+          reason: 'Vector #$id ($name) serializeBinary',
+        );
         final binaryDec = LinkpointProtocolFFI.parseBinary(binaryEnc);
         expect(binaryDec, isNotNull, reason: 'Vector #$id ($name) parseBinary');
       }
@@ -100,7 +110,7 @@ void main() {
       final jsonStr = jsonEncode({
         'agent_id': '00000000-0000-0000-0000-000000000000',
         'balance': 1000,
-        'online': true
+        'online': true,
       });
       for (var i = 0; i < 1000; i++) {
         final xml = LinkpointProtocolFFI.serializeXml(jsonStr);

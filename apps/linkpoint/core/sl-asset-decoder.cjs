@@ -15,6 +15,46 @@ function number(value, axis) {
 }
 
 async function decodeLLMesh(buffer) {
+  if (buffer) {
+    try {
+      const text = typeof buffer === 'string' ? buffer : (Buffer.isBuffer(buffer) || buffer instanceof Uint8Array ? new TextDecoder('utf-8').decode(buffer) : null);
+      if (text && (text.includes('unified-llsd-mesh-v1') || text.includes('preprocessed') || text.includes('submeshes'))) {
+        const payload = JSON.parse(text);
+        if (payload && (payload.format === 'unified-llsd-mesh-v1' || Array.isArray(payload.submeshes))) {
+          const parts = (payload.submeshes || payload.parts || []).map((sub, idx) => ({
+            materialIndex: Number(sub.materialIndex ?? sub.material_index ?? idx),
+            vertices: sub.positions || sub.vertices || [],
+            normals: sub.normals || [],
+            texCoords: sub.texCoords || sub.tex_coords || [],
+            indices: Array.isArray(sub.indices) ? sub.indices.map(Number) : [],
+            joints: sub.joints || [],
+            jointWeights: sub.jointWeights || sub.joint_weights || []
+          }));
+          const rawThresholds = payload.lod_thresholds || payload.lodThresholds || {};
+          const lodThresholds = {
+            highThreshold: Number(rawThresholds.highThreshold ?? rawThresholds.high_threshold ?? 200.0),
+            mediumThreshold: Number(rawThresholds.mediumThreshold ?? rawThresholds.medium_threshold ?? 80.0),
+            lowThreshold: Number(rawThresholds.lowThreshold ?? rawThresholds.low_threshold ?? 20.0),
+            lowestThreshold: Number(rawThresholds.lowestThreshold ?? rawThresholds.lowest_threshold ?? 4.0)
+          };
+          return {
+            format: payload.format || 'unified-llsd-mesh-v1',
+            selectedLod: payload.selected_lod || payload.selectedLod || 'high_lod',
+            parts,
+            lods: payload.lods || { high_lod: parts },
+            lodThresholds,
+            skin: payload.skin || null,
+            physics: payload.physics || null,
+            metadata: payload.metadata || {},
+            ...parts[0]
+          };
+        }
+      }
+    } catch (_) {
+      // Fallback to legacy binary decoding
+    }
+  }
+
   const mesh = await LLMesh.from(buffer);
   return normalizeLLMesh(mesh);
 }
