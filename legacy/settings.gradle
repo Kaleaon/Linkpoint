@@ -1,10 +1,33 @@
 include('llsd-core')
 project(':llsd-core').projectDir = file('LLSD-KOTLIN')
 
-def hasAndroidSdk = System.getenv('ANDROID_HOME') != null ||
-                    System.getenv('ANDROID_SDK_ROOT') != null ||
-                    file('Linkpoint/local.properties').exists() ||
-                    file('local.properties').exists()
+def skipAndroid = System.getenv('LINKPOINT_SKIP_ANDROID') == '1' ||
+                  System.getenv('SKIP_ANDROID_BUILD') == '1' ||
+                  providers.gradleProperty('skipAndroidBuild').orNull == 'true'
+
+def resolveSdkDir = {
+    for (propFile in [file('Linkpoint/local.properties'), file('local.properties')]) {
+        if (propFile.exists()) {
+            def props = new Properties()
+            propFile.withInputStream { props.load(it) }
+            def dir = props.getProperty('sdk.dir')
+            if (dir && file(dir).exists()) return file(dir)
+        }
+    }
+    def envHome = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+    if (envHome && file(envHome).exists()) {
+        return file(envHome)
+    }
+    return null
+}
+
+def sdkDir = resolveSdkDir()
+def hasAndroidSdk = !skipAndroid && sdkDir != null && (
+    file("${sdkDir}/licenses/android-sdk-license").exists() ||
+    file("${sdkDir}/ndk/26.3.11579264").exists() ||
+    file('Linkpoint/local.properties').exists() ||
+    file('local.properties').exists()
+)
 
 if (hasAndroidSdk && file('Linkpoint').exists()) {
     includeBuild('Linkpoint')
