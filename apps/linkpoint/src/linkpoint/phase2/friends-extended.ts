@@ -111,6 +111,7 @@ export class FriendsExtended extends Utils.EventEmitter {
       ...friendData,
       id: normalizedId,
       onlineStatus: this.normalizeStatus(friendData.onlineStatus ?? friendData.online ?? existing?.onlineStatus),
+      onlineAlert: Boolean(friendData.onlineAlert ?? existing?.onlineAlert ?? false),
     };
 
     this.friends.set(normalizedId, friend);
@@ -177,12 +178,57 @@ export class FriendsExtended extends Utils.EventEmitter {
 
       // Notify listeners
       if (oldStatus !== normalizedStatus) {
+        if (friend.onlineAlert) {
+          this.emit('online_alert', {
+            friendId: normalizedId,
+            friendName: friend.name,
+            status: normalizedStatus,
+            message: `${friend.name} is now ${normalizedStatus}.`,
+          });
+        }
         this.notifyStatusChange(normalizedId, normalizedStatus, oldStatus);
         this.emit('friend_updated', { ...friend });
       }
 
       console.log(`[FriendsExtended] Friend ${normalizedId} status: ${normalizedStatus}`);
     }
+  }
+
+  /**
+   * Set online alert for a friend
+   */
+  setOnlineAlert(friendId: string, enabled: boolean) {
+    if (!friendId || typeof friendId !== 'string') {
+      throw new Error('Valid friend ID required');
+    }
+    const normalizedId = this.normalizeId(friendId);
+    let friend = this.friends.get(normalizedId);
+    const alertEnabled = Boolean(enabled);
+    if (!friend) {
+      this.addFriend(normalizedId, { onlineAlert: alertEnabled });
+      friend = this.friends.get(normalizedId);
+    } else {
+      friend.onlineAlert = alertEnabled;
+      this.emit('friend_updated', { ...friend });
+    }
+    if (typeof this.protocol?.setOnlineAlert === 'function') {
+      try {
+        this.protocol.setOnlineAlert(normalizedId, alertEnabled);
+      } catch (err) {
+        console.warn('[FriendsExtended] protocol setOnlineAlert failed:', err);
+      }
+    }
+    console.log(`[FriendsExtended] Set online alert for ${friend.name}: ${alertEnabled}`);
+    return friend;
+  }
+
+  /**
+   * Get online alert status for a friend
+   */
+  getOnlineAlert(friendId: string): boolean {
+    if (!friendId) return false;
+    const normalizedId = this.normalizeId(friendId);
+    return Boolean(this.friends.get(normalizedId)?.onlineAlert);
   }
 
   /**
@@ -324,6 +370,33 @@ export class FriendsExtended extends Utils.EventEmitter {
   /** Snapshot for UI rendering; callers cannot mutate the backing map. */
   getFriends() {
     return Array.from(this.friends.values()).map(friend => ({ ...friend }));
+  }
+
+  /**
+   * Re-fetch friends list from protocol and update internal state.
+   */
+  async refresh(): Promise<any[]> {
+    if (typeof this.protocol?.fetchFriends === 'function') {
+      const friends = await this.protocol.fetchFriends();
+      if (Array.isArray(friends)) {
+        if (typeof this.protocol.emit === 'function') {
+          this.protocol.emit('friends_loaded', friends);
+        }
+        this.replaceFriends(friends.map((f: any) => ({
+          id: f.id,
+          name: f.name,
+          onlineStatus: f.onlineStatus ?? f.online,
+          permissions: f.permissions ?? {
+            canSeeOnline: typeof f.rightsHasMask === 'number' ? Boolean(f.rightsHasMask & 1) : Boolean(f.rightsHas),
+            canSeeOnMap: typeof f.rightsHasMask === 'number' ? Boolean(f.rightsHasMask & 2) : Boolean(f.rightsHas),
+            canModifyObjects: typeof f.rightsGivenMask === 'number' ? Boolean(f.rightsGivenMask & 4) : Boolean(f.rightsGiven),
+          }
+        })));
+        this.emit('friends_loaded', friends);
+        return this.getFriends();
+      }
+    }
+    return this.getFriends();
   }
 
   getStats() {

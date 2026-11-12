@@ -2,19 +2,23 @@ package com.linkpoint.ui.linkpoint2.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInFull
@@ -43,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.linkpoint.ui.adaptive.LocalWindowSizeClass
 import com.linkpoint.ui.components.linkpoint2.primitives.L2Chip
 import com.linkpoint.ui.components.linkpoint2.primitives.L2ChipVariant
 import com.linkpoint.ui.components.linkpoint2.primitives.L2GlassSurface
@@ -103,6 +108,9 @@ fun BuildToolsScreen(
         }
     }
 
+    val windowSizeClass = LocalWindowSizeClass.current
+    val isCompact = windowSizeClass.isCompact
+
     Box(modifier = modifier.fillMaxSize()) {
         L2WorldSceneBackdrop()
         // Selection bracket overlay
@@ -113,16 +121,30 @@ fun BuildToolsScreen(
                 .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
         )
 
-        // Bottom edit sheet
+        // Edit panel/sheet (bottom sheet on compact screens, side rail on medium/expanded)
         L2GlassSurface(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(12.dp),
-            shape = RoundedCornerShape(topStart = tokens.radii.xl, topEnd = tokens.radii.xl, bottomStart = tokens.radii.lg, bottomEnd = tokens.radii.lg),
+            modifier = if (isCompact) {
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            } else {
+                Modifier
+                    .align(Alignment.CenterEnd)
+                    .width(320.dp)
+                    .fillMaxHeight()
+                    .padding(12.dp)
+            },
+            shape = if (isCompact) {
+                RoundedCornerShape(topStart = tokens.radii.xl, topEnd = tokens.radii.xl, bottomStart = tokens.radii.lg, bottomEnd = tokens.radii.lg)
+            } else {
+                RoundedCornerShape(topStart = tokens.radii.xl, bottomStart = tokens.radii.xl, topEnd = tokens.radii.lg, bottomEnd = tokens.radii.lg)
+            },
             contentPadding = PaddingValues(16.dp),
         ) {
-            Column {
+            Column(
+                modifier = if (!isCompact) Modifier.verticalScroll(rememberScrollState()) else Modifier
+            ) {
                 // Header row
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
@@ -154,7 +176,10 @@ fun BuildToolsScreen(
                 Spacer(Modifier.height(12.dp))
 
                 // Tool tab chips
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     BuildTool.entries.forEach { t ->
                         L2Chip(
                             label = t.name,
@@ -169,16 +194,19 @@ fun BuildToolsScreen(
                 Spacer(Modifier.height(12.dp))
 
                 // XYZ inputs (color-coded)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    XyzField("X", x, Color(0xFFFF6B6B)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    XyzField("X", x, Linkpoint2.tokens.axisX) {
                         x = it
                         notifyPositionChange(it, y, z)
                     }
-                    XyzField("Y", y, Color(0xFF7CFFD8)) {
+                    XyzField("Y", y, Linkpoint2.tokens.axisY) {
                         y = it
                         notifyPositionChange(x, it, z)
                     }
-                    XyzField("Z", z, Color(0xFF6DE8FF)) {
+                    XyzField("Z", z, Linkpoint2.tokens.axisZ) {
                         z = it
                         notifyPositionChange(x, y, it)
                     }
@@ -208,7 +236,10 @@ fun BuildToolsScreen(
                 }
 
                 Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     AssistChip(
                         onClick = { /* properties */ },
                         label = { Text("Properties") },

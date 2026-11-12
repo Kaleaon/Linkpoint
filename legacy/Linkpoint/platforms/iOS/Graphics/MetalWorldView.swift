@@ -11,9 +11,13 @@ struct MetalWorldView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> MTKView {
         let view = MTKView()
-        view.device = MTLCreateSystemDefaultDevice()
+        let device = MTLCreateSystemDefaultDevice()
+        view.device = device
         view.clearColor = MTLClearColor(red: 0.32, green: 0.5, blue: 0.82, alpha: 1)
         view.delegate = context.coordinator
+        if let device = device {
+            context.coordinator.setup(device: device)
+        }
         context.coordinator.start()
         return view
     }
@@ -22,6 +26,11 @@ struct MetalWorldView: UIViewRepresentable {
 
     final class Renderer: NSObject, MTKViewDelegate {
         private var startTime = CACurrentMediaTime()
+        private var commandQueue: MTLCommandQueue?
+
+        func setup(device: MTLDevice) {
+            commandQueue = device.makeCommandQueue()
+        }
 
         func start() {
             startTime = CACurrentMediaTime()
@@ -32,8 +41,7 @@ struct MetalWorldView: UIViewRepresentable {
         func draw(in view: MTKView) {
             guard let drawable = view.currentDrawable,
                   let descriptor = view.currentRenderPassDescriptor,
-                  let device = view.device,
-                  let commandQueue = device.makeCommandQueue(),
+                  let commandQueue = commandQueue,
                   let commandBuffer = commandQueue.makeCommandBuffer(),
                   let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor) else {
                 return

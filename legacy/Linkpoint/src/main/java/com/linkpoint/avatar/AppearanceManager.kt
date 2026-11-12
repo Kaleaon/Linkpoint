@@ -4,6 +4,8 @@ import android.util.Log
 import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.protocol.messages.UDPConnectionFixed
 import com.linkpoint.protocol.types.putUUID
+import com.linkpoint.inventory.WearableAssetTelemetry
+import com.linkpoint.inventory.WearableLoadFailureReason
 import kotlinx.coroutines.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -177,13 +179,20 @@ class AppearanceManager @JvmOverloads constructor(
         Log.i(TAG, "═══ Appearance update starting (serial+1=${serialNum.get() + 1}) ═══")
 
         try {
+            if (avatarBaker == null || !avatarBaker.hasValidBaseSkinBakes()) {
+                Log.w(TAG, "Deferring AgentSetAppearance update: base skin channels not valid")
+                WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.APPEARANCE_DEFERRED)
+                lastUpdateError = "Appearance update deferred: base skin channels missing"
+                return
+            }
+
             val negotiation = capabilityNegotiator?.negotiateCapabilities()
             if (negotiation != null) {
                 Log.i(TAG, "Negotiated appearance mode: ${negotiation.mode} (latency: ${negotiation.resolutionTimeMs}ms)")
             }
 
             Log.d(TAG, "  baking 11 channels (head/upper/lower/eyes/skirt/hair/leftarm/leftleg/aux1/aux2/aux3)...")
-            val bakedTextures = avatarBaker?.bakeAll(includeBoM = true) ?: emptyMap()
+            val bakedTextures = avatarBaker.bakeAll(includeBoM = true)
             lastBakedTextureCount = bakedTextures.size
             Log.d(TAG, "  baked ${bakedTextures.size} channels: ${bakedTextures.keys.sorted().joinToString()}")
 

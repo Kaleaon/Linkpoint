@@ -25,6 +25,7 @@ export interface SyncTask {
   addedAt: number;
   status: TaskStatus;
   retries: number;
+  reject?: (reason?: any) => void;
 }
 
 export interface BatteryStatus {
@@ -261,6 +262,7 @@ export class SlidingWindowSyncQueue extends Utils.EventEmitter {
         addedAt: Date.now(),
         status: 'queued',
         retries: 0,
+        reject,
       };
 
       // Wrap task execution to settle outer Promise and track dynamic response times
@@ -400,9 +402,25 @@ export class SlidingWindowSyncQueue extends Utils.EventEmitter {
     return { ...this.batteryStatus };
   }
 
-  public clearQueue(): void {
+  /**
+   * Clears all pending queued tasks and rejects their promises with a cancellation error.
+   */
+  public clearQueue(reason?: string | Error): void {
+    const error =
+      reason instanceof Error
+        ? reason
+        : new Error(typeof reason === 'string' ? reason : 'Queue cleared');
+    const pendingTasks = [...this.queue];
+    const cancelledCount = pendingTasks.length;
     this.queue = [];
-    this.emit('queue_cleared');
+
+    for (const task of pendingTasks) {
+      if (task.reject) {
+        task.reject(error);
+      }
+    }
+
+    this.emit('queue_cleared', { cancelledCount, reason: error });
   }
 }
 

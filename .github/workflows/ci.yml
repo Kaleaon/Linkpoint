@@ -13,6 +13,7 @@ permissions:
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: "true"
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -250,7 +251,7 @@ jobs:
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
       - name: Run Rust tests with coverage
-        run: cargo llvm-cov --workspace --locked --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --locked --ignore-filename-regex "generated" --lcov --output-path lcov.info
 
       - name: Upload Rust coverage report
         uses: actions/upload-artifact@v4
