@@ -34,6 +34,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 LINKPOINT_ROOT="$(cd -- "${SCRIPT_DIR}/../.." &> /dev/null && pwd)"
 REPO_ROOT="$(cd -- "${LINKPOINT_ROOT}/../.." &> /dev/null && pwd)"
+cd "${REPO_ROOT}"
 REPORTS_DIR="${LINKPOINT_ROOT}/build/reports/protocol"
 
 skip_gradle=0

@@ -41,6 +41,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Configure Git line endings
+        run: |
+          git config --system core.autocrlf false || true
+          git config --global core.autocrlf false
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,6 +53,8 @@ jobs:
       - name: Set up Rust toolchain
         if: matrix.os == 'ubuntu-latest'
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -78,6 +84,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+      - name: Configure Git line endings
+        run: |
+          git config --system core.autocrlf false || true
+          git config --global core.autocrlf false
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Set up Python
         uses: actions/setup-python@v5
