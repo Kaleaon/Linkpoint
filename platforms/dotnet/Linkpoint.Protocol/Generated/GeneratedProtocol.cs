@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Linkpoint.Protocol.Generated
+namespace Linkpoint.Protocol
 {
     public static class GeneratedProtocol
     {
@@ -544,10 +544,19 @@ namespace Linkpoint.Protocol.Generated
         public static byte[] decompressZerocoded(byte[] src) => DecompressZerocoded(src);
     }
 
+    public static class GeneratedProtocolCatalog
+    {
+        public const string TemplateVersion = GeneratedProtocol.TemplateVersion;
+        public static IReadOnlyDictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
+        public static byte[] DecompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
+        public static byte[] decompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
+    }
+
     // Generated UDP Messages
     public class TestMessagePacket
     {
         public string MessageName { get; set; } = "TestMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 1;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -568,6 +577,7 @@ namespace Linkpoint.Protocol.Generated
     public class PacketAckPacket
     {
         public string MessageName { get; set; } = "PacketAck";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 4294967291;
         public string Frequency { get; set; } = "Fixed";
         public bool IsZerocoded { get; set; } = false;
@@ -588,6 +598,7 @@ namespace Linkpoint.Protocol.Generated
     public class OpenCircuitPacket
     {
         public string MessageName { get; set; } = "OpenCircuit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 4294967292;
         public string Frequency { get; set; } = "Fixed";
         public bool IsZerocoded { get; set; } = false;
@@ -608,6 +619,7 @@ namespace Linkpoint.Protocol.Generated
     public class CloseCircuitPacket
     {
         public string MessageName { get; set; } = "CloseCircuit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 4294967293;
         public string Frequency { get; set; } = "Fixed";
         public bool IsZerocoded { get; set; } = false;
@@ -628,6 +640,7 @@ namespace Linkpoint.Protocol.Generated
     public class StartPingCheckPacket
     {
         public string MessageName { get; set; } = "StartPingCheck";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 1;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -648,6 +661,7 @@ namespace Linkpoint.Protocol.Generated
     public class CompletePingCheckPacket
     {
         public string MessageName { get; set; } = "CompletePingCheck";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 2;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -668,6 +682,7 @@ namespace Linkpoint.Protocol.Generated
     public class AddCircuitCodePacket
     {
         public string MessageName { get; set; } = "AddCircuitCode";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 2;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -688,6 +703,7 @@ namespace Linkpoint.Protocol.Generated
     public class UseCircuitCodePacket
     {
         public string MessageName { get; set; } = "UseCircuitCode";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 3;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -708,6 +724,7 @@ namespace Linkpoint.Protocol.Generated
     public class NeighborListPacket
     {
         public string MessageName { get; set; } = "NeighborList";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 3;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -728,6 +745,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarTextureUpdatePacket
     {
         public string MessageName { get; set; } = "AvatarTextureUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 4;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -748,6 +766,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorMapUpdatePacket
     {
         public string MessageName { get; set; } = "SimulatorMapUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 5;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -768,6 +787,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorSetMapPacket
     {
         public string MessageName { get; set; } = "SimulatorSetMap";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 6;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -788,6 +808,7 @@ namespace Linkpoint.Protocol.Generated
     public class SubscribeLoadPacket
     {
         public string MessageName { get; set; } = "SubscribeLoad";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 7;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -808,6 +829,7 @@ namespace Linkpoint.Protocol.Generated
     public class UnsubscribeLoadPacket
     {
         public string MessageName { get; set; } = "UnsubscribeLoad";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 8;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -828,6 +850,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorReadyPacket
     {
         public string MessageName { get; set; } = "SimulatorReady";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 9;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -848,6 +871,7 @@ namespace Linkpoint.Protocol.Generated
     public class TelehubInfoPacket
     {
         public string MessageName { get; set; } = "TelehubInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 10;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -868,6 +892,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorPresentAtLocationPacket
     {
         public string MessageName { get; set; } = "SimulatorPresentAtLocation";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 11;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -888,6 +913,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorLoadPacket
     {
         public string MessageName { get; set; } = "SimulatorLoad";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 12;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -908,6 +934,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorShutdownRequestPacket
     {
         public string MessageName { get; set; } = "SimulatorShutdownRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 13;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -928,6 +955,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionPresenceRequestByRegionIDPacket
     {
         public string MessageName { get; set; } = "RegionPresenceRequestByRegionID";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 14;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -948,6 +976,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionPresenceRequestByHandlePacket
     {
         public string MessageName { get; set; } = "RegionPresenceRequestByHandle";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 15;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -968,6 +997,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionPresenceResponsePacket
     {
         public string MessageName { get; set; } = "RegionPresenceResponse";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 16;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -988,6 +1018,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateSimulatorPacket
     {
         public string MessageName { get; set; } = "UpdateSimulator";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 17;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1008,6 +1039,7 @@ namespace Linkpoint.Protocol.Generated
     public class LogDwellTimePacket
     {
         public string MessageName { get; set; } = "LogDwellTime";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 18;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1028,6 +1060,7 @@ namespace Linkpoint.Protocol.Generated
     public class FeatureDisabledPacket
     {
         public string MessageName { get; set; } = "FeatureDisabled";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 19;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1048,6 +1081,7 @@ namespace Linkpoint.Protocol.Generated
     public class LogFailedMoneyTransactionPacket
     {
         public string MessageName { get; set; } = "LogFailedMoneyTransaction";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 20;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1068,6 +1102,7 @@ namespace Linkpoint.Protocol.Generated
     public class UserReportInternalPacket
     {
         public string MessageName { get; set; } = "UserReportInternal";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 21;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1088,6 +1123,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetSimStatusInDatabasePacket
     {
         public string MessageName { get; set; } = "SetSimStatusInDatabase";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 22;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1108,6 +1144,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetSimPresenceInDatabasePacket
     {
         public string MessageName { get; set; } = "SetSimPresenceInDatabase";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 23;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1128,6 +1165,7 @@ namespace Linkpoint.Protocol.Generated
     public class EconomyDataRequestPacket
     {
         public string MessageName { get; set; } = "EconomyDataRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 24;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1148,6 +1186,7 @@ namespace Linkpoint.Protocol.Generated
     public class EconomyDataPacket
     {
         public string MessageName { get; set; } = "EconomyData";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 25;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1168,6 +1207,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPickerRequestPacket
     {
         public string MessageName { get; set; } = "AvatarPickerRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 26;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1188,6 +1228,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPickerRequestBackendPacket
     {
         public string MessageName { get; set; } = "AvatarPickerRequestBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 27;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1208,6 +1249,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPickerReplyPacket
     {
         public string MessageName { get; set; } = "AvatarPickerReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 28;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1228,6 +1270,7 @@ namespace Linkpoint.Protocol.Generated
     public class PlacesQueryPacket
     {
         public string MessageName { get; set; } = "PlacesQuery";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 29;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1248,6 +1291,7 @@ namespace Linkpoint.Protocol.Generated
     public class PlacesReplyPacket
     {
         public string MessageName { get; set; } = "PlacesReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 30;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1268,6 +1312,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirFindQueryPacket
     {
         public string MessageName { get; set; } = "DirFindQuery";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 31;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1288,6 +1333,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirFindQueryBackendPacket
     {
         public string MessageName { get; set; } = "DirFindQueryBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 32;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1308,6 +1354,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPlacesQueryPacket
     {
         public string MessageName { get; set; } = "DirPlacesQuery";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 33;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1328,6 +1375,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPlacesQueryBackendPacket
     {
         public string MessageName { get; set; } = "DirPlacesQueryBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 34;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1348,6 +1396,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPlacesReplyPacket
     {
         public string MessageName { get; set; } = "DirPlacesReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 35;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1368,6 +1417,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPeopleReplyPacket
     {
         public string MessageName { get; set; } = "DirPeopleReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 36;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1388,6 +1438,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirEventsReplyPacket
     {
         public string MessageName { get; set; } = "DirEventsReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 37;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1408,6 +1459,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirGroupsReplyPacket
     {
         public string MessageName { get; set; } = "DirGroupsReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 38;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1428,6 +1480,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirClassifiedQueryPacket
     {
         public string MessageName { get; set; } = "DirClassifiedQuery";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 39;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1448,6 +1501,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirClassifiedQueryBackendPacket
     {
         public string MessageName { get; set; } = "DirClassifiedQueryBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 40;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1468,6 +1522,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirClassifiedReplyPacket
     {
         public string MessageName { get; set; } = "DirClassifiedReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 41;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1488,6 +1543,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarClassifiedReplyPacket
     {
         public string MessageName { get; set; } = "AvatarClassifiedReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 42;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1508,6 +1564,7 @@ namespace Linkpoint.Protocol.Generated
     public class ClassifiedInfoRequestPacket
     {
         public string MessageName { get; set; } = "ClassifiedInfoRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 43;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1528,6 +1585,7 @@ namespace Linkpoint.Protocol.Generated
     public class ClassifiedInfoReplyPacket
     {
         public string MessageName { get; set; } = "ClassifiedInfoReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 44;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1548,6 +1606,7 @@ namespace Linkpoint.Protocol.Generated
     public class ClassifiedInfoUpdatePacket
     {
         public string MessageName { get; set; } = "ClassifiedInfoUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 45;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1568,6 +1627,7 @@ namespace Linkpoint.Protocol.Generated
     public class ClassifiedDeletePacket
     {
         public string MessageName { get; set; } = "ClassifiedDelete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 46;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1588,6 +1648,7 @@ namespace Linkpoint.Protocol.Generated
     public class ClassifiedGodDeletePacket
     {
         public string MessageName { get; set; } = "ClassifiedGodDelete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 47;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1608,6 +1669,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirLandQueryPacket
     {
         public string MessageName { get; set; } = "DirLandQuery";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 48;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1628,6 +1690,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirLandQueryBackendPacket
     {
         public string MessageName { get; set; } = "DirLandQueryBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 49;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1648,6 +1711,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirLandReplyPacket
     {
         public string MessageName { get; set; } = "DirLandReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 50;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1668,6 +1732,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPopularQueryPacket
     {
         public string MessageName { get; set; } = "DirPopularQuery";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 51;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1688,6 +1753,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPopularQueryBackendPacket
     {
         public string MessageName { get; set; } = "DirPopularQueryBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 52;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1708,6 +1774,7 @@ namespace Linkpoint.Protocol.Generated
     public class DirPopularReplyPacket
     {
         public string MessageName { get; set; } = "DirPopularReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 53;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1728,6 +1795,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelInfoRequestPacket
     {
         public string MessageName { get; set; } = "ParcelInfoRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 54;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1748,6 +1816,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelInfoReplyPacket
     {
         public string MessageName { get; set; } = "ParcelInfoReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 55;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1768,6 +1837,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelObjectOwnersRequestPacket
     {
         public string MessageName { get; set; } = "ParcelObjectOwnersRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 56;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1788,6 +1858,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelObjectOwnersReplyPacket
     {
         public string MessageName { get; set; } = "ParcelObjectOwnersReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 57;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1808,6 +1879,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupNoticesListRequestPacket
     {
         public string MessageName { get; set; } = "GroupNoticesListRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 58;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1828,6 +1900,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupNoticesListReplyPacket
     {
         public string MessageName { get; set; } = "GroupNoticesListReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 59;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1848,6 +1921,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupNoticeRequestPacket
     {
         public string MessageName { get; set; } = "GroupNoticeRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 60;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1868,6 +1942,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupNoticeAddPacket
     {
         public string MessageName { get; set; } = "GroupNoticeAdd";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 61;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1888,6 +1963,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportRequestPacket
     {
         public string MessageName { get; set; } = "TeleportRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 62;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1908,6 +1984,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportLocationRequestPacket
     {
         public string MessageName { get; set; } = "TeleportLocationRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 63;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1928,6 +2005,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportLocalPacket
     {
         public string MessageName { get; set; } = "TeleportLocal";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 64;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1948,6 +2026,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportLandmarkRequestPacket
     {
         public string MessageName { get; set; } = "TeleportLandmarkRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 65;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -1968,6 +2047,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportProgressPacket
     {
         public string MessageName { get; set; } = "TeleportProgress";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 66;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -1988,6 +2068,7 @@ namespace Linkpoint.Protocol.Generated
     public class DataHomeLocationRequestPacket
     {
         public string MessageName { get; set; } = "DataHomeLocationRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 67;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2008,6 +2089,7 @@ namespace Linkpoint.Protocol.Generated
     public class DataHomeLocationReplyPacket
     {
         public string MessageName { get; set; } = "DataHomeLocationReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 68;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2028,6 +2110,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportFinishPacket
     {
         public string MessageName { get; set; } = "TeleportFinish";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 69;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2048,6 +2131,7 @@ namespace Linkpoint.Protocol.Generated
     public class StartLurePacket
     {
         public string MessageName { get; set; } = "StartLure";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 70;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2068,6 +2152,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportLureRequestPacket
     {
         public string MessageName { get; set; } = "TeleportLureRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 71;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2088,6 +2173,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportCancelPacket
     {
         public string MessageName { get; set; } = "TeleportCancel";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 72;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2108,6 +2194,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportStartPacket
     {
         public string MessageName { get; set; } = "TeleportStart";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 73;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2128,6 +2215,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportFailedPacket
     {
         public string MessageName { get; set; } = "TeleportFailed";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 74;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2148,6 +2236,7 @@ namespace Linkpoint.Protocol.Generated
     public class UndoPacket
     {
         public string MessageName { get; set; } = "Undo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 75;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2168,6 +2257,7 @@ namespace Linkpoint.Protocol.Generated
     public class RedoPacket
     {
         public string MessageName { get; set; } = "Redo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 76;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2188,6 +2278,7 @@ namespace Linkpoint.Protocol.Generated
     public class UndoLandPacket
     {
         public string MessageName { get; set; } = "UndoLand";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 77;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2208,6 +2299,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentPausePacket
     {
         public string MessageName { get; set; } = "AgentPause";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 78;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2228,6 +2320,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentResumePacket
     {
         public string MessageName { get; set; } = "AgentResume";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 79;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2248,6 +2341,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentUpdatePacket
     {
         public string MessageName { get; set; } = "AgentUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 4;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -2268,6 +2362,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChatFromViewerPacket
     {
         public string MessageName { get; set; } = "ChatFromViewer";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 80;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2288,6 +2383,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentThrottlePacket
     {
         public string MessageName { get; set; } = "AgentThrottle";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 81;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2308,6 +2404,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentFOVPacket
     {
         public string MessageName { get; set; } = "AgentFOV";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 82;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2328,6 +2425,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentHeightWidthPacket
     {
         public string MessageName { get; set; } = "AgentHeightWidth";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 83;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2348,6 +2446,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentSetAppearancePacket
     {
         public string MessageName { get; set; } = "AgentSetAppearance";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 84;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2368,6 +2467,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentAnimationPacket
     {
         public string MessageName { get; set; } = "AgentAnimation";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 5;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -2388,6 +2488,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentRequestSitPacket
     {
         public string MessageName { get; set; } = "AgentRequestSit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 6;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -2408,6 +2509,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentSitPacket
     {
         public string MessageName { get; set; } = "AgentSit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 7;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -2428,6 +2530,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentQuitCopyPacket
     {
         public string MessageName { get; set; } = "AgentQuitCopy";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 85;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2448,6 +2551,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestImagePacket
     {
         public string MessageName { get; set; } = "RequestImage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 8;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -2468,6 +2572,7 @@ namespace Linkpoint.Protocol.Generated
     public class ImageNotInDatabasePacket
     {
         public string MessageName { get; set; } = "ImageNotInDatabase";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 86;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2488,6 +2593,7 @@ namespace Linkpoint.Protocol.Generated
     public class RebakeAvatarTexturesPacket
     {
         public string MessageName { get; set; } = "RebakeAvatarTextures";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 87;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2508,6 +2614,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetAlwaysRunPacket
     {
         public string MessageName { get; set; } = "SetAlwaysRun";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 88;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -2528,6 +2635,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectAddPacket
     {
         public string MessageName { get; set; } = "ObjectAdd";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 1;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -2548,6 +2656,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDeletePacket
     {
         public string MessageName { get; set; } = "ObjectDelete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 89;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2568,6 +2677,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDuplicatePacket
     {
         public string MessageName { get; set; } = "ObjectDuplicate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 90;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2588,6 +2698,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDuplicateOnRayPacket
     {
         public string MessageName { get; set; } = "ObjectDuplicateOnRay";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 91;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2608,6 +2719,7 @@ namespace Linkpoint.Protocol.Generated
     public class MultipleObjectUpdatePacket
     {
         public string MessageName { get; set; } = "MultipleObjectUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 2;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -2628,6 +2740,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestMultipleObjectsPacket
     {
         public string MessageName { get; set; } = "RequestMultipleObjects";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 3;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -2648,6 +2761,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectPositionPacket
     {
         public string MessageName { get; set; } = "ObjectPosition";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 4;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -2668,6 +2782,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectScalePacket
     {
         public string MessageName { get; set; } = "ObjectScale";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 92;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2688,6 +2803,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectRotationPacket
     {
         public string MessageName { get; set; } = "ObjectRotation";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 93;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2708,6 +2824,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectFlagUpdatePacket
     {
         public string MessageName { get; set; } = "ObjectFlagUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 94;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2728,6 +2845,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectClickActionPacket
     {
         public string MessageName { get; set; } = "ObjectClickAction";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 95;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2748,6 +2866,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectImagePacket
     {
         public string MessageName { get; set; } = "ObjectImage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 96;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2768,6 +2887,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectBypassModUpdatePacket
     {
         public string MessageName { get; set; } = "ObjectBypassModUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 431;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2788,6 +2908,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectMaterialPacket
     {
         public string MessageName { get; set; } = "ObjectMaterial";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 97;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2808,6 +2929,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectShapePacket
     {
         public string MessageName { get; set; } = "ObjectShape";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 98;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2828,6 +2950,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectExtraParamsPacket
     {
         public string MessageName { get; set; } = "ObjectExtraParams";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 99;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2848,6 +2971,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectOwnerPacket
     {
         public string MessageName { get; set; } = "ObjectOwner";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 100;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2868,6 +2992,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectGroupPacket
     {
         public string MessageName { get; set; } = "ObjectGroup";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 101;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2888,6 +3013,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectBuyPacket
     {
         public string MessageName { get; set; } = "ObjectBuy";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 102;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2908,6 +3034,7 @@ namespace Linkpoint.Protocol.Generated
     public class BuyObjectInventoryPacket
     {
         public string MessageName { get; set; } = "BuyObjectInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 103;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2928,6 +3055,7 @@ namespace Linkpoint.Protocol.Generated
     public class DerezContainerPacket
     {
         public string MessageName { get; set; } = "DerezContainer";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 104;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2948,6 +3076,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectPermissionsPacket
     {
         public string MessageName { get; set; } = "ObjectPermissions";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 105;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2968,6 +3097,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectSaleInfoPacket
     {
         public string MessageName { get; set; } = "ObjectSaleInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 106;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -2988,6 +3118,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectNamePacket
     {
         public string MessageName { get; set; } = "ObjectName";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 107;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3008,6 +3139,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDescriptionPacket
     {
         public string MessageName { get; set; } = "ObjectDescription";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 108;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3028,6 +3160,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectCategoryPacket
     {
         public string MessageName { get; set; } = "ObjectCategory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 109;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3048,6 +3181,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectSelectPacket
     {
         public string MessageName { get; set; } = "ObjectSelect";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 110;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3068,6 +3202,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDeselectPacket
     {
         public string MessageName { get; set; } = "ObjectDeselect";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 111;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3088,6 +3223,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectAttachPacket
     {
         public string MessageName { get; set; } = "ObjectAttach";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 112;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3108,6 +3244,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDetachPacket
     {
         public string MessageName { get; set; } = "ObjectDetach";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 113;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3128,6 +3265,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDropPacket
     {
         public string MessageName { get; set; } = "ObjectDrop";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 114;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3148,6 +3286,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectLinkPacket
     {
         public string MessageName { get; set; } = "ObjectLink";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 115;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3168,6 +3307,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDelinkPacket
     {
         public string MessageName { get; set; } = "ObjectDelink";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 116;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3188,6 +3328,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectGrabPacket
     {
         public string MessageName { get; set; } = "ObjectGrab";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 117;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3208,6 +3349,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectGrabUpdatePacket
     {
         public string MessageName { get; set; } = "ObjectGrabUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 118;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3228,6 +3370,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectDeGrabPacket
     {
         public string MessageName { get; set; } = "ObjectDeGrab";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 119;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3248,6 +3391,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectSpinStartPacket
     {
         public string MessageName { get; set; } = "ObjectSpinStart";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 120;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3268,6 +3412,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectSpinUpdatePacket
     {
         public string MessageName { get; set; } = "ObjectSpinUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 121;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3288,6 +3433,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectSpinStopPacket
     {
         public string MessageName { get; set; } = "ObjectSpinStop";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 122;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3308,6 +3454,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectExportSelectedPacket
     {
         public string MessageName { get; set; } = "ObjectExportSelected";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 123;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3328,6 +3475,7 @@ namespace Linkpoint.Protocol.Generated
     public class ModifyLandPacket
     {
         public string MessageName { get; set; } = "ModifyLand";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 124;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3348,6 +3496,7 @@ namespace Linkpoint.Protocol.Generated
     public class VelocityInterpolateOnPacket
     {
         public string MessageName { get; set; } = "VelocityInterpolateOn";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 125;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3368,6 +3517,7 @@ namespace Linkpoint.Protocol.Generated
     public class VelocityInterpolateOffPacket
     {
         public string MessageName { get; set; } = "VelocityInterpolateOff";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 126;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3388,6 +3538,7 @@ namespace Linkpoint.Protocol.Generated
     public class StateSavePacket
     {
         public string MessageName { get; set; } = "StateSave";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 127;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3408,6 +3559,7 @@ namespace Linkpoint.Protocol.Generated
     public class ReportAutosaveCrashPacket
     {
         public string MessageName { get; set; } = "ReportAutosaveCrash";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 128;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3428,6 +3580,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimWideDeletesPacket
     {
         public string MessageName { get; set; } = "SimWideDeletes";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 129;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3448,6 +3601,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestObjectPropertiesFamilyPacket
     {
         public string MessageName { get; set; } = "RequestObjectPropertiesFamily";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 5;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -3468,6 +3622,7 @@ namespace Linkpoint.Protocol.Generated
     public class TrackAgentPacket
     {
         public string MessageName { get; set; } = "TrackAgent";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 130;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3488,6 +3643,7 @@ namespace Linkpoint.Protocol.Generated
     public class ViewerStatsPacket
     {
         public string MessageName { get; set; } = "ViewerStats";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 131;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3508,6 +3664,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptAnswerYesPacket
     {
         public string MessageName { get; set; } = "ScriptAnswerYes";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 132;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3528,6 +3685,7 @@ namespace Linkpoint.Protocol.Generated
     public class UserReportPacket
     {
         public string MessageName { get; set; } = "UserReport";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 133;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3548,6 +3706,7 @@ namespace Linkpoint.Protocol.Generated
     public class AlertMessagePacket
     {
         public string MessageName { get; set; } = "AlertMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 134;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3568,6 +3727,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentAlertMessagePacket
     {
         public string MessageName { get; set; } = "AgentAlertMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 135;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3588,6 +3748,7 @@ namespace Linkpoint.Protocol.Generated
     public class MeanCollisionAlertPacket
     {
         public string MessageName { get; set; } = "MeanCollisionAlert";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 136;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3608,6 +3769,7 @@ namespace Linkpoint.Protocol.Generated
     public class ViewerFrozenMessagePacket
     {
         public string MessageName { get; set; } = "ViewerFrozenMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 137;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3628,6 +3790,7 @@ namespace Linkpoint.Protocol.Generated
     public class HealthMessagePacket
     {
         public string MessageName { get; set; } = "HealthMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 138;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3648,6 +3811,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChatFromSimulatorPacket
     {
         public string MessageName { get; set; } = "ChatFromSimulator";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 139;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3668,6 +3832,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimStatsPacket
     {
         public string MessageName { get; set; } = "SimStats";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 140;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3688,6 +3853,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestRegionInfoPacket
     {
         public string MessageName { get; set; } = "RequestRegionInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 141;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3708,6 +3874,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionInfoPacket
     {
         public string MessageName { get; set; } = "RegionInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 142;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3728,6 +3895,7 @@ namespace Linkpoint.Protocol.Generated
     public class GodUpdateRegionInfoPacket
     {
         public string MessageName { get; set; } = "GodUpdateRegionInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 143;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3748,6 +3916,7 @@ namespace Linkpoint.Protocol.Generated
     public class NearestLandingRegionRequestPacket
     {
         public string MessageName { get; set; } = "NearestLandingRegionRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 144;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3768,6 +3937,7 @@ namespace Linkpoint.Protocol.Generated
     public class NearestLandingRegionReplyPacket
     {
         public string MessageName { get; set; } = "NearestLandingRegionReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 145;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3788,6 +3958,7 @@ namespace Linkpoint.Protocol.Generated
     public class NearestLandingRegionUpdatedPacket
     {
         public string MessageName { get; set; } = "NearestLandingRegionUpdated";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 146;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3808,6 +3979,7 @@ namespace Linkpoint.Protocol.Generated
     public class TeleportLandingStatusChangedPacket
     {
         public string MessageName { get; set; } = "TeleportLandingStatusChanged";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 147;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -3828,6 +4000,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionHandshakePacket
     {
         public string MessageName { get; set; } = "RegionHandshake";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 148;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3848,6 +4021,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionHandshakeReplyPacket
     {
         public string MessageName { get; set; } = "RegionHandshakeReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 149;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -3868,6 +4042,7 @@ namespace Linkpoint.Protocol.Generated
     public class CoarseLocationUpdatePacket
     {
         public string MessageName { get; set; } = "CoarseLocationUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 6;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -3888,6 +4063,7 @@ namespace Linkpoint.Protocol.Generated
     public class ImageDataPacket
     {
         public string MessageName { get; set; } = "ImageData";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 9;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -3908,6 +4084,7 @@ namespace Linkpoint.Protocol.Generated
     public class ImagePacketPacket
     {
         public string MessageName { get; set; } = "ImagePacket";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 10;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -3928,6 +4105,7 @@ namespace Linkpoint.Protocol.Generated
     public class LayerDataPacket
     {
         public string MessageName { get; set; } = "LayerData";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 11;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -3948,6 +4126,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectUpdatePacket
     {
         public string MessageName { get; set; } = "ObjectUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 12;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -3968,6 +4147,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectUpdateCompressedPacket
     {
         public string MessageName { get; set; } = "ObjectUpdateCompressed";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 13;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -3988,6 +4168,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectUpdateCachedPacket
     {
         public string MessageName { get; set; } = "ObjectUpdateCached";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 14;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4008,6 +4189,7 @@ namespace Linkpoint.Protocol.Generated
     public class ImprovedTerseObjectUpdatePacket
     {
         public string MessageName { get; set; } = "ImprovedTerseObjectUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 15;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4028,6 +4210,7 @@ namespace Linkpoint.Protocol.Generated
     public class KillObjectPacket
     {
         public string MessageName { get; set; } = "KillObject";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 16;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4048,6 +4231,7 @@ namespace Linkpoint.Protocol.Generated
     public class CrossedRegionPacket
     {
         public string MessageName { get; set; } = "CrossedRegion";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 7;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -4068,6 +4252,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimulatorViewerTimeMessagePacket
     {
         public string MessageName { get; set; } = "SimulatorViewerTimeMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 150;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4088,6 +4273,7 @@ namespace Linkpoint.Protocol.Generated
     public class EnableSimulatorPacket
     {
         public string MessageName { get; set; } = "EnableSimulator";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 151;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4108,6 +4294,7 @@ namespace Linkpoint.Protocol.Generated
     public class DisableSimulatorPacket
     {
         public string MessageName { get; set; } = "DisableSimulator";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 152;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4128,6 +4315,7 @@ namespace Linkpoint.Protocol.Generated
     public class ConfirmEnableSimulatorPacket
     {
         public string MessageName { get; set; } = "ConfirmEnableSimulator";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 8;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -4148,6 +4336,7 @@ namespace Linkpoint.Protocol.Generated
     public class TransferRequestPacket
     {
         public string MessageName { get; set; } = "TransferRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 153;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4168,6 +4357,7 @@ namespace Linkpoint.Protocol.Generated
     public class TransferInfoPacket
     {
         public string MessageName { get; set; } = "TransferInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 154;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4188,6 +4378,7 @@ namespace Linkpoint.Protocol.Generated
     public class TransferPacketPacket
     {
         public string MessageName { get; set; } = "TransferPacket";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 17;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4208,6 +4399,7 @@ namespace Linkpoint.Protocol.Generated
     public class TransferAbortPacket
     {
         public string MessageName { get; set; } = "TransferAbort";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 155;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4228,6 +4420,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestXferPacket
     {
         public string MessageName { get; set; } = "RequestXfer";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 156;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4248,6 +4441,7 @@ namespace Linkpoint.Protocol.Generated
     public class SendXferPacketPacket
     {
         public string MessageName { get; set; } = "SendXferPacket";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 18;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4268,6 +4462,7 @@ namespace Linkpoint.Protocol.Generated
     public class ConfirmXferPacketPacket
     {
         public string MessageName { get; set; } = "ConfirmXferPacket";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 19;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4288,6 +4483,7 @@ namespace Linkpoint.Protocol.Generated
     public class AbortXferPacket
     {
         public string MessageName { get; set; } = "AbortXfer";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 157;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4308,6 +4504,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarAnimationPacket
     {
         public string MessageName { get; set; } = "AvatarAnimation";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 20;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -4328,6 +4525,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarAppearancePacket
     {
         public string MessageName { get; set; } = "AvatarAppearance";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 158;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4348,6 +4546,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarSitResponsePacket
     {
         public string MessageName { get; set; } = "AvatarSitResponse";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 21;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -4368,6 +4567,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetFollowCamPropertiesPacket
     {
         public string MessageName { get; set; } = "SetFollowCamProperties";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 159;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4388,6 +4588,7 @@ namespace Linkpoint.Protocol.Generated
     public class ClearFollowCamPropertiesPacket
     {
         public string MessageName { get; set; } = "ClearFollowCamProperties";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 160;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4408,6 +4609,7 @@ namespace Linkpoint.Protocol.Generated
     public class CameraConstraintPacket
     {
         public string MessageName { get; set; } = "CameraConstraint";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 22;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -4428,6 +4630,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectPropertiesPacket
     {
         public string MessageName { get; set; } = "ObjectProperties";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 9;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -4448,6 +4651,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectPropertiesFamilyPacket
     {
         public string MessageName { get; set; } = "ObjectPropertiesFamily";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 10;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -4468,6 +4672,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestPayPricePacket
     {
         public string MessageName { get; set; } = "RequestPayPrice";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 161;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4488,6 +4693,7 @@ namespace Linkpoint.Protocol.Generated
     public class PayPriceReplyPacket
     {
         public string MessageName { get; set; } = "PayPriceReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 162;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4508,6 +4714,7 @@ namespace Linkpoint.Protocol.Generated
     public class KickUserPacket
     {
         public string MessageName { get; set; } = "KickUser";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 163;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4528,6 +4735,7 @@ namespace Linkpoint.Protocol.Generated
     public class KickUserAckPacket
     {
         public string MessageName { get; set; } = "KickUserAck";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 164;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4548,6 +4756,7 @@ namespace Linkpoint.Protocol.Generated
     public class GodKickUserPacket
     {
         public string MessageName { get; set; } = "GodKickUser";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 165;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4568,6 +4777,7 @@ namespace Linkpoint.Protocol.Generated
     public class SystemKickUserPacket
     {
         public string MessageName { get; set; } = "SystemKickUser";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 166;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4588,6 +4798,7 @@ namespace Linkpoint.Protocol.Generated
     public class EjectUserPacket
     {
         public string MessageName { get; set; } = "EjectUser";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 167;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4608,6 +4819,7 @@ namespace Linkpoint.Protocol.Generated
     public class FreezeUserPacket
     {
         public string MessageName { get; set; } = "FreezeUser";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 168;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4628,6 +4840,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPropertiesRequestPacket
     {
         public string MessageName { get; set; } = "AvatarPropertiesRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 169;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4648,6 +4861,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPropertiesRequestBackendPacket
     {
         public string MessageName { get; set; } = "AvatarPropertiesRequestBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 170;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4668,6 +4882,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPropertiesReplyPacket
     {
         public string MessageName { get; set; } = "AvatarPropertiesReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 171;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4688,6 +4903,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarInterestsReplyPacket
     {
         public string MessageName { get; set; } = "AvatarInterestsReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 172;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4708,6 +4924,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarGroupsReplyPacket
     {
         public string MessageName { get; set; } = "AvatarGroupsReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 173;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4728,6 +4945,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPropertiesUpdatePacket
     {
         public string MessageName { get; set; } = "AvatarPropertiesUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 174;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4748,6 +4966,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarInterestsUpdatePacket
     {
         public string MessageName { get; set; } = "AvatarInterestsUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 175;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -4768,6 +4987,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarNotesReplyPacket
     {
         public string MessageName { get; set; } = "AvatarNotesReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 176;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4788,6 +5008,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarNotesUpdatePacket
     {
         public string MessageName { get; set; } = "AvatarNotesUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 177;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4808,6 +5029,7 @@ namespace Linkpoint.Protocol.Generated
     public class AvatarPicksReplyPacket
     {
         public string MessageName { get; set; } = "AvatarPicksReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 178;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4828,6 +5050,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventInfoRequestPacket
     {
         public string MessageName { get; set; } = "EventInfoRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 179;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4848,6 +5071,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventInfoReplyPacket
     {
         public string MessageName { get; set; } = "EventInfoReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 180;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4868,6 +5092,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventNotificationAddRequestPacket
     {
         public string MessageName { get; set; } = "EventNotificationAddRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 181;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4888,6 +5113,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventNotificationRemoveRequestPacket
     {
         public string MessageName { get; set; } = "EventNotificationRemoveRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 182;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4908,6 +5134,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventGodDeletePacket
     {
         public string MessageName { get; set; } = "EventGodDelete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 183;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4928,6 +5155,7 @@ namespace Linkpoint.Protocol.Generated
     public class PickInfoReplyPacket
     {
         public string MessageName { get; set; } = "PickInfoReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 184;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4948,6 +5176,7 @@ namespace Linkpoint.Protocol.Generated
     public class PickInfoUpdatePacket
     {
         public string MessageName { get; set; } = "PickInfoUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 185;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4968,6 +5197,7 @@ namespace Linkpoint.Protocol.Generated
     public class PickDeletePacket
     {
         public string MessageName { get; set; } = "PickDelete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 186;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -4988,6 +5218,7 @@ namespace Linkpoint.Protocol.Generated
     public class PickGodDeletePacket
     {
         public string MessageName { get; set; } = "PickGodDelete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 187;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5008,6 +5239,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptQuestionPacket
     {
         public string MessageName { get; set; } = "ScriptQuestion";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 188;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5028,6 +5260,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptControlChangePacket
     {
         public string MessageName { get; set; } = "ScriptControlChange";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 189;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5048,6 +5281,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptDialogPacket
     {
         public string MessageName { get; set; } = "ScriptDialog";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 190;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5068,6 +5302,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptDialogReplyPacket
     {
         public string MessageName { get; set; } = "ScriptDialogReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 191;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5088,6 +5323,7 @@ namespace Linkpoint.Protocol.Generated
     public class ForceScriptControlReleasePacket
     {
         public string MessageName { get; set; } = "ForceScriptControlRelease";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 192;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5108,6 +5344,7 @@ namespace Linkpoint.Protocol.Generated
     public class RevokePermissionsPacket
     {
         public string MessageName { get; set; } = "RevokePermissions";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 193;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5128,6 +5365,7 @@ namespace Linkpoint.Protocol.Generated
     public class LoadURLPacket
     {
         public string MessageName { get; set; } = "LoadURL";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 194;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5148,6 +5386,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptTeleportRequestPacket
     {
         public string MessageName { get; set; } = "ScriptTeleportRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 195;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5168,6 +5407,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelOverlayPacket
     {
         public string MessageName { get; set; } = "ParcelOverlay";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 196;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5188,6 +5428,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelPropertiesRequestPacket
     {
         public string MessageName { get; set; } = "ParcelPropertiesRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 11;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -5208,6 +5449,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelPropertiesRequestByIDPacket
     {
         public string MessageName { get; set; } = "ParcelPropertiesRequestByID";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 197;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5228,6 +5470,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelPropertiesPacket
     {
         public string MessageName { get; set; } = "ParcelProperties";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 23;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -5248,6 +5491,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelPropertiesUpdatePacket
     {
         public string MessageName { get; set; } = "ParcelPropertiesUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 198;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5268,6 +5512,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelReturnObjectsPacket
     {
         public string MessageName { get; set; } = "ParcelReturnObjects";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 199;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5288,6 +5533,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelSetOtherCleanTimePacket
     {
         public string MessageName { get; set; } = "ParcelSetOtherCleanTime";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 200;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5308,6 +5554,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelDisableObjectsPacket
     {
         public string MessageName { get; set; } = "ParcelDisableObjects";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 201;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5328,6 +5575,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelSelectObjectsPacket
     {
         public string MessageName { get; set; } = "ParcelSelectObjects";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 202;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5348,6 +5596,7 @@ namespace Linkpoint.Protocol.Generated
     public class EstateCovenantRequestPacket
     {
         public string MessageName { get; set; } = "EstateCovenantRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 203;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5368,6 +5617,7 @@ namespace Linkpoint.Protocol.Generated
     public class EstateCovenantReplyPacket
     {
         public string MessageName { get; set; } = "EstateCovenantReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 204;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5388,6 +5638,7 @@ namespace Linkpoint.Protocol.Generated
     public class ForceObjectSelectPacket
     {
         public string MessageName { get; set; } = "ForceObjectSelect";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 205;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5408,6 +5659,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelBuyPassPacket
     {
         public string MessageName { get; set; } = "ParcelBuyPass";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 206;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5428,6 +5680,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelDeedToGroupPacket
     {
         public string MessageName { get; set; } = "ParcelDeedToGroup";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 207;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5448,6 +5701,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelReclaimPacket
     {
         public string MessageName { get; set; } = "ParcelReclaim";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 208;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5468,6 +5722,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelClaimPacket
     {
         public string MessageName { get; set; } = "ParcelClaim";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 209;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5488,6 +5743,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelJoinPacket
     {
         public string MessageName { get; set; } = "ParcelJoin";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 210;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5508,6 +5764,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelDividePacket
     {
         public string MessageName { get; set; } = "ParcelDivide";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 211;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5528,6 +5785,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelReleasePacket
     {
         public string MessageName { get; set; } = "ParcelRelease";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 212;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5548,6 +5806,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelBuyPacket
     {
         public string MessageName { get; set; } = "ParcelBuy";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 213;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5568,6 +5827,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelGodForceOwnerPacket
     {
         public string MessageName { get; set; } = "ParcelGodForceOwner";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 214;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5588,6 +5848,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelAccessListRequestPacket
     {
         public string MessageName { get; set; } = "ParcelAccessListRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 215;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5608,6 +5869,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelAccessListReplyPacket
     {
         public string MessageName { get; set; } = "ParcelAccessListReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 216;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5628,6 +5890,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelAccessListUpdatePacket
     {
         public string MessageName { get; set; } = "ParcelAccessListUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 217;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5648,6 +5911,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelDwellRequestPacket
     {
         public string MessageName { get; set; } = "ParcelDwellRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 218;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5668,6 +5932,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelDwellReplyPacket
     {
         public string MessageName { get; set; } = "ParcelDwellReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 219;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5688,6 +5953,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestParcelTransferPacket
     {
         public string MessageName { get; set; } = "RequestParcelTransfer";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 220;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5708,6 +5974,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateParcelPacket
     {
         public string MessageName { get; set; } = "UpdateParcel";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 221;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5728,6 +5995,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveParcelPacket
     {
         public string MessageName { get; set; } = "RemoveParcel";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 222;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5748,6 +6016,7 @@ namespace Linkpoint.Protocol.Generated
     public class MergeParcelPacket
     {
         public string MessageName { get; set; } = "MergeParcel";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 223;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5768,6 +6037,7 @@ namespace Linkpoint.Protocol.Generated
     public class LogParcelChangesPacket
     {
         public string MessageName { get; set; } = "LogParcelChanges";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 224;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -5788,6 +6058,7 @@ namespace Linkpoint.Protocol.Generated
     public class CheckParcelSalesPacket
     {
         public string MessageName { get; set; } = "CheckParcelSales";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 225;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5808,6 +6079,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelSalesPacket
     {
         public string MessageName { get; set; } = "ParcelSales";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 226;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5828,6 +6100,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelGodMarkAsContentPacket
     {
         public string MessageName { get; set; } = "ParcelGodMarkAsContent";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 227;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5848,6 +6121,7 @@ namespace Linkpoint.Protocol.Generated
     public class ViewerStartAuctionPacket
     {
         public string MessageName { get; set; } = "ViewerStartAuction";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 228;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5868,6 +6142,7 @@ namespace Linkpoint.Protocol.Generated
     public class StartAuctionPacket
     {
         public string MessageName { get; set; } = "StartAuction";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 229;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5888,6 +6163,7 @@ namespace Linkpoint.Protocol.Generated
     public class ConfirmAuctionStartPacket
     {
         public string MessageName { get; set; } = "ConfirmAuctionStart";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 230;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5908,6 +6184,7 @@ namespace Linkpoint.Protocol.Generated
     public class CompleteAuctionPacket
     {
         public string MessageName { get; set; } = "CompleteAuction";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 231;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5928,6 +6205,7 @@ namespace Linkpoint.Protocol.Generated
     public class CancelAuctionPacket
     {
         public string MessageName { get; set; } = "CancelAuction";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 232;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5948,6 +6226,7 @@ namespace Linkpoint.Protocol.Generated
     public class CheckParcelAuctionsPacket
     {
         public string MessageName { get; set; } = "CheckParcelAuctions";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 233;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5968,6 +6247,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelAuctionsPacket
     {
         public string MessageName { get; set; } = "ParcelAuctions";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 234;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -5988,6 +6268,7 @@ namespace Linkpoint.Protocol.Generated
     public class UUIDNameRequestPacket
     {
         public string MessageName { get; set; } = "UUIDNameRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 235;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6008,6 +6289,7 @@ namespace Linkpoint.Protocol.Generated
     public class UUIDNameReplyPacket
     {
         public string MessageName { get; set; } = "UUIDNameReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 236;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6028,6 +6310,7 @@ namespace Linkpoint.Protocol.Generated
     public class UUIDGroupNameRequestPacket
     {
         public string MessageName { get; set; } = "UUIDGroupNameRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 237;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6048,6 +6331,7 @@ namespace Linkpoint.Protocol.Generated
     public class UUIDGroupNameReplyPacket
     {
         public string MessageName { get; set; } = "UUIDGroupNameReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 238;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6068,6 +6352,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChatPassPacket
     {
         public string MessageName { get; set; } = "ChatPass";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 239;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6088,6 +6373,7 @@ namespace Linkpoint.Protocol.Generated
     public class EdgeDataPacketPacket
     {
         public string MessageName { get; set; } = "EdgeDataPacket";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 24;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -6108,6 +6394,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimStatusPacket
     {
         public string MessageName { get; set; } = "SimStatus";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 12;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -6128,6 +6415,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChildAgentUpdatePacket
     {
         public string MessageName { get; set; } = "ChildAgentUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 25;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -6148,6 +6436,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChildAgentAlivePacket
     {
         public string MessageName { get; set; } = "ChildAgentAlive";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 26;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -6168,6 +6457,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChildAgentPositionUpdatePacket
     {
         public string MessageName { get; set; } = "ChildAgentPositionUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 27;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -6188,6 +6478,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChildAgentDyingPacket
     {
         public string MessageName { get; set; } = "ChildAgentDying";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 240;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6208,6 +6499,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChildAgentUnknownPacket
     {
         public string MessageName { get; set; } = "ChildAgentUnknown";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 241;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6228,6 +6520,7 @@ namespace Linkpoint.Protocol.Generated
     public class AtomicPassObjectPacket
     {
         public string MessageName { get; set; } = "AtomicPassObject";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 28;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -6248,6 +6541,7 @@ namespace Linkpoint.Protocol.Generated
     public class KillChildAgentsPacket
     {
         public string MessageName { get; set; } = "KillChildAgents";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 242;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6268,6 +6562,7 @@ namespace Linkpoint.Protocol.Generated
     public class GetScriptRunningPacket
     {
         public string MessageName { get; set; } = "GetScriptRunning";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 243;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6288,6 +6583,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptRunningReplyPacket
     {
         public string MessageName { get; set; } = "ScriptRunningReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 244;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6308,6 +6604,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetScriptRunningPacket
     {
         public string MessageName { get; set; } = "SetScriptRunning";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 245;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6328,6 +6625,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptResetPacket
     {
         public string MessageName { get; set; } = "ScriptReset";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 246;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6348,6 +6646,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptSensorRequestPacket
     {
         public string MessageName { get; set; } = "ScriptSensorRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 247;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6368,6 +6667,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptSensorReplyPacket
     {
         public string MessageName { get; set; } = "ScriptSensorReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 248;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6388,6 +6688,7 @@ namespace Linkpoint.Protocol.Generated
     public class CompleteAgentMovementPacket
     {
         public string MessageName { get; set; } = "CompleteAgentMovement";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 249;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6408,6 +6709,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentMovementCompletePacket
     {
         public string MessageName { get; set; } = "AgentMovementComplete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 250;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6428,6 +6730,7 @@ namespace Linkpoint.Protocol.Generated
     public class DataServerLogoutPacket
     {
         public string MessageName { get; set; } = "DataServerLogout";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 251;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6448,6 +6751,7 @@ namespace Linkpoint.Protocol.Generated
     public class LogoutRequestPacket
     {
         public string MessageName { get; set; } = "LogoutRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 252;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6468,6 +6772,7 @@ namespace Linkpoint.Protocol.Generated
     public class LogoutReplyPacket
     {
         public string MessageName { get; set; } = "LogoutReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 253;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6488,6 +6793,7 @@ namespace Linkpoint.Protocol.Generated
     public class ImprovedInstantMessagePacket
     {
         public string MessageName { get; set; } = "ImprovedInstantMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 254;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6508,6 +6814,7 @@ namespace Linkpoint.Protocol.Generated
     public class RetrieveInstantMessagesPacket
     {
         public string MessageName { get; set; } = "RetrieveInstantMessages";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 255;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6528,6 +6835,7 @@ namespace Linkpoint.Protocol.Generated
     public class FindAgentPacket
     {
         public string MessageName { get; set; } = "FindAgent";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 256;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6548,6 +6856,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestGodlikePowersPacket
     {
         public string MessageName { get; set; } = "RequestGodlikePowers";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 257;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6568,6 +6877,7 @@ namespace Linkpoint.Protocol.Generated
     public class GrantGodlikePowersPacket
     {
         public string MessageName { get; set; } = "GrantGodlikePowers";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 258;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6588,6 +6898,7 @@ namespace Linkpoint.Protocol.Generated
     public class GodlikeMessagePacket
     {
         public string MessageName { get; set; } = "GodlikeMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 259;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6608,6 +6919,7 @@ namespace Linkpoint.Protocol.Generated
     public class EstateOwnerMessagePacket
     {
         public string MessageName { get; set; } = "EstateOwnerMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 260;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6628,6 +6940,7 @@ namespace Linkpoint.Protocol.Generated
     public class GenericMessagePacket
     {
         public string MessageName { get; set; } = "GenericMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 261;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6648,6 +6961,7 @@ namespace Linkpoint.Protocol.Generated
     public class GenericStreamingMessagePacket
     {
         public string MessageName { get; set; } = "GenericStreamingMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 31;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -6668,6 +6982,7 @@ namespace Linkpoint.Protocol.Generated
     public class LargeGenericMessagePacket
     {
         public string MessageName { get; set; } = "LargeGenericMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 430;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6688,6 +7003,7 @@ namespace Linkpoint.Protocol.Generated
     public class MuteListRequestPacket
     {
         public string MessageName { get; set; } = "MuteListRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 262;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6708,6 +7024,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateMuteListEntryPacket
     {
         public string MessageName { get; set; } = "UpdateMuteListEntry";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 263;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6728,6 +7045,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveMuteListEntryPacket
     {
         public string MessageName { get; set; } = "RemoveMuteListEntry";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 264;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6748,6 +7066,7 @@ namespace Linkpoint.Protocol.Generated
     public class CopyInventoryFromNotecardPacket
     {
         public string MessageName { get; set; } = "CopyInventoryFromNotecard";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 265;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6768,6 +7087,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateInventoryItemPacket
     {
         public string MessageName { get; set; } = "UpdateInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 266;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6788,6 +7108,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateCreateInventoryItemPacket
     {
         public string MessageName { get; set; } = "UpdateCreateInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 267;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6808,6 +7129,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoveInventoryItemPacket
     {
         public string MessageName { get; set; } = "MoveInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 268;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6828,6 +7150,7 @@ namespace Linkpoint.Protocol.Generated
     public class CopyInventoryItemPacket
     {
         public string MessageName { get; set; } = "CopyInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 269;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6848,6 +7171,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveInventoryItemPacket
     {
         public string MessageName { get; set; } = "RemoveInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 270;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6868,6 +7192,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChangeInventoryItemFlagsPacket
     {
         public string MessageName { get; set; } = "ChangeInventoryItemFlags";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 271;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6888,6 +7213,7 @@ namespace Linkpoint.Protocol.Generated
     public class SaveAssetIntoInventoryPacket
     {
         public string MessageName { get; set; } = "SaveAssetIntoInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 272;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6908,6 +7234,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateInventoryFolderPacket
     {
         public string MessageName { get; set; } = "CreateInventoryFolder";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 273;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6928,6 +7255,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateInventoryFolderPacket
     {
         public string MessageName { get; set; } = "UpdateInventoryFolder";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 274;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6948,6 +7276,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoveInventoryFolderPacket
     {
         public string MessageName { get; set; } = "MoveInventoryFolder";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 275;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -6968,6 +7297,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveInventoryFolderPacket
     {
         public string MessageName { get; set; } = "RemoveInventoryFolder";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 276;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -6988,6 +7318,7 @@ namespace Linkpoint.Protocol.Generated
     public class FetchInventoryDescendentsPacket
     {
         public string MessageName { get; set; } = "FetchInventoryDescendents";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 277;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7008,6 +7339,7 @@ namespace Linkpoint.Protocol.Generated
     public class InventoryDescendentsPacket
     {
         public string MessageName { get; set; } = "InventoryDescendents";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 278;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7028,6 +7360,7 @@ namespace Linkpoint.Protocol.Generated
     public class FetchInventoryPacket
     {
         public string MessageName { get; set; } = "FetchInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 279;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7048,6 +7381,7 @@ namespace Linkpoint.Protocol.Generated
     public class FetchInventoryReplyPacket
     {
         public string MessageName { get; set; } = "FetchInventoryReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 280;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7068,6 +7402,7 @@ namespace Linkpoint.Protocol.Generated
     public class BulkUpdateInventoryPacket
     {
         public string MessageName { get; set; } = "BulkUpdateInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 281;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7088,6 +7423,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestInventoryAssetPacket
     {
         public string MessageName { get; set; } = "RequestInventoryAsset";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 282;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7108,6 +7444,7 @@ namespace Linkpoint.Protocol.Generated
     public class InventoryAssetResponsePacket
     {
         public string MessageName { get; set; } = "InventoryAssetResponse";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 283;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7128,6 +7465,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveInventoryObjectsPacket
     {
         public string MessageName { get; set; } = "RemoveInventoryObjects";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 284;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7148,6 +7486,7 @@ namespace Linkpoint.Protocol.Generated
     public class PurgeInventoryDescendentsPacket
     {
         public string MessageName { get; set; } = "PurgeInventoryDescendents";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 285;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7168,6 +7507,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateTaskInventoryPacket
     {
         public string MessageName { get; set; } = "UpdateTaskInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 286;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7188,6 +7528,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveTaskInventoryPacket
     {
         public string MessageName { get; set; } = "RemoveTaskInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 287;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7208,6 +7549,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoveTaskInventoryPacket
     {
         public string MessageName { get; set; } = "MoveTaskInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 288;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7228,6 +7570,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestTaskInventoryPacket
     {
         public string MessageName { get; set; } = "RequestTaskInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 289;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7248,6 +7591,7 @@ namespace Linkpoint.Protocol.Generated
     public class ReplyTaskInventoryPacket
     {
         public string MessageName { get; set; } = "ReplyTaskInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 290;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7268,6 +7612,7 @@ namespace Linkpoint.Protocol.Generated
     public class DeRezObjectPacket
     {
         public string MessageName { get; set; } = "DeRezObject";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 291;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7288,6 +7633,7 @@ namespace Linkpoint.Protocol.Generated
     public class DeRezAckPacket
     {
         public string MessageName { get; set; } = "DeRezAck";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 292;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7308,6 +7654,7 @@ namespace Linkpoint.Protocol.Generated
     public class RezObjectPacket
     {
         public string MessageName { get; set; } = "RezObject";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 293;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7328,6 +7675,7 @@ namespace Linkpoint.Protocol.Generated
     public class RezObjectFromNotecardPacket
     {
         public string MessageName { get; set; } = "RezObjectFromNotecard";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 294;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7348,6 +7696,7 @@ namespace Linkpoint.Protocol.Generated
     public class TransferInventoryPacket
     {
         public string MessageName { get; set; } = "TransferInventory";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 295;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7368,6 +7717,7 @@ namespace Linkpoint.Protocol.Generated
     public class TransferInventoryAckPacket
     {
         public string MessageName { get; set; } = "TransferInventoryAck";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 296;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7388,6 +7738,7 @@ namespace Linkpoint.Protocol.Generated
     public class AcceptFriendshipPacket
     {
         public string MessageName { get; set; } = "AcceptFriendship";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 297;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7408,6 +7759,7 @@ namespace Linkpoint.Protocol.Generated
     public class DeclineFriendshipPacket
     {
         public string MessageName { get; set; } = "DeclineFriendship";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 298;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7428,6 +7780,7 @@ namespace Linkpoint.Protocol.Generated
     public class FormFriendshipPacket
     {
         public string MessageName { get; set; } = "FormFriendship";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 299;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7448,6 +7801,7 @@ namespace Linkpoint.Protocol.Generated
     public class TerminateFriendshipPacket
     {
         public string MessageName { get; set; } = "TerminateFriendship";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 300;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7468,6 +7822,7 @@ namespace Linkpoint.Protocol.Generated
     public class OfferCallingCardPacket
     {
         public string MessageName { get; set; } = "OfferCallingCard";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 301;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7488,6 +7843,7 @@ namespace Linkpoint.Protocol.Generated
     public class AcceptCallingCardPacket
     {
         public string MessageName { get; set; } = "AcceptCallingCard";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 302;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7508,6 +7864,7 @@ namespace Linkpoint.Protocol.Generated
     public class DeclineCallingCardPacket
     {
         public string MessageName { get; set; } = "DeclineCallingCard";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 303;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7528,6 +7885,7 @@ namespace Linkpoint.Protocol.Generated
     public class RezScriptPacket
     {
         public string MessageName { get; set; } = "RezScript";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 304;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7548,6 +7906,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateInventoryItemPacket
     {
         public string MessageName { get; set; } = "CreateInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 305;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7568,6 +7927,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateLandmarkForEventPacket
     {
         public string MessageName { get; set; } = "CreateLandmarkForEvent";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 306;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7588,6 +7948,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventLocationRequestPacket
     {
         public string MessageName { get; set; } = "EventLocationRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 307;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7608,6 +7969,7 @@ namespace Linkpoint.Protocol.Generated
     public class EventLocationReplyPacket
     {
         public string MessageName { get; set; } = "EventLocationReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 308;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7628,6 +7990,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionHandleRequestPacket
     {
         public string MessageName { get; set; } = "RegionHandleRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 309;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7648,6 +8011,7 @@ namespace Linkpoint.Protocol.Generated
     public class RegionIDAndHandleReplyPacket
     {
         public string MessageName { get; set; } = "RegionIDAndHandleReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 310;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7668,6 +8032,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoneyTransferRequestPacket
     {
         public string MessageName { get; set; } = "MoneyTransferRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 311;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7688,6 +8053,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoneyTransferBackendPacket
     {
         public string MessageName { get; set; } = "MoneyTransferBackend";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 312;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7708,6 +8074,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoneyBalanceRequestPacket
     {
         public string MessageName { get; set; } = "MoneyBalanceRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 313;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7728,6 +8095,7 @@ namespace Linkpoint.Protocol.Generated
     public class MoneyBalanceReplyPacket
     {
         public string MessageName { get; set; } = "MoneyBalanceReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 314;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7748,6 +8116,7 @@ namespace Linkpoint.Protocol.Generated
     public class RoutedMoneyBalanceReplyPacket
     {
         public string MessageName { get; set; } = "RoutedMoneyBalanceReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 315;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7768,6 +8137,7 @@ namespace Linkpoint.Protocol.Generated
     public class ActivateGesturesPacket
     {
         public string MessageName { get; set; } = "ActivateGestures";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 316;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7788,6 +8158,7 @@ namespace Linkpoint.Protocol.Generated
     public class DeactivateGesturesPacket
     {
         public string MessageName { get; set; } = "DeactivateGestures";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 317;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7808,6 +8179,7 @@ namespace Linkpoint.Protocol.Generated
     public class MuteListUpdatePacket
     {
         public string MessageName { get; set; } = "MuteListUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 318;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7828,6 +8200,7 @@ namespace Linkpoint.Protocol.Generated
     public class UseCachedMuteListPacket
     {
         public string MessageName { get; set; } = "UseCachedMuteList";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 319;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7848,6 +8221,7 @@ namespace Linkpoint.Protocol.Generated
     public class GrantUserRightsPacket
     {
         public string MessageName { get; set; } = "GrantUserRights";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 320;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7868,6 +8242,7 @@ namespace Linkpoint.Protocol.Generated
     public class ChangeUserRightsPacket
     {
         public string MessageName { get; set; } = "ChangeUserRights";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 321;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7888,6 +8263,7 @@ namespace Linkpoint.Protocol.Generated
     public class OnlineNotificationPacket
     {
         public string MessageName { get; set; } = "OnlineNotification";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 322;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7908,6 +8284,7 @@ namespace Linkpoint.Protocol.Generated
     public class OfflineNotificationPacket
     {
         public string MessageName { get; set; } = "OfflineNotification";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 323;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7928,6 +8305,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetStartLocationRequestPacket
     {
         public string MessageName { get; set; } = "SetStartLocationRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 324;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7948,6 +8326,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetStartLocationPacket
     {
         public string MessageName { get; set; } = "SetStartLocation";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 325;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -7968,6 +8347,7 @@ namespace Linkpoint.Protocol.Generated
     public class NetTestPacket
     {
         public string MessageName { get; set; } = "NetTest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 326;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -7988,6 +8368,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetCPURatioPacket
     {
         public string MessageName { get; set; } = "SetCPURatio";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 327;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8008,6 +8389,7 @@ namespace Linkpoint.Protocol.Generated
     public class SimCrashedPacket
     {
         public string MessageName { get; set; } = "SimCrashed";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 328;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8028,6 +8410,7 @@ namespace Linkpoint.Protocol.Generated
     public class NameValuePairPacket
     {
         public string MessageName { get; set; } = "NameValuePair";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 329;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8048,6 +8431,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveNameValuePairPacket
     {
         public string MessageName { get; set; } = "RemoveNameValuePair";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 330;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8068,6 +8452,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateAttachmentPacket
     {
         public string MessageName { get; set; } = "UpdateAttachment";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 331;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8088,6 +8473,7 @@ namespace Linkpoint.Protocol.Generated
     public class RemoveAttachmentPacket
     {
         public string MessageName { get; set; } = "RemoveAttachment";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 332;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8108,6 +8494,7 @@ namespace Linkpoint.Protocol.Generated
     public class SoundTriggerPacket
     {
         public string MessageName { get; set; } = "SoundTrigger";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 29;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -8128,6 +8515,7 @@ namespace Linkpoint.Protocol.Generated
     public class AttachedSoundPacket
     {
         public string MessageName { get; set; } = "AttachedSound";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 13;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -8148,6 +8536,7 @@ namespace Linkpoint.Protocol.Generated
     public class AttachedSoundGainChangePacket
     {
         public string MessageName { get; set; } = "AttachedSoundGainChange";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 14;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -8168,6 +8557,7 @@ namespace Linkpoint.Protocol.Generated
     public class PreloadSoundPacket
     {
         public string MessageName { get; set; } = "PreloadSound";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 15;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -8188,6 +8578,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectAnimationPacket
     {
         public string MessageName { get; set; } = "ObjectAnimation";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 30;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = false;
@@ -8208,6 +8599,7 @@ namespace Linkpoint.Protocol.Generated
     public class AssetUploadRequestPacket
     {
         public string MessageName { get; set; } = "AssetUploadRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 333;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8228,6 +8620,7 @@ namespace Linkpoint.Protocol.Generated
     public class AssetUploadCompletePacket
     {
         public string MessageName { get; set; } = "AssetUploadComplete";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 334;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8248,6 +8641,7 @@ namespace Linkpoint.Protocol.Generated
     public class EmailMessageRequestPacket
     {
         public string MessageName { get; set; } = "EmailMessageRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 335;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8268,6 +8662,7 @@ namespace Linkpoint.Protocol.Generated
     public class EmailMessageReplyPacket
     {
         public string MessageName { get; set; } = "EmailMessageReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 336;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8288,6 +8683,7 @@ namespace Linkpoint.Protocol.Generated
     public class InternalScriptMailPacket
     {
         public string MessageName { get; set; } = "InternalScriptMail";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 16;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = false;
@@ -8308,6 +8704,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptDataRequestPacket
     {
         public string MessageName { get; set; } = "ScriptDataRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 337;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8328,6 +8725,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptDataReplyPacket
     {
         public string MessageName { get; set; } = "ScriptDataReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 338;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8348,6 +8746,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateGroupRequestPacket
     {
         public string MessageName { get; set; } = "CreateGroupRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 339;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8368,6 +8767,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateGroupReplyPacket
     {
         public string MessageName { get; set; } = "CreateGroupReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 340;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8388,6 +8788,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateGroupInfoPacket
     {
         public string MessageName { get; set; } = "UpdateGroupInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 341;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8408,6 +8809,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupRoleChangesPacket
     {
         public string MessageName { get; set; } = "GroupRoleChanges";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 342;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8428,6 +8830,7 @@ namespace Linkpoint.Protocol.Generated
     public class JoinGroupRequestPacket
     {
         public string MessageName { get; set; } = "JoinGroupRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 343;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8448,6 +8851,7 @@ namespace Linkpoint.Protocol.Generated
     public class JoinGroupReplyPacket
     {
         public string MessageName { get; set; } = "JoinGroupReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 344;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8468,6 +8872,7 @@ namespace Linkpoint.Protocol.Generated
     public class EjectGroupMemberRequestPacket
     {
         public string MessageName { get; set; } = "EjectGroupMemberRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 345;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8488,6 +8893,7 @@ namespace Linkpoint.Protocol.Generated
     public class EjectGroupMemberReplyPacket
     {
         public string MessageName { get; set; } = "EjectGroupMemberReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 346;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8508,6 +8914,7 @@ namespace Linkpoint.Protocol.Generated
     public class LeaveGroupRequestPacket
     {
         public string MessageName { get; set; } = "LeaveGroupRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 347;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8528,6 +8935,7 @@ namespace Linkpoint.Protocol.Generated
     public class LeaveGroupReplyPacket
     {
         public string MessageName { get; set; } = "LeaveGroupReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 348;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8548,6 +8956,7 @@ namespace Linkpoint.Protocol.Generated
     public class InviteGroupRequestPacket
     {
         public string MessageName { get; set; } = "InviteGroupRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 349;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8568,6 +8977,7 @@ namespace Linkpoint.Protocol.Generated
     public class InviteGroupResponsePacket
     {
         public string MessageName { get; set; } = "InviteGroupResponse";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 350;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8588,6 +8998,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupProfileRequestPacket
     {
         public string MessageName { get; set; } = "GroupProfileRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 351;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8608,6 +9019,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupProfileReplyPacket
     {
         public string MessageName { get; set; } = "GroupProfileReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 352;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8628,6 +9040,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupAccountSummaryRequestPacket
     {
         public string MessageName { get; set; } = "GroupAccountSummaryRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 353;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8648,6 +9061,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupAccountSummaryReplyPacket
     {
         public string MessageName { get; set; } = "GroupAccountSummaryReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 354;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8668,6 +9082,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupAccountDetailsRequestPacket
     {
         public string MessageName { get; set; } = "GroupAccountDetailsRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 355;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8688,6 +9103,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupAccountDetailsReplyPacket
     {
         public string MessageName { get; set; } = "GroupAccountDetailsReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 356;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8708,6 +9124,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupAccountTransactionsRequestPacket
     {
         public string MessageName { get; set; } = "GroupAccountTransactionsRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 357;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8728,6 +9145,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupAccountTransactionsReplyPacket
     {
         public string MessageName { get; set; } = "GroupAccountTransactionsReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 358;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8748,6 +9166,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupActiveProposalsRequestPacket
     {
         public string MessageName { get; set; } = "GroupActiveProposalsRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 359;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8768,6 +9187,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupActiveProposalItemReplyPacket
     {
         public string MessageName { get; set; } = "GroupActiveProposalItemReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 360;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8788,6 +9208,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupVoteHistoryRequestPacket
     {
         public string MessageName { get; set; } = "GroupVoteHistoryRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 361;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8808,6 +9229,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupVoteHistoryItemReplyPacket
     {
         public string MessageName { get; set; } = "GroupVoteHistoryItemReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 362;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8828,6 +9250,7 @@ namespace Linkpoint.Protocol.Generated
     public class StartGroupProposalPacket
     {
         public string MessageName { get; set; } = "StartGroupProposal";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 363;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8848,6 +9271,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupProposalBallotPacket
     {
         public string MessageName { get; set; } = "GroupProposalBallot";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 364;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8868,6 +9292,7 @@ namespace Linkpoint.Protocol.Generated
     public class TallyVotesPacket
     {
         public string MessageName { get; set; } = "TallyVotes";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 365;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8888,6 +9313,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupMembersRequestPacket
     {
         public string MessageName { get; set; } = "GroupMembersRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 366;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8908,6 +9334,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupMembersReplyPacket
     {
         public string MessageName { get; set; } = "GroupMembersReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 367;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8928,6 +9355,7 @@ namespace Linkpoint.Protocol.Generated
     public class ActivateGroupPacket
     {
         public string MessageName { get; set; } = "ActivateGroup";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 368;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -8948,6 +9376,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetGroupContributionPacket
     {
         public string MessageName { get; set; } = "SetGroupContribution";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 369;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8968,6 +9397,7 @@ namespace Linkpoint.Protocol.Generated
     public class SetGroupAcceptNoticesPacket
     {
         public string MessageName { get; set; } = "SetGroupAcceptNotices";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 370;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -8988,6 +9418,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupRoleDataRequestPacket
     {
         public string MessageName { get; set; } = "GroupRoleDataRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 371;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9008,6 +9439,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupRoleDataReplyPacket
     {
         public string MessageName { get; set; } = "GroupRoleDataReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 372;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9028,6 +9460,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupRoleMembersRequestPacket
     {
         public string MessageName { get; set; } = "GroupRoleMembersRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 373;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9048,6 +9481,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupRoleMembersReplyPacket
     {
         public string MessageName { get; set; } = "GroupRoleMembersReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 374;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9068,6 +9502,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupTitlesRequestPacket
     {
         public string MessageName { get; set; } = "GroupTitlesRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 375;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9088,6 +9523,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupTitlesReplyPacket
     {
         public string MessageName { get; set; } = "GroupTitlesReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 376;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9108,6 +9544,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupTitleUpdatePacket
     {
         public string MessageName { get; set; } = "GroupTitleUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 377;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9128,6 +9565,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupRoleUpdatePacket
     {
         public string MessageName { get; set; } = "GroupRoleUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 378;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9148,6 +9586,7 @@ namespace Linkpoint.Protocol.Generated
     public class LiveHelpGroupRequestPacket
     {
         public string MessageName { get; set; } = "LiveHelpGroupRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 379;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9168,6 +9607,7 @@ namespace Linkpoint.Protocol.Generated
     public class LiveHelpGroupReplyPacket
     {
         public string MessageName { get; set; } = "LiveHelpGroupReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 380;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9188,6 +9628,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentWearablesRequestPacket
     {
         public string MessageName { get; set; } = "AgentWearablesRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 381;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9208,6 +9649,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentWearablesUpdatePacket
     {
         public string MessageName { get; set; } = "AgentWearablesUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 382;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9228,6 +9670,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentIsNowWearingPacket
     {
         public string MessageName { get; set; } = "AgentIsNowWearing";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 383;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9248,6 +9691,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentCachedTexturePacket
     {
         public string MessageName { get; set; } = "AgentCachedTexture";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 384;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9268,6 +9712,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentCachedTextureResponsePacket
     {
         public string MessageName { get; set; } = "AgentCachedTextureResponse";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 385;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9288,6 +9733,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentDataUpdateRequestPacket
     {
         public string MessageName { get; set; } = "AgentDataUpdateRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 386;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9308,6 +9754,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentDataUpdatePacket
     {
         public string MessageName { get; set; } = "AgentDataUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 387;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9328,6 +9775,7 @@ namespace Linkpoint.Protocol.Generated
     public class GroupDataUpdatePacket
     {
         public string MessageName { get; set; } = "GroupDataUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 388;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9348,6 +9796,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentGroupDataUpdatePacket
     {
         public string MessageName { get; set; } = "AgentGroupDataUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 389;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9368,6 +9817,7 @@ namespace Linkpoint.Protocol.Generated
     public class AgentDropGroupPacket
     {
         public string MessageName { get; set; } = "AgentDropGroup";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 390;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9388,6 +9838,7 @@ namespace Linkpoint.Protocol.Generated
     public class LogTextMessagePacket
     {
         public string MessageName { get; set; } = "LogTextMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 391;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9408,6 +9859,7 @@ namespace Linkpoint.Protocol.Generated
     public class ViewerEffectPacket
     {
         public string MessageName { get; set; } = "ViewerEffect";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 17;
         public string Frequency { get; set; } = "Medium";
         public bool IsZerocoded { get; set; } = true;
@@ -9428,6 +9880,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateTrustedCircuitPacket
     {
         public string MessageName { get; set; } = "CreateTrustedCircuit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 392;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9448,6 +9901,7 @@ namespace Linkpoint.Protocol.Generated
     public class DenyTrustedCircuitPacket
     {
         public string MessageName { get; set; } = "DenyTrustedCircuit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 393;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9468,6 +9922,7 @@ namespace Linkpoint.Protocol.Generated
     public class RequestTrustedCircuitPacket
     {
         public string MessageName { get; set; } = "RequestTrustedCircuit";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 394;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9488,6 +9943,7 @@ namespace Linkpoint.Protocol.Generated
     public class RezSingleAttachmentFromInvPacket
     {
         public string MessageName { get; set; } = "RezSingleAttachmentFromInv";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 395;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9508,6 +9964,7 @@ namespace Linkpoint.Protocol.Generated
     public class RezMultipleAttachmentsFromInvPacket
     {
         public string MessageName { get; set; } = "RezMultipleAttachmentsFromInv";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 396;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9528,6 +9985,7 @@ namespace Linkpoint.Protocol.Generated
     public class DetachAttachmentIntoInvPacket
     {
         public string MessageName { get; set; } = "DetachAttachmentIntoInv";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 397;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9548,6 +10006,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateNewOutfitAttachmentsPacket
     {
         public string MessageName { get; set; } = "CreateNewOutfitAttachments";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 398;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9568,6 +10027,7 @@ namespace Linkpoint.Protocol.Generated
     public class UserInfoRequestPacket
     {
         public string MessageName { get; set; } = "UserInfoRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 399;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9588,6 +10048,7 @@ namespace Linkpoint.Protocol.Generated
     public class UserInfoReplyPacket
     {
         public string MessageName { get; set; } = "UserInfoReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 400;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9608,6 +10069,7 @@ namespace Linkpoint.Protocol.Generated
     public class UpdateUserInfoPacket
     {
         public string MessageName { get; set; } = "UpdateUserInfo";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 401;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9628,6 +10090,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelRenamePacket
     {
         public string MessageName { get; set; } = "ParcelRename";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 402;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9648,6 +10111,7 @@ namespace Linkpoint.Protocol.Generated
     public class InitiateDownloadPacket
     {
         public string MessageName { get; set; } = "InitiateDownload";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 403;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9668,6 +10132,7 @@ namespace Linkpoint.Protocol.Generated
     public class SystemMessagePacket
     {
         public string MessageName { get; set; } = "SystemMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 404;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -9688,6 +10153,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapLayerRequestPacket
     {
         public string MessageName { get; set; } = "MapLayerRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 405;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9708,6 +10174,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapLayerReplyPacket
     {
         public string MessageName { get; set; } = "MapLayerReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 406;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9728,6 +10195,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapBlockRequestPacket
     {
         public string MessageName { get; set; } = "MapBlockRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 407;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9748,6 +10216,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapNameRequestPacket
     {
         public string MessageName { get; set; } = "MapNameRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 408;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9768,6 +10237,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapBlockReplyPacket
     {
         public string MessageName { get; set; } = "MapBlockReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 409;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9788,6 +10258,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapItemRequestPacket
     {
         public string MessageName { get; set; } = "MapItemRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 410;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9808,6 +10279,7 @@ namespace Linkpoint.Protocol.Generated
     public class MapItemReplyPacket
     {
         public string MessageName { get; set; } = "MapItemReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 411;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9828,6 +10300,7 @@ namespace Linkpoint.Protocol.Generated
     public class SendPostcardPacket
     {
         public string MessageName { get; set; } = "SendPostcard";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 412;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9848,6 +10321,7 @@ namespace Linkpoint.Protocol.Generated
     public class RpcChannelRequestPacket
     {
         public string MessageName { get; set; } = "RpcChannelRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 413;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9868,6 +10342,7 @@ namespace Linkpoint.Protocol.Generated
     public class RpcChannelReplyPacket
     {
         public string MessageName { get; set; } = "RpcChannelReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 414;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9888,6 +10363,7 @@ namespace Linkpoint.Protocol.Generated
     public class RpcScriptRequestInboundPacket
     {
         public string MessageName { get; set; } = "RpcScriptRequestInbound";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 415;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9908,6 +10384,7 @@ namespace Linkpoint.Protocol.Generated
     public class RpcScriptRequestInboundForwardPacket
     {
         public string MessageName { get; set; } = "RpcScriptRequestInboundForward";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 416;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9928,6 +10405,7 @@ namespace Linkpoint.Protocol.Generated
     public class RpcScriptReplyInboundPacket
     {
         public string MessageName { get; set; } = "RpcScriptReplyInbound";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 417;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9948,6 +10426,7 @@ namespace Linkpoint.Protocol.Generated
     public class ScriptMailRegistrationPacket
     {
         public string MessageName { get; set; } = "ScriptMailRegistration";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 418;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9968,6 +10447,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelMediaCommandMessagePacket
     {
         public string MessageName { get; set; } = "ParcelMediaCommandMessage";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 419;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -9988,6 +10468,7 @@ namespace Linkpoint.Protocol.Generated
     public class ParcelMediaUpdatePacket
     {
         public string MessageName { get; set; } = "ParcelMediaUpdate";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 420;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10008,6 +10489,7 @@ namespace Linkpoint.Protocol.Generated
     public class LandStatRequestPacket
     {
         public string MessageName { get; set; } = "LandStatRequest";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 421;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10028,6 +10510,7 @@ namespace Linkpoint.Protocol.Generated
     public class LandStatReplyPacket
     {
         public string MessageName { get; set; } = "LandStatReply";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 422;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10048,6 +10531,7 @@ namespace Linkpoint.Protocol.Generated
     public class ErrorPacket
     {
         public string MessageName { get; set; } = "Error";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 423;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -10068,6 +10552,7 @@ namespace Linkpoint.Protocol.Generated
     public class ObjectIncludeInSearchPacket
     {
         public string MessageName { get; set; } = "ObjectIncludeInSearch";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 424;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10088,6 +10573,7 @@ namespace Linkpoint.Protocol.Generated
     public class RezRestoreToWorldPacket
     {
         public string MessageName { get; set; } = "RezRestoreToWorld";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 425;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10108,6 +10594,7 @@ namespace Linkpoint.Protocol.Generated
     public class LinkInventoryItemPacket
     {
         public string MessageName { get; set; } = "LinkInventoryItem";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 426;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = true;
@@ -10128,6 +10615,7 @@ namespace Linkpoint.Protocol.Generated
     public class RetrieveIMsExtendedPacket
     {
         public string MessageName { get; set; } = "RetrieveIMsExtended";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 427;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10148,6 +10636,7 @@ namespace Linkpoint.Protocol.Generated
     public class JoinGroupRequestExtendedPacket
     {
         public string MessageName { get; set; } = "JoinGroupRequestExtended";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 428;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10168,6 +10657,7 @@ namespace Linkpoint.Protocol.Generated
     public class CreateGroupRequestExtendedPacket
     {
         public string MessageName { get; set; } = "CreateGroupRequestExtended";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 429;
         public string Frequency { get; set; } = "Low";
         public bool IsZerocoded { get; set; } = false;
@@ -10188,6 +10678,7 @@ namespace Linkpoint.Protocol.Generated
     public class GameControlInputPacket
     {
         public string MessageName { get; set; } = "GameControlInput";
+        public string Name => MessageName;
         public uint MessageNumber { get; set; } = 32;
         public string Frequency { get; set; } = "High";
         public bool IsZerocoded { get; set; } = true;
@@ -10205,4 +10696,15 @@ namespace Linkpoint.Protocol.Generated
         public byte[] serialize() => Serialize();
     }
 
+}
+
+namespace Linkpoint.Protocol.Generated
+{
+    public static class GeneratedProtocol
+    {
+        public const string TemplateVersion = Linkpoint.Protocol.GeneratedProtocol.TemplateVersion;
+        public static Dictionary<string, uint> RegisteredMessages => Linkpoint.Protocol.GeneratedProtocol.RegisteredMessages;
+        public static byte[] DecompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);
+        public static byte[] decompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);
+    }
 }

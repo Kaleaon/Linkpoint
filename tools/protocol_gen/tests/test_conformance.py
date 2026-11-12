@@ -78,7 +78,6 @@ class TestDecompressionConformance(unittest.TestCase):
             vector_entries.append(
                 f"  {{ name: '{name}', src: new Uint8Array([{src_str}]), expected: new Uint8Array([{exp_str}]) }}"
             )
-
         vectors_joined = ",\n".join(vector_entries)
         runner_code = f"""import {{ decompressZerocoded }} from './generated.ts';
 import process from 'node:process';

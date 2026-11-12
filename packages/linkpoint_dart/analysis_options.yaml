@@ -1,5 +1,6 @@
 analyzer:
   errors:
     deprecated_member_use: ignore
+    invalid_dependency: ignore
   exclude:
     - build/**

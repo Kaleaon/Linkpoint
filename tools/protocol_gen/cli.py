@@ -33,7 +33,7 @@ DEFAULT_TARGET_OUT_DIRS = {
     ),
     "godot": "platforms/godot/gdextension/src/generated/protocol",
     "swift": "platforms/iOS/Sources/LLSD/Generated",
-    "csharp": "platforms/dotnet/Generated",
+    "csharp": "platforms/dotnet/Linkpoint.Protocol/Generated",
 }
 
 

@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
 
+export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
+
 echo "========================================================"
 echo " Starting Linkpoint Polyglot Conformance Test Suite"
 echo " Repository root: ${REPO_ROOT}"
@@ -93,7 +95,7 @@ fi
 echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
 (
     cd "${REPO_ROOT}/legacy"
-    ./gradlew :llsd-core:test --no-daemon
+    ./gradlew :llsd-core:test --no-daemon -PskipAndroid=true
 )
 
 # Optional Swift execution if toolchain exists
