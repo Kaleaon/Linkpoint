@@ -47,8 +47,10 @@ describe('computeSkyUniforms', () => {
     }
   });
 
-  it('rejects non-numeric vectors', () => {
-    expect(readVec3(['a', 1, 2], [9, 9, 9])).toEqual([9, 9, 9]);
+  it('replaces non-numeric and non-finite vector channels individually', () => {
+    expect(readVec3(['a', 1, 2], [9, 9, 9])).toEqual([9, 1, 2]);
+    expect(readVec3([1, NaN, 2], [9, 9, 9])).toEqual([1, 9, 2]);
+    expect(readVec3([Infinity, 1, -Infinity], [7, 8, 9])).toEqual([7, 1, 9]);
     expect(readVec3([1, 2], [9, 9, 9])).toEqual([9, 9, 9]);
     expect(readScalar(null, 4)).toBe(4);
     expect(readScalar('', 4)).toBe(4);

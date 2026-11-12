@@ -73,7 +73,7 @@ class DrawableMeshStore {
         var isDirty: Boolean = true
             private set
 
-        var scaleS: Float = scaleS
+        var scaleS: Float = 1f
             set(value) {
                 if (field != value) {
                     field = value
@@ -81,7 +81,7 @@ class DrawableMeshStore {
                 }
             }
 
-        var scaleT: Float = scaleT
+        var scaleT: Float = 1f
             set(value) {
                 if (field != value) {
                     field = value
@@ -89,7 +89,7 @@ class DrawableMeshStore {
                 }
             }
 
-        var offsetS: Float = offsetS
+        var offsetS: Float = 0f
             set(value) {
                 if (field != value) {
                     field = value
@@ -97,7 +97,7 @@ class DrawableMeshStore {
                 }
             }
 
-        var offsetT: Float = offsetT
+        var offsetT: Float = 0f
             set(value) {
                 if (field != value) {
                     field = value
@@ -105,13 +105,21 @@ class DrawableMeshStore {
                 }
             }
 
-        var rotation: Float = rotation
+        var rotation: Float = 0f
             set(value) {
                 if (field != value) {
                     field = value
                     isDirty = true
                 }
             }
+
+        init {
+            this.scaleS = scaleS
+            this.scaleT = scaleT
+            this.offsetS = offsetS
+            this.offsetT = offsetT
+            this.rotation = rotation
+        }
 
         private val matrixBuffer = FloatArray(16)
         @Volatile
