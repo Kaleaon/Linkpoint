@@ -22,9 +22,14 @@ def resolveAndroidSdkDir = {
 def sdkDir = resolveAndroidSdkDir()
 def hasAndroidSdk = sdkDir != null && sdkDir.exists() && (
     new File(sdkDir, 'ndk/26.3.11579264').exists() ||
-    new File(sdkDir, 'ndk-bundle').exists() ||
-    (System.getenv('ANDROID_NDK_HOME') != null && file(System.getenv('ANDROID_NDK_HOME')).exists()) ||
-    (System.getenv('ANDROID_NDK_ROOT') != null && file(System.getenv('ANDROID_NDK_ROOT')).exists())
+    (System.getenv('ANDROID_NDK_HOME') != null && file(System.getenv('ANDROID_NDK_HOME')).exists() && (
+        file(System.getenv('ANDROID_NDK_HOME')).name == '26.3.11579264' ||
+        new File(file(System.getenv('ANDROID_NDK_HOME')), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
+    )) ||
+    (System.getenv('ANDROID_NDK_ROOT') != null && file(System.getenv('ANDROID_NDK_ROOT')).exists() && (
+        file(System.getenv('ANDROID_NDK_ROOT')).name == '26.3.11579264' ||
+        new File(file(System.getenv('ANDROID_NDK_ROOT')), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
+    ))
 )
 
 if (hasAndroidSdk && file('Linkpoint').exists()) {
