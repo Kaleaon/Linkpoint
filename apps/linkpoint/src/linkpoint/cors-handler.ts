@@ -129,6 +129,7 @@ export class CORSHandler {
           headers: new Headers(result.headers),
           text: async () => result.text,
           json: async () => JSON.parse(result.text),
+          arrayBuffer: async () => new TextEncoder().encode(result.text).buffer,
         };
       }
 
@@ -150,7 +151,8 @@ export class CORSHandler {
           statusText: response.statusText || '',
           data: response.data,
           text: async () => typeof response.data === 'string' ? response.data : JSON.stringify(response.data),
-          json: async () => typeof response.data === 'object' ? response.data : JSON.parse(response.data)
+          json: async () => typeof response.data === 'object' ? response.data : JSON.parse(response.data),
+          arrayBuffer: async () => typeof response.data === 'string' ? new TextEncoder().encode(response.data).buffer : new Uint8Array(response.data).buffer,
         };
       }
 
