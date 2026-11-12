@@ -59,7 +59,7 @@ describe('JPEG2000 Texture Upload Pipeline', () => {
       expect(scaled.height).toBe(1024);
     });
 
-    it('prepares canvas and extracts RGBA pixel array', async () => {
+    it('prepares canvas and extracts RGBA pixel array with explicit layout and color space metadata', async () => {
       const blob = new Blob(['fake image bytes'], { type: 'image/png' });
       const result = await prepareTextureCanvas(blob);
 
@@ -69,6 +69,12 @@ describe('JPEG2000 Texture Upload Pipeline', () => {
       expect(result.height).toBeLessThanOrEqual(1024);
       expect(result.rgba).toBeInstanceOf(Uint8Array);
       expect(result.rgba.length).toBe(result.width * result.height * 4);
+      expect(result.channelLayout).toBe('RGBA');
+      expect(result.colorSpace).toBe('sRGB');
+
+      const linearResult = await prepareTextureCanvas(blob, { channelLayout: 'BGRA', colorSpace: 'linear' });
+      expect(linearResult.channelLayout).toBe('BGRA');
+      expect(linearResult.colorSpace).toBe('linear');
     });
   });
 
