@@ -192,6 +192,10 @@ class OutfitManager(
         var initialDelayMs = 1000L
         var attempt = 1
 
+        var lastFailureReason: WearableLoadFailureReason? = null
+        var lastFailureDetail: String = ""
+        var lastException: Throwable? = null
+
         while (attempt <= maxAttempts && currentCoroutineContext().isActive) {
             WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_ATTEMPT)
             if (attempt > 1) {
@@ -206,25 +210,35 @@ class OutfitManager(
 
             try {
                 val bytes = fetcher(item)
-                if (bytes != null) {
-                    val parseResult = WearableAssetParser.parseWithDiagnostics(
-                        raw = bytes,
-                        defaultType = wearableType,
-                        assetId = item.assetId
-                    )
-                    val parsed = parseResult.data
-                    if (parsed != null) {
-                        if (attempt > 1) {
-                            WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_SUCCESS)
-                        }
-                        baker.setWearable(wearableType, parsed)
-                        rebakeWearableLayers(wearableType)
-                        return
-                    }
+                if (bytes == null) {
+                    lastFailureReason = WearableLoadFailureReason.MISSING_ASSET_BYTES
+                    lastFailureDetail = "Wearable asset fetch returned null bytes"
+                    break
                 }
+                val parseResult = WearableAssetParser.parseWithDiagnostics(
+                    raw = bytes,
+                    defaultType = wearableType,
+                    assetId = item.assetId
+                )
+                val parsed = parseResult.data
+                if (parsed == null) {
+                    lastFailureReason = WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD
+                    lastFailureDetail =
+                        "Wearable parse failed (${parseResult.error ?: "unknown parse error"}, ${bytes.size} bytes)"
+                    break
+                }
+                if (attempt > 1) {
+                    WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_SUCCESS)
+                }
+                baker.setWearable(wearableType, parsed)
+                rebakeWearableLayers(wearableType)
+                return
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                lastFailureReason = WearableLoadFailureReason.FETCH_EXCEPTION
+                lastFailureDetail = "Failed to load wearable asset: ${e.message}"
+                lastException = e
                 Log.w(TAG, "Attempt $attempt failed for wearable item ${item.itemId}: ${e.message}")
             }
             attempt++
@@ -232,6 +246,15 @@ class OutfitManager(
 
         // Failed across all retries
         WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_FAILURE)
+        if (lastFailureReason != null) {
+            fallbackWearableData(
+                type = wearableType,
+                item = item,
+                reason = lastFailureReason,
+                detail = lastFailureDetail,
+                throwable = lastException
+            )
+        }
 
         if (wearableType == WearableType.SKIN) {
             WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK)
@@ -257,7 +280,7 @@ class OutfitManager(
         reason: WearableLoadFailureReason,
         detail: String,
         throwable: Throwable? = null
-    ): WearableData {
+    ): WearableData? {
         WearableAssetTelemetry.recordFallback(reason)
         if (throwable != null) {
             Log.e(
@@ -271,12 +294,7 @@ class OutfitManager(
                 "Using fallback wearable for item=${item.itemId} asset=${item.assetId} reason=$reason detail=$detail"
             )
         }
-        return WearableData(
-            type = type,
-            assetId = item.assetId,
-            textures = emptyMap(),
-            params = emptyMap()
-        )
+        return null
     }
 
     private suspend fun rebakeWearableLayers(wearableType: WearableType) {

@@ -145,7 +145,8 @@ class LinkpointProtocolFFI {
     final lib = _loadLibrary();
     final freeFn =
         lib.lookupFunction<NativeLinkpointFreeBuffer, DartLinkpointFreeBuffer>(
-            'linkpoint_free_buffer');
+      'linkpoint_free_buffer',
+    );
     freeFn(buf);
   }
 
@@ -172,7 +173,8 @@ class LinkpointProtocolFFI {
   }
 
   static List<int> _extractAndFreeBinaryResult(
-      Pointer<LlsdResultBufferStruct> resBuf) {
+    Pointer<LlsdResultBufferStruct> resBuf,
+  ) {
     if (resBuf == nullptr) {
       throw Exception('FFI returned null buffer');
     }
