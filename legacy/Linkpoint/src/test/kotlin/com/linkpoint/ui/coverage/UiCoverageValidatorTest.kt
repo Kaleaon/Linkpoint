@@ -111,6 +111,8 @@ class UiCoverageValidatorTest {
         if (Files.exists(direct)) return direct
         val legacyDirect = root.resolve("legacy").resolve(relativePath)
         if (Files.exists(legacyDirect)) return legacyDirect
+        val legacyNested = root.resolve("legacy/Linkpoint").resolve(relativePath)
+        if (Files.exists(legacyNested)) return legacyNested
         error("Unable to resolve project path: $relativePath")
     }
 
