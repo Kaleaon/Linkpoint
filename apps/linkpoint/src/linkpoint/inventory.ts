@@ -699,6 +699,32 @@ export class InventoryManager extends Utils.EventEmitter {
     this.emit('wear_item', { item, append: Boolean(options.append) });
   }
 
+  async offerItem(targetId: string, itemOrId: string | any): Promise<any> {
+    const item = typeof itemOrId === 'string' ? this.items.get(itemOrId) || { id: itemOrId, name: 'Item' } : itemOrId;
+    const itemId = item?.id || itemOrId;
+
+    if (!targetId || typeof targetId !== 'string' || !targetId.trim()) {
+      throw new Error('Valid target avatar ID is required');
+    }
+    if (!item || !itemId) {
+      throw new Error('Valid inventory item is required');
+    }
+
+    if (item.transferable === false || (item.permissions && (item.permissions.ownerMask !== undefined && (item.permissions.ownerMask & 0x2000) === 0))) {
+      throw new Error('Item is not transferable');
+    }
+
+    let result: any = null;
+    if (slBridge.connected) {
+      result = await slBridge.offerItem(targetId.trim(), item);
+    } else if (typeof this.protocol?.offerItem === 'function') {
+      result = await this.protocol.offerItem(targetId.trim(), item);
+    }
+
+    this.emit('item_offered', { targetId: targetId.trim(), item: { ...item, id: itemId } });
+    return result || { offered: true, targetId: targetId.trim(), itemId };
+  }
+
   getFolderItemsRecursive(folderId: string): any[] {
     const collected: any[] = [];
     const visitedFolders = new Set<string>();

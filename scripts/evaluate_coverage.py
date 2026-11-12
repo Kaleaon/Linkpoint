@@ -54,13 +54,24 @@ def parse_lcov(lcov_path: Path):
     try:
         lines_found = 0
         lines_hit = 0
+        skip_file = False
         with open(lcov_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
-                if line.startswith("LF:"):
-                    lines_found += int(line.split(":")[1])
-                elif line.startswith("LH:"):
-                    lines_hit += int(line.split(":")[1])
+                if line.startswith("SF:"):
+                    source_file = line.split(":", 1)[1]
+                    skip_file = (
+                        "generated" in source_file.lower()
+                        or "/generated/" in source_file
+                        or source_file.endswith("/generated/mod.rs")
+                    )
+                elif line.startswith("end_of_record"):
+                    skip_file = False
+                elif not skip_file:
+                    if line.startswith("LF:"):
+                        lines_found += int(line.split(":")[1])
+                    elif line.startswith("LH:"):
+                        lines_hit += int(line.split(":")[1])
 
         missed = lines_found - lines_hit
         pct = (lines_hit / lines_found * 100.0) if lines_found > 0 else 0.0
@@ -83,14 +94,16 @@ def main():
     parser.add_argument(
         "--android-report",
         type=Path,
-        default=Path(
-            "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-        )
-        if Path(
-            "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
-        ).exists()
-        else Path(
-            "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        default=(
+            Path(
+                "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            )
+            if Path(
+                "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            ).exists()
+            else Path(
+                "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            )
         ),
     )
     parser.add_argument("--web-report", type=Path, default=Path("coverage/lcov.info"))
@@ -150,7 +163,12 @@ def main():
     # 3. Rust
     rust_data = parse_lcov(args.rust_report)
     if rust_data is None:
-        for fallback in [Path("coverage-rust.lcov"), Path("rust-lcov.info")]:
+        for fallback in [
+            Path("coverage-rust.lcov"),
+            Path("rust-lcov.info"),
+            Path("lcov.info"),
+            Path("coverage-artifacts/rust-coverage/lcov.info"),
+        ]:
             rust_data = parse_lcov(fallback)
             if rust_data:
                 break
