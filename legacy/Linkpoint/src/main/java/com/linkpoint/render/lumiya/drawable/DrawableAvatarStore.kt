@@ -9,6 +9,7 @@ import com.linkpoint.render.lumiya.glres.GLBufferManager
 import com.linkpoint.render.lumiya.shaders.AvatarShaderProgram
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.FloatBuffer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -17,6 +18,8 @@ class DrawableAvatarStore internal constructor(
 ) {
     companion object {
         private const val TAG = "DrawableAvatarStore"
+        const val AVATAR_HEIGHT_OFFSET = 1.0f
+        const val AVATAR_BOUNDING_RADIUS = 2.0f
     }
 
     class AvatarInstance(
@@ -27,6 +30,10 @@ class DrawableAvatarStore internal constructor(
         var textureHandle: Int = 0,
         val jointMatrices: FloatArray = FloatArray(AvatarShaderProgram.MAX_JOINTS * 16)
     ) {
+        val jointBuffer: FloatBuffer = ByteBuffer.allocateDirect(AvatarShaderProgram.MAX_JOINTS * 16 * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
         init {
             for (i in 0 until AvatarShaderProgram.MAX_JOINTS) {
                 Matrix.setIdentityM(jointMatrices, i * 16)
@@ -44,6 +51,13 @@ class DrawableAvatarStore internal constructor(
         val instance = AvatarInstance(id = id)
         Matrix.setIdentityM(instance.modelMatrix, 0)
         Matrix.translateM(instance.modelMatrix, 0, posX, posY, posZ)
+        instance.modelMatrix[0] = 1f
+        instance.modelMatrix[5] = 1f
+        instance.modelMatrix[10] = 1f
+        instance.modelMatrix[12] = posX
+        instance.modelMatrix[13] = posY
+        instance.modelMatrix[14] = posZ
+        instance.modelMatrix[15] = 1f
         avatars[id] = instance
     }
 
@@ -60,6 +74,22 @@ class DrawableAvatarStore internal constructor(
         clear()
         avatarMesh?.let { bufferManager?.destroyVAO(it) }
         avatarMesh = null
+    }
+
+    fun isAvatarVisible(avatar: AvatarInstance, ctx: LumiyaRenderContext): Boolean {
+        val posX = avatar.modelMatrix[12]
+        val posY = avatar.modelMatrix[13]
+        val posZ = avatar.modelMatrix[14]
+
+        val dx = posX - ctx.cameraPositionX
+        val dy = posY - ctx.cameraPositionY
+        val dz = posZ - ctx.cameraPositionZ
+        val distSq = dx * dx + dy * dy + dz * dz
+        val maxDistSq = ctx.drawDistance * ctx.drawDistance
+
+        if (distSq > maxDistSq) return false
+
+        return ctx.frustumCuller.isSphereVisible(posX, posY, posZ + AVATAR_HEIGHT_OFFSET, AVATAR_BOUNDING_RADIUS)
     }
 
     fun draw(ctx: LumiyaRenderContext) {
@@ -81,6 +111,8 @@ class DrawableAvatarStore internal constructor(
 
         GLES32.glBindVertexArray(mesh.vao)
         for (avatar in avatars.values) {
+            if (!isAvatarVisible(avatar, ctx)) continue
+
             program.setModelMatrix(avatar.modelMatrix)
             program.setColor(0.85f, 0.72f, 0.62f, 1.0f)
             program.setUseTexture(avatar.textureHandle != 0)
@@ -99,21 +131,23 @@ class DrawableAvatarStore internal constructor(
         System.arraycopy(matrices, 0, avatar.jointMatrices, 0, minOf(matrices.size, avatar.jointMatrices.size))
         avatar.jointCount = count
 
+        val byteSize = AvatarShaderProgram.MAX_JOINTS * 16 * 4
+
         if (avatar.jointUBO == 0) {
             val buf = IntArray(1)
             GLES32.glGenBuffers(1, buf, 0)
             avatar.jointUBO = buf[0]
+            GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, avatar.jointUBO)
+            GLES32.glBufferData(GLES32.GL_UNIFORM_BUFFER, byteSize, null, GLES32.GL_DYNAMIC_DRAW)
+            GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, 0)
         }
 
-        val byteSize = AvatarShaderProgram.MAX_JOINTS * 16 * 4
-        val fb = ByteBuffer.allocateDirect(byteSize)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer()
-            .put(avatar.jointMatrices, 0, AvatarShaderProgram.MAX_JOINTS * 16)
-        fb.flip()
+        avatar.jointBuffer.clear()
+        avatar.jointBuffer.put(avatar.jointMatrices, 0, AvatarShaderProgram.MAX_JOINTS * 16)
+        avatar.jointBuffer.flip()
 
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, avatar.jointUBO)
-        GLES32.glBufferData(GLES32.GL_UNIFORM_BUFFER, byteSize, fb, GLES32.GL_DYNAMIC_DRAW)
+        GLES32.glBufferSubData(GLES32.GL_UNIFORM_BUFFER, 0, byteSize, avatar.jointBuffer)
         GLES32.glBindBuffer(GLES32.GL_UNIFORM_BUFFER, 0)
     }
 
