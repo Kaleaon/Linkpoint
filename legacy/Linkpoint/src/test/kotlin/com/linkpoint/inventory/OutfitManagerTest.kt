@@ -191,6 +191,18 @@ class OutfitManagerTest {
         assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.MISSING_ASSET_BYTES))
         assertEquals(2, WearableAssetTelemetry.count(WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD))
         assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.FETCH_EXCEPTION))
+
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_ATTEMPT)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_SUCCESS)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_FAILURE)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK)
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.APPEARANCE_DEFERRED)
+
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.RETRY_ATTEMPT))
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.RETRY_SUCCESS))
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.RETRY_FAILURE))
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK))
+        assertEquals(1, WearableAssetTelemetry.count(WearableLoadFailureReason.APPEARANCE_DEFERRED))
     }
 
     @Test
