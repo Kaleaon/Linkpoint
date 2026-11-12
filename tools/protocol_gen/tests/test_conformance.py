@@ -79,12 +79,12 @@ class TestDecompressionConformance(unittest.TestCase):
                 f"  {{ name: '{name}', src: new Uint8Array([{src_str}]), expected: new Uint8Array([{exp_str}]) }}"
             )
 
-        vectors_ts = ",\n".join(vector_entries)
+        vectors_joined = ",\n".join(vector_entries)
         runner_code = f"""import {{ decompressZerocoded }} from './generated.ts';
 import process from 'node:process';
 
 const vectors = [
-{vectors_ts}
+{vectors_joined}
 ];
 
 function arraysEqual(a, b) {{
@@ -231,7 +231,7 @@ fn main() {{
                 f'    {{"{name}", src_{i}, {len(src)}, exp_{i}, {len(expected)}}}'
             )
 
-        vectors_c = ",\n".join(vector_items)
+        vector_items_joined = ",\n".join(vector_items)
         runner_code = f"""#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -249,7 +249,7 @@ typedef struct {{
 
 int main() {{
     Vector vectors[] = {{
-{vectors_c}
+{vector_items_joined}
     }};
     size_t num_vectors = sizeof(vectors) / sizeof(vectors[0]);
 

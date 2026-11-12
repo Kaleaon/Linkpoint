@@ -30,6 +30,23 @@ describe('Windlight preset parsing (Lumiya rules)', () => {
     const bad = xml('A-6AM').replace('<real>0.15793180465698242</real>', '<string>x</string>');
     expect(() => parseWindlightPreset(bad)).toThrow(/blue_density/);
   });
+
+  it('clamps negative ambient and sunlight components to zero before gamma encoding', () => {
+    const negativeXml = xml('A-6AM')
+      .replace('<real>0.80999994277954102</real>', '<real>-0.80999994277954102</real>')
+      .replace('<real>2.369999885559082</real>', '<real>-2.369999885559082</real>');
+
+    const preset = parseWindlightPreset(negativeXml);
+    expect(preset.ambient[0]).toBe(0);
+    expect(preset.sunlightColor[0]).toBe(0);
+    expect(preset.ambient.every((v) => Number.isFinite(v) && v >= 0)).toBe(true);
+    expect(preset.sunlightColor.every((v) => Number.isFinite(v) && v >= 0)).toBe(true);
+
+    const frame = presetToSkyFrame(preset);
+    const uniforms = computeSkyUniforms(frame);
+    expect(uniforms.skyColor.every((v) => Number.isFinite(v) && !Number.isNaN(v))).toBe(true);
+    expect(uniforms.hazeColor.every((v) => Number.isFinite(v) && !Number.isNaN(v))).toBe(true);
+  });
 });
 
 describe('Windlight day interpolation', () => {
