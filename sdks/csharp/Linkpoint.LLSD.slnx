@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Linkpoint.LLSD.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Linkpoint.LLSD.Tests.csproj" />
+  </Folder>
+</Solution>
