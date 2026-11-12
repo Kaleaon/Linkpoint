@@ -19,6 +19,7 @@ class DartEmitter(BaseEmitter):
 
         try:
             import subprocess
+
             subprocess.run(
                 ["dart", "format", out_file],
                 check=False,
