@@ -217,6 +217,7 @@ mod tests {
             "../../Linkpoint/src/test/resources/llsd-conformance/vectors",
             "legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
             "Linkpoint/src/test/resources/llsd-conformance/vectors",
+            "/app/Linkpoint/legacy/Linkpoint/src/test/resources/llsd-conformance/vectors",
         ];
 
         let mut vectors_dir = None;
@@ -230,6 +231,11 @@ mod tests {
             let cwd_candidate = PathBuf::from(&subpath);
             if cwd_candidate.exists() {
                 vectors_dir = Some(cwd_candidate);
+                break;
+            }
+            let direct_candidate = PathBuf::from(rel);
+            if direct_candidate.exists() {
+                vectors_dir = Some(direct_candidate);
                 break;
             }
         }

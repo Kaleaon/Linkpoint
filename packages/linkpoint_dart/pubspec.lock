@@ -408,6 +408,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unified_llsd:
+    dependency: "direct main"
+    description:
+      path: dart
+      ref: "stitch/fix/dart-llsd-repair-unification-jm1-b1569d0d-6d7c-4594-906c-73e49598c7b1"
+      resolved-ref: "00fac3b2db87add178749ce4675e335a2cc4b17a"
+      url: "https://github.com/Kaleaon/Unified-LLSD.git"
+    source: git
+    version: "1.0.0"
   vector_math:
     dependency: transitive
     description:
