@@ -79,8 +79,8 @@ object ThemeCatalog {
             val root = findRepoRoot()
             val possibleDirs = listOfNotNull(
                 File("src/main/assets/themes"),
-                File("Linkpoint/src/main/assets/themes"),
                 File("legacy/Linkpoint/src/main/assets/themes"),
+                File("Linkpoint/src/main/assets/themes"),
                 File("packages/design-system/themes"),
                 File("packages/design-system/themes/community"),
                 File("Linkpoint/packages/design-system/themes"),
