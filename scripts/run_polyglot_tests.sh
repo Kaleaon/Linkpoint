@@ -95,7 +95,7 @@ fi
 echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
 (
     cd "${REPO_ROOT}/legacy"
-    ./gradlew :llsd-core:test --no-daemon
+    ./gradlew :llsd-core:test --no-daemon -PskipAndroid=true
 )
 
 # Optional Swift execution if toolchain exists
