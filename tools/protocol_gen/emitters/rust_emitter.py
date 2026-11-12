@@ -56,13 +56,8 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
         if b == 0 {
             if i + 1 < src.len() {
                 let count = src[i + 1] as usize;
-                if count == 0 {
-                    dest.push(0);
-                    i += 2;
-                } else {
-                    dest.extend(std::iter::repeat(0).take(count));
-                    i += 2;
-                }
+                dest.extend(std::iter::repeat(0).take(count));
+                i += 2;
             } else {
                 dest.push(0);
                 i += 1;
@@ -117,7 +112,7 @@ pub fn decompress_zerocoded(src: &[u8]) -> Vec<u8> {
 
         # LLSD capability structs
         out.append("// Generated LLSD Capability Schemas")
-        for schema in ast.llsd_schemas:
+        for schema in sorted(ast.llsd_schemas, key=lambda s: s.title):
             struct_name = f"{schema.title}Capabilities"
             out.append("#[derive(Debug, Clone, Default)]")
             out.append(f"pub struct {struct_name} {{")

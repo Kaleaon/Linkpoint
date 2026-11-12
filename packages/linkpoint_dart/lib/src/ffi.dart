@@ -45,6 +45,10 @@ class LinkpointProtocolFFI {
     if (Platform.isLinux) {
       final searchPaths = [
         'liblinkpoint_protocol.so',
+        'builds/native/liblinkpoint_protocol.so',
+        '../../builds/native/liblinkpoint_protocol.so',
+        '../builds/native/liblinkpoint_protocol.so',
+        '/app/Linkpoint/builds/native/liblinkpoint_protocol.so',
         '../../target/release/liblinkpoint_protocol.so',
         '../target/release/liblinkpoint_protocol.so',
         'target/release/liblinkpoint_protocol.so',
@@ -66,6 +70,10 @@ class LinkpointProtocolFFI {
     } else if (Platform.isMacOS) {
       final searchPaths = [
         'liblinkpoint_protocol.dylib',
+        'builds/native/liblinkpoint_protocol.dylib',
+        '../../builds/native/liblinkpoint_protocol.dylib',
+        '../builds/native/liblinkpoint_protocol.dylib',
+        '/app/Linkpoint/builds/native/liblinkpoint_protocol.dylib',
         '../../target/release/liblinkpoint_protocol.dylib',
         '../target/release/liblinkpoint_protocol.dylib',
         'target/release/liblinkpoint_protocol.dylib',
@@ -86,6 +94,10 @@ class LinkpointProtocolFFI {
     } else if (Platform.isWindows) {
       final searchPaths = [
         'linkpoint_protocol.dll',
+        'builds/native/linkpoint_protocol.dll',
+        '../../builds/native/linkpoint_protocol.dll',
+        '../builds/native/linkpoint_protocol.dll',
+        '/app/Linkpoint/builds/native/linkpoint_protocol.dll',
         '../../target/release/linkpoint_protocol.dll',
         '../target/release/linkpoint_protocol.dll',
         'target/release/linkpoint_protocol.dll',
