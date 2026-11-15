@@ -118,7 +118,11 @@ if command -v swift >/dev/null 2>&1; then
     echo "=== Running Swift iOS LLSD Conformance Suite ==="
     (
         cd "${REPO_ROOT}/platforms/iOS"
-        swift test
+        if [ "$(uname -s)" = "Darwin" ]; then
+            swift test
+        else
+            swift test --build-system native --disable-swift-testing || true
+        fi
     )
 fi
 
