@@ -31,9 +31,9 @@ DEFAULT_TARGET_OUT_DIRS = {
         if os.path.exists("legacy/Linkpoint")
         else "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
     ),
+    "godot": "platforms/godot/gdextension/src/generated/protocol",
     "swift": "platforms/iOS/Sources/LLSD/Generated",
     "csharp": "platforms/dotnet/Linkpoint.Protocol/Generated",
-    "godot": "platforms/godot/gdextension/src/generated/protocol",
 }
 
 
@@ -93,6 +93,14 @@ def cmd_generate(args):
             print(f"[{target.upper()}] Generated {path}")
             generated_count += 1
 
+        if target == "csharp" and not args.out_dir:
+            legacy_dir = "platforms/dotnet/Generated"
+            if os.path.exists(legacy_dir):
+                for p, c in results.items():
+                    dest = os.path.join(legacy_dir, os.path.basename(p))
+                    with open(dest, "w", encoding="utf-8", newline="\n") as f:
+                        f.write(c)
+
     print(
         f"\nSuccessfully generated {generated_count} source files across {len(targets)} targets."
     )
@@ -141,7 +149,7 @@ def main():
     p_gen.add_argument(
         "--target",
         default="all",
-        help="Target languages (kotlin,rust,dart,typescript,python,c,java,swift,csharp,godot,all)",
+        help="Target languages (kotlin,rust,dart,typescript,python,c,java,godot,swift,csharp,all)",
     )
     p_gen.add_argument("--out-dir", default=None, help="Custom output directory root")
     p_gen.set_defaults(func=cmd_generate)

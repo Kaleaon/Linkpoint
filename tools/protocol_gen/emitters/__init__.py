@@ -17,9 +17,9 @@ EMITTERS = {
     "python": PythonEmitter(),
     "c": CEmitter(),
     "java": JavaEmitter(),
+    "godot": GodotEmitter(),
     "swift": SwiftEmitter(),
     "csharp": CSharpEmitter(),
-    "godot": GodotEmitter(),
 }
 
 __all__ = [
