@@ -112,8 +112,8 @@ else
     )
 fi
 
-# Optional Swift execution if toolchain exists
-if command -v swift >/dev/null 2>&1; then
+# Optional Swift execution if toolchain exists on macOS/Darwin (iOS framework dependencies require Darwin)
+if command -v swift >/dev/null 2>&1 && { [[ "$(uname -s)" == "Darwin" ]] || [[ "${FORCE_SWIFT_TEST:-0}" == "1" ]]; }; then
     echo "=== Running Swift iOS LLSD Conformance Suite ==="
     (
         cd "${REPO_ROOT}/platforms/iOS"
