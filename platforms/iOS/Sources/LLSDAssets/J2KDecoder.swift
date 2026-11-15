@@ -1,7 +1,13 @@
 import Foundation
+#if canImport(CoreGraphics)
 import CoreGraphics
+#endif
+#if canImport(ImageIO)
 import ImageIO
+#endif
+#if canImport(UniformTypeIdentifiers)
 import UniformTypeIdentifiers
+#endif
 
 public struct J2KHeaderInfo {
     public let width: Int
@@ -59,6 +65,7 @@ public enum J2KDecoder {
             return nil
         }
 
+#if canImport(CoreGraphics) && canImport(ImageIO)
         // Attempt Apple CGImageSource native J2K decompression
         if let imageSource = CGImageSourceCreateWithData(data as CFData, nil),
            let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
@@ -82,6 +89,7 @@ public enum J2KDecoder {
             }
             return pixelData
         }
+#endif
 
         // Fallback RGBA generation
         var pixelData = Data(count: header.width * header.height * 4)

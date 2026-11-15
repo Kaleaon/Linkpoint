@@ -68,6 +68,9 @@ class ManagerMessageIdUsageTest {
         managerFiles.forEach { relativePath ->
             var file = File(repoRoot, relativePath)
             if (!file.exists()) {
+                file = File(repoRoot, "legacy/Linkpoint/$relativePath")
+            }
+            if (!file.exists()) {
                 file = File(repoRoot, "Linkpoint/$relativePath")
             }
             if (file.exists()) {
