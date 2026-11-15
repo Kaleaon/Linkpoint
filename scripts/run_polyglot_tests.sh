@@ -8,6 +8,15 @@ cd "${REPO_ROOT}"
 
 export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
 
+SKIP_GRADLE=false
+for arg in "$@"; do
+    case "${arg}" in
+        --skip-gradle)
+            SKIP_GRADLE=true
+            ;;
+    esac
+done
+
 echo "========================================================"
 echo " Starting Linkpoint Polyglot Conformance Test Suite"
 echo " Repository root: ${REPO_ROOT}"
@@ -61,7 +70,7 @@ echo "=== [4/6] Running Dart / Flutter FFI Conformance Suite ==="
     flutter test test/llsd_31_vectors_ffi_test.dart
 )
 
-# Step 5: C++20 Native Test Suite
+# Step 5: C++20 Native Test Harness
 echo "=== [5/6] Compiling and Running C++20 Native Test Harness ==="
 CXX_CMD=""
 if command -v g++ >/dev/null 2>&1; then
@@ -92,11 +101,17 @@ else
 fi
 
 # Step 6: Kotlin LLSD Conformance Suite
-echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
-(
-    cd "${REPO_ROOT}/legacy"
-    ./gradlew :llsd-core:test --no-daemon -PskipAndroid=true
-)
+if [ "${SKIP_GRADLE}" = true ]; then
+    echo "=== [6/6] Skipping Kotlin LLSD Conformance Suite (--skip-gradle requested) ==="
+elif ! command -v java >/dev/null 2>&1 && [ -z "${JAVA_HOME:-}" ]; then
+    echo "=== [6/6] Skipping Kotlin LLSD Conformance Suite (no Java/JDK found) ==="
+else
+    echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
+    (
+        cd "${REPO_ROOT}/legacy"
+        LINKPOINT_SKIP_ANDROID=1 ./gradlew :llsd-core:test --no-daemon -PskipAndroid=true
+    )
+fi
 
 # Optional Swift execution if toolchain exists
 if command -v swift >/dev/null 2>&1; then
