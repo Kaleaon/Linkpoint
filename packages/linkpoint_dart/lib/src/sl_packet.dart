@@ -94,7 +94,8 @@ class SLPacketCodec {
     } else {
       if (offset >= packetBytes.length) {
         throw FormatException(
-            'Truncated packet header while reading message ID');
+          'Truncated packet header while reading message ID',
+        );
       }
       final second = packetBytes[offset++];
       if (second != 0xFF) {
@@ -103,20 +104,23 @@ class SLPacketCodec {
       } else {
         if (offset >= packetBytes.length) {
           throw FormatException(
-              'Truncated packet header while reading low/fixed frequency message ID');
+            'Truncated packet header while reading low/fixed frequency message ID',
+          );
         }
         final high = packetBytes[offset++];
         if (high == 0xFF) {
           if (offset >= packetBytes.length) {
             throw FormatException(
-                'Truncated packet header while reading fixed frequency message ID');
+              'Truncated packet header while reading fixed frequency message ID',
+            );
           }
           freq = SLPacketFrequency.fixed;
           msgId = packetBytes[offset++];
         } else {
           if (offset >= packetBytes.length) {
             throw FormatException(
-                'Truncated packet header while reading low frequency message ID');
+              'Truncated packet header while reading low frequency message ID',
+            );
           }
           final low = packetBytes[offset++];
           freq = SLPacketFrequency.low;

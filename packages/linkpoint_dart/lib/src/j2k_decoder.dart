@@ -68,12 +68,7 @@ class J2KDecoder {
       }
     }
 
-    return J2KHeader(
-      width: 0,
-      height: 0,
-      channels: 4,
-      status: 'fallback',
-    );
+    return J2KHeader(width: 0, height: 0, channels: 4, status: 'fallback');
   }
 
   static Uint8List? decodeRgba(Uint8List bytes) {
