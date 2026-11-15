@@ -1,10 +1,40 @@
 include('llsd-core')
 project(':llsd-core').projectDir = file('LLSD-KOTLIN')
 
-def hasAndroidSdk = System.getenv('ANDROID_HOME') != null ||
-                    System.getenv('ANDROID_SDK_ROOT') != null ||
-                    file('Linkpoint/local.properties').exists() ||
-                    file('local.properties').exists()
+def resolveAndroidSdkDir = {
+    def localProps = new Properties()
+    for (loc in ['Linkpoint/local.properties', 'local.properties', '../local.properties']) {
+        def f = file(loc)
+        if (f.exists()) {
+            f.withInputStream { localProps.load(it) }
+            if (localProps.getProperty('sdk.dir')) {
+                return file(localProps.getProperty('sdk.dir'))
+            }
+        }
+    }
+    def envHome = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+    if (envHome) {
+        return file(envHome)
+    }
+    return null
+}
+
+def skipAndroid = System.getenv('LINKPOINT_SKIP_ANDROID') == '1' ||
+                  System.getenv('SKIP_ANDROID_BUILD') == '1' ||
+                  providers.gradleProperty('skipAndroidBuild').orNull == 'true'
+
+def sdkDir = resolveAndroidSdkDir()
+def hasAndroidSdk = !skipAndroid && sdkDir != null && sdkDir.exists() && (
+    new File(sdkDir, 'ndk/26.3.11579264').exists() ||
+    (System.getenv('ANDROID_NDK_HOME') != null && file(System.getenv('ANDROID_NDK_HOME')).exists() && (
+        file(System.getenv('ANDROID_NDK_HOME')).name == '26.3.11579264' ||
+        new File(file(System.getenv('ANDROID_NDK_HOME')), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
+    )) ||
+    (System.getenv('ANDROID_NDK_ROOT') != null && file(System.getenv('ANDROID_NDK_ROOT')).exists() && (
+        file(System.getenv('ANDROID_NDK_ROOT')).name == '26.3.11579264' ||
+        new File(file(System.getenv('ANDROID_NDK_ROOT')), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
+    ))
+)
 
 if (hasAndroidSdk && file('Linkpoint').exists()) {
     includeBuild('Linkpoint')

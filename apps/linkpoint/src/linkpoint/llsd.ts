@@ -3,6 +3,8 @@
  * Handles parsing and building of LLSD XML for Second Life capabilities
  */
 
+import { parseBinary as parseBinaryData, parseNotation as parseNotationText } from '../lib/llsd';
+
 export class LLSD {
   /**
    * Parse LLSD XML string to JavaScript object
@@ -35,6 +37,24 @@ export class LLSD {
     }
 
     return this._parseElement(firstChild);
+  }
+
+  /**
+   * Parse LLSD binary data to JavaScript object
+   * @param data - The binary byte array to parse
+   * @returns - The parsed data
+   */
+  static parseBinary(data: Uint8Array): any {
+    return parseBinaryData(data);
+  }
+
+  /**
+   * Parse LLSD notation string to JavaScript object
+   * @param notation - The notation string to parse
+   * @returns - The parsed data
+   */
+  static parseNotation(notation: string): any {
+    return parseNotationText(notation);
   }
 
   /**

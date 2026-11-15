@@ -15,6 +15,46 @@ function number(value, axis) {
 }
 
 async function decodeLLMesh(buffer) {
+  if (buffer) {
+    try {
+      const text = typeof buffer === 'string' ? buffer : (Buffer.isBuffer(buffer) || buffer instanceof Uint8Array ? new TextDecoder('utf-8').decode(buffer) : null);
+      if (text && (text.includes('unified-llsd-mesh-v1') || text.includes('preprocessed') || text.includes('submeshes'))) {
+        const payload = JSON.parse(text);
+        if (payload && (payload.format === 'unified-llsd-mesh-v1' || Array.isArray(payload.submeshes))) {
+          const parts = (payload.submeshes || payload.parts || []).map((sub, idx) => ({
+            materialIndex: Number(sub.materialIndex ?? sub.material_index ?? idx),
+            vertices: sub.positions || sub.vertices || [],
+            normals: sub.normals || [],
+            texCoords: sub.texCoords || sub.tex_coords || [],
+            indices: Array.isArray(sub.indices) ? sub.indices.map(Number) : [],
+            joints: sub.joints || [],
+            jointWeights: sub.jointWeights || sub.joint_weights || []
+          }));
+          const rawThresholds = payload.lod_thresholds || payload.lodThresholds || {};
+          const lodThresholds = {
+            highThreshold: Number(rawThresholds.highThreshold ?? rawThresholds.high_threshold ?? 200.0),
+            mediumThreshold: Number(rawThresholds.mediumThreshold ?? rawThresholds.medium_threshold ?? 80.0),
+            lowThreshold: Number(rawThresholds.lowThreshold ?? rawThresholds.low_threshold ?? 20.0),
+            lowestThreshold: Number(rawThresholds.lowestThreshold ?? rawThresholds.lowest_threshold ?? 4.0)
+          };
+          return {
+            format: payload.format || 'unified-llsd-mesh-v1',
+            selectedLod: payload.selected_lod || payload.selectedLod || 'high_lod',
+            parts,
+            lods: payload.lods || { high_lod: parts },
+            lodThresholds,
+            skin: payload.skin || null,
+            physics: payload.physics || null,
+            metadata: payload.metadata || {},
+            ...parts[0]
+          };
+        }
+      }
+    } catch (_) {
+      // Fallback to legacy binary decoding
+    }
+  }
+
   const mesh = await LLMesh.from(buffer);
   return normalizeLLMesh(mesh);
 }
@@ -83,13 +123,66 @@ function decodeSubmesh(submesh, materialIndex) {
   return { materialIndex, vertices, normals, texCoords, indices, ...decodeWeights(submesh.weights, vertexCount) };
 }
 
-function normalizeLLMesh(mesh) {
+/**
+ * Compute screen pixel footprint (coverage diameter) of an object's bounding sphere.
+ * Formula: projectedPixels = (boundingRadius * screenHeightPx) / (distance * tan(fov / 2))
+ */
+function calculateProjectedPixelCoverage(boundingRadius = 0.5, distanceMeters = 10.0, fovRad = Math.PI / 3, screenHeightPx = 1080) {
+  const safeRadius = boundingRadius <= 0 ? 0.5 : boundingRadius;
+  const safeDistance = distanceMeters <= 0.001 ? 0.001 : distanceMeters;
+  const safeFov = Math.max(0.01, Math.min(Math.PI - 0.01, fovRad));
+  const tanHalfFov = Math.tan(safeFov / 2);
+  const safeTan = tanHalfFov <= 0.0001 ? 0.57735 : tanHalfFov;
+  return (safeRadius * screenHeightPx) / (safeDistance * safeTan);
+}
+
+/**
+ * Select LOD level based on screen-space pixel area calculations.
+ */
+function selectLOD(lods, options = {}) {
+  const highThreshold = options.highThreshold ?? 200.0;
+  const mediumThreshold = options.mediumThreshold ?? 80.0;
+  const lowThreshold = options.lowThreshold ?? 20.0;
+  const lowestThreshold = options.lowestThreshold ?? 4.0;
+
+  let projectedPixels = options.projectedPixels;
+  if (projectedPixels === undefined && options.distance !== undefined) {
+    projectedPixels = calculateProjectedPixelCoverage(
+      options.boundingRadius ?? 0.5,
+      options.distance,
+      options.fovRad ?? Math.PI / 3,
+      options.screenHeightPx ?? 1080
+    );
+  }
+
+  let preferredOrder;
+  if (projectedPixels !== undefined) {
+    if (projectedPixels >= highThreshold) {
+      preferredOrder = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'];
+    } else if (projectedPixels >= mediumThreshold) {
+      preferredOrder = ['medium_lod', 'high_lod', 'low_lod', 'lowest_lod'];
+    } else if (projectedPixels >= lowThreshold) {
+      preferredOrder = ['low_lod', 'medium_lod', 'lowest_lod', 'high_lod'];
+    } else {
+      preferredOrder = ['lowest_lod', 'low_lod', 'medium_lod', 'high_lod'];
+    }
+  } else if (options.targetLod) {
+    preferredOrder = [options.targetLod, 'high_lod', 'medium_lod', 'low_lod', 'lowest_lod'];
+  } else {
+    preferredOrder = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'];
+  }
+
+  const selectedName = preferredOrder.find((name) => lods[name] && lods[name].length > 0);
+  return selectedName || null;
+}
+
+function normalizeLLMesh(mesh, options = {}) {
   const lods = {};
   for (const name of ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod']) {
     const parts = (mesh.lodLevels?.[name] || []).map(decodeSubmesh).filter(Boolean);
     if (parts.length) lods[name] = parts;
   }
-  const selectedLod = ['high_lod', 'medium_lod', 'low_lod', 'lowest_lod'].find((name) => lods[name]);
+  const selectedLod = selectLOD(lods, options);
   if (!selectedLod) throw new Error('LLMesh contains no renderable LOD');
   const parts = lods[selectedLod];
   const skin = mesh.skin ? {
@@ -320,4 +413,4 @@ function clearTextureCache() {
   textureLRUOrder.length = 0;
 }
 
-module.exports = { computeNormals, decodeLLMesh, normalizeLLMesh, decodeGLTFMaterial, normalizeGLTFMaterial, decodeSculpt, decodeJPEG2000, clearTextureCache };
+module.exports = { computeNormals, calculateProjectedPixelCoverage, selectLOD, decodeLLMesh, normalizeLLMesh, decodeGLTFMaterial, normalizeGLTFMaterial, decodeSculpt, decodeJPEG2000, clearTextureCache };

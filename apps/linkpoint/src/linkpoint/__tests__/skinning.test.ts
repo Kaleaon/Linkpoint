@@ -39,4 +39,32 @@ describe('GPU skinning helpers', () => {
   it('clamps out-of-range or non-integer joint indices to joint 0', () => {
     expect(clampJointIndices([0, 3, 4, -1, 1.5, NaN], 4)).toEqual([0, 3, 0, 0, 0, 0]);
   });
+
+  it('writes into provided target buffer when capacity is sufficient', () => {
+    const target = new Float32Array(24);
+    target.fill(99);
+    const m = compose([1, 2, 3]);
+    const res = packJointRows([m], 2, target);
+    expect(res).toBe(target);
+    expect(res[0]).not.toBe(99);
+  });
+
+  it('handles identity fallbacks on reused buffers by overwriting lingering values', () => {
+    const target = new Float32Array(24);
+    target.fill(77);
+    const rows = packJointRows([], 2, target);
+    expect(rows).toBe(target);
+    expect(Array.from(rows.slice(0, 12))).toEqual([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]);
+    expect(Array.from(rows.slice(12, 24))).toEqual([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]);
+  });
+
+  it('allocates a new buffer when target parameter is omitted or undersized', () => {
+    const undersized = new Float32Array(10);
+    const res1 = packJointRows([], 2, undersized);
+    expect(res1).not.toBe(undersized);
+    expect(res1).toHaveLength(24);
+
+    const res2 = packJointRows([], 2);
+    expect(res2).toHaveLength(24);
+  });
 });
