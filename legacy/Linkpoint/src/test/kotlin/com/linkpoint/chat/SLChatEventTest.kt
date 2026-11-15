@@ -8,6 +8,7 @@ import com.linkpoint.protocol.messages.ids.MessageIdRegistry
 import com.linkpoint.teleport.TeleportManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.*
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -88,24 +89,26 @@ class SLChatEventTest {
 
     @Test
     fun `test handleIncomingIM emits typed SLChatEvent through messageFlow`() = runBlocking {
-        val sessionId = UUID.randomUUID()
-        val senderId = UUID.randomUUID()
+        withTimeout(5000) {
+            val sessionId = UUID.randomUUID()
+            val senderId = UUID.randomUUID()
 
-        imManager.handleIncomingIM(
-            fromAgentId = senderId,
-            fromName = "Friend Avatar",
-            message = "Wants to be friends",
-            sessionId = sessionId,
-            dialogType = IMType.FRIENDSHIP_OFFERED,
-            timestamp = 2000L
-        )
+            imManager.handleIncomingIM(
+                fromAgentId = senderId,
+                fromName = "Friend Avatar",
+                message = "Wants to be friends",
+                sessionId = sessionId,
+                dialogType = IMType.FRIENDSHIP_OFFERED,
+                timestamp = 2000L
+            )
 
-        val emittedEvent = imManager.messageFlow.first()
-        assertTrue("Emitted event should be FriendshipOffer", emittedEvent is SLChatEvent.FriendshipOffer)
-        val offer = emittedEvent as SLChatEvent.FriendshipOffer
-        assertEquals(senderId, offer.fromAgentId)
-        assertEquals("Friend Avatar", offer.fromName)
-        assertEquals(CardActionState.PENDING, offer.actionState)
+            val emittedEvent = imManager.messageFlow.first()
+            assertTrue("Emitted event should be FriendshipOffer", emittedEvent is SLChatEvent.FriendshipOffer)
+            val offer = emittedEvent as SLChatEvent.FriendshipOffer
+            assertEquals(senderId, offer.fromAgentId)
+            assertEquals("Friend Avatar", offer.fromName)
+            assertEquals(CardActionState.PENDING, offer.actionState)
+        }
     }
 
     @Test
