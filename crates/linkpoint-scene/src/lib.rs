@@ -7,7 +7,8 @@ pub mod volume;
 pub mod wasm;
 
 pub use decoder::{
-    J2KHeaderInfo, calculate_discard_level, generate_placeholder_rgba, parse_j2k_header,
+    J2KHeaderInfo, ParsedMeshHeader, calculate_discard_level, calculate_projected_pixel_coverage,
+    generate_placeholder_rgba, parse_binary_mesh_header, parse_j2k_header, select_lod,
 };
 pub use math::{EulerAngles, Matrix4, Quaternion};
 pub use spatial::{
@@ -93,6 +94,27 @@ pub struct SimulatorObject {
     pub rotation: Option<[f32; 4]>,
     pub scale: Option<[f32; 3]>,
     pub mesh_asset: Option<String>,
+}
+
+impl SceneEntity {
+    pub fn from_binary_mesh_header(
+        id: impl Into<String>,
+        header_data: &[u8],
+        transform: Transform,
+    ) -> Self {
+        let (kind, materials) = if let Ok(header) = parse_binary_mesh_header(header_data) {
+            (EntityKind::Mesh, header.materials)
+        } else {
+            (EntityKind::Mesh, vec![])
+        };
+        Self {
+            id: id.into(),
+            parent_id: None,
+            transform,
+            kind,
+            materials,
+        }
+    }
 }
 
 impl From<SimulatorObject> for SceneEntity {
