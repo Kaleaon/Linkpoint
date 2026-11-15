@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:ffi/ffi.dart';
 
 final class LlsdResultBufferStruct extends Struct {
@@ -19,14 +20,20 @@ final class LlsdResultBufferStruct extends Struct {
 }
 
 typedef NativeLinkpointFreeBuffer = Void Function(
-    Pointer<LlsdResultBufferStruct>);
+  Pointer<LlsdResultBufferStruct>,
+);
 typedef DartLinkpointFreeBuffer = void Function(
-    Pointer<LlsdResultBufferStruct>);
+  Pointer<LlsdResultBufferStruct>,
+);
 
 typedef NativeLinkpointParse = Pointer<LlsdResultBufferStruct> Function(
-    Pointer<Uint8>, IntPtr);
+  Pointer<Uint8>,
+  IntPtr,
+);
 typedef DartLinkpointParse = Pointer<LlsdResultBufferStruct> Function(
-    Pointer<Uint8>, int);
+  Pointer<Uint8>,
+  int,
+);
 
 class LinkpointProtocolFFI {
   static DynamicLibrary? _lib;
@@ -145,7 +152,8 @@ class LinkpointProtocolFFI {
     final lib = _loadLibrary();
     final freeFn =
         lib.lookupFunction<NativeLinkpointFreeBuffer, DartLinkpointFreeBuffer>(
-            'linkpoint_free_buffer');
+      'linkpoint_free_buffer',
+    );
     freeFn(buf);
   }
 
@@ -172,7 +180,8 @@ class LinkpointProtocolFFI {
   }
 
   static List<int> _extractAndFreeBinaryResult(
-      Pointer<LlsdResultBufferStruct> resBuf) {
+    Pointer<LlsdResultBufferStruct> resBuf,
+  ) {
     if (resBuf == nullptr) {
       throw Exception('FFI returned null buffer');
     }

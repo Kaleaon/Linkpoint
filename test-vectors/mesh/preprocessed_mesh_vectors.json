@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "description": "Shared canonical pre-processed Unified-LLSD geometry payload test vectors",
+  "preprocessed_mesh_vectors": [
+    {
+      "name": "canonical_triangle_preprocessed",
+      "payload": {
+        "format": "unified-llsd-mesh-v1",
+        "selected_lod": "high_lod",
+        "lod_thresholds": {
+          "high_threshold": 200.0,
+          "medium_threshold": 80.0,
+          "low_threshold": 20.0,
+          "lowest_threshold": 4.0
+        },
+        "submeshes": [
+          {
+            "material_index": 0,
+            "indices": [0, 1, 2],
+            "positions": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+            "normals": [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0],
+            "tex_coords": [0.0, 0.0, 1.0, 0.0, 0.0, 1.0],
+            "joint_influences": []
+          }
+        ]
+      },
+      "expected": {
+        "format": "unified-llsd-mesh-v1",
+        "submesh_count": 1,
+        "vertex_count": 3,
+        "index_count": 3,
+        "high_threshold": 200.0
+      }
+    }
+  ]
+}

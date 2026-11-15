@@ -78,6 +78,21 @@ describe('avatar body in the world', () => {
     expect(bodyIds(scene)).toEqual([]);
   });
 
+  it('reuses Float32Array buffers for avatar body parts across frames and cleans up on removal', () => {
+    const { protocol, world, scene } = setup(true);
+    protocol.emit('scene:object-add', avatar);
+    const upper1 = scene.objects.get('av:body:upperBody').skin;
+    expect(upper1).toBeInstanceOf(Float32Array);
+
+    (world as any).updateAnimatedAvatars();
+    const upper2 = scene.objects.get('av:body:upperBody').skin;
+    expect(upper2).toBe(upper1);
+
+    expect((world as any).avatarBodyBuffers.has('av')).toBe(true);
+    protocol.emit('scene:object-remove', { id: 'av', localId: 1 });
+    expect((world as any).avatarBodyBuffers.has('av')).toBe(false);
+  });
+
   const faces = (entries: Record<number, string>) => {
     const list: any[] = Array.from({ length: 21 }, () => ({ textureId: null }));
     for (const [index, textureId] of Object.entries(entries)) list[Number(index)] = { textureId };

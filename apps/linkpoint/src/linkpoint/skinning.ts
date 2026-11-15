@@ -115,8 +115,9 @@ export function skinnedVertexShader(maxJoints: number): string {
 /**
  * Pack column-major 4x4 joint matrices into dual quaternions (8 floats per joint: 4 real + 4 dual).
  */
-export function packJointDualQuaternions(matrices: ArrayLike<number>[], maxJoints: number): Float32Array {
-  const out = new Float32Array(maxJoints * 8);
+export function packJointDualQuaternions(matrices: ArrayLike<number>[], maxJoints: number, target?: Float32Array): Float32Array {
+  const neededLength = maxJoints * 8;
+  const out = target && target.length >= neededLength ? target : new Float32Array(neededLength);
   for (let j = 0; j < maxJoints; j++) {
     const m = matrices[j];
     const dq = m && m.length >= 16 ? DualQuaternion.fromMatrix(m) : DualQuaternion.identity();
@@ -137,8 +138,8 @@ export function packJointDualQuaternions(matrices: ArrayLike<number>[], maxJoint
 /**
  * Packs 8 float values per joint as normalized dual quaternions into uniform buffers.
  */
-export function packJointRows(matrices: ArrayLike<number>[], maxJoints: number): Float32Array {
-  return packJointDualQuaternions(matrices, maxJoints);
+export function packJointRows(matrices: ArrayLike<number>[], maxJoints: number, target?: Float32Array): Float32Array {
+  return packJointDualQuaternions(matrices, maxJoints, target);
 }
 
 /** Flatten per-vertex joint indices to what the shader can address, clamping to the uploaded joint count. */
