@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
 
 # Dynamic root directory resolution
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

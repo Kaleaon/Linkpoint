@@ -927,8 +927,8 @@ fn build_side(
     let mut tex_coords = Vec::new();
     let mut cols = 0;
 
-    for t in 0..size_t {
-        let tt = path.points[t].tex_t;
+    for (t, point) in path.points.iter().enumerate().take(size_t) {
+        let tt = point.tex_t;
         let mut col_count = 0;
         for s in 0..num_cols {
             let index = begin_s + s;
