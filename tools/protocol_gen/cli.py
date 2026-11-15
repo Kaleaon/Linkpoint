@@ -32,6 +32,8 @@ DEFAULT_TARGET_OUT_DIRS = {
         else "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
     ),
     "godot": "platforms/godot/gdextension/src/generated/protocol",
+    "swift": "platforms/iOS/Sources/LLSD/Generated",
+    "csharp": "platforms/dotnet/Generated",
 }
 
 
@@ -139,7 +141,7 @@ def main():
     p_gen.add_argument(
         "--target",
         default="all",
-        help="Target languages (kotlin,rust,dart,typescript,python,c,java,all)",
+        help="Target languages (kotlin,rust,dart,typescript,python,c,java,godot,swift,csharp,all)",
     )
     p_gen.add_argument("--out-dir", default=None, help="Custom output directory root")
     p_gen.set_defaults(func=cmd_generate)
