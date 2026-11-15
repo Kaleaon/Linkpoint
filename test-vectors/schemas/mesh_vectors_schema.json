@@ -27,7 +27,59 @@
         },
         "required": ["name", "hex_bytes", "expected"]
       }
+    },
+    "multi_lod_vectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "bounding_radius": { "type": "number" },
+          "distance_meters": { "type": "number" },
+          "fov_rad": { "type": "number" },
+          "screen_height_px": { "type": "number" },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "projected_pixel_coverage": { "type": "number" },
+              "selected_lod": { "type": "string" }
+            },
+            "required": ["projected_pixel_coverage", "selected_lod"]
+          }
+        },
+        "required": ["name", "bounding_radius", "distance_meters", "fov_rad", "screen_height_px", "expected"]
+      }
+    },
+    "submesh_vectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "hex_bytes": { "type": "string" },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "submesh_count": { "type": "integer" },
+              "submeshes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "material_index": { "type": "integer" },
+                    "vertex_count": { "type": "integer" },
+                    "index_count": { "type": "integer" }
+                  },
+                  "required": ["material_index", "vertex_count", "index_count"]
+                }
+              }
+            },
+            "required": ["submesh_count", "submeshes"]
+          }
+        },
+        "required": ["name", "hex_bytes", "expected"]
+      }
     }
   },
-  "required": ["version", "llmesh_vectors"]
+  "required": ["version", "llmesh_vectors", "multi_lod_vectors", "submesh_vectors"]
 }

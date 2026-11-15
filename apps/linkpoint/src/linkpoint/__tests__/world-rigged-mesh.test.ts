@@ -144,4 +144,26 @@ describe('animated rigged mesh in the world', () => {
     expect(scene.objects.get('animesh').skin[1]).toBeCloseTo(-1, 3);
     expect(scene.objects.get('animesh').position).toEqual([4, 5, 6]);
   });
+
+  it('reuses target buffer for rigged meshes on scene object state', () => {
+    const { protocol, scene, world } = setup();
+    protocol.emit('scene:object-add', {
+      id: 'rig', localId: 2, parentId: 1, avatar: false, assetId: 'mesh-1', shape: 'asset-proxy',
+      position: [0.3, 0, 0.1], rotation: [0, 0, 0, 1], scale: [3, 3, 3],
+    });
+    protocol.emit('scene:asset-ready', {
+      assetId: 'mesh-1',
+      geometry: {
+        parts: [{ materialIndex: 0, vertices: [0, 0, 0], indices: [0, 0, 0], joints: [0, 0, 0, 0], jointWeights: [1, 0, 0, 0] }],
+        skin: { jointNames: ['mPelvis'], bindShapeMatrix: identity, inverseBindMatrices: [identity] },
+      },
+    });
+    const rig1 = scene.objects.get('rig');
+    const buffer1 = rig1.skin;
+    expect(buffer1).toBeInstanceOf(Float32Array);
+
+    (world as any).updateAnimatedSkins();
+    const rig2 = scene.objects.get('rig');
+    expect(rig2.skin).toBe(buffer1);
+  });
 });

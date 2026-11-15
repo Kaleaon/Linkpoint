@@ -5,6 +5,7 @@ import { loadGoogle } from "../services/google.ts";
 import { useApp } from "../context/AppContext.jsx";
 import { useRlvSafe } from "../viewer/RlvContext";
 import { app } from "../linkpoint/app.ts";
+import { EnvironmentPresetSelector } from "../linkpoint/windlight.ts";
 import Icon from "../components/Icon.jsx";
 
 export default function Settings() {
@@ -86,6 +87,11 @@ export default function Settings() {
           {rlv.active.size} active restriction{rlv.active.size > 1 ? "s" : ""} enforced across in-world objects.
         </p>
       ) : null}
+    </section>
+    <section className="runtime-card" aria-labelledby="environment-heading">
+      <Icon name="sun" size={22} />
+      <h2 id="environment-heading">Environment &amp; Sky Presets</h2>
+      <EnvironmentPresetSelector protocol={app.protocol} />
     </section>
     <section className="runtime-card">
       <Icon name="settings" size={22} />
