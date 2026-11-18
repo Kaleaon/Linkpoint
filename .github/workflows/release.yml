@@ -46,7 +46,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
         with:
           packages: >-
             platform-tools
@@ -219,12 +219,28 @@ jobs:
           channel: "stable"
 
       - name: Verify and publish to Pub.dev
+        env:
+          PUB_DEV_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
         run: |
           cd packages/linkpoint_dart
-          dart pub publish --dry-run
+          if [ -n "$PUB_DEV_TOKEN" ]; then
+            mkdir -p ~/.config/dart
+            cat << EOF > ~/.config/dart/pub-credentials.json
+            {
+              "accessToken": "${PUB_DEV_TOKEN}",
+              "refreshToken": null,
+              "tokenEndpoint": "https://accounts.google.com/o/oauth2/token",
+              "scopes": ["https://www.googleapis.com/auth/userinfo.email", "openid"],
+              "expiration": 2147483647000
+            }
+            EOF
+            dart pub publish --force
+          else
+            dart pub publish --dry-run
+          fi
 
   publish-nuget:
-    name: Task 6 - Publish NuGet .NET Package
+    name: Task 6 - Publish NuGet .NET Packages
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -239,14 +255,16 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Pack and publish NuGet Package
+      - name: Pack and publish NuGet Packages
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_API_KEY || secrets.NUGET_KEY }}
         run: |
-          cd platforms/dotnet
-          dotnet pack -c Release Linkpoint.Protocol/Linkpoint.Protocol.csproj -o nupkg
-          if [ -n "${{ secrets.NUGET_API_KEY }}" ]; then
-            dotnet nuget push nupkg/*.nupkg --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet pack -c Release platforms/dotnet/Linkpoint.Protocol/Linkpoint.Protocol.csproj -o nupkg
+          dotnet pack -c Release sdks/csharp/src/Linkpoint.LLSD.csproj -o nupkg
+          if [ -n "$NUGET_TOKEN" ]; then
+            dotnet nuget push nupkg/*.nupkg --api-key "$NUGET_TOKEN" --source https://api.nuget.org/v3/index.json --skip-duplicate
           else
-            echo "NUGET_API_KEY not set, NuGet package built and verified successfully."
+            echo "NuGet API key not set, NuGet packages built and verified successfully."
           fi
 
   publish-maven:
@@ -298,3 +316,4 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: ${{ startsWith(github.ref_name, 'next-v') || contains(github.ref_name, 'beta') }}
+

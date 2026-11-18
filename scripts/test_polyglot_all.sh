@@ -116,7 +116,7 @@ run_target "swift" "Swift iOS Engine" \
 # 8. C# Target
 run_target "csharp" "C# .NET Solution" \
     "command -v dotnet" \
-    "cd platforms/dotnet && (dotnet test 2>/dev/null || dotnet run --project Linkpoint.Protocol.Tests/Linkpoint.Protocol.Tests.csproj)"
+    "dotnet run --project platforms/dotnet/Linkpoint.Protocol.Tests/Linkpoint.Protocol.Tests.csproj && dotnet run --project sdks/csharp/tests/Linkpoint.LLSD.Tests.csproj"
 
 echo ""
 echo "========================================================"

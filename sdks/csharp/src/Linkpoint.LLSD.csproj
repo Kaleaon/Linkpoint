@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Linkpoint.LLSD</RootNamespace>
+    <AssemblyName>Linkpoint.LLSD</AssemblyName>
+    <PackageId>Linkpoint.LLSD</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Linkpoint Contributors</Authors>
+    <Description>C# SDK and LLSD protocol codecs for Linkpoint</Description>
+    <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/Kaleaon/Linkpoint</RepositoryUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+
+</Project>

@@ -96,7 +96,7 @@ jobs:
           cache: "gradle"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
         with:
           packages: >-
             platform-tools
@@ -328,7 +328,7 @@ jobs:
   swift:
     name: Task 7 - Swift iOS Engine Verification
     runs-on: macos-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -340,9 +340,9 @@ jobs:
           swift test
 
   csharp:
-    name: Task 8 - C# .NET Protocol Verification
+    name: Task 8 - C# .NET SDK & Protocol Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -358,10 +358,13 @@ jobs:
           cd platforms/dotnet
           dotnet run --project Linkpoint.Protocol.Tests/Linkpoint.Protocol.Tests.csproj
 
-      - name: Pack NuGet Package
+      - name: Run C# LLSD SDK Tests
+        run: dotnet run --project sdks/csharp/tests/Linkpoint.LLSD.Tests.csproj
+
+      - name: Pack NuGet Packages
         run: |
-          cd platforms/dotnet
-          dotnet pack -c Release Linkpoint.Protocol/Linkpoint.Protocol.csproj
+          dotnet pack -c Release platforms/dotnet/Linkpoint.Protocol/Linkpoint.Protocol.csproj -o nupkg
+          dotnet pack -c Release sdks/csharp/src/Linkpoint.LLSD.csproj -o nupkg
 
   ci-status:
     name: Task 9 - CI Status & Coverage Quality Gate
