@@ -22,7 +22,7 @@ DEFAULT_TARGET_OUT_DIRS = {
         else "Linkpoint/src/main/java/com/linkpoint/protocol/generated"
     ),
     "rust": "crates/linkpoint-protocol/src/generated",
-    "dart": "packages/viewer-dart/lib/src/generated",
+    "dart": "packages/linkpoint_dart/lib/src/generated",
     "typescript": "packages/viewer-types/src/generated",
     "python": "tools/protocol_gen/generated/python",
     "c": "crates/linkpoint-protocol/c_include/generated",
@@ -35,6 +35,33 @@ DEFAULT_TARGET_OUT_DIRS = {
     "swift": "platforms/iOS/Sources/LLSD/Generated",
     "csharp": "platforms/dotnet/Linkpoint.Protocol/Generated",
 }
+
+
+def get_default_target_out_dir(target: str) -> str:
+    if target == "kotlin":
+        if os.path.exists("legacy/Linkpoint/src/main/java/com/linkpoint/protocol"):
+            return "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/generated"
+        elif os.path.exists("src/main/java/com/linkpoint/protocol"):
+            return "src/main/java/com/linkpoint/protocol/generated"
+        else:
+            return "Linkpoint/src/main/java/com/linkpoint/protocol/generated"
+    if target == "java":
+        if os.path.exists("legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java"):
+            return (
+                "legacy/Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
+            )
+        elif os.path.exists("src/main/java/com/linkpoint/protocol/java"):
+            return "src/main/java/com/linkpoint/protocol/java/generated"
+        else:
+            return "Linkpoint/src/main/java/com/linkpoint/protocol/java/generated"
+    if target == "dart":
+        if os.path.exists("packages/linkpoint_dart"):
+            return "packages/linkpoint_dart/lib/src/generated"
+        elif os.path.exists("lib/src"):
+            return "lib/src/generated"
+        else:
+            return "packages/viewer-dart/lib/src/generated"
+    return DEFAULT_TARGET_OUT_DIRS.get(target, f"generated/{target}")
 
 
 def load_ast(template_path: str, llsd_dir: str) -> ProtocolAST:
@@ -82,11 +109,7 @@ def cmd_generate(args):
             sys.exit(1)
 
         emitter = EMITTERS[target]
-        out_dir = (
-            args.out_dir
-            if args.out_dir
-            else DEFAULT_TARGET_OUT_DIRS.get(target, f"generated/{target}")
-        )
+        out_dir = args.out_dir if args.out_dir else get_default_target_out_dir(target)
 
         results = emitter.emit(ast, out_dir)
         for path in results.keys():
