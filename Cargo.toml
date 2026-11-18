@@ -7,8 +7,10 @@ members = [
     "crates/linkpoint-scene",
     "crates/linkpoint-cache",
     "crates/linkpoint-tauri",
+    "crates/quick-xml",
+    "crates/serde-llsd-benthic",
 ]
-exclude = ["apps/linkpoint/src-tauri", "LLSD-KOTLIN/src/main/rust", "crates/quick-xml"]
+exclude = ["apps/linkpoint/src-tauri", "LLSD-KOTLIN/src/main/rust"]
 
 [workspace.package]
 version = "0.1.0"

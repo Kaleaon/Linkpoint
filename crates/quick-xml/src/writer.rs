@@ -327,7 +327,10 @@ impl Indentation {
     }
 
     fn shrink(&mut self) {
-        self.indents_len = self.indents_len.checked_sub(self.indent_size).unwrap_or_default();
+        self.indents_len = self
+            .indents_len
+            .checked_sub(self.indent_size)
+            .unwrap_or_default();
     }
 }
 

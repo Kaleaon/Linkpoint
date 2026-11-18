@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use quick_xml::{de::from_str, se::to_string};
 use serde::{Deserialize, Serialize};
 

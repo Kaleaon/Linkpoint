@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use std::borrow::Cow;
 use std::io::Cursor;
 use std::str::from_utf8;

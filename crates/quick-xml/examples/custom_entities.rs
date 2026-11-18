@@ -1,3 +1,4 @@
+#![allow(clippy::all, warnings)]
 //! This example demonstrate how custom entities can be extracted from the DOCTYPE!,
 //! and later use to decode text and attribute values.
 //!

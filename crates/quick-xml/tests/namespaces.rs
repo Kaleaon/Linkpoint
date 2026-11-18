@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use pretty_assertions::assert_eq;
 use quick_xml::events::attributes::Attribute;
 use quick_xml::events::Event::*;

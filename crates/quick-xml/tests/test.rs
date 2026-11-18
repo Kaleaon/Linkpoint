@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use quick_xml::{events::attributes::Attribute, events::Event::*, Error, Reader};
 use std::{borrow::Cow, io::Cursor};
 
@@ -145,6 +147,7 @@ fn test_issue94() {
 }
 
 #[test]
+#[allow(clippy::collapsible_match, clippy::unnecessary_map_or)]
 fn fuzz_101() {
     let data: &[u8] = b"\x00\x00<\x00\x00\x0a>&#44444444401?#\x0a413518\
                        #\x0a\x0a\x0a;<:<)(<:\x0a\x0a\x0a\x0a;<:\x0a\x0a\

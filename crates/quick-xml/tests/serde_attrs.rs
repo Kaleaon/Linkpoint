@@ -1,3 +1,5 @@
+#![allow(clippy::all, warnings)]
+
 use quick_xml::se::to_string;
 use regex::Regex;
 use serde::Serialize;
@@ -62,7 +64,7 @@ fn test_nested() {
     assert_eq!(xml, inline(str));
 }
 
-fn inline(str: &str) -> Cow<str> {
+fn inline(str: &str) -> Cow<'_, str> {
     let regex = Regex::new(r">\s+<").unwrap();
     regex.replace_all(str, "><")
 }
