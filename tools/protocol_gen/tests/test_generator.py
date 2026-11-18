@@ -79,15 +79,18 @@ version 2.0
     def test_swift_emitter_code_structure(self):
         ast = TemplateParser().parse(self.sample_template)
         from tools.protocol_gen.emitters.swift_emitter import SwiftEmitter
+
         emitter = SwiftEmitter()
         code = emitter._generate_swift_code(ast)
-        self.assertIn("struct GeneratedProtocolCatalog", code)
+        self.assertIn("struct GeneratedProtocol", code)
+        self.assertIn("GeneratedProtocolCatalog", code)
         self.assertIn("struct TestPacketPacket", code)
         self.assertIn("func decompressZerocoded", code)
 
     def test_csharp_emitter_code_structure(self):
         ast = TemplateParser().parse(self.sample_template)
         from tools.protocol_gen.emitters.csharp_emitter import CSharpEmitter
+
         emitter = CSharpEmitter()
         code = emitter._generate_csharp_code(ast)
         self.assertIn("namespace Linkpoint.Protocol", code)
@@ -108,6 +111,10 @@ version 2.0
 
         proto_content = results[proto_file]
         self.assertIn("public struct GeneratedProtocol", proto_content)
+        self.assertIn(
+            "public typealias GeneratedProtocolCatalog = GeneratedProtocol",
+            proto_content,
+        )
         self.assertIn("func decompressZerocoded", proto_content)
         self.assertIn("public struct TestPacketPacket", proto_content)
         self.assertIn("func serialize() -> Data", proto_content)
@@ -126,6 +133,7 @@ version 2.0
 
         proto_content = results[proto_file]
         self.assertIn("public static class GeneratedProtocol", proto_content)
+        self.assertIn("public static class GeneratedProtocolCatalog", proto_content)
         self.assertIn("DecompressZerocoded", proto_content)
         self.assertIn("public class TestPacketPacket", proto_content)
         self.assertIn("public byte[] Serialize()", proto_content)

@@ -37,13 +37,3 @@ namespace Linkpoint.Protocol
     }
 
 }
-
-namespace Linkpoint.Protocol.Generated
-{
-    public class AgentDomainCapabilitiesCapabilities : Linkpoint.Protocol.AgentDomainCapabilitiesCapabilities { }
-
-    public class CapabilitiesRequestResponseCapabilities : Linkpoint.Protocol.CapabilitiesRequestResponseCapabilities { }
-
-    public class EventQueueGetCapabilities : Linkpoint.Protocol.EventQueueGetCapabilities { }
-
-}

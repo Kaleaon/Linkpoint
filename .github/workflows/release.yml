@@ -267,7 +267,12 @@ jobs:
           java-version: "17"
 
       - name: Build and verify Maven package
-        run: mvn clean package -f LLSD-KOTLIN/pom.xml
+        run: |
+          if [ -f "legacy/LLSD-KOTLIN/pom.xml" ]; then
+            mvn clean package -f legacy/LLSD-KOTLIN/pom.xml
+          else
+            mvn clean package -f LLSD-KOTLIN/pom.xml
+          fi
 
   publish-release:
     name: Task 8 - Publish GitHub Release

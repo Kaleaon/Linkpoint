@@ -551,18 +551,13 @@ public struct GeneratedProtocol {
     }
 }
 
-public struct GeneratedProtocolCatalog {
-    public static let templateVersion: String = GeneratedProtocol.templateVersion
-    public static let registeredMessages: [String: UInt32] = GeneratedProtocol.registeredMessages
-    public static func decompressZerocoded(_ src: Data) -> Data { GeneratedProtocol.decompressZerocoded(src) }
-    public static func decompressZerocoded(_ src: [UInt8]) -> [UInt8] { GeneratedProtocol.decompressZerocoded(src) }
-}
+public typealias GeneratedProtocolCatalog = GeneratedProtocol
 
 // Generated UDP Messages
 // Message: TestMessage (Low 1)
 public struct TestMessagePacket {
     public var messageName: String = "TestMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 1
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -590,7 +585,7 @@ public struct TestMessagePacket {
 // Message: PacketAck (Fixed 4294967291)
 public struct PacketAckPacket {
     public var messageName: String = "PacketAck"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 4294967291
     public var frequency: String = "Fixed"
     public var isZerocoded: Bool = false
@@ -618,7 +613,7 @@ public struct PacketAckPacket {
 // Message: OpenCircuit (Fixed 4294967292)
 public struct OpenCircuitPacket {
     public var messageName: String = "OpenCircuit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 4294967292
     public var frequency: String = "Fixed"
     public var isZerocoded: Bool = false
@@ -646,7 +641,7 @@ public struct OpenCircuitPacket {
 // Message: CloseCircuit (Fixed 4294967293)
 public struct CloseCircuitPacket {
     public var messageName: String = "CloseCircuit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 4294967293
     public var frequency: String = "Fixed"
     public var isZerocoded: Bool = false
@@ -674,7 +669,7 @@ public struct CloseCircuitPacket {
 // Message: StartPingCheck (High 1)
 public struct StartPingCheckPacket {
     public var messageName: String = "StartPingCheck"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 1
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -702,7 +697,7 @@ public struct StartPingCheckPacket {
 // Message: CompletePingCheck (High 2)
 public struct CompletePingCheckPacket {
     public var messageName: String = "CompletePingCheck"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 2
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -730,7 +725,7 @@ public struct CompletePingCheckPacket {
 // Message: AddCircuitCode (Low 2)
 public struct AddCircuitCodePacket {
     public var messageName: String = "AddCircuitCode"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 2
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -758,7 +753,7 @@ public struct AddCircuitCodePacket {
 // Message: UseCircuitCode (Low 3)
 public struct UseCircuitCodePacket {
     public var messageName: String = "UseCircuitCode"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 3
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -786,7 +781,7 @@ public struct UseCircuitCodePacket {
 // Message: NeighborList (High 3)
 public struct NeighborListPacket {
     public var messageName: String = "NeighborList"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 3
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -814,7 +809,7 @@ public struct NeighborListPacket {
 // Message: AvatarTextureUpdate (Low 4)
 public struct AvatarTextureUpdatePacket {
     public var messageName: String = "AvatarTextureUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 4
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -842,7 +837,7 @@ public struct AvatarTextureUpdatePacket {
 // Message: SimulatorMapUpdate (Low 5)
 public struct SimulatorMapUpdatePacket {
     public var messageName: String = "SimulatorMapUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 5
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -870,7 +865,7 @@ public struct SimulatorMapUpdatePacket {
 // Message: SimulatorSetMap (Low 6)
 public struct SimulatorSetMapPacket {
     public var messageName: String = "SimulatorSetMap"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 6
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -898,7 +893,7 @@ public struct SimulatorSetMapPacket {
 // Message: SubscribeLoad (Low 7)
 public struct SubscribeLoadPacket {
     public var messageName: String = "SubscribeLoad"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 7
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -926,7 +921,7 @@ public struct SubscribeLoadPacket {
 // Message: UnsubscribeLoad (Low 8)
 public struct UnsubscribeLoadPacket {
     public var messageName: String = "UnsubscribeLoad"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 8
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -954,7 +949,7 @@ public struct UnsubscribeLoadPacket {
 // Message: SimulatorReady (Low 9)
 public struct SimulatorReadyPacket {
     public var messageName: String = "SimulatorReady"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 9
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -982,7 +977,7 @@ public struct SimulatorReadyPacket {
 // Message: TelehubInfo (Low 10)
 public struct TelehubInfoPacket {
     public var messageName: String = "TelehubInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 10
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1010,7 +1005,7 @@ public struct TelehubInfoPacket {
 // Message: SimulatorPresentAtLocation (Low 11)
 public struct SimulatorPresentAtLocationPacket {
     public var messageName: String = "SimulatorPresentAtLocation"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 11
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1038,7 +1033,7 @@ public struct SimulatorPresentAtLocationPacket {
 // Message: SimulatorLoad (Low 12)
 public struct SimulatorLoadPacket {
     public var messageName: String = "SimulatorLoad"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 12
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1066,7 +1061,7 @@ public struct SimulatorLoadPacket {
 // Message: SimulatorShutdownRequest (Low 13)
 public struct SimulatorShutdownRequestPacket {
     public var messageName: String = "SimulatorShutdownRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 13
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1094,7 +1089,7 @@ public struct SimulatorShutdownRequestPacket {
 // Message: RegionPresenceRequestByRegionID (Low 14)
 public struct RegionPresenceRequestByRegionIDPacket {
     public var messageName: String = "RegionPresenceRequestByRegionID"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 14
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1122,7 +1117,7 @@ public struct RegionPresenceRequestByRegionIDPacket {
 // Message: RegionPresenceRequestByHandle (Low 15)
 public struct RegionPresenceRequestByHandlePacket {
     public var messageName: String = "RegionPresenceRequestByHandle"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 15
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1150,7 +1145,7 @@ public struct RegionPresenceRequestByHandlePacket {
 // Message: RegionPresenceResponse (Low 16)
 public struct RegionPresenceResponsePacket {
     public var messageName: String = "RegionPresenceResponse"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 16
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1178,7 +1173,7 @@ public struct RegionPresenceResponsePacket {
 // Message: UpdateSimulator (Low 17)
 public struct UpdateSimulatorPacket {
     public var messageName: String = "UpdateSimulator"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 17
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1206,7 +1201,7 @@ public struct UpdateSimulatorPacket {
 // Message: LogDwellTime (Low 18)
 public struct LogDwellTimePacket {
     public var messageName: String = "LogDwellTime"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 18
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1234,7 +1229,7 @@ public struct LogDwellTimePacket {
 // Message: FeatureDisabled (Low 19)
 public struct FeatureDisabledPacket {
     public var messageName: String = "FeatureDisabled"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 19
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1262,7 +1257,7 @@ public struct FeatureDisabledPacket {
 // Message: LogFailedMoneyTransaction (Low 20)
 public struct LogFailedMoneyTransactionPacket {
     public var messageName: String = "LogFailedMoneyTransaction"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 20
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1290,7 +1285,7 @@ public struct LogFailedMoneyTransactionPacket {
 // Message: UserReportInternal (Low 21)
 public struct UserReportInternalPacket {
     public var messageName: String = "UserReportInternal"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 21
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1318,7 +1313,7 @@ public struct UserReportInternalPacket {
 // Message: SetSimStatusInDatabase (Low 22)
 public struct SetSimStatusInDatabasePacket {
     public var messageName: String = "SetSimStatusInDatabase"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 22
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1346,7 +1341,7 @@ public struct SetSimStatusInDatabasePacket {
 // Message: SetSimPresenceInDatabase (Low 23)
 public struct SetSimPresenceInDatabasePacket {
     public var messageName: String = "SetSimPresenceInDatabase"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 23
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1374,7 +1369,7 @@ public struct SetSimPresenceInDatabasePacket {
 // Message: EconomyDataRequest (Low 24)
 public struct EconomyDataRequestPacket {
     public var messageName: String = "EconomyDataRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 24
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1402,7 +1397,7 @@ public struct EconomyDataRequestPacket {
 // Message: EconomyData (Low 25)
 public struct EconomyDataPacket {
     public var messageName: String = "EconomyData"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 25
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1430,7 +1425,7 @@ public struct EconomyDataPacket {
 // Message: AvatarPickerRequest (Low 26)
 public struct AvatarPickerRequestPacket {
     public var messageName: String = "AvatarPickerRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 26
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1458,7 +1453,7 @@ public struct AvatarPickerRequestPacket {
 // Message: AvatarPickerRequestBackend (Low 27)
 public struct AvatarPickerRequestBackendPacket {
     public var messageName: String = "AvatarPickerRequestBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 27
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1486,7 +1481,7 @@ public struct AvatarPickerRequestBackendPacket {
 // Message: AvatarPickerReply (Low 28)
 public struct AvatarPickerReplyPacket {
     public var messageName: String = "AvatarPickerReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 28
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1514,7 +1509,7 @@ public struct AvatarPickerReplyPacket {
 // Message: PlacesQuery (Low 29)
 public struct PlacesQueryPacket {
     public var messageName: String = "PlacesQuery"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 29
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1542,7 +1537,7 @@ public struct PlacesQueryPacket {
 // Message: PlacesReply (Low 30)
 public struct PlacesReplyPacket {
     public var messageName: String = "PlacesReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 30
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1570,7 +1565,7 @@ public struct PlacesReplyPacket {
 // Message: DirFindQuery (Low 31)
 public struct DirFindQueryPacket {
     public var messageName: String = "DirFindQuery"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 31
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1598,7 +1593,7 @@ public struct DirFindQueryPacket {
 // Message: DirFindQueryBackend (Low 32)
 public struct DirFindQueryBackendPacket {
     public var messageName: String = "DirFindQueryBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 32
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1626,7 +1621,7 @@ public struct DirFindQueryBackendPacket {
 // Message: DirPlacesQuery (Low 33)
 public struct DirPlacesQueryPacket {
     public var messageName: String = "DirPlacesQuery"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 33
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1654,7 +1649,7 @@ public struct DirPlacesQueryPacket {
 // Message: DirPlacesQueryBackend (Low 34)
 public struct DirPlacesQueryBackendPacket {
     public var messageName: String = "DirPlacesQueryBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 34
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1682,7 +1677,7 @@ public struct DirPlacesQueryBackendPacket {
 // Message: DirPlacesReply (Low 35)
 public struct DirPlacesReplyPacket {
     public var messageName: String = "DirPlacesReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 35
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1710,7 +1705,7 @@ public struct DirPlacesReplyPacket {
 // Message: DirPeopleReply (Low 36)
 public struct DirPeopleReplyPacket {
     public var messageName: String = "DirPeopleReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 36
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1738,7 +1733,7 @@ public struct DirPeopleReplyPacket {
 // Message: DirEventsReply (Low 37)
 public struct DirEventsReplyPacket {
     public var messageName: String = "DirEventsReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 37
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1766,7 +1761,7 @@ public struct DirEventsReplyPacket {
 // Message: DirGroupsReply (Low 38)
 public struct DirGroupsReplyPacket {
     public var messageName: String = "DirGroupsReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 38
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1794,7 +1789,7 @@ public struct DirGroupsReplyPacket {
 // Message: DirClassifiedQuery (Low 39)
 public struct DirClassifiedQueryPacket {
     public var messageName: String = "DirClassifiedQuery"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 39
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1822,7 +1817,7 @@ public struct DirClassifiedQueryPacket {
 // Message: DirClassifiedQueryBackend (Low 40)
 public struct DirClassifiedQueryBackendPacket {
     public var messageName: String = "DirClassifiedQueryBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 40
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1850,7 +1845,7 @@ public struct DirClassifiedQueryBackendPacket {
 // Message: DirClassifiedReply (Low 41)
 public struct DirClassifiedReplyPacket {
     public var messageName: String = "DirClassifiedReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 41
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1878,7 +1873,7 @@ public struct DirClassifiedReplyPacket {
 // Message: AvatarClassifiedReply (Low 42)
 public struct AvatarClassifiedReplyPacket {
     public var messageName: String = "AvatarClassifiedReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 42
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1906,7 +1901,7 @@ public struct AvatarClassifiedReplyPacket {
 // Message: ClassifiedInfoRequest (Low 43)
 public struct ClassifiedInfoRequestPacket {
     public var messageName: String = "ClassifiedInfoRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 43
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -1934,7 +1929,7 @@ public struct ClassifiedInfoRequestPacket {
 // Message: ClassifiedInfoReply (Low 44)
 public struct ClassifiedInfoReplyPacket {
     public var messageName: String = "ClassifiedInfoReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 44
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1962,7 +1957,7 @@ public struct ClassifiedInfoReplyPacket {
 // Message: ClassifiedInfoUpdate (Low 45)
 public struct ClassifiedInfoUpdatePacket {
     public var messageName: String = "ClassifiedInfoUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 45
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -1990,7 +1985,7 @@ public struct ClassifiedInfoUpdatePacket {
 // Message: ClassifiedDelete (Low 46)
 public struct ClassifiedDeletePacket {
     public var messageName: String = "ClassifiedDelete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 46
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2018,7 +2013,7 @@ public struct ClassifiedDeletePacket {
 // Message: ClassifiedGodDelete (Low 47)
 public struct ClassifiedGodDeletePacket {
     public var messageName: String = "ClassifiedGodDelete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 47
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2046,7 +2041,7 @@ public struct ClassifiedGodDeletePacket {
 // Message: DirLandQuery (Low 48)
 public struct DirLandQueryPacket {
     public var messageName: String = "DirLandQuery"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 48
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2074,7 +2069,7 @@ public struct DirLandQueryPacket {
 // Message: DirLandQueryBackend (Low 49)
 public struct DirLandQueryBackendPacket {
     public var messageName: String = "DirLandQueryBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 49
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2102,7 +2097,7 @@ public struct DirLandQueryBackendPacket {
 // Message: DirLandReply (Low 50)
 public struct DirLandReplyPacket {
     public var messageName: String = "DirLandReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 50
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2130,7 +2125,7 @@ public struct DirLandReplyPacket {
 // Message: DirPopularQuery (Low 51)
 public struct DirPopularQueryPacket {
     public var messageName: String = "DirPopularQuery"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 51
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2158,7 +2153,7 @@ public struct DirPopularQueryPacket {
 // Message: DirPopularQueryBackend (Low 52)
 public struct DirPopularQueryBackendPacket {
     public var messageName: String = "DirPopularQueryBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 52
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2186,7 +2181,7 @@ public struct DirPopularQueryBackendPacket {
 // Message: DirPopularReply (Low 53)
 public struct DirPopularReplyPacket {
     public var messageName: String = "DirPopularReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 53
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2214,7 +2209,7 @@ public struct DirPopularReplyPacket {
 // Message: ParcelInfoRequest (Low 54)
 public struct ParcelInfoRequestPacket {
     public var messageName: String = "ParcelInfoRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 54
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2242,7 +2237,7 @@ public struct ParcelInfoRequestPacket {
 // Message: ParcelInfoReply (Low 55)
 public struct ParcelInfoReplyPacket {
     public var messageName: String = "ParcelInfoReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 55
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2270,7 +2265,7 @@ public struct ParcelInfoReplyPacket {
 // Message: ParcelObjectOwnersRequest (Low 56)
 public struct ParcelObjectOwnersRequestPacket {
     public var messageName: String = "ParcelObjectOwnersRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 56
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2298,7 +2293,7 @@ public struct ParcelObjectOwnersRequestPacket {
 // Message: ParcelObjectOwnersReply (Low 57)
 public struct ParcelObjectOwnersReplyPacket {
     public var messageName: String = "ParcelObjectOwnersReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 57
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2326,7 +2321,7 @@ public struct ParcelObjectOwnersReplyPacket {
 // Message: GroupNoticesListRequest (Low 58)
 public struct GroupNoticesListRequestPacket {
     public var messageName: String = "GroupNoticesListRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 58
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2354,7 +2349,7 @@ public struct GroupNoticesListRequestPacket {
 // Message: GroupNoticesListReply (Low 59)
 public struct GroupNoticesListReplyPacket {
     public var messageName: String = "GroupNoticesListReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 59
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2382,7 +2377,7 @@ public struct GroupNoticesListReplyPacket {
 // Message: GroupNoticeRequest (Low 60)
 public struct GroupNoticeRequestPacket {
     public var messageName: String = "GroupNoticeRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 60
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2410,7 +2405,7 @@ public struct GroupNoticeRequestPacket {
 // Message: GroupNoticeAdd (Low 61)
 public struct GroupNoticeAddPacket {
     public var messageName: String = "GroupNoticeAdd"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 61
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2438,7 +2433,7 @@ public struct GroupNoticeAddPacket {
 // Message: TeleportRequest (Low 62)
 public struct TeleportRequestPacket {
     public var messageName: String = "TeleportRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 62
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2466,7 +2461,7 @@ public struct TeleportRequestPacket {
 // Message: TeleportLocationRequest (Low 63)
 public struct TeleportLocationRequestPacket {
     public var messageName: String = "TeleportLocationRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 63
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2494,7 +2489,7 @@ public struct TeleportLocationRequestPacket {
 // Message: TeleportLocal (Low 64)
 public struct TeleportLocalPacket {
     public var messageName: String = "TeleportLocal"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 64
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2522,7 +2517,7 @@ public struct TeleportLocalPacket {
 // Message: TeleportLandmarkRequest (Low 65)
 public struct TeleportLandmarkRequestPacket {
     public var messageName: String = "TeleportLandmarkRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 65
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2550,7 +2545,7 @@ public struct TeleportLandmarkRequestPacket {
 // Message: TeleportProgress (Low 66)
 public struct TeleportProgressPacket {
     public var messageName: String = "TeleportProgress"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 66
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2578,7 +2573,7 @@ public struct TeleportProgressPacket {
 // Message: DataHomeLocationRequest (Low 67)
 public struct DataHomeLocationRequestPacket {
     public var messageName: String = "DataHomeLocationRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 67
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2606,7 +2601,7 @@ public struct DataHomeLocationRequestPacket {
 // Message: DataHomeLocationReply (Low 68)
 public struct DataHomeLocationReplyPacket {
     public var messageName: String = "DataHomeLocationReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 68
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2634,7 +2629,7 @@ public struct DataHomeLocationReplyPacket {
 // Message: TeleportFinish (Low 69)
 public struct TeleportFinishPacket {
     public var messageName: String = "TeleportFinish"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 69
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2662,7 +2657,7 @@ public struct TeleportFinishPacket {
 // Message: StartLure (Low 70)
 public struct StartLurePacket {
     public var messageName: String = "StartLure"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 70
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2690,7 +2685,7 @@ public struct StartLurePacket {
 // Message: TeleportLureRequest (Low 71)
 public struct TeleportLureRequestPacket {
     public var messageName: String = "TeleportLureRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 71
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2718,7 +2713,7 @@ public struct TeleportLureRequestPacket {
 // Message: TeleportCancel (Low 72)
 public struct TeleportCancelPacket {
     public var messageName: String = "TeleportCancel"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 72
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2746,7 +2741,7 @@ public struct TeleportCancelPacket {
 // Message: TeleportStart (Low 73)
 public struct TeleportStartPacket {
     public var messageName: String = "TeleportStart"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 73
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2774,7 +2769,7 @@ public struct TeleportStartPacket {
 // Message: TeleportFailed (Low 74)
 public struct TeleportFailedPacket {
     public var messageName: String = "TeleportFailed"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 74
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2802,7 +2797,7 @@ public struct TeleportFailedPacket {
 // Message: Undo (Low 75)
 public struct UndoPacket {
     public var messageName: String = "Undo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 75
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2830,7 +2825,7 @@ public struct UndoPacket {
 // Message: Redo (Low 76)
 public struct RedoPacket {
     public var messageName: String = "Redo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 76
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2858,7 +2853,7 @@ public struct RedoPacket {
 // Message: UndoLand (Low 77)
 public struct UndoLandPacket {
     public var messageName: String = "UndoLand"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 77
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2886,7 +2881,7 @@ public struct UndoLandPacket {
 // Message: AgentPause (Low 78)
 public struct AgentPausePacket {
     public var messageName: String = "AgentPause"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 78
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2914,7 +2909,7 @@ public struct AgentPausePacket {
 // Message: AgentResume (Low 79)
 public struct AgentResumePacket {
     public var messageName: String = "AgentResume"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 79
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -2942,7 +2937,7 @@ public struct AgentResumePacket {
 // Message: AgentUpdate (High 4)
 public struct AgentUpdatePacket {
     public var messageName: String = "AgentUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 4
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -2970,7 +2965,7 @@ public struct AgentUpdatePacket {
 // Message: ChatFromViewer (Low 80)
 public struct ChatFromViewerPacket {
     public var messageName: String = "ChatFromViewer"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 80
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -2998,7 +2993,7 @@ public struct ChatFromViewerPacket {
 // Message: AgentThrottle (Low 81)
 public struct AgentThrottlePacket {
     public var messageName: String = "AgentThrottle"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 81
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3026,7 +3021,7 @@ public struct AgentThrottlePacket {
 // Message: AgentFOV (Low 82)
 public struct AgentFOVPacket {
     public var messageName: String = "AgentFOV"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 82
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -3054,7 +3049,7 @@ public struct AgentFOVPacket {
 // Message: AgentHeightWidth (Low 83)
 public struct AgentHeightWidthPacket {
     public var messageName: String = "AgentHeightWidth"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 83
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -3082,7 +3077,7 @@ public struct AgentHeightWidthPacket {
 // Message: AgentSetAppearance (Low 84)
 public struct AgentSetAppearancePacket {
     public var messageName: String = "AgentSetAppearance"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 84
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3110,7 +3105,7 @@ public struct AgentSetAppearancePacket {
 // Message: AgentAnimation (High 5)
 public struct AgentAnimationPacket {
     public var messageName: String = "AgentAnimation"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 5
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -3138,7 +3133,7 @@ public struct AgentAnimationPacket {
 // Message: AgentRequestSit (High 6)
 public struct AgentRequestSitPacket {
     public var messageName: String = "AgentRequestSit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 6
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -3166,7 +3161,7 @@ public struct AgentRequestSitPacket {
 // Message: AgentSit (High 7)
 public struct AgentSitPacket {
     public var messageName: String = "AgentSit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 7
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -3194,7 +3189,7 @@ public struct AgentSitPacket {
 // Message: AgentQuitCopy (Low 85)
 public struct AgentQuitCopyPacket {
     public var messageName: String = "AgentQuitCopy"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 85
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -3222,7 +3217,7 @@ public struct AgentQuitCopyPacket {
 // Message: RequestImage (High 8)
 public struct RequestImagePacket {
     public var messageName: String = "RequestImage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 8
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -3250,7 +3245,7 @@ public struct RequestImagePacket {
 // Message: ImageNotInDatabase (Low 86)
 public struct ImageNotInDatabasePacket {
     public var messageName: String = "ImageNotInDatabase"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 86
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -3278,7 +3273,7 @@ public struct ImageNotInDatabasePacket {
 // Message: RebakeAvatarTextures (Low 87)
 public struct RebakeAvatarTexturesPacket {
     public var messageName: String = "RebakeAvatarTextures"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 87
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -3306,7 +3301,7 @@ public struct RebakeAvatarTexturesPacket {
 // Message: SetAlwaysRun (Low 88)
 public struct SetAlwaysRunPacket {
     public var messageName: String = "SetAlwaysRun"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 88
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -3334,7 +3329,7 @@ public struct SetAlwaysRunPacket {
 // Message: ObjectAdd (Medium 1)
 public struct ObjectAddPacket {
     public var messageName: String = "ObjectAdd"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 1
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -3362,7 +3357,7 @@ public struct ObjectAddPacket {
 // Message: ObjectDelete (Low 89)
 public struct ObjectDeletePacket {
     public var messageName: String = "ObjectDelete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 89
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3390,7 +3385,7 @@ public struct ObjectDeletePacket {
 // Message: ObjectDuplicate (Low 90)
 public struct ObjectDuplicatePacket {
     public var messageName: String = "ObjectDuplicate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 90
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3418,7 +3413,7 @@ public struct ObjectDuplicatePacket {
 // Message: ObjectDuplicateOnRay (Low 91)
 public struct ObjectDuplicateOnRayPacket {
     public var messageName: String = "ObjectDuplicateOnRay"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 91
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3446,7 +3441,7 @@ public struct ObjectDuplicateOnRayPacket {
 // Message: MultipleObjectUpdate (Medium 2)
 public struct MultipleObjectUpdatePacket {
     public var messageName: String = "MultipleObjectUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 2
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -3474,7 +3469,7 @@ public struct MultipleObjectUpdatePacket {
 // Message: RequestMultipleObjects (Medium 3)
 public struct RequestMultipleObjectsPacket {
     public var messageName: String = "RequestMultipleObjects"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 3
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -3502,7 +3497,7 @@ public struct RequestMultipleObjectsPacket {
 // Message: ObjectPosition (Medium 4)
 public struct ObjectPositionPacket {
     public var messageName: String = "ObjectPosition"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 4
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -3530,7 +3525,7 @@ public struct ObjectPositionPacket {
 // Message: ObjectScale (Low 92)
 public struct ObjectScalePacket {
     public var messageName: String = "ObjectScale"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 92
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3558,7 +3553,7 @@ public struct ObjectScalePacket {
 // Message: ObjectRotation (Low 93)
 public struct ObjectRotationPacket {
     public var messageName: String = "ObjectRotation"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 93
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3586,7 +3581,7 @@ public struct ObjectRotationPacket {
 // Message: ObjectFlagUpdate (Low 94)
 public struct ObjectFlagUpdatePacket {
     public var messageName: String = "ObjectFlagUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 94
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3614,7 +3609,7 @@ public struct ObjectFlagUpdatePacket {
 // Message: ObjectClickAction (Low 95)
 public struct ObjectClickActionPacket {
     public var messageName: String = "ObjectClickAction"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 95
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3642,7 +3637,7 @@ public struct ObjectClickActionPacket {
 // Message: ObjectImage (Low 96)
 public struct ObjectImagePacket {
     public var messageName: String = "ObjectImage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 96
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3670,7 +3665,7 @@ public struct ObjectImagePacket {
 // Message: ObjectBypassModUpdate (Low 431)
 public struct ObjectBypassModUpdatePacket {
     public var messageName: String = "ObjectBypassModUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 431
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3698,7 +3693,7 @@ public struct ObjectBypassModUpdatePacket {
 // Message: ObjectMaterial (Low 97)
 public struct ObjectMaterialPacket {
     public var messageName: String = "ObjectMaterial"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 97
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3726,7 +3721,7 @@ public struct ObjectMaterialPacket {
 // Message: ObjectShape (Low 98)
 public struct ObjectShapePacket {
     public var messageName: String = "ObjectShape"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 98
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3754,7 +3749,7 @@ public struct ObjectShapePacket {
 // Message: ObjectExtraParams (Low 99)
 public struct ObjectExtraParamsPacket {
     public var messageName: String = "ObjectExtraParams"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 99
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3782,7 +3777,7 @@ public struct ObjectExtraParamsPacket {
 // Message: ObjectOwner (Low 100)
 public struct ObjectOwnerPacket {
     public var messageName: String = "ObjectOwner"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 100
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3810,7 +3805,7 @@ public struct ObjectOwnerPacket {
 // Message: ObjectGroup (Low 101)
 public struct ObjectGroupPacket {
     public var messageName: String = "ObjectGroup"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 101
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3838,7 +3833,7 @@ public struct ObjectGroupPacket {
 // Message: ObjectBuy (Low 102)
 public struct ObjectBuyPacket {
     public var messageName: String = "ObjectBuy"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 102
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3866,7 +3861,7 @@ public struct ObjectBuyPacket {
 // Message: BuyObjectInventory (Low 103)
 public struct BuyObjectInventoryPacket {
     public var messageName: String = "BuyObjectInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 103
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3894,7 +3889,7 @@ public struct BuyObjectInventoryPacket {
 // Message: DerezContainer (Low 104)
 public struct DerezContainerPacket {
     public var messageName: String = "DerezContainer"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 104
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3922,7 +3917,7 @@ public struct DerezContainerPacket {
 // Message: ObjectPermissions (Low 105)
 public struct ObjectPermissionsPacket {
     public var messageName: String = "ObjectPermissions"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 105
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3950,7 +3945,7 @@ public struct ObjectPermissionsPacket {
 // Message: ObjectSaleInfo (Low 106)
 public struct ObjectSaleInfoPacket {
     public var messageName: String = "ObjectSaleInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 106
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -3978,7 +3973,7 @@ public struct ObjectSaleInfoPacket {
 // Message: ObjectName (Low 107)
 public struct ObjectNamePacket {
     public var messageName: String = "ObjectName"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 107
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4006,7 +4001,7 @@ public struct ObjectNamePacket {
 // Message: ObjectDescription (Low 108)
 public struct ObjectDescriptionPacket {
     public var messageName: String = "ObjectDescription"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 108
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4034,7 +4029,7 @@ public struct ObjectDescriptionPacket {
 // Message: ObjectCategory (Low 109)
 public struct ObjectCategoryPacket {
     public var messageName: String = "ObjectCategory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 109
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4062,7 +4057,7 @@ public struct ObjectCategoryPacket {
 // Message: ObjectSelect (Low 110)
 public struct ObjectSelectPacket {
     public var messageName: String = "ObjectSelect"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 110
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4090,7 +4085,7 @@ public struct ObjectSelectPacket {
 // Message: ObjectDeselect (Low 111)
 public struct ObjectDeselectPacket {
     public var messageName: String = "ObjectDeselect"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 111
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4118,7 +4113,7 @@ public struct ObjectDeselectPacket {
 // Message: ObjectAttach (Low 112)
 public struct ObjectAttachPacket {
     public var messageName: String = "ObjectAttach"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 112
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4146,7 +4141,7 @@ public struct ObjectAttachPacket {
 // Message: ObjectDetach (Low 113)
 public struct ObjectDetachPacket {
     public var messageName: String = "ObjectDetach"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 113
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4174,7 +4169,7 @@ public struct ObjectDetachPacket {
 // Message: ObjectDrop (Low 114)
 public struct ObjectDropPacket {
     public var messageName: String = "ObjectDrop"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 114
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4202,7 +4197,7 @@ public struct ObjectDropPacket {
 // Message: ObjectLink (Low 115)
 public struct ObjectLinkPacket {
     public var messageName: String = "ObjectLink"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 115
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4230,7 +4225,7 @@ public struct ObjectLinkPacket {
 // Message: ObjectDelink (Low 116)
 public struct ObjectDelinkPacket {
     public var messageName: String = "ObjectDelink"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 116
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4258,7 +4253,7 @@ public struct ObjectDelinkPacket {
 // Message: ObjectGrab (Low 117)
 public struct ObjectGrabPacket {
     public var messageName: String = "ObjectGrab"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 117
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4286,7 +4281,7 @@ public struct ObjectGrabPacket {
 // Message: ObjectGrabUpdate (Low 118)
 public struct ObjectGrabUpdatePacket {
     public var messageName: String = "ObjectGrabUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 118
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4314,7 +4309,7 @@ public struct ObjectGrabUpdatePacket {
 // Message: ObjectDeGrab (Low 119)
 public struct ObjectDeGrabPacket {
     public var messageName: String = "ObjectDeGrab"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 119
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4342,7 +4337,7 @@ public struct ObjectDeGrabPacket {
 // Message: ObjectSpinStart (Low 120)
 public struct ObjectSpinStartPacket {
     public var messageName: String = "ObjectSpinStart"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 120
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4370,7 +4365,7 @@ public struct ObjectSpinStartPacket {
 // Message: ObjectSpinUpdate (Low 121)
 public struct ObjectSpinUpdatePacket {
     public var messageName: String = "ObjectSpinUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 121
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4398,7 +4393,7 @@ public struct ObjectSpinUpdatePacket {
 // Message: ObjectSpinStop (Low 122)
 public struct ObjectSpinStopPacket {
     public var messageName: String = "ObjectSpinStop"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 122
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4426,7 +4421,7 @@ public struct ObjectSpinStopPacket {
 // Message: ObjectExportSelected (Low 123)
 public struct ObjectExportSelectedPacket {
     public var messageName: String = "ObjectExportSelected"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 123
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4454,7 +4449,7 @@ public struct ObjectExportSelectedPacket {
 // Message: ModifyLand (Low 124)
 public struct ModifyLandPacket {
     public var messageName: String = "ModifyLand"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 124
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4482,7 +4477,7 @@ public struct ModifyLandPacket {
 // Message: VelocityInterpolateOn (Low 125)
 public struct VelocityInterpolateOnPacket {
     public var messageName: String = "VelocityInterpolateOn"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 125
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4510,7 +4505,7 @@ public struct VelocityInterpolateOnPacket {
 // Message: VelocityInterpolateOff (Low 126)
 public struct VelocityInterpolateOffPacket {
     public var messageName: String = "VelocityInterpolateOff"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 126
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4538,7 +4533,7 @@ public struct VelocityInterpolateOffPacket {
 // Message: StateSave (Low 127)
 public struct StateSavePacket {
     public var messageName: String = "StateSave"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 127
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4566,7 +4561,7 @@ public struct StateSavePacket {
 // Message: ReportAutosaveCrash (Low 128)
 public struct ReportAutosaveCrashPacket {
     public var messageName: String = "ReportAutosaveCrash"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 128
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4594,7 +4589,7 @@ public struct ReportAutosaveCrashPacket {
 // Message: SimWideDeletes (Low 129)
 public struct SimWideDeletesPacket {
     public var messageName: String = "SimWideDeletes"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 129
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4622,7 +4617,7 @@ public struct SimWideDeletesPacket {
 // Message: RequestObjectPropertiesFamily (Medium 5)
 public struct RequestObjectPropertiesFamilyPacket {
     public var messageName: String = "RequestObjectPropertiesFamily"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 5
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -4650,7 +4645,7 @@ public struct RequestObjectPropertiesFamilyPacket {
 // Message: TrackAgent (Low 130)
 public struct TrackAgentPacket {
     public var messageName: String = "TrackAgent"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 130
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4678,7 +4673,7 @@ public struct TrackAgentPacket {
 // Message: ViewerStats (Low 131)
 public struct ViewerStatsPacket {
     public var messageName: String = "ViewerStats"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 131
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4706,7 +4701,7 @@ public struct ViewerStatsPacket {
 // Message: ScriptAnswerYes (Low 132)
 public struct ScriptAnswerYesPacket {
     public var messageName: String = "ScriptAnswerYes"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 132
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4734,7 +4729,7 @@ public struct ScriptAnswerYesPacket {
 // Message: UserReport (Low 133)
 public struct UserReportPacket {
     public var messageName: String = "UserReport"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 133
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4762,7 +4757,7 @@ public struct UserReportPacket {
 // Message: AlertMessage (Low 134)
 public struct AlertMessagePacket {
     public var messageName: String = "AlertMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 134
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4790,7 +4785,7 @@ public struct AlertMessagePacket {
 // Message: AgentAlertMessage (Low 135)
 public struct AgentAlertMessagePacket {
     public var messageName: String = "AgentAlertMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 135
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4818,7 +4813,7 @@ public struct AgentAlertMessagePacket {
 // Message: MeanCollisionAlert (Low 136)
 public struct MeanCollisionAlertPacket {
     public var messageName: String = "MeanCollisionAlert"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 136
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4846,7 +4841,7 @@ public struct MeanCollisionAlertPacket {
 // Message: ViewerFrozenMessage (Low 137)
 public struct ViewerFrozenMessagePacket {
     public var messageName: String = "ViewerFrozenMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 137
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4874,7 +4869,7 @@ public struct ViewerFrozenMessagePacket {
 // Message: HealthMessage (Low 138)
 public struct HealthMessagePacket {
     public var messageName: String = "HealthMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 138
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -4902,7 +4897,7 @@ public struct HealthMessagePacket {
 // Message: ChatFromSimulator (Low 139)
 public struct ChatFromSimulatorPacket {
     public var messageName: String = "ChatFromSimulator"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 139
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4930,7 +4925,7 @@ public struct ChatFromSimulatorPacket {
 // Message: SimStats (Low 140)
 public struct SimStatsPacket {
     public var messageName: String = "SimStats"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 140
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4958,7 +4953,7 @@ public struct SimStatsPacket {
 // Message: RequestRegionInfo (Low 141)
 public struct RequestRegionInfoPacket {
     public var messageName: String = "RequestRegionInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 141
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -4986,7 +4981,7 @@ public struct RequestRegionInfoPacket {
 // Message: RegionInfo (Low 142)
 public struct RegionInfoPacket {
     public var messageName: String = "RegionInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 142
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5014,7 +5009,7 @@ public struct RegionInfoPacket {
 // Message: GodUpdateRegionInfo (Low 143)
 public struct GodUpdateRegionInfoPacket {
     public var messageName: String = "GodUpdateRegionInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 143
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5042,7 +5037,7 @@ public struct GodUpdateRegionInfoPacket {
 // Message: NearestLandingRegionRequest (Low 144)
 public struct NearestLandingRegionRequestPacket {
     public var messageName: String = "NearestLandingRegionRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 144
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5070,7 +5065,7 @@ public struct NearestLandingRegionRequestPacket {
 // Message: NearestLandingRegionReply (Low 145)
 public struct NearestLandingRegionReplyPacket {
     public var messageName: String = "NearestLandingRegionReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 145
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5098,7 +5093,7 @@ public struct NearestLandingRegionReplyPacket {
 // Message: NearestLandingRegionUpdated (Low 146)
 public struct NearestLandingRegionUpdatedPacket {
     public var messageName: String = "NearestLandingRegionUpdated"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 146
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5126,7 +5121,7 @@ public struct NearestLandingRegionUpdatedPacket {
 // Message: TeleportLandingStatusChanged (Low 147)
 public struct TeleportLandingStatusChangedPacket {
     public var messageName: String = "TeleportLandingStatusChanged"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 147
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5154,7 +5149,7 @@ public struct TeleportLandingStatusChangedPacket {
 // Message: RegionHandshake (Low 148)
 public struct RegionHandshakePacket {
     public var messageName: String = "RegionHandshake"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 148
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5182,7 +5177,7 @@ public struct RegionHandshakePacket {
 // Message: RegionHandshakeReply (Low 149)
 public struct RegionHandshakeReplyPacket {
     public var messageName: String = "RegionHandshakeReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 149
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5210,7 +5205,7 @@ public struct RegionHandshakeReplyPacket {
 // Message: CoarseLocationUpdate (Medium 6)
 public struct CoarseLocationUpdatePacket {
     public var messageName: String = "CoarseLocationUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 6
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -5238,7 +5233,7 @@ public struct CoarseLocationUpdatePacket {
 // Message: ImageData (High 9)
 public struct ImageDataPacket {
     public var messageName: String = "ImageData"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 9
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5266,7 +5261,7 @@ public struct ImageDataPacket {
 // Message: ImagePacket (High 10)
 public struct ImagePacketPacket {
     public var messageName: String = "ImagePacket"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 10
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5294,7 +5289,7 @@ public struct ImagePacketPacket {
 // Message: LayerData (High 11)
 public struct LayerDataPacket {
     public var messageName: String = "LayerData"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 11
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5322,7 +5317,7 @@ public struct LayerDataPacket {
 // Message: ObjectUpdate (High 12)
 public struct ObjectUpdatePacket {
     public var messageName: String = "ObjectUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 12
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -5350,7 +5345,7 @@ public struct ObjectUpdatePacket {
 // Message: ObjectUpdateCompressed (High 13)
 public struct ObjectUpdateCompressedPacket {
     public var messageName: String = "ObjectUpdateCompressed"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 13
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5378,7 +5373,7 @@ public struct ObjectUpdateCompressedPacket {
 // Message: ObjectUpdateCached (High 14)
 public struct ObjectUpdateCachedPacket {
     public var messageName: String = "ObjectUpdateCached"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 14
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5406,7 +5401,7 @@ public struct ObjectUpdateCachedPacket {
 // Message: ImprovedTerseObjectUpdate (High 15)
 public struct ImprovedTerseObjectUpdatePacket {
     public var messageName: String = "ImprovedTerseObjectUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 15
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5434,7 +5429,7 @@ public struct ImprovedTerseObjectUpdatePacket {
 // Message: KillObject (High 16)
 public struct KillObjectPacket {
     public var messageName: String = "KillObject"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 16
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5462,7 +5457,7 @@ public struct KillObjectPacket {
 // Message: CrossedRegion (Medium 7)
 public struct CrossedRegionPacket {
     public var messageName: String = "CrossedRegion"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 7
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -5490,7 +5485,7 @@ public struct CrossedRegionPacket {
 // Message: SimulatorViewerTimeMessage (Low 150)
 public struct SimulatorViewerTimeMessagePacket {
     public var messageName: String = "SimulatorViewerTimeMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 150
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5518,7 +5513,7 @@ public struct SimulatorViewerTimeMessagePacket {
 // Message: EnableSimulator (Low 151)
 public struct EnableSimulatorPacket {
     public var messageName: String = "EnableSimulator"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 151
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5546,7 +5541,7 @@ public struct EnableSimulatorPacket {
 // Message: DisableSimulator (Low 152)
 public struct DisableSimulatorPacket {
     public var messageName: String = "DisableSimulator"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 152
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5574,7 +5569,7 @@ public struct DisableSimulatorPacket {
 // Message: ConfirmEnableSimulator (Medium 8)
 public struct ConfirmEnableSimulatorPacket {
     public var messageName: String = "ConfirmEnableSimulator"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 8
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -5602,7 +5597,7 @@ public struct ConfirmEnableSimulatorPacket {
 // Message: TransferRequest (Low 153)
 public struct TransferRequestPacket {
     public var messageName: String = "TransferRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 153
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5630,7 +5625,7 @@ public struct TransferRequestPacket {
 // Message: TransferInfo (Low 154)
 public struct TransferInfoPacket {
     public var messageName: String = "TransferInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 154
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5658,7 +5653,7 @@ public struct TransferInfoPacket {
 // Message: TransferPacket (High 17)
 public struct TransferPacketPacket {
     public var messageName: String = "TransferPacket"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 17
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5686,7 +5681,7 @@ public struct TransferPacketPacket {
 // Message: TransferAbort (Low 155)
 public struct TransferAbortPacket {
     public var messageName: String = "TransferAbort"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 155
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5714,7 +5709,7 @@ public struct TransferAbortPacket {
 // Message: RequestXfer (Low 156)
 public struct RequestXferPacket {
     public var messageName: String = "RequestXfer"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 156
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5742,7 +5737,7 @@ public struct RequestXferPacket {
 // Message: SendXferPacket (High 18)
 public struct SendXferPacketPacket {
     public var messageName: String = "SendXferPacket"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 18
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5770,7 +5765,7 @@ public struct SendXferPacketPacket {
 // Message: ConfirmXferPacket (High 19)
 public struct ConfirmXferPacketPacket {
     public var messageName: String = "ConfirmXferPacket"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 19
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5798,7 +5793,7 @@ public struct ConfirmXferPacketPacket {
 // Message: AbortXfer (Low 157)
 public struct AbortXferPacket {
     public var messageName: String = "AbortXfer"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 157
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5826,7 +5821,7 @@ public struct AbortXferPacket {
 // Message: AvatarAnimation (High 20)
 public struct AvatarAnimationPacket {
     public var messageName: String = "AvatarAnimation"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 20
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -5854,7 +5849,7 @@ public struct AvatarAnimationPacket {
 // Message: AvatarAppearance (Low 158)
 public struct AvatarAppearancePacket {
     public var messageName: String = "AvatarAppearance"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 158
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -5882,7 +5877,7 @@ public struct AvatarAppearancePacket {
 // Message: AvatarSitResponse (High 21)
 public struct AvatarSitResponsePacket {
     public var messageName: String = "AvatarSitResponse"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 21
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -5910,7 +5905,7 @@ public struct AvatarSitResponsePacket {
 // Message: SetFollowCamProperties (Low 159)
 public struct SetFollowCamPropertiesPacket {
     public var messageName: String = "SetFollowCamProperties"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 159
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5938,7 +5933,7 @@ public struct SetFollowCamPropertiesPacket {
 // Message: ClearFollowCamProperties (Low 160)
 public struct ClearFollowCamPropertiesPacket {
     public var messageName: String = "ClearFollowCamProperties"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 160
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -5966,7 +5961,7 @@ public struct ClearFollowCamPropertiesPacket {
 // Message: CameraConstraint (High 22)
 public struct CameraConstraintPacket {
     public var messageName: String = "CameraConstraint"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 22
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -5994,7 +5989,7 @@ public struct CameraConstraintPacket {
 // Message: ObjectProperties (Medium 9)
 public struct ObjectPropertiesPacket {
     public var messageName: String = "ObjectProperties"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 9
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -6022,7 +6017,7 @@ public struct ObjectPropertiesPacket {
 // Message: ObjectPropertiesFamily (Medium 10)
 public struct ObjectPropertiesFamilyPacket {
     public var messageName: String = "ObjectPropertiesFamily"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 10
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -6050,7 +6045,7 @@ public struct ObjectPropertiesFamilyPacket {
 // Message: RequestPayPrice (Low 161)
 public struct RequestPayPricePacket {
     public var messageName: String = "RequestPayPrice"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 161
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6078,7 +6073,7 @@ public struct RequestPayPricePacket {
 // Message: PayPriceReply (Low 162)
 public struct PayPriceReplyPacket {
     public var messageName: String = "PayPriceReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 162
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6106,7 +6101,7 @@ public struct PayPriceReplyPacket {
 // Message: KickUser (Low 163)
 public struct KickUserPacket {
     public var messageName: String = "KickUser"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 163
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6134,7 +6129,7 @@ public struct KickUserPacket {
 // Message: KickUserAck (Low 164)
 public struct KickUserAckPacket {
     public var messageName: String = "KickUserAck"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 164
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6162,7 +6157,7 @@ public struct KickUserAckPacket {
 // Message: GodKickUser (Low 165)
 public struct GodKickUserPacket {
     public var messageName: String = "GodKickUser"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 165
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6190,7 +6185,7 @@ public struct GodKickUserPacket {
 // Message: SystemKickUser (Low 166)
 public struct SystemKickUserPacket {
     public var messageName: String = "SystemKickUser"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 166
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6218,7 +6213,7 @@ public struct SystemKickUserPacket {
 // Message: EjectUser (Low 167)
 public struct EjectUserPacket {
     public var messageName: String = "EjectUser"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 167
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6246,7 +6241,7 @@ public struct EjectUserPacket {
 // Message: FreezeUser (Low 168)
 public struct FreezeUserPacket {
     public var messageName: String = "FreezeUser"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 168
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6274,7 +6269,7 @@ public struct FreezeUserPacket {
 // Message: AvatarPropertiesRequest (Low 169)
 public struct AvatarPropertiesRequestPacket {
     public var messageName: String = "AvatarPropertiesRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 169
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6302,7 +6297,7 @@ public struct AvatarPropertiesRequestPacket {
 // Message: AvatarPropertiesRequestBackend (Low 170)
 public struct AvatarPropertiesRequestBackendPacket {
     public var messageName: String = "AvatarPropertiesRequestBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 170
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6330,7 +6325,7 @@ public struct AvatarPropertiesRequestBackendPacket {
 // Message: AvatarPropertiesReply (Low 171)
 public struct AvatarPropertiesReplyPacket {
     public var messageName: String = "AvatarPropertiesReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 171
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6358,7 +6353,7 @@ public struct AvatarPropertiesReplyPacket {
 // Message: AvatarInterestsReply (Low 172)
 public struct AvatarInterestsReplyPacket {
     public var messageName: String = "AvatarInterestsReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 172
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6386,7 +6381,7 @@ public struct AvatarInterestsReplyPacket {
 // Message: AvatarGroupsReply (Low 173)
 public struct AvatarGroupsReplyPacket {
     public var messageName: String = "AvatarGroupsReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 173
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6414,7 +6409,7 @@ public struct AvatarGroupsReplyPacket {
 // Message: AvatarPropertiesUpdate (Low 174)
 public struct AvatarPropertiesUpdatePacket {
     public var messageName: String = "AvatarPropertiesUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 174
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6442,7 +6437,7 @@ public struct AvatarPropertiesUpdatePacket {
 // Message: AvatarInterestsUpdate (Low 175)
 public struct AvatarInterestsUpdatePacket {
     public var messageName: String = "AvatarInterestsUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 175
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6470,7 +6465,7 @@ public struct AvatarInterestsUpdatePacket {
 // Message: AvatarNotesReply (Low 176)
 public struct AvatarNotesReplyPacket {
     public var messageName: String = "AvatarNotesReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 176
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6498,7 +6493,7 @@ public struct AvatarNotesReplyPacket {
 // Message: AvatarNotesUpdate (Low 177)
 public struct AvatarNotesUpdatePacket {
     public var messageName: String = "AvatarNotesUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 177
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6526,7 +6521,7 @@ public struct AvatarNotesUpdatePacket {
 // Message: AvatarPicksReply (Low 178)
 public struct AvatarPicksReplyPacket {
     public var messageName: String = "AvatarPicksReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 178
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6554,7 +6549,7 @@ public struct AvatarPicksReplyPacket {
 // Message: EventInfoRequest (Low 179)
 public struct EventInfoRequestPacket {
     public var messageName: String = "EventInfoRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 179
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6582,7 +6577,7 @@ public struct EventInfoRequestPacket {
 // Message: EventInfoReply (Low 180)
 public struct EventInfoReplyPacket {
     public var messageName: String = "EventInfoReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 180
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6610,7 +6605,7 @@ public struct EventInfoReplyPacket {
 // Message: EventNotificationAddRequest (Low 181)
 public struct EventNotificationAddRequestPacket {
     public var messageName: String = "EventNotificationAddRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 181
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6638,7 +6633,7 @@ public struct EventNotificationAddRequestPacket {
 // Message: EventNotificationRemoveRequest (Low 182)
 public struct EventNotificationRemoveRequestPacket {
     public var messageName: String = "EventNotificationRemoveRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 182
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6666,7 +6661,7 @@ public struct EventNotificationRemoveRequestPacket {
 // Message: EventGodDelete (Low 183)
 public struct EventGodDeletePacket {
     public var messageName: String = "EventGodDelete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 183
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6694,7 +6689,7 @@ public struct EventGodDeletePacket {
 // Message: PickInfoReply (Low 184)
 public struct PickInfoReplyPacket {
     public var messageName: String = "PickInfoReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 184
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6722,7 +6717,7 @@ public struct PickInfoReplyPacket {
 // Message: PickInfoUpdate (Low 185)
 public struct PickInfoUpdatePacket {
     public var messageName: String = "PickInfoUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 185
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6750,7 +6745,7 @@ public struct PickInfoUpdatePacket {
 // Message: PickDelete (Low 186)
 public struct PickDeletePacket {
     public var messageName: String = "PickDelete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 186
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6778,7 +6773,7 @@ public struct PickDeletePacket {
 // Message: PickGodDelete (Low 187)
 public struct PickGodDeletePacket {
     public var messageName: String = "PickGodDelete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 187
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6806,7 +6801,7 @@ public struct PickGodDeletePacket {
 // Message: ScriptQuestion (Low 188)
 public struct ScriptQuestionPacket {
     public var messageName: String = "ScriptQuestion"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 188
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6834,7 +6829,7 @@ public struct ScriptQuestionPacket {
 // Message: ScriptControlChange (Low 189)
 public struct ScriptControlChangePacket {
     public var messageName: String = "ScriptControlChange"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 189
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6862,7 +6857,7 @@ public struct ScriptControlChangePacket {
 // Message: ScriptDialog (Low 190)
 public struct ScriptDialogPacket {
     public var messageName: String = "ScriptDialog"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 190
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6890,7 +6885,7 @@ public struct ScriptDialogPacket {
 // Message: ScriptDialogReply (Low 191)
 public struct ScriptDialogReplyPacket {
     public var messageName: String = "ScriptDialogReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 191
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -6918,7 +6913,7 @@ public struct ScriptDialogReplyPacket {
 // Message: ForceScriptControlRelease (Low 192)
 public struct ForceScriptControlReleasePacket {
     public var messageName: String = "ForceScriptControlRelease"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 192
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6946,7 +6941,7 @@ public struct ForceScriptControlReleasePacket {
 // Message: RevokePermissions (Low 193)
 public struct RevokePermissionsPacket {
     public var messageName: String = "RevokePermissions"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 193
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -6974,7 +6969,7 @@ public struct RevokePermissionsPacket {
 // Message: LoadURL (Low 194)
 public struct LoadURLPacket {
     public var messageName: String = "LoadURL"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 194
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7002,7 +6997,7 @@ public struct LoadURLPacket {
 // Message: ScriptTeleportRequest (Low 195)
 public struct ScriptTeleportRequestPacket {
     public var messageName: String = "ScriptTeleportRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 195
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7030,7 +7025,7 @@ public struct ScriptTeleportRequestPacket {
 // Message: ParcelOverlay (Low 196)
 public struct ParcelOverlayPacket {
     public var messageName: String = "ParcelOverlay"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 196
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7058,7 +7053,7 @@ public struct ParcelOverlayPacket {
 // Message: ParcelPropertiesRequest (Medium 11)
 public struct ParcelPropertiesRequestPacket {
     public var messageName: String = "ParcelPropertiesRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 11
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -7086,7 +7081,7 @@ public struct ParcelPropertiesRequestPacket {
 // Message: ParcelPropertiesRequestByID (Low 197)
 public struct ParcelPropertiesRequestByIDPacket {
     public var messageName: String = "ParcelPropertiesRequestByID"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 197
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7114,7 +7109,7 @@ public struct ParcelPropertiesRequestByIDPacket {
 // Message: ParcelProperties (High 23)
 public struct ParcelPropertiesPacket {
     public var messageName: String = "ParcelProperties"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 23
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -7142,7 +7137,7 @@ public struct ParcelPropertiesPacket {
 // Message: ParcelPropertiesUpdate (Low 198)
 public struct ParcelPropertiesUpdatePacket {
     public var messageName: String = "ParcelPropertiesUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 198
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7170,7 +7165,7 @@ public struct ParcelPropertiesUpdatePacket {
 // Message: ParcelReturnObjects (Low 199)
 public struct ParcelReturnObjectsPacket {
     public var messageName: String = "ParcelReturnObjects"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 199
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7198,7 +7193,7 @@ public struct ParcelReturnObjectsPacket {
 // Message: ParcelSetOtherCleanTime (Low 200)
 public struct ParcelSetOtherCleanTimePacket {
     public var messageName: String = "ParcelSetOtherCleanTime"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 200
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7226,7 +7221,7 @@ public struct ParcelSetOtherCleanTimePacket {
 // Message: ParcelDisableObjects (Low 201)
 public struct ParcelDisableObjectsPacket {
     public var messageName: String = "ParcelDisableObjects"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 201
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7254,7 +7249,7 @@ public struct ParcelDisableObjectsPacket {
 // Message: ParcelSelectObjects (Low 202)
 public struct ParcelSelectObjectsPacket {
     public var messageName: String = "ParcelSelectObjects"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 202
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7282,7 +7277,7 @@ public struct ParcelSelectObjectsPacket {
 // Message: EstateCovenantRequest (Low 203)
 public struct EstateCovenantRequestPacket {
     public var messageName: String = "EstateCovenantRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 203
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7310,7 +7305,7 @@ public struct EstateCovenantRequestPacket {
 // Message: EstateCovenantReply (Low 204)
 public struct EstateCovenantReplyPacket {
     public var messageName: String = "EstateCovenantReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 204
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7338,7 +7333,7 @@ public struct EstateCovenantReplyPacket {
 // Message: ForceObjectSelect (Low 205)
 public struct ForceObjectSelectPacket {
     public var messageName: String = "ForceObjectSelect"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 205
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7366,7 +7361,7 @@ public struct ForceObjectSelectPacket {
 // Message: ParcelBuyPass (Low 206)
 public struct ParcelBuyPassPacket {
     public var messageName: String = "ParcelBuyPass"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 206
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7394,7 +7389,7 @@ public struct ParcelBuyPassPacket {
 // Message: ParcelDeedToGroup (Low 207)
 public struct ParcelDeedToGroupPacket {
     public var messageName: String = "ParcelDeedToGroup"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 207
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7422,7 +7417,7 @@ public struct ParcelDeedToGroupPacket {
 // Message: ParcelReclaim (Low 208)
 public struct ParcelReclaimPacket {
     public var messageName: String = "ParcelReclaim"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 208
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7450,7 +7445,7 @@ public struct ParcelReclaimPacket {
 // Message: ParcelClaim (Low 209)
 public struct ParcelClaimPacket {
     public var messageName: String = "ParcelClaim"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 209
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7478,7 +7473,7 @@ public struct ParcelClaimPacket {
 // Message: ParcelJoin (Low 210)
 public struct ParcelJoinPacket {
     public var messageName: String = "ParcelJoin"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 210
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7506,7 +7501,7 @@ public struct ParcelJoinPacket {
 // Message: ParcelDivide (Low 211)
 public struct ParcelDividePacket {
     public var messageName: String = "ParcelDivide"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 211
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7534,7 +7529,7 @@ public struct ParcelDividePacket {
 // Message: ParcelRelease (Low 212)
 public struct ParcelReleasePacket {
     public var messageName: String = "ParcelRelease"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 212
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7562,7 +7557,7 @@ public struct ParcelReleasePacket {
 // Message: ParcelBuy (Low 213)
 public struct ParcelBuyPacket {
     public var messageName: String = "ParcelBuy"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 213
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7590,7 +7585,7 @@ public struct ParcelBuyPacket {
 // Message: ParcelGodForceOwner (Low 214)
 public struct ParcelGodForceOwnerPacket {
     public var messageName: String = "ParcelGodForceOwner"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 214
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7618,7 +7613,7 @@ public struct ParcelGodForceOwnerPacket {
 // Message: ParcelAccessListRequest (Low 215)
 public struct ParcelAccessListRequestPacket {
     public var messageName: String = "ParcelAccessListRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 215
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7646,7 +7641,7 @@ public struct ParcelAccessListRequestPacket {
 // Message: ParcelAccessListReply (Low 216)
 public struct ParcelAccessListReplyPacket {
     public var messageName: String = "ParcelAccessListReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 216
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7674,7 +7669,7 @@ public struct ParcelAccessListReplyPacket {
 // Message: ParcelAccessListUpdate (Low 217)
 public struct ParcelAccessListUpdatePacket {
     public var messageName: String = "ParcelAccessListUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 217
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7702,7 +7697,7 @@ public struct ParcelAccessListUpdatePacket {
 // Message: ParcelDwellRequest (Low 218)
 public struct ParcelDwellRequestPacket {
     public var messageName: String = "ParcelDwellRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 218
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7730,7 +7725,7 @@ public struct ParcelDwellRequestPacket {
 // Message: ParcelDwellReply (Low 219)
 public struct ParcelDwellReplyPacket {
     public var messageName: String = "ParcelDwellReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 219
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7758,7 +7753,7 @@ public struct ParcelDwellReplyPacket {
 // Message: RequestParcelTransfer (Low 220)
 public struct RequestParcelTransferPacket {
     public var messageName: String = "RequestParcelTransfer"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 220
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7786,7 +7781,7 @@ public struct RequestParcelTransferPacket {
 // Message: UpdateParcel (Low 221)
 public struct UpdateParcelPacket {
     public var messageName: String = "UpdateParcel"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 221
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7814,7 +7809,7 @@ public struct UpdateParcelPacket {
 // Message: RemoveParcel (Low 222)
 public struct RemoveParcelPacket {
     public var messageName: String = "RemoveParcel"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 222
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7842,7 +7837,7 @@ public struct RemoveParcelPacket {
 // Message: MergeParcel (Low 223)
 public struct MergeParcelPacket {
     public var messageName: String = "MergeParcel"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 223
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7870,7 +7865,7 @@ public struct MergeParcelPacket {
 // Message: LogParcelChanges (Low 224)
 public struct LogParcelChangesPacket {
     public var messageName: String = "LogParcelChanges"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 224
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -7898,7 +7893,7 @@ public struct LogParcelChangesPacket {
 // Message: CheckParcelSales (Low 225)
 public struct CheckParcelSalesPacket {
     public var messageName: String = "CheckParcelSales"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 225
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7926,7 +7921,7 @@ public struct CheckParcelSalesPacket {
 // Message: ParcelSales (Low 226)
 public struct ParcelSalesPacket {
     public var messageName: String = "ParcelSales"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 226
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7954,7 +7949,7 @@ public struct ParcelSalesPacket {
 // Message: ParcelGodMarkAsContent (Low 227)
 public struct ParcelGodMarkAsContentPacket {
     public var messageName: String = "ParcelGodMarkAsContent"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 227
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -7982,7 +7977,7 @@ public struct ParcelGodMarkAsContentPacket {
 // Message: ViewerStartAuction (Low 228)
 public struct ViewerStartAuctionPacket {
     public var messageName: String = "ViewerStartAuction"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 228
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8010,7 +8005,7 @@ public struct ViewerStartAuctionPacket {
 // Message: StartAuction (Low 229)
 public struct StartAuctionPacket {
     public var messageName: String = "StartAuction"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 229
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8038,7 +8033,7 @@ public struct StartAuctionPacket {
 // Message: ConfirmAuctionStart (Low 230)
 public struct ConfirmAuctionStartPacket {
     public var messageName: String = "ConfirmAuctionStart"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 230
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8066,7 +8061,7 @@ public struct ConfirmAuctionStartPacket {
 // Message: CompleteAuction (Low 231)
 public struct CompleteAuctionPacket {
     public var messageName: String = "CompleteAuction"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 231
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8094,7 +8089,7 @@ public struct CompleteAuctionPacket {
 // Message: CancelAuction (Low 232)
 public struct CancelAuctionPacket {
     public var messageName: String = "CancelAuction"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 232
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8122,7 +8117,7 @@ public struct CancelAuctionPacket {
 // Message: CheckParcelAuctions (Low 233)
 public struct CheckParcelAuctionsPacket {
     public var messageName: String = "CheckParcelAuctions"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 233
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8150,7 +8145,7 @@ public struct CheckParcelAuctionsPacket {
 // Message: ParcelAuctions (Low 234)
 public struct ParcelAuctionsPacket {
     public var messageName: String = "ParcelAuctions"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 234
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8178,7 +8173,7 @@ public struct ParcelAuctionsPacket {
 // Message: UUIDNameRequest (Low 235)
 public struct UUIDNameRequestPacket {
     public var messageName: String = "UUIDNameRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 235
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8206,7 +8201,7 @@ public struct UUIDNameRequestPacket {
 // Message: UUIDNameReply (Low 236)
 public struct UUIDNameReplyPacket {
     public var messageName: String = "UUIDNameReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 236
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8234,7 +8229,7 @@ public struct UUIDNameReplyPacket {
 // Message: UUIDGroupNameRequest (Low 237)
 public struct UUIDGroupNameRequestPacket {
     public var messageName: String = "UUIDGroupNameRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 237
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8262,7 +8257,7 @@ public struct UUIDGroupNameRequestPacket {
 // Message: UUIDGroupNameReply (Low 238)
 public struct UUIDGroupNameReplyPacket {
     public var messageName: String = "UUIDGroupNameReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 238
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8290,7 +8285,7 @@ public struct UUIDGroupNameReplyPacket {
 // Message: ChatPass (Low 239)
 public struct ChatPassPacket {
     public var messageName: String = "ChatPass"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 239
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -8318,7 +8313,7 @@ public struct ChatPassPacket {
 // Message: EdgeDataPacket (High 24)
 public struct EdgeDataPacketPacket {
     public var messageName: String = "EdgeDataPacket"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 24
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -8346,7 +8341,7 @@ public struct EdgeDataPacketPacket {
 // Message: SimStatus (Medium 12)
 public struct SimStatusPacket {
     public var messageName: String = "SimStatus"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 12
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -8374,7 +8369,7 @@ public struct SimStatusPacket {
 // Message: ChildAgentUpdate (High 25)
 public struct ChildAgentUpdatePacket {
     public var messageName: String = "ChildAgentUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 25
     public var frequency: String = "High"
     public var isZerocoded: Bool = true
@@ -8402,7 +8397,7 @@ public struct ChildAgentUpdatePacket {
 // Message: ChildAgentAlive (High 26)
 public struct ChildAgentAlivePacket {
     public var messageName: String = "ChildAgentAlive"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 26
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -8430,7 +8425,7 @@ public struct ChildAgentAlivePacket {
 // Message: ChildAgentPositionUpdate (High 27)
 public struct ChildAgentPositionUpdatePacket {
     public var messageName: String = "ChildAgentPositionUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 27
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -8458,7 +8453,7 @@ public struct ChildAgentPositionUpdatePacket {
 // Message: ChildAgentDying (Low 240)
 public struct ChildAgentDyingPacket {
     public var messageName: String = "ChildAgentDying"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 240
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -8486,7 +8481,7 @@ public struct ChildAgentDyingPacket {
 // Message: ChildAgentUnknown (Low 241)
 public struct ChildAgentUnknownPacket {
     public var messageName: String = "ChildAgentUnknown"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 241
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8514,7 +8509,7 @@ public struct ChildAgentUnknownPacket {
 // Message: AtomicPassObject (High 28)
 public struct AtomicPassObjectPacket {
     public var messageName: String = "AtomicPassObject"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 28
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -8542,7 +8537,7 @@ public struct AtomicPassObjectPacket {
 // Message: KillChildAgents (Low 242)
 public struct KillChildAgentsPacket {
     public var messageName: String = "KillChildAgents"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 242
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8570,7 +8565,7 @@ public struct KillChildAgentsPacket {
 // Message: GetScriptRunning (Low 243)
 public struct GetScriptRunningPacket {
     public var messageName: String = "GetScriptRunning"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 243
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8598,7 +8593,7 @@ public struct GetScriptRunningPacket {
 // Message: ScriptRunningReply (Low 244)
 public struct ScriptRunningReplyPacket {
     public var messageName: String = "ScriptRunningReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 244
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8626,7 +8621,7 @@ public struct ScriptRunningReplyPacket {
 // Message: SetScriptRunning (Low 245)
 public struct SetScriptRunningPacket {
     public var messageName: String = "SetScriptRunning"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 245
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8654,7 +8649,7 @@ public struct SetScriptRunningPacket {
 // Message: ScriptReset (Low 246)
 public struct ScriptResetPacket {
     public var messageName: String = "ScriptReset"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 246
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8682,7 +8677,7 @@ public struct ScriptResetPacket {
 // Message: ScriptSensorRequest (Low 247)
 public struct ScriptSensorRequestPacket {
     public var messageName: String = "ScriptSensorRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 247
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -8710,7 +8705,7 @@ public struct ScriptSensorRequestPacket {
 // Message: ScriptSensorReply (Low 248)
 public struct ScriptSensorReplyPacket {
     public var messageName: String = "ScriptSensorReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 248
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -8738,7 +8733,7 @@ public struct ScriptSensorReplyPacket {
 // Message: CompleteAgentMovement (Low 249)
 public struct CompleteAgentMovementPacket {
     public var messageName: String = "CompleteAgentMovement"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 249
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8766,7 +8761,7 @@ public struct CompleteAgentMovementPacket {
 // Message: AgentMovementComplete (Low 250)
 public struct AgentMovementCompletePacket {
     public var messageName: String = "AgentMovementComplete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 250
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8794,7 +8789,7 @@ public struct AgentMovementCompletePacket {
 // Message: DataServerLogout (Low 251)
 public struct DataServerLogoutPacket {
     public var messageName: String = "DataServerLogout"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 251
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8822,7 +8817,7 @@ public struct DataServerLogoutPacket {
 // Message: LogoutRequest (Low 252)
 public struct LogoutRequestPacket {
     public var messageName: String = "LogoutRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 252
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8850,7 +8845,7 @@ public struct LogoutRequestPacket {
 // Message: LogoutReply (Low 253)
 public struct LogoutReplyPacket {
     public var messageName: String = "LogoutReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 253
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -8878,7 +8873,7 @@ public struct LogoutReplyPacket {
 // Message: ImprovedInstantMessage (Low 254)
 public struct ImprovedInstantMessagePacket {
     public var messageName: String = "ImprovedInstantMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 254
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -8906,7 +8901,7 @@ public struct ImprovedInstantMessagePacket {
 // Message: RetrieveInstantMessages (Low 255)
 public struct RetrieveInstantMessagesPacket {
     public var messageName: String = "RetrieveInstantMessages"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 255
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8934,7 +8929,7 @@ public struct RetrieveInstantMessagesPacket {
 // Message: FindAgent (Low 256)
 public struct FindAgentPacket {
     public var messageName: String = "FindAgent"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 256
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8962,7 +8957,7 @@ public struct FindAgentPacket {
 // Message: RequestGodlikePowers (Low 257)
 public struct RequestGodlikePowersPacket {
     public var messageName: String = "RequestGodlikePowers"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 257
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -8990,7 +8985,7 @@ public struct RequestGodlikePowersPacket {
 // Message: GrantGodlikePowers (Low 258)
 public struct GrantGodlikePowersPacket {
     public var messageName: String = "GrantGodlikePowers"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 258
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9018,7 +9013,7 @@ public struct GrantGodlikePowersPacket {
 // Message: GodlikeMessage (Low 259)
 public struct GodlikeMessagePacket {
     public var messageName: String = "GodlikeMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 259
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9046,7 +9041,7 @@ public struct GodlikeMessagePacket {
 // Message: EstateOwnerMessage (Low 260)
 public struct EstateOwnerMessagePacket {
     public var messageName: String = "EstateOwnerMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 260
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9074,7 +9069,7 @@ public struct EstateOwnerMessagePacket {
 // Message: GenericMessage (Low 261)
 public struct GenericMessagePacket {
     public var messageName: String = "GenericMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 261
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9102,7 +9097,7 @@ public struct GenericMessagePacket {
 // Message: GenericStreamingMessage (High 31)
 public struct GenericStreamingMessagePacket {
     public var messageName: String = "GenericStreamingMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 31
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -9130,7 +9125,7 @@ public struct GenericStreamingMessagePacket {
 // Message: LargeGenericMessage (Low 430)
 public struct LargeGenericMessagePacket {
     public var messageName: String = "LargeGenericMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 430
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9158,7 +9153,7 @@ public struct LargeGenericMessagePacket {
 // Message: MuteListRequest (Low 262)
 public struct MuteListRequestPacket {
     public var messageName: String = "MuteListRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 262
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9186,7 +9181,7 @@ public struct MuteListRequestPacket {
 // Message: UpdateMuteListEntry (Low 263)
 public struct UpdateMuteListEntryPacket {
     public var messageName: String = "UpdateMuteListEntry"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 263
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9214,7 +9209,7 @@ public struct UpdateMuteListEntryPacket {
 // Message: RemoveMuteListEntry (Low 264)
 public struct RemoveMuteListEntryPacket {
     public var messageName: String = "RemoveMuteListEntry"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 264
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9242,7 +9237,7 @@ public struct RemoveMuteListEntryPacket {
 // Message: CopyInventoryFromNotecard (Low 265)
 public struct CopyInventoryFromNotecardPacket {
     public var messageName: String = "CopyInventoryFromNotecard"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 265
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9270,7 +9265,7 @@ public struct CopyInventoryFromNotecardPacket {
 // Message: UpdateInventoryItem (Low 266)
 public struct UpdateInventoryItemPacket {
     public var messageName: String = "UpdateInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 266
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9298,7 +9293,7 @@ public struct UpdateInventoryItemPacket {
 // Message: UpdateCreateInventoryItem (Low 267)
 public struct UpdateCreateInventoryItemPacket {
     public var messageName: String = "UpdateCreateInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 267
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9326,7 +9321,7 @@ public struct UpdateCreateInventoryItemPacket {
 // Message: MoveInventoryItem (Low 268)
 public struct MoveInventoryItemPacket {
     public var messageName: String = "MoveInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 268
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9354,7 +9349,7 @@ public struct MoveInventoryItemPacket {
 // Message: CopyInventoryItem (Low 269)
 public struct CopyInventoryItemPacket {
     public var messageName: String = "CopyInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 269
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9382,7 +9377,7 @@ public struct CopyInventoryItemPacket {
 // Message: RemoveInventoryItem (Low 270)
 public struct RemoveInventoryItemPacket {
     public var messageName: String = "RemoveInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 270
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9410,7 +9405,7 @@ public struct RemoveInventoryItemPacket {
 // Message: ChangeInventoryItemFlags (Low 271)
 public struct ChangeInventoryItemFlagsPacket {
     public var messageName: String = "ChangeInventoryItemFlags"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 271
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9438,7 +9433,7 @@ public struct ChangeInventoryItemFlagsPacket {
 // Message: SaveAssetIntoInventory (Low 272)
 public struct SaveAssetIntoInventoryPacket {
     public var messageName: String = "SaveAssetIntoInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 272
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9466,7 +9461,7 @@ public struct SaveAssetIntoInventoryPacket {
 // Message: CreateInventoryFolder (Low 273)
 public struct CreateInventoryFolderPacket {
     public var messageName: String = "CreateInventoryFolder"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 273
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9494,7 +9489,7 @@ public struct CreateInventoryFolderPacket {
 // Message: UpdateInventoryFolder (Low 274)
 public struct UpdateInventoryFolderPacket {
     public var messageName: String = "UpdateInventoryFolder"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 274
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9522,7 +9517,7 @@ public struct UpdateInventoryFolderPacket {
 // Message: MoveInventoryFolder (Low 275)
 public struct MoveInventoryFolderPacket {
     public var messageName: String = "MoveInventoryFolder"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 275
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9550,7 +9545,7 @@ public struct MoveInventoryFolderPacket {
 // Message: RemoveInventoryFolder (Low 276)
 public struct RemoveInventoryFolderPacket {
     public var messageName: String = "RemoveInventoryFolder"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 276
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9578,7 +9573,7 @@ public struct RemoveInventoryFolderPacket {
 // Message: FetchInventoryDescendents (Low 277)
 public struct FetchInventoryDescendentsPacket {
     public var messageName: String = "FetchInventoryDescendents"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 277
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9606,7 +9601,7 @@ public struct FetchInventoryDescendentsPacket {
 // Message: InventoryDescendents (Low 278)
 public struct InventoryDescendentsPacket {
     public var messageName: String = "InventoryDescendents"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 278
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9634,7 +9629,7 @@ public struct InventoryDescendentsPacket {
 // Message: FetchInventory (Low 279)
 public struct FetchInventoryPacket {
     public var messageName: String = "FetchInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 279
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9662,7 +9657,7 @@ public struct FetchInventoryPacket {
 // Message: FetchInventoryReply (Low 280)
 public struct FetchInventoryReplyPacket {
     public var messageName: String = "FetchInventoryReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 280
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9690,7 +9685,7 @@ public struct FetchInventoryReplyPacket {
 // Message: BulkUpdateInventory (Low 281)
 public struct BulkUpdateInventoryPacket {
     public var messageName: String = "BulkUpdateInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 281
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9718,7 +9713,7 @@ public struct BulkUpdateInventoryPacket {
 // Message: RequestInventoryAsset (Low 282)
 public struct RequestInventoryAssetPacket {
     public var messageName: String = "RequestInventoryAsset"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 282
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9746,7 +9741,7 @@ public struct RequestInventoryAssetPacket {
 // Message: InventoryAssetResponse (Low 283)
 public struct InventoryAssetResponsePacket {
     public var messageName: String = "InventoryAssetResponse"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 283
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9774,7 +9769,7 @@ public struct InventoryAssetResponsePacket {
 // Message: RemoveInventoryObjects (Low 284)
 public struct RemoveInventoryObjectsPacket {
     public var messageName: String = "RemoveInventoryObjects"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 284
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9802,7 +9797,7 @@ public struct RemoveInventoryObjectsPacket {
 // Message: PurgeInventoryDescendents (Low 285)
 public struct PurgeInventoryDescendentsPacket {
     public var messageName: String = "PurgeInventoryDescendents"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 285
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9830,7 +9825,7 @@ public struct PurgeInventoryDescendentsPacket {
 // Message: UpdateTaskInventory (Low 286)
 public struct UpdateTaskInventoryPacket {
     public var messageName: String = "UpdateTaskInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 286
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9858,7 +9853,7 @@ public struct UpdateTaskInventoryPacket {
 // Message: RemoveTaskInventory (Low 287)
 public struct RemoveTaskInventoryPacket {
     public var messageName: String = "RemoveTaskInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 287
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9886,7 +9881,7 @@ public struct RemoveTaskInventoryPacket {
 // Message: MoveTaskInventory (Low 288)
 public struct MoveTaskInventoryPacket {
     public var messageName: String = "MoveTaskInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 288
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9914,7 +9909,7 @@ public struct MoveTaskInventoryPacket {
 // Message: RequestTaskInventory (Low 289)
 public struct RequestTaskInventoryPacket {
     public var messageName: String = "RequestTaskInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 289
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -9942,7 +9937,7 @@ public struct RequestTaskInventoryPacket {
 // Message: ReplyTaskInventory (Low 290)
 public struct ReplyTaskInventoryPacket {
     public var messageName: String = "ReplyTaskInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 290
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9970,7 +9965,7 @@ public struct ReplyTaskInventoryPacket {
 // Message: DeRezObject (Low 291)
 public struct DeRezObjectPacket {
     public var messageName: String = "DeRezObject"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 291
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -9998,7 +9993,7 @@ public struct DeRezObjectPacket {
 // Message: DeRezAck (Low 292)
 public struct DeRezAckPacket {
     public var messageName: String = "DeRezAck"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 292
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10026,7 +10021,7 @@ public struct DeRezAckPacket {
 // Message: RezObject (Low 293)
 public struct RezObjectPacket {
     public var messageName: String = "RezObject"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 293
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10054,7 +10049,7 @@ public struct RezObjectPacket {
 // Message: RezObjectFromNotecard (Low 294)
 public struct RezObjectFromNotecardPacket {
     public var messageName: String = "RezObjectFromNotecard"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 294
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10082,7 +10077,7 @@ public struct RezObjectFromNotecardPacket {
 // Message: TransferInventory (Low 295)
 public struct TransferInventoryPacket {
     public var messageName: String = "TransferInventory"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 295
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10110,7 +10105,7 @@ public struct TransferInventoryPacket {
 // Message: TransferInventoryAck (Low 296)
 public struct TransferInventoryAckPacket {
     public var messageName: String = "TransferInventoryAck"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 296
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10138,7 +10133,7 @@ public struct TransferInventoryAckPacket {
 // Message: AcceptFriendship (Low 297)
 public struct AcceptFriendshipPacket {
     public var messageName: String = "AcceptFriendship"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 297
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10166,7 +10161,7 @@ public struct AcceptFriendshipPacket {
 // Message: DeclineFriendship (Low 298)
 public struct DeclineFriendshipPacket {
     public var messageName: String = "DeclineFriendship"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 298
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10194,7 +10189,7 @@ public struct DeclineFriendshipPacket {
 // Message: FormFriendship (Low 299)
 public struct FormFriendshipPacket {
     public var messageName: String = "FormFriendship"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 299
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10222,7 +10217,7 @@ public struct FormFriendshipPacket {
 // Message: TerminateFriendship (Low 300)
 public struct TerminateFriendshipPacket {
     public var messageName: String = "TerminateFriendship"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 300
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10250,7 +10245,7 @@ public struct TerminateFriendshipPacket {
 // Message: OfferCallingCard (Low 301)
 public struct OfferCallingCardPacket {
     public var messageName: String = "OfferCallingCard"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 301
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10278,7 +10273,7 @@ public struct OfferCallingCardPacket {
 // Message: AcceptCallingCard (Low 302)
 public struct AcceptCallingCardPacket {
     public var messageName: String = "AcceptCallingCard"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 302
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10306,7 +10301,7 @@ public struct AcceptCallingCardPacket {
 // Message: DeclineCallingCard (Low 303)
 public struct DeclineCallingCardPacket {
     public var messageName: String = "DeclineCallingCard"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 303
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10334,7 +10329,7 @@ public struct DeclineCallingCardPacket {
 // Message: RezScript (Low 304)
 public struct RezScriptPacket {
     public var messageName: String = "RezScript"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 304
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10362,7 +10357,7 @@ public struct RezScriptPacket {
 // Message: CreateInventoryItem (Low 305)
 public struct CreateInventoryItemPacket {
     public var messageName: String = "CreateInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 305
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10390,7 +10385,7 @@ public struct CreateInventoryItemPacket {
 // Message: CreateLandmarkForEvent (Low 306)
 public struct CreateLandmarkForEventPacket {
     public var messageName: String = "CreateLandmarkForEvent"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 306
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10418,7 +10413,7 @@ public struct CreateLandmarkForEventPacket {
 // Message: EventLocationRequest (Low 307)
 public struct EventLocationRequestPacket {
     public var messageName: String = "EventLocationRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 307
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10446,7 +10441,7 @@ public struct EventLocationRequestPacket {
 // Message: EventLocationReply (Low 308)
 public struct EventLocationReplyPacket {
     public var messageName: String = "EventLocationReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 308
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10474,7 +10469,7 @@ public struct EventLocationReplyPacket {
 // Message: RegionHandleRequest (Low 309)
 public struct RegionHandleRequestPacket {
     public var messageName: String = "RegionHandleRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 309
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10502,7 +10497,7 @@ public struct RegionHandleRequestPacket {
 // Message: RegionIDAndHandleReply (Low 310)
 public struct RegionIDAndHandleReplyPacket {
     public var messageName: String = "RegionIDAndHandleReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 310
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10530,7 +10525,7 @@ public struct RegionIDAndHandleReplyPacket {
 // Message: MoneyTransferRequest (Low 311)
 public struct MoneyTransferRequestPacket {
     public var messageName: String = "MoneyTransferRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 311
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10558,7 +10553,7 @@ public struct MoneyTransferRequestPacket {
 // Message: MoneyTransferBackend (Low 312)
 public struct MoneyTransferBackendPacket {
     public var messageName: String = "MoneyTransferBackend"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 312
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10586,7 +10581,7 @@ public struct MoneyTransferBackendPacket {
 // Message: MoneyBalanceRequest (Low 313)
 public struct MoneyBalanceRequestPacket {
     public var messageName: String = "MoneyBalanceRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 313
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10614,7 +10609,7 @@ public struct MoneyBalanceRequestPacket {
 // Message: MoneyBalanceReply (Low 314)
 public struct MoneyBalanceReplyPacket {
     public var messageName: String = "MoneyBalanceReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 314
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10642,7 +10637,7 @@ public struct MoneyBalanceReplyPacket {
 // Message: RoutedMoneyBalanceReply (Low 315)
 public struct RoutedMoneyBalanceReplyPacket {
     public var messageName: String = "RoutedMoneyBalanceReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 315
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10670,7 +10665,7 @@ public struct RoutedMoneyBalanceReplyPacket {
 // Message: ActivateGestures (Low 316)
 public struct ActivateGesturesPacket {
     public var messageName: String = "ActivateGestures"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 316
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10698,7 +10693,7 @@ public struct ActivateGesturesPacket {
 // Message: DeactivateGestures (Low 317)
 public struct DeactivateGesturesPacket {
     public var messageName: String = "DeactivateGestures"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 317
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10726,7 +10721,7 @@ public struct DeactivateGesturesPacket {
 // Message: MuteListUpdate (Low 318)
 public struct MuteListUpdatePacket {
     public var messageName: String = "MuteListUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 318
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10754,7 +10749,7 @@ public struct MuteListUpdatePacket {
 // Message: UseCachedMuteList (Low 319)
 public struct UseCachedMuteListPacket {
     public var messageName: String = "UseCachedMuteList"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 319
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10782,7 +10777,7 @@ public struct UseCachedMuteListPacket {
 // Message: GrantUserRights (Low 320)
 public struct GrantUserRightsPacket {
     public var messageName: String = "GrantUserRights"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 320
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10810,7 +10805,7 @@ public struct GrantUserRightsPacket {
 // Message: ChangeUserRights (Low 321)
 public struct ChangeUserRightsPacket {
     public var messageName: String = "ChangeUserRights"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 321
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10838,7 +10833,7 @@ public struct ChangeUserRightsPacket {
 // Message: OnlineNotification (Low 322)
 public struct OnlineNotificationPacket {
     public var messageName: String = "OnlineNotification"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 322
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10866,7 +10861,7 @@ public struct OnlineNotificationPacket {
 // Message: OfflineNotification (Low 323)
 public struct OfflineNotificationPacket {
     public var messageName: String = "OfflineNotification"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 323
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10894,7 +10889,7 @@ public struct OfflineNotificationPacket {
 // Message: SetStartLocationRequest (Low 324)
 public struct SetStartLocationRequestPacket {
     public var messageName: String = "SetStartLocationRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 324
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10922,7 +10917,7 @@ public struct SetStartLocationRequestPacket {
 // Message: SetStartLocation (Low 325)
 public struct SetStartLocationPacket {
     public var messageName: String = "SetStartLocation"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 325
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -10950,7 +10945,7 @@ public struct SetStartLocationPacket {
 // Message: NetTest (Low 326)
 public struct NetTestPacket {
     public var messageName: String = "NetTest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 326
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -10978,7 +10973,7 @@ public struct NetTestPacket {
 // Message: SetCPURatio (Low 327)
 public struct SetCPURatioPacket {
     public var messageName: String = "SetCPURatio"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 327
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11006,7 +11001,7 @@ public struct SetCPURatioPacket {
 // Message: SimCrashed (Low 328)
 public struct SimCrashedPacket {
     public var messageName: String = "SimCrashed"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 328
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11034,7 +11029,7 @@ public struct SimCrashedPacket {
 // Message: NameValuePair (Low 329)
 public struct NameValuePairPacket {
     public var messageName: String = "NameValuePair"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 329
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11062,7 +11057,7 @@ public struct NameValuePairPacket {
 // Message: RemoveNameValuePair (Low 330)
 public struct RemoveNameValuePairPacket {
     public var messageName: String = "RemoveNameValuePair"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 330
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11090,7 +11085,7 @@ public struct RemoveNameValuePairPacket {
 // Message: UpdateAttachment (Low 331)
 public struct UpdateAttachmentPacket {
     public var messageName: String = "UpdateAttachment"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 331
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11118,7 +11113,7 @@ public struct UpdateAttachmentPacket {
 // Message: RemoveAttachment (Low 332)
 public struct RemoveAttachmentPacket {
     public var messageName: String = "RemoveAttachment"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 332
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11146,7 +11141,7 @@ public struct RemoveAttachmentPacket {
 // Message: SoundTrigger (High 29)
 public struct SoundTriggerPacket {
     public var messageName: String = "SoundTrigger"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 29
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -11174,7 +11169,7 @@ public struct SoundTriggerPacket {
 // Message: AttachedSound (Medium 13)
 public struct AttachedSoundPacket {
     public var messageName: String = "AttachedSound"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 13
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -11202,7 +11197,7 @@ public struct AttachedSoundPacket {
 // Message: AttachedSoundGainChange (Medium 14)
 public struct AttachedSoundGainChangePacket {
     public var messageName: String = "AttachedSoundGainChange"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 14
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -11230,7 +11225,7 @@ public struct AttachedSoundGainChangePacket {
 // Message: PreloadSound (Medium 15)
 public struct PreloadSoundPacket {
     public var messageName: String = "PreloadSound"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 15
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -11258,7 +11253,7 @@ public struct PreloadSoundPacket {
 // Message: ObjectAnimation (High 30)
 public struct ObjectAnimationPacket {
     public var messageName: String = "ObjectAnimation"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 30
     public var frequency: String = "High"
     public var isZerocoded: Bool = false
@@ -11286,7 +11281,7 @@ public struct ObjectAnimationPacket {
 // Message: AssetUploadRequest (Low 333)
 public struct AssetUploadRequestPacket {
     public var messageName: String = "AssetUploadRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 333
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11314,7 +11309,7 @@ public struct AssetUploadRequestPacket {
 // Message: AssetUploadComplete (Low 334)
 public struct AssetUploadCompletePacket {
     public var messageName: String = "AssetUploadComplete"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 334
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11342,7 +11337,7 @@ public struct AssetUploadCompletePacket {
 // Message: EmailMessageRequest (Low 335)
 public struct EmailMessageRequestPacket {
     public var messageName: String = "EmailMessageRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 335
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11370,7 +11365,7 @@ public struct EmailMessageRequestPacket {
 // Message: EmailMessageReply (Low 336)
 public struct EmailMessageReplyPacket {
     public var messageName: String = "EmailMessageReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 336
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11398,7 +11393,7 @@ public struct EmailMessageReplyPacket {
 // Message: InternalScriptMail (Medium 16)
 public struct InternalScriptMailPacket {
     public var messageName: String = "InternalScriptMail"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 16
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = false
@@ -11426,7 +11421,7 @@ public struct InternalScriptMailPacket {
 // Message: ScriptDataRequest (Low 337)
 public struct ScriptDataRequestPacket {
     public var messageName: String = "ScriptDataRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 337
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11454,7 +11449,7 @@ public struct ScriptDataRequestPacket {
 // Message: ScriptDataReply (Low 338)
 public struct ScriptDataReplyPacket {
     public var messageName: String = "ScriptDataReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 338
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11482,7 +11477,7 @@ public struct ScriptDataReplyPacket {
 // Message: CreateGroupRequest (Low 339)
 public struct CreateGroupRequestPacket {
     public var messageName: String = "CreateGroupRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 339
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11510,7 +11505,7 @@ public struct CreateGroupRequestPacket {
 // Message: CreateGroupReply (Low 340)
 public struct CreateGroupReplyPacket {
     public var messageName: String = "CreateGroupReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 340
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11538,7 +11533,7 @@ public struct CreateGroupReplyPacket {
 // Message: UpdateGroupInfo (Low 341)
 public struct UpdateGroupInfoPacket {
     public var messageName: String = "UpdateGroupInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 341
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11566,7 +11561,7 @@ public struct UpdateGroupInfoPacket {
 // Message: GroupRoleChanges (Low 342)
 public struct GroupRoleChangesPacket {
     public var messageName: String = "GroupRoleChanges"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 342
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11594,7 +11589,7 @@ public struct GroupRoleChangesPacket {
 // Message: JoinGroupRequest (Low 343)
 public struct JoinGroupRequestPacket {
     public var messageName: String = "JoinGroupRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 343
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11622,7 +11617,7 @@ public struct JoinGroupRequestPacket {
 // Message: JoinGroupReply (Low 344)
 public struct JoinGroupReplyPacket {
     public var messageName: String = "JoinGroupReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 344
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11650,7 +11645,7 @@ public struct JoinGroupReplyPacket {
 // Message: EjectGroupMemberRequest (Low 345)
 public struct EjectGroupMemberRequestPacket {
     public var messageName: String = "EjectGroupMemberRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 345
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11678,7 +11673,7 @@ public struct EjectGroupMemberRequestPacket {
 // Message: EjectGroupMemberReply (Low 346)
 public struct EjectGroupMemberReplyPacket {
     public var messageName: String = "EjectGroupMemberReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 346
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11706,7 +11701,7 @@ public struct EjectGroupMemberReplyPacket {
 // Message: LeaveGroupRequest (Low 347)
 public struct LeaveGroupRequestPacket {
     public var messageName: String = "LeaveGroupRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 347
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11734,7 +11729,7 @@ public struct LeaveGroupRequestPacket {
 // Message: LeaveGroupReply (Low 348)
 public struct LeaveGroupReplyPacket {
     public var messageName: String = "LeaveGroupReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 348
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11762,7 +11757,7 @@ public struct LeaveGroupReplyPacket {
 // Message: InviteGroupRequest (Low 349)
 public struct InviteGroupRequestPacket {
     public var messageName: String = "InviteGroupRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 349
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11790,7 +11785,7 @@ public struct InviteGroupRequestPacket {
 // Message: InviteGroupResponse (Low 350)
 public struct InviteGroupResponsePacket {
     public var messageName: String = "InviteGroupResponse"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 350
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11818,7 +11813,7 @@ public struct InviteGroupResponsePacket {
 // Message: GroupProfileRequest (Low 351)
 public struct GroupProfileRequestPacket {
     public var messageName: String = "GroupProfileRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 351
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -11846,7 +11841,7 @@ public struct GroupProfileRequestPacket {
 // Message: GroupProfileReply (Low 352)
 public struct GroupProfileReplyPacket {
     public var messageName: String = "GroupProfileReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 352
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11874,7 +11869,7 @@ public struct GroupProfileReplyPacket {
 // Message: GroupAccountSummaryRequest (Low 353)
 public struct GroupAccountSummaryRequestPacket {
     public var messageName: String = "GroupAccountSummaryRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 353
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11902,7 +11897,7 @@ public struct GroupAccountSummaryRequestPacket {
 // Message: GroupAccountSummaryReply (Low 354)
 public struct GroupAccountSummaryReplyPacket {
     public var messageName: String = "GroupAccountSummaryReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 354
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11930,7 +11925,7 @@ public struct GroupAccountSummaryReplyPacket {
 // Message: GroupAccountDetailsRequest (Low 355)
 public struct GroupAccountDetailsRequestPacket {
     public var messageName: String = "GroupAccountDetailsRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 355
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11958,7 +11953,7 @@ public struct GroupAccountDetailsRequestPacket {
 // Message: GroupAccountDetailsReply (Low 356)
 public struct GroupAccountDetailsReplyPacket {
     public var messageName: String = "GroupAccountDetailsReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 356
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -11986,7 +11981,7 @@ public struct GroupAccountDetailsReplyPacket {
 // Message: GroupAccountTransactionsRequest (Low 357)
 public struct GroupAccountTransactionsRequestPacket {
     public var messageName: String = "GroupAccountTransactionsRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 357
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12014,7 +12009,7 @@ public struct GroupAccountTransactionsRequestPacket {
 // Message: GroupAccountTransactionsReply (Low 358)
 public struct GroupAccountTransactionsReplyPacket {
     public var messageName: String = "GroupAccountTransactionsReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 358
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12042,7 +12037,7 @@ public struct GroupAccountTransactionsReplyPacket {
 // Message: GroupActiveProposalsRequest (Low 359)
 public struct GroupActiveProposalsRequestPacket {
     public var messageName: String = "GroupActiveProposalsRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 359
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12070,7 +12065,7 @@ public struct GroupActiveProposalsRequestPacket {
 // Message: GroupActiveProposalItemReply (Low 360)
 public struct GroupActiveProposalItemReplyPacket {
     public var messageName: String = "GroupActiveProposalItemReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 360
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12098,7 +12093,7 @@ public struct GroupActiveProposalItemReplyPacket {
 // Message: GroupVoteHistoryRequest (Low 361)
 public struct GroupVoteHistoryRequestPacket {
     public var messageName: String = "GroupVoteHistoryRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 361
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12126,7 +12121,7 @@ public struct GroupVoteHistoryRequestPacket {
 // Message: GroupVoteHistoryItemReply (Low 362)
 public struct GroupVoteHistoryItemReplyPacket {
     public var messageName: String = "GroupVoteHistoryItemReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 362
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12154,7 +12149,7 @@ public struct GroupVoteHistoryItemReplyPacket {
 // Message: StartGroupProposal (Low 363)
 public struct StartGroupProposalPacket {
     public var messageName: String = "StartGroupProposal"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 363
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12182,7 +12177,7 @@ public struct StartGroupProposalPacket {
 // Message: GroupProposalBallot (Low 364)
 public struct GroupProposalBallotPacket {
     public var messageName: String = "GroupProposalBallot"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 364
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12210,7 +12205,7 @@ public struct GroupProposalBallotPacket {
 // Message: TallyVotes (Low 365)
 public struct TallyVotesPacket {
     public var messageName: String = "TallyVotes"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 365
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12238,7 +12233,7 @@ public struct TallyVotesPacket {
 // Message: GroupMembersRequest (Low 366)
 public struct GroupMembersRequestPacket {
     public var messageName: String = "GroupMembersRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 366
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12266,7 +12261,7 @@ public struct GroupMembersRequestPacket {
 // Message: GroupMembersReply (Low 367)
 public struct GroupMembersReplyPacket {
     public var messageName: String = "GroupMembersReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 367
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12294,7 +12289,7 @@ public struct GroupMembersReplyPacket {
 // Message: ActivateGroup (Low 368)
 public struct ActivateGroupPacket {
     public var messageName: String = "ActivateGroup"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 368
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12322,7 +12317,7 @@ public struct ActivateGroupPacket {
 // Message: SetGroupContribution (Low 369)
 public struct SetGroupContributionPacket {
     public var messageName: String = "SetGroupContribution"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 369
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12350,7 +12345,7 @@ public struct SetGroupContributionPacket {
 // Message: SetGroupAcceptNotices (Low 370)
 public struct SetGroupAcceptNoticesPacket {
     public var messageName: String = "SetGroupAcceptNotices"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 370
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12378,7 +12373,7 @@ public struct SetGroupAcceptNoticesPacket {
 // Message: GroupRoleDataRequest (Low 371)
 public struct GroupRoleDataRequestPacket {
     public var messageName: String = "GroupRoleDataRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 371
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12406,7 +12401,7 @@ public struct GroupRoleDataRequestPacket {
 // Message: GroupRoleDataReply (Low 372)
 public struct GroupRoleDataReplyPacket {
     public var messageName: String = "GroupRoleDataReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 372
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12434,7 +12429,7 @@ public struct GroupRoleDataReplyPacket {
 // Message: GroupRoleMembersRequest (Low 373)
 public struct GroupRoleMembersRequestPacket {
     public var messageName: String = "GroupRoleMembersRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 373
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12462,7 +12457,7 @@ public struct GroupRoleMembersRequestPacket {
 // Message: GroupRoleMembersReply (Low 374)
 public struct GroupRoleMembersReplyPacket {
     public var messageName: String = "GroupRoleMembersReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 374
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12490,7 +12485,7 @@ public struct GroupRoleMembersReplyPacket {
 // Message: GroupTitlesRequest (Low 375)
 public struct GroupTitlesRequestPacket {
     public var messageName: String = "GroupTitlesRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 375
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12518,7 +12513,7 @@ public struct GroupTitlesRequestPacket {
 // Message: GroupTitlesReply (Low 376)
 public struct GroupTitlesReplyPacket {
     public var messageName: String = "GroupTitlesReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 376
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12546,7 +12541,7 @@ public struct GroupTitlesReplyPacket {
 // Message: GroupTitleUpdate (Low 377)
 public struct GroupTitleUpdatePacket {
     public var messageName: String = "GroupTitleUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 377
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12574,7 +12569,7 @@ public struct GroupTitleUpdatePacket {
 // Message: GroupRoleUpdate (Low 378)
 public struct GroupRoleUpdatePacket {
     public var messageName: String = "GroupRoleUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 378
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12602,7 +12597,7 @@ public struct GroupRoleUpdatePacket {
 // Message: LiveHelpGroupRequest (Low 379)
 public struct LiveHelpGroupRequestPacket {
     public var messageName: String = "LiveHelpGroupRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 379
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12630,7 +12625,7 @@ public struct LiveHelpGroupRequestPacket {
 // Message: LiveHelpGroupReply (Low 380)
 public struct LiveHelpGroupReplyPacket {
     public var messageName: String = "LiveHelpGroupReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 380
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12658,7 +12653,7 @@ public struct LiveHelpGroupReplyPacket {
 // Message: AgentWearablesRequest (Low 381)
 public struct AgentWearablesRequestPacket {
     public var messageName: String = "AgentWearablesRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 381
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12686,7 +12681,7 @@ public struct AgentWearablesRequestPacket {
 // Message: AgentWearablesUpdate (Low 382)
 public struct AgentWearablesUpdatePacket {
     public var messageName: String = "AgentWearablesUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 382
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12714,7 +12709,7 @@ public struct AgentWearablesUpdatePacket {
 // Message: AgentIsNowWearing (Low 383)
 public struct AgentIsNowWearingPacket {
     public var messageName: String = "AgentIsNowWearing"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 383
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12742,7 +12737,7 @@ public struct AgentIsNowWearingPacket {
 // Message: AgentCachedTexture (Low 384)
 public struct AgentCachedTexturePacket {
     public var messageName: String = "AgentCachedTexture"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 384
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12770,7 +12765,7 @@ public struct AgentCachedTexturePacket {
 // Message: AgentCachedTextureResponse (Low 385)
 public struct AgentCachedTextureResponsePacket {
     public var messageName: String = "AgentCachedTextureResponse"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 385
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12798,7 +12793,7 @@ public struct AgentCachedTextureResponsePacket {
 // Message: AgentDataUpdateRequest (Low 386)
 public struct AgentDataUpdateRequestPacket {
     public var messageName: String = "AgentDataUpdateRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 386
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -12826,7 +12821,7 @@ public struct AgentDataUpdateRequestPacket {
 // Message: AgentDataUpdate (Low 387)
 public struct AgentDataUpdatePacket {
     public var messageName: String = "AgentDataUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 387
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12854,7 +12849,7 @@ public struct AgentDataUpdatePacket {
 // Message: GroupDataUpdate (Low 388)
 public struct GroupDataUpdatePacket {
     public var messageName: String = "GroupDataUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 388
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12882,7 +12877,7 @@ public struct GroupDataUpdatePacket {
 // Message: AgentGroupDataUpdate (Low 389)
 public struct AgentGroupDataUpdatePacket {
     public var messageName: String = "AgentGroupDataUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 389
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12910,7 +12905,7 @@ public struct AgentGroupDataUpdatePacket {
 // Message: AgentDropGroup (Low 390)
 public struct AgentDropGroupPacket {
     public var messageName: String = "AgentDropGroup"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 390
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12938,7 +12933,7 @@ public struct AgentDropGroupPacket {
 // Message: LogTextMessage (Low 391)
 public struct LogTextMessagePacket {
     public var messageName: String = "LogTextMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 391
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -12966,7 +12961,7 @@ public struct LogTextMessagePacket {
 // Message: ViewerEffect (Medium 17)
 public struct ViewerEffectPacket {
     public var messageName: String = "ViewerEffect"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 17
     public var frequency: String = "Medium"
     public var isZerocoded: Bool = true
@@ -12994,7 +12989,7 @@ public struct ViewerEffectPacket {
 // Message: CreateTrustedCircuit (Low 392)
 public struct CreateTrustedCircuitPacket {
     public var messageName: String = "CreateTrustedCircuit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 392
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13022,7 +13017,7 @@ public struct CreateTrustedCircuitPacket {
 // Message: DenyTrustedCircuit (Low 393)
 public struct DenyTrustedCircuitPacket {
     public var messageName: String = "DenyTrustedCircuit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 393
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13050,7 +13045,7 @@ public struct DenyTrustedCircuitPacket {
 // Message: RequestTrustedCircuit (Low 394)
 public struct RequestTrustedCircuitPacket {
     public var messageName: String = "RequestTrustedCircuit"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 394
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13078,7 +13073,7 @@ public struct RequestTrustedCircuitPacket {
 // Message: RezSingleAttachmentFromInv (Low 395)
 public struct RezSingleAttachmentFromInvPacket {
     public var messageName: String = "RezSingleAttachmentFromInv"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 395
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -13106,7 +13101,7 @@ public struct RezSingleAttachmentFromInvPacket {
 // Message: RezMultipleAttachmentsFromInv (Low 396)
 public struct RezMultipleAttachmentsFromInvPacket {
     public var messageName: String = "RezMultipleAttachmentsFromInv"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 396
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -13134,7 +13129,7 @@ public struct RezMultipleAttachmentsFromInvPacket {
 // Message: DetachAttachmentIntoInv (Low 397)
 public struct DetachAttachmentIntoInvPacket {
     public var messageName: String = "DetachAttachmentIntoInv"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 397
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13162,7 +13157,7 @@ public struct DetachAttachmentIntoInvPacket {
 // Message: CreateNewOutfitAttachments (Low 398)
 public struct CreateNewOutfitAttachmentsPacket {
     public var messageName: String = "CreateNewOutfitAttachments"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 398
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13190,7 +13185,7 @@ public struct CreateNewOutfitAttachmentsPacket {
 // Message: UserInfoRequest (Low 399)
 public struct UserInfoRequestPacket {
     public var messageName: String = "UserInfoRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 399
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13218,7 +13213,7 @@ public struct UserInfoRequestPacket {
 // Message: UserInfoReply (Low 400)
 public struct UserInfoReplyPacket {
     public var messageName: String = "UserInfoReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 400
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13246,7 +13241,7 @@ public struct UserInfoReplyPacket {
 // Message: UpdateUserInfo (Low 401)
 public struct UpdateUserInfoPacket {
     public var messageName: String = "UpdateUserInfo"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 401
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13274,7 +13269,7 @@ public struct UpdateUserInfoPacket {
 // Message: ParcelRename (Low 402)
 public struct ParcelRenamePacket {
     public var messageName: String = "ParcelRename"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 402
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13302,7 +13297,7 @@ public struct ParcelRenamePacket {
 // Message: InitiateDownload (Low 403)
 public struct InitiateDownloadPacket {
     public var messageName: String = "InitiateDownload"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 403
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13330,7 +13325,7 @@ public struct InitiateDownloadPacket {
 // Message: SystemMessage (Low 404)
 public struct SystemMessagePacket {
     public var messageName: String = "SystemMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 404
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -13358,7 +13353,7 @@ public struct SystemMessagePacket {
 // Message: MapLayerRequest (Low 405)
 public struct MapLayerRequestPacket {
     public var messageName: String = "MapLayerRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 405
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13386,7 +13381,7 @@ public struct MapLayerRequestPacket {
 // Message: MapLayerReply (Low 406)
 public struct MapLayerReplyPacket {
     public var messageName: String = "MapLayerReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 406
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13414,7 +13409,7 @@ public struct MapLayerReplyPacket {
 // Message: MapBlockRequest (Low 407)
 public struct MapBlockRequestPacket {
     public var messageName: String = "MapBlockRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 407
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13442,7 +13437,7 @@ public struct MapBlockRequestPacket {
 // Message: MapNameRequest (Low 408)
 public struct MapNameRequestPacket {
     public var messageName: String = "MapNameRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 408
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13470,7 +13465,7 @@ public struct MapNameRequestPacket {
 // Message: MapBlockReply (Low 409)
 public struct MapBlockReplyPacket {
     public var messageName: String = "MapBlockReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 409
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13498,7 +13493,7 @@ public struct MapBlockReplyPacket {
 // Message: MapItemRequest (Low 410)
 public struct MapItemRequestPacket {
     public var messageName: String = "MapItemRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 410
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13526,7 +13521,7 @@ public struct MapItemRequestPacket {
 // Message: MapItemReply (Low 411)
 public struct MapItemReplyPacket {
     public var messageName: String = "MapItemReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 411
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13554,7 +13549,7 @@ public struct MapItemReplyPacket {
 // Message: SendPostcard (Low 412)
 public struct SendPostcardPacket {
     public var messageName: String = "SendPostcard"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 412
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13582,7 +13577,7 @@ public struct SendPostcardPacket {
 // Message: RpcChannelRequest (Low 413)
 public struct RpcChannelRequestPacket {
     public var messageName: String = "RpcChannelRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 413
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13610,7 +13605,7 @@ public struct RpcChannelRequestPacket {
 // Message: RpcChannelReply (Low 414)
 public struct RpcChannelReplyPacket {
     public var messageName: String = "RpcChannelReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 414
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13638,7 +13633,7 @@ public struct RpcChannelReplyPacket {
 // Message: RpcScriptRequestInbound (Low 415)
 public struct RpcScriptRequestInboundPacket {
     public var messageName: String = "RpcScriptRequestInbound"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 415
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13666,7 +13661,7 @@ public struct RpcScriptRequestInboundPacket {
 // Message: RpcScriptRequestInboundForward (Low 416)
 public struct RpcScriptRequestInboundForwardPacket {
     public var messageName: String = "RpcScriptRequestInboundForward"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 416
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13694,7 +13689,7 @@ public struct RpcScriptRequestInboundForwardPacket {
 // Message: RpcScriptReplyInbound (Low 417)
 public struct RpcScriptReplyInboundPacket {
     public var messageName: String = "RpcScriptReplyInbound"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 417
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13722,7 +13717,7 @@ public struct RpcScriptReplyInboundPacket {
 // Message: ScriptMailRegistration (Low 418)
 public struct ScriptMailRegistrationPacket {
     public var messageName: String = "ScriptMailRegistration"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 418
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13750,7 +13745,7 @@ public struct ScriptMailRegistrationPacket {
 // Message: ParcelMediaCommandMessage (Low 419)
 public struct ParcelMediaCommandMessagePacket {
     public var messageName: String = "ParcelMediaCommandMessage"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 419
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13778,7 +13773,7 @@ public struct ParcelMediaCommandMessagePacket {
 // Message: ParcelMediaUpdate (Low 420)
 public struct ParcelMediaUpdatePacket {
     public var messageName: String = "ParcelMediaUpdate"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 420
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13806,7 +13801,7 @@ public struct ParcelMediaUpdatePacket {
 // Message: LandStatRequest (Low 421)
 public struct LandStatRequestPacket {
     public var messageName: String = "LandStatRequest"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 421
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13834,7 +13829,7 @@ public struct LandStatRequestPacket {
 // Message: LandStatReply (Low 422)
 public struct LandStatReplyPacket {
     public var messageName: String = "LandStatReply"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 422
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13862,7 +13857,7 @@ public struct LandStatReplyPacket {
 // Message: Error (Low 423)
 public struct ErrorPacket {
     public var messageName: String = "Error"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 423
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -13890,7 +13885,7 @@ public struct ErrorPacket {
 // Message: ObjectIncludeInSearch (Low 424)
 public struct ObjectIncludeInSearchPacket {
     public var messageName: String = "ObjectIncludeInSearch"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 424
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13918,7 +13913,7 @@ public struct ObjectIncludeInSearchPacket {
 // Message: RezRestoreToWorld (Low 425)
 public struct RezRestoreToWorldPacket {
     public var messageName: String = "RezRestoreToWorld"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 425
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -13946,7 +13941,7 @@ public struct RezRestoreToWorldPacket {
 // Message: LinkInventoryItem (Low 426)
 public struct LinkInventoryItemPacket {
     public var messageName: String = "LinkInventoryItem"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 426
     public var frequency: String = "Low"
     public var isZerocoded: Bool = true
@@ -13974,7 +13969,7 @@ public struct LinkInventoryItemPacket {
 // Message: RetrieveIMsExtended (Low 427)
 public struct RetrieveIMsExtendedPacket {
     public var messageName: String = "RetrieveIMsExtended"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 427
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -14002,7 +13997,7 @@ public struct RetrieveIMsExtendedPacket {
 // Message: JoinGroupRequestExtended (Low 428)
 public struct JoinGroupRequestExtendedPacket {
     public var messageName: String = "JoinGroupRequestExtended"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 428
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -14030,7 +14025,7 @@ public struct JoinGroupRequestExtendedPacket {
 // Message: CreateGroupRequestExtended (Low 429)
 public struct CreateGroupRequestExtendedPacket {
     public var messageName: String = "CreateGroupRequestExtended"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 429
     public var frequency: String = "Low"
     public var isZerocoded: Bool = false
@@ -14058,7 +14053,7 @@ public struct CreateGroupRequestExtendedPacket {
 // Message: GameControlInput (High 32)
 public struct GameControlInputPacket {
     public var messageName: String = "GameControlInput"
-    public var name: String { get { messageName } set { messageName = value } }
+    public var name: String { messageName }
     public var messageNumber: UInt32 = 32
     public var frequency: String = "High"
     public var isZerocoded: Bool = true

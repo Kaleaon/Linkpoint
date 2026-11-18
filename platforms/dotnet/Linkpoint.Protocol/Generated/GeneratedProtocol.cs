@@ -547,7 +547,7 @@ namespace Linkpoint.Protocol
     public static class GeneratedProtocolCatalog
     {
         public const string TemplateVersion = GeneratedProtocol.TemplateVersion;
-        public static Dictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
+        public static IReadOnlyDictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
         public static byte[] DecompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
         public static byte[] decompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
     }

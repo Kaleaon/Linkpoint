@@ -102,14 +102,9 @@ class SwiftEmitter(BaseEmitter):
         return dest
     }
 }
-
-public struct GeneratedProtocolCatalog {
-    public static let templateVersion: String = GeneratedProtocol.templateVersion
-    public static let registeredMessages: [String: UInt32] = GeneratedProtocol.registeredMessages
-    public static func decompressZerocoded(_ src: Data) -> Data { GeneratedProtocol.decompressZerocoded(src) }
-    public static func decompressZerocoded(_ src: [UInt8]) -> [UInt8] { GeneratedProtocol.decompressZerocoded(src) }
-}
 """)
+
+        out.append("public typealias GeneratedProtocolCatalog = GeneratedProtocol\n")
 
         # UDP Message structs
         out.append("// Generated UDP Messages")
@@ -117,7 +112,7 @@ public struct GeneratedProtocolCatalog {
             out.append(f"// Message: {msg.name} ({msg.frequency} {msg.message_number})")
             out.append(f"public struct {msg.name}Packet {{")
             out.append(f'    public var messageName: String = "{msg.name}"')
-            out.append('    public var name: String { get { messageName } set { messageName = value } }')
+            out.append("    public var name: String { messageName }")
             out.append(f"    public var messageNumber: UInt32 = {msg.message_number}")
             out.append(f'    public var frequency: String = "{msg.frequency}"')
             out.append(
