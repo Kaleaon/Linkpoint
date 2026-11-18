@@ -1,6 +1,6 @@
 package com.linkpoint.linden.llcharacter
 
-import com.linkpoint.linden.llmath.Matrix4
+import com.linkpoint.scene.math.Matrix4
 import com.linkpoint.linden.llmath.Quaternion
 import com.linkpoint.linden.llmath.Vector3
 

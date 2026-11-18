@@ -1,13 +1,21 @@
-package com.linkpoint.linden.llmath
+package com.linkpoint.scene.math
 
+import com.linkpoint.linden.llmath.Matrix3
+import com.linkpoint.linden.llmath.Quaternion
+import com.linkpoint.linden.llmath.Vector3
+import com.linkpoint.linden.llmath.Vector4
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-@Deprecated("Deprecated in favor of unified native linkpoint-scene Rust core rendering library")
-class Matrix4 private constructor(val values: FloatArray) {
+/**
+ * Native scene 4x4 matrix implementation for linkpoint-scene unified 3D rendering pipeline.
+ *
+ * Matrix layout is 16 float elements stored in row-major order: values[row * 4 + col].
+ */
+class Matrix4(val values: FloatArray) {
 
     init {
-        require(values.size == 16)
+        require(values.size == 16) { "Matrix4 requires exactly 16 float elements" }
     }
 
     constructor() : this(FloatArray(16).also { identityInto(it) })
@@ -32,7 +40,7 @@ class Matrix4 private constructor(val values: FloatArray) {
         initMatrix(m3, pos)
     }
 
-    // row-major: values[row * 4 + col]
+    // Row-major indexing: values[row * 4 + col]
     operator fun get(row: Int, col: Int): Float = values[row * 4 + col]
     operator fun set(row: Int, col: Int, v: Float) { values[row * 4 + col] = v }
 
@@ -115,15 +123,15 @@ class Matrix4 private constructor(val values: FloatArray) {
                 m[1]  * m[4]  * m[10] * m[15] + m[0]  * m[5]  * m[10] * m[15]
     }
 
-    // Invert for pure orthonormal homogeneous transform matrices.
     fun inverse(): Matrix4 {
-        // Transpose the 3x3 rotation block
+        val det = determinant()
+        if (abs(det) < 1e-8f) return this
+
         var t: Float
         t = values[1]; values[1] = values[4]; values[4] = t
         t = values[2]; values[2] = values[8]; values[8] = t
         t = values[6]; values[6] = values[9]; values[9] = t
 
-        // Rotate the translation part by the new rotation, store temporarily in column 3
         for (j in 0..2) {
             values[j * 4 + 3] = values[12] * values[0 * 4 + j] +
                                  values[13] * values[1 * 4 + j] +
@@ -156,14 +164,12 @@ class Matrix4 private constructor(val values: FloatArray) {
         r.copyInto(values)
     }
 
-    // Transform a Vector3: full transform including translation (row-vector * matrix)
     operator fun times(a: Vector3): Vector3 = Vector3(
         a.x * values[0]  + a.y * values[4]  + a.z * values[8]  + values[12],
         a.x * values[1]  + a.y * values[5]  + a.z * values[9]  + values[13],
         a.x * values[2]  + a.y * values[6]  + a.z * values[10] + values[14]
     )
 
-    // Transform a Vector4: full 4-component transform (row-vector * matrix)
     operator fun times(a: Vector4): Vector4 = Vector4(
         a.x * values[0]  + a.y * values[4]  + a.z * values[8]  + a.w * values[12],
         a.x * values[1]  + a.y * values[5]  + a.z * values[9]  + a.w * values[13],
@@ -171,14 +177,12 @@ class Matrix4 private constructor(val values: FloatArray) {
         a.x * values[3]  + a.y * values[7]  + a.z * values[11] + a.w * values[15]
     )
 
-    // Rotate a Vector3 without applying translation
     fun rotateVector(a: Vector3): Vector3 = Vector3(
         a.x * values[0] + a.y * values[4] + a.z * values[8],
         a.x * values[1] + a.y * values[5] + a.z * values[9],
         a.x * values[2] + a.y * values[6] + a.z * values[10]
     )
 
-    // Rotate a Vector4 without applying translation
     fun rotateVector(a: Vector4): Vector4 = Vector4(
         a.x * values[0] + a.y * values[4] + a.z * values[8],
         a.x * values[1] + a.y * values[5] + a.z * values[9],
@@ -198,7 +202,6 @@ class Matrix4 private constructor(val values: FloatArray) {
             q[1] = (values[8]  - values[2])  * s
             q[2] = (values[1]  - values[4])  * s
         } else {
-            // indices into the 4x4 flat array: [row*4+col]
             val diag = intArrayOf(0, 5, 10)
             var i = 0
             if (values[5] > values[0]) i = 1
@@ -239,6 +242,8 @@ class Matrix4 private constructor(val values: FloatArray) {
             v[8]  = 0f; v[9]  = 0f; v[10] = 1f; v[11] = 0f
             v[12] = 0f; v[13] = 0f; v[14] = 0f; v[15] = 1f
         }
+
+        fun identity(): Matrix4 = Matrix4()
 
         fun fromQuaternion(q: Quaternion): Matrix4 = Matrix4(q)
 
