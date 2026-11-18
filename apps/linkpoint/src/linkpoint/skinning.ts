@@ -81,16 +81,23 @@ export function skinnedVertexShader(maxJoints: number): string {
  * (`uJointRows[3 * joint + row] = (m[row], m[4 + row], m[8 + row], m[12 + row])`).
  * Joints beyond `maxJoints` are dropped; unused slots stay identity.
  */
-export function packJointRows(matrices: ArrayLike<number>[], maxJoints: number): Float32Array {
-  const out = new Float32Array(maxJoints * 12);
+export function packJointRows(matrices: ArrayLike<number>[], maxJoints: number, target?: Float32Array): Float32Array {
+  const neededLength = maxJoints * 12;
+  const out = target && target.length >= neededLength ? target : new Float32Array(neededLength);
   for (let j = 0; j < maxJoints; j++) {
     const m = matrices[j];
     for (let row = 0; row < 3; row++) {
       const o = j * 12 + row * 4;
       if (m && m.length === 16) {
-        out[o] = m[row]; out[o + 1] = m[4 + row]; out[o + 2] = m[8 + row]; out[o + 3] = m[12 + row];
+        out[o] = m[row];
+        out[o + 1] = m[4 + row];
+        out[o + 2] = m[8 + row];
+        out[o + 3] = m[12 + row];
       } else {
-        out[o + row] = 1;
+        out[o] = row === 0 ? 1 : 0;
+        out[o + 1] = row === 1 ? 1 : 0;
+        out[o + 2] = row === 2 ? 1 : 0;
+        out[o + 3] = 0;
       }
     }
   }

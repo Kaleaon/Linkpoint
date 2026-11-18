@@ -34,7 +34,14 @@ public enum LLMeshParser {
         if bytes.count > 64 {
             numVerts = Int(UInt16(bytes[63]) | (UInt16(bytes[64]) << 8))
         }
-        if bytes.count > 198 {
+        if bytes.count > 186 {
+            let candidate185 = Int(UInt16(bytes[185]) | (UInt16(bytes[186]) << 8))
+            if candidate185 > 0 && candidate185 < 1000 {
+                numFaces = candidate185
+            } else if bytes.count > 198 {
+                numFaces = Int(UInt16(bytes[197]) | (UInt16(bytes[198]) << 8))
+            }
+        } else if bytes.count > 198 {
             numFaces = Int(UInt16(bytes[197]) | (UInt16(bytes[198]) << 8))
         }
 

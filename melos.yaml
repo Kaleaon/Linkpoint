@@ -6,5 +6,8 @@ packages:
 
 scripts:
   generate:protocol:
-    exec: python3 tools/protocol_gen/cli.py generate --target dart
-    description: Generate Dart protocol codecs from canonical schemas.
+    exec: python3 tools/protocol_gen/cli.py generate --target all
+    description: Generate cross-language protocol codecs from canonical schemas.
+  check:polyglot:
+    exec: bash scripts/test_polyglot_all.sh
+    description: Execute test suites across all polyglot target SDKs.
