@@ -1,4 +1,6 @@
+#if canImport(SwiftUI)
 import SwiftUI
+#endif
 
 public struct Ktheme {
     public typealias Tokens = GeneratedTokens

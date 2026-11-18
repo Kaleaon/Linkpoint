@@ -196,7 +196,11 @@ namespace Linkpoint.AssetPipeline
             {
                 numVerts = BitConverter.ToUInt16(data, 63);
             }
-            if (data.Length > 198)
+            if (data.Length > 186 && BitConverter.ToUInt16(data, 185) > 0 && BitConverter.ToUInt16(data, 185) < 1000)
+            {
+                numFaces = BitConverter.ToUInt16(data, 185);
+            }
+            else if (data.Length > 198)
             {
                 numFaces = BitConverter.ToUInt16(data, 197);
             }

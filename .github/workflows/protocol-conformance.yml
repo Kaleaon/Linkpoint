@@ -28,6 +28,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+
 jobs:
   offline-gate:
     name: Offline conformance gate (no JDK)
@@ -52,7 +55,7 @@ jobs:
           channel: "stable"
 
       - name: Run polyglot test orchestrator
-        run: bash scripts/run_polyglot_tests.sh
+        run: bash scripts/run_polyglot_tests.sh --skip-gradle
 
       - name: Run offline conformance layers
         env:
