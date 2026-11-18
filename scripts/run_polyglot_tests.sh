@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
 
+export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
+
 SKIP_GRADLE=false
 for arg in "$@"; do
     case "${arg}" in
@@ -14,8 +16,6 @@ for arg in "$@"; do
             ;;
     esac
 done
-
-export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
 
 echo "========================================================"
 echo " Starting Linkpoint Polyglot Conformance Test Suite"
@@ -70,7 +70,7 @@ echo "=== [4/6] Running Dart / Flutter FFI Conformance Suite ==="
     flutter test test/llsd_31_vectors_ffi_test.dart
 )
 
-# Step 5: C++20 Native Test Suite
+# Step 5: C++20 Native Test Harness
 echo "=== [5/6] Compiling and Running C++20 Native Test Harness ==="
 CXX_CMD=""
 if command -v g++ >/dev/null 2>&1; then

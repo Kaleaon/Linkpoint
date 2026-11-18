@@ -22,6 +22,7 @@ def resolveAndroidSdkDir = {
 def skipAndroid = System.getenv('LINKPOINT_SKIP_ANDROID') == '1' ||
                   System.getenv('LINKPOINT_SKIP_ANDROID') == 'true' ||
                   System.getenv('SKIP_ANDROID_BUILD') == '1' ||
+                  System.getenv('SKIP_ANDROID_BUILD') == 'true' ||
                   providers.gradleProperty('skipAndroidBuild').orNull == 'true' ||
                   providers.gradleProperty('skipAndroid').orNull == 'true'
 
@@ -52,4 +53,3 @@ def hasCompleteSdk = !skipAndroid &&
 if (hasCompleteSdk && file('Linkpoint').exists()) {
     includeBuild('Linkpoint')
 }
-
