@@ -23,11 +23,13 @@ object GltfMaterialParser {
 
     /**
      * Parse a glTF 2.0 JSON string or SL material envelope into a [MaterialDescriptor].
+     * @param enableMetallicRoughness When true (default), extracts metallic-roughness texture maps.
      */
-    fun parseJson(jsonString: String): MaterialDescriptor {
+    @JvmOverloads
+    fun parseJson(jsonString: String, enableMetallicRoughness: Boolean = true): MaterialDescriptor {
         return try {
             val root = JSONObject(jsonString)
-            parseJsonObject(root)
+            parseJsonObject(root, enableMetallicRoughness)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse glTF 2.0 material JSON", e)
             MaterialDescriptor()
@@ -36,8 +38,10 @@ object GltfMaterialParser {
 
     /**
      * Parse a glTF 2.0 JSONObject into a [MaterialDescriptor].
+     * @param enableMetallicRoughness When true (default), extracts metallic-roughness texture maps.
      */
-    fun parseJsonObject(root: JSONObject): MaterialDescriptor {
+    @JvmOverloads
+    fun parseJsonObject(root: JSONObject, enableMetallicRoughness: Boolean = true): MaterialDescriptor {
         val materialsArray = root.optJSONArray("materials")
         val matObj = if (materialsArray != null && materialsArray.length() > 0) {
             materialsArray.optJSONObject(0) ?: JSONObject()
@@ -99,7 +103,11 @@ object GltfMaterialParser {
 
         val baseColorTexRef = resolveTextureRef(root, pbr.optJSONObject("baseColorTexture"), texturesArray, imagesArray)
         val normalTexRef = resolveTextureRef(root, normalTexObj, texturesArray, imagesArray)
-        val metallicRoughnessTexRef = resolveTextureRef(root, pbr.optJSONObject("metallicRoughnessTexture"), texturesArray, imagesArray)
+        val metallicRoughnessTexRef = if (enableMetallicRoughness) {
+            resolveTextureRef(root, pbr.optJSONObject("metallicRoughnessTexture"), texturesArray, imagesArray)
+        } else {
+            null
+        }
         val emissiveTexRef = resolveTextureRef(root, matObj.optJSONObject("emissiveTexture"), texturesArray, imagesArray)
         val occlusionTexRef = resolveTextureRef(root, occlusionTexObj, texturesArray, imagesArray)
 
@@ -128,11 +136,13 @@ object GltfMaterialParser {
     /**
      * Parse an LLSDMap material payload into a [MaterialDescriptor].
      * Supports glTF JSON overrides, legacy LLSD "Textures" sub-maps, and flat texture/factor keys.
+     * @param enableMetallicRoughness When true (default), extracts metallic-roughness texture maps.
      */
-    fun parseLlsd(llsd: LLSDMap): MaterialDescriptor {
+    @JvmOverloads
+    fun parseLlsd(llsd: LLSDMap, enableMetallicRoughness: Boolean = true): MaterialDescriptor {
         val jsonString = llsd.getString("gltf_json") ?: llsd.getString("json")
         if (jsonString != null) {
-            return parseJson(jsonString)
+            return parseJson(jsonString, enableMetallicRoughness)
         }
 
         // Base color factor array
@@ -170,12 +180,16 @@ object GltfMaterialParser {
             flatKeys = arrayOf("normal_texture", "normalTexture", "NormalTexture", "Normal", "normal")
         )
 
-        val mrRef = resolveLlsdTextureRef(
-            texturesMap = texturesMap,
-            rootLlsd = llsd,
-            textureMapKeys = arrayOf("MetallicRoughness", "metallicRoughness", "metallic_roughness", "MetallicRoughnessTexture", "metallicRoughnessTexture", "metallic_roughness_texture"),
-            flatKeys = arrayOf("metallic_roughness_texture", "metallicRoughnessTexture", "MetallicRoughnessTexture", "MetallicRoughness", "metallic_roughness", "metallicRoughness")
-        )
+        val mrRef = if (enableMetallicRoughness) {
+            resolveLlsdTextureRef(
+                texturesMap = texturesMap,
+                rootLlsd = llsd,
+                textureMapKeys = arrayOf("MetallicRoughness", "metallicRoughness", "metallic_roughness", "MetallicRoughnessTexture", "metallicRoughnessTexture", "metallic_roughness_texture"),
+                flatKeys = arrayOf("metallic_roughness_texture", "metallicRoughnessTexture", "MetallicRoughnessTexture", "MetallicRoughness", "metallic_roughness", "metallicRoughness")
+            )
+        } else {
+            null
+        }
 
         val emissiveRef = resolveLlsdTextureRef(
             texturesMap = texturesMap,

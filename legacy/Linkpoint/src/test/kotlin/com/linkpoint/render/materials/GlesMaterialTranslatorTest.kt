@@ -10,9 +10,11 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class GlesMaterialTranslatorTest {
 
     @Test

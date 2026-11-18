@@ -22,15 +22,10 @@ object PbrMaterialDecoder {
      */
     @Deprecated(
         message = "decodeFromLLSD is deprecated; use GltfMaterialParser.parseLlsd instead.",
-        replaceWith = ReplaceWith("GltfMaterialParser.parseLlsd(data)", "com.linkpoint.render.materials.GltfMaterialParser")
+        replaceWith = ReplaceWith("GltfMaterialParser.parseLlsd(data, enableMetallicRoughness)", "com.linkpoint.render.materials.GltfMaterialParser")
     )
     @JvmOverloads
     fun decodeFromLLSD(data: LLSDMap, enableMetallicRoughness: Boolean = true): MaterialDescriptor {
-        val descriptor = GltfMaterialParser.parseLlsd(data)
-        return if (!enableMetallicRoughness && descriptor.metallicRoughnessTexture != null) {
-            descriptor.copy(metallicRoughnessTexture = null)
-        } else {
-            descriptor
-        }
+        return GltfMaterialParser.parseLlsd(data, enableMetallicRoughness)
     }
 }
