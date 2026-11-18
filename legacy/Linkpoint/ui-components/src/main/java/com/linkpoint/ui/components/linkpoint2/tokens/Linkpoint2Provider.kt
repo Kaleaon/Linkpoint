@@ -19,10 +19,16 @@ import androidx.compose.ui.graphics.Color
 fun ProvideLinkpoint2Tokens(
     radii: L2Radii = L2Radii.Default,
     spacing: L2Spacing = L2Spacing.Balanced,
+    axisX: Color? = null,
+    axisY: Color? = null,
+    axisZ: Color? = null,
     content: @Composable () -> Unit,
 ) {
     val cs = MaterialTheme.colorScheme
-    val tokens = remember(cs, radii, spacing) {
+    val resolvedAxisX = axisX ?: Color(0xFFFF6B6B)
+    val resolvedAxisY = axisY ?: Color(0xFF7CFFD8)
+    val resolvedAxisZ = axisZ ?: Color(0xFF6DE8FF)
+    val tokens = remember(cs, radii, spacing, resolvedAxisX, resolvedAxisY, resolvedAxisZ) {
         Linkpoint2Tokens(
             radii = radii,
             spacing = spacing,
@@ -43,6 +49,9 @@ fun ProvideLinkpoint2Tokens(
             warning = GeneratedTokens.Color.Status.Warning,
             unreadBadge = cs.primary,
             onUnreadBadge = cs.onPrimary,
+            axisX = resolvedAxisX,
+            axisY = resolvedAxisY,
+            axisZ = resolvedAxisZ,
         )
     }
     CompositionLocalProvider(LocalLinkpoint2Tokens provides tokens, content = content)

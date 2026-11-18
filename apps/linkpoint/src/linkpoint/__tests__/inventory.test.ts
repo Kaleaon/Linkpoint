@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { InventoryManager } from '../inventory';
 import { InventoryCore } from '../phase2/inventory-core';
+import { slBridge } from '../sl-bridge';
 
 describe('InventoryManager Tree Pruning Filter API', () => {
   let inventory: InventoryManager;
@@ -244,6 +245,116 @@ describe('InventoryManager Tree Pruning Filter API', () => {
       // Duplicate move call
       inventory.moveItemToFolder('item_x', 'f_target');
       expect(inventory.folders.get('f_target').children).toEqual(['item_x']);
+    });
+  });
+
+  describe('offerItem', () => {
+    it('throws error when targetId is empty or invalid', async () => {
+      await expect(inventory.offerItem('', { id: 'item-1', name: 'Item' })).rejects.toThrow(
+        'Valid target avatar ID is required'
+      );
+      await expect(inventory.offerItem('   ', { id: 'item-1', name: 'Item' })).rejects.toThrow(
+        'Valid target avatar ID is required'
+      );
+      await expect(inventory.offerItem(null as any, { id: 'item-1', name: 'Item' })).rejects.toThrow(
+        'Valid target avatar ID is required'
+      );
+    });
+
+    it('throws error when item is missing or invalid', async () => {
+      await expect(inventory.offerItem('avatar-target-id', null as any)).rejects.toThrow(
+        'Valid inventory item is required'
+      );
+    });
+
+    it('throws error when item is explicitly marked non-transferable', async () => {
+      const nonTransferableItem = {
+        id: 'no-transfer-item',
+        name: 'No Transfer Hat',
+        transferable: false,
+      };
+      await expect(inventory.offerItem('avatar-target-id', nonTransferableItem)).rejects.toThrow(
+        'Item is not transferable'
+      );
+    });
+
+    it('throws error when item ownerMask does not include transfer bit (0x2000)', async () => {
+      const restrictedItem = {
+        id: 'restricted-item',
+        name: 'Restricted Shoes',
+        permissions: {
+          ownerMask: 0x1000, // copy only, no transfer
+        },
+      };
+      await expect(inventory.offerItem('avatar-target-id', restrictedItem)).rejects.toThrow(
+        'Item is not transferable'
+      );
+    });
+
+    it('successfully offers transferable item and emits item_offered event', async () => {
+      const validItem = {
+        id: 'transferable-shirt',
+        name: 'Cool Jacket',
+        permissions: {
+          ownerMask: 0x2000 | 0x1000,
+        },
+      };
+
+      const emittedEvents: any[] = [];
+      inventory.on('item_offered', (payload) => {
+        emittedEvents.push(payload);
+      });
+
+      const res = await inventory.offerItem('target-avatar-uuid', validItem);
+      expect(res).toBeDefined();
+      expect(emittedEvents).toHaveLength(1);
+      expect(emittedEvents[0].targetId).toBe('target-avatar-uuid');
+      expect(emittedEvents[0].item.id).toBe('transferable-shirt');
+      expect(emittedEvents[0].item.name).toBe('Cool Jacket');
+    });
+
+    it('successfully offers item resolved by item ID from inventory cache', async () => {
+      inventory.items.set('cached-item-id', {
+        id: 'cached-item-id',
+        name: 'Cached Sunglasses',
+        assetType: 5,
+        transferable: true,
+      });
+
+      const emittedEvents: any[] = [];
+      inventory.on('item_offered', (payload) => {
+        emittedEvents.push(payload);
+      });
+
+      const res = await inventory.offerItem('friend-uuid', 'cached-item-id');
+      expect(res.itemId).toBe('cached-item-id');
+      expect(emittedEvents).toHaveLength(1);
+      expect(emittedEvents[0].item.name).toBe('Cached Sunglasses');
+    });
+
+    it('delegates to slBridge.offerItem when slBridge is connected', async () => {
+      const offerSpy = vi.spyOn(slBridge, 'offerItem').mockResolvedValueOnce({ offered: true, targetId: 'recipient-uuid', itemId: 'bridge-item' });
+      (slBridge as any).connected = true;
+
+      const item = { id: 'bridge-item', name: 'Bridge Shirt' };
+      const res = await inventory.offerItem('recipient-uuid', item);
+
+      expect(offerSpy).toHaveBeenCalledWith('recipient-uuid', item);
+      expect(res).toEqual({ offered: true, targetId: 'recipient-uuid', itemId: 'bridge-item' });
+
+      (slBridge as any).connected = false;
+      offerSpy.mockRestore();
+    });
+
+    it('delegates to protocol.offerItem when protocol has offerItem method', async () => {
+      const protocolSpy = vi.fn().mockResolvedValueOnce({ protoSuccess: true });
+      (inventory as any).protocol.offerItem = protocolSpy;
+
+      const item = { id: 'proto-item', name: 'Proto Shirt' };
+      const res = await inventory.offerItem('recipient-uuid', item);
+
+      expect(protocolSpy).toHaveBeenCalledWith('recipient-uuid', item);
+      expect(res).toEqual({ protoSuccess: true });
     });
   });
 });

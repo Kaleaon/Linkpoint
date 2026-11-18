@@ -43,7 +43,7 @@ repos:
 
       - id: flutter-analyze
         name: flutter analyze (packages/linkpoint_dart)
-        entry: bash -c 'cd packages/linkpoint_dart && flutter analyze'
+        entry: bash -c 'cd packages/linkpoint_dart && (test -d .dart_tool || flutter pub get) && flutter analyze'
         language: system
         files: '^packages/linkpoint_dart/'
         pass_filenames: false

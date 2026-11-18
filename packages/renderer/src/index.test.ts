@@ -68,6 +68,17 @@ describe("createBabylonRenderer", () => {
     renderer.applySnapshot(initialEntities);
     renderer.focusAll();
 
+    // Verify PBR texture color space assignment (linear vs sRGB)
+    const entityRecord = (renderer as any).entityRecords?.get?.("entity-box");
+    if (entityRecord?.material) {
+      if (entityRecord.material.baseTexture) {
+        expect(entityRecord.material.baseTexture.gammaSpace).toBe(true);
+      }
+      if (entityRecord.material.normalTexture) {
+        expect(entityRecord.material.normalTexture.gammaSpace).toBe(false);
+      }
+    }
+
     // Dynamically update entity with upsert
     renderer.upsert({
       id: "entity-box",

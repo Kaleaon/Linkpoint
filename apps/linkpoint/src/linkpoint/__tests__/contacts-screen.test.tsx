@@ -161,6 +161,25 @@ describe('Contacts screen', () => {
     expect(mounted.host.textContent).toContain('All 2 of your friends are saved');
   });
 
+  it('refreshes friends from grid when REFRESH FRIENDS is clicked on ADD FROM SL tab', async () => {
+    vi.spyOn(app.auth, 'isLoggedIn').mockReturnValue(true);
+    const fetchFriends = vi.spyOn(app.protocol, 'fetchFriends').mockResolvedValue(friends);
+    mounted = await mountScreen(ContactsScreen);
+    await act(async () => { mounted!.ctx.current.actions.setTab('Contacts', 'ADD FROM SL'); });
+
+    expect(mounted.host.textContent).toContain('No friends loaded');
+    const refreshBtn = buttonByText(mounted.host, 'REFRESH FRIENDS');
+    expect(refreshBtn).toBeTruthy();
+
+    await click(refreshBtn);
+    await flush();
+
+    expect(fetchFriends).toHaveBeenCalledTimes(1);
+    expect(mounted.host.textContent).toContain('Friends list updated.');
+    expect(mounted.host.textContent).toContain('Pat Resident');
+    expect(mounted.host.textContent).toContain('Sam Linden');
+  });
+
   it('exports a backup of what is saved', async () => {
     const createObjectURL = vi.fn(() => 'blob:test');
     Object.assign(URL, { createObjectURL, revokeObjectURL: vi.fn() });

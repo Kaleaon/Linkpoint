@@ -3,10 +3,10 @@ package com.linkpoint.assets
 import android.content.Context
 import android.util.Log
 import android.util.LruCache
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Asset caching system with memory and disk levels
@@ -56,6 +56,62 @@ class AssetCache(
     // Configured disk cache size in bytes
     private val maxDiskCacheBytes: Long
         get() = cacheManager.getDiskCacheSizeMB().toLong() * 1024 * 1024
+
+    private val activeRetryJobs = ConcurrentHashMap<UUID, Job>()
+
+    /**
+     * Get an asset from cache, or fetch it using the supplied fetcher with exponential backoff retries.
+     */
+    suspend fun getOrFetchWithRetry(
+        assetId: UUID,
+        assetType: AssetType,
+        maxAttempts: Int = 3,
+        initialDelayMs: Long = 1000L,
+        fetcher: suspend (UUID, AssetType) -> ByteArray?
+    ): ByteArray? {
+        val cached = get(assetId, assetType)
+        if (cached != null) return cached
+
+        return withContext(Dispatchers.IO) {
+            val job = coroutineContext[Job]
+            if (job != null) {
+                activeRetryJobs[assetId] = job
+            }
+
+            try {
+                var attempt = 1
+                while (attempt <= maxAttempts && currentCoroutineContext().isActive) {
+                    if (attempt > 1) {
+                        val backoff = initialDelayMs * (1L shl (attempt - 2))
+                        Log.d(TAG, "Retrying asset fetch $assetId (attempt $attempt/$maxAttempts) after ${backoff}ms")
+                        try {
+                            delay(backoff)
+                        } catch (e: CancellationException) {
+                            Log.d(TAG, "Asset fetch retry cancelled for $assetId")
+                            return@withContext null
+                        }
+                    }
+
+                    val fetched = fetcher(assetId, assetType)
+                    if (fetched != null && fetched.isNotEmpty()) {
+                        put(assetId, assetType, fetched)
+                        return@withContext fetched
+                    }
+                    attempt++
+                }
+                null
+            } finally {
+                activeRetryJobs.remove(assetId)
+            }
+        }
+    }
+
+    /**
+     * Cancel any active background retry for the given asset ID.
+     */
+    fun cancelRetry(assetId: UUID) {
+        activeRetryJobs.remove(assetId)?.cancel()
+    }
 
     /**
      * Get an asset from cache (memory first, then disk)

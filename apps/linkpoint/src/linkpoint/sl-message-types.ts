@@ -56,6 +56,18 @@ export class LLQuaternion {
   }
 }
 
+export enum InstantMessageDialog {
+  MESSAGE_FROM_AGENT = 0,
+  MESSAGE_BOX = 1,
+  GROUP_INVITATION = 3,
+  INVENTORY_OFFERED = 4,
+  InventoryOffered = 4,
+  INVENTORY_ACCEPTED = 5,
+  INVENTORY_DECLINED = 6,
+  TASK_INVENTORY_OFFERED = 9,
+  DENY_TELEPORT = 24,
+}
+
 export abstract class SLMessage {
   public isReliable: boolean = false;
   public seqNum: number = 0;

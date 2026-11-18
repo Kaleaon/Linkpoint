@@ -28,7 +28,12 @@ pub fn parse_llmesh_binary(data: &[u8]) -> Option<ParsedLLMesh> {
         0
     };
 
-    let num_faces = if data.len() > 198 {
+    let num_faces = if data.len() > 186
+        && u16::from_le_bytes([data[185], data[186]]) > 0
+        && u16::from_le_bytes([data[185], data[186]]) < 1000
+    {
+        u16::from_le_bytes([data[185], data[186]]) as usize
+    } else if data.len() > 198 {
         u16::from_le_bytes([data[197], data[198]]) as usize
     } else {
         0
@@ -56,7 +61,7 @@ pub fn convert_llmesh_to_gltf_json(mesh: &ParsedLLMesh) -> String {
     let pos_offset = buffer_bytes.len();
     let mut min_pos = [f32::MAX, f32::MAX, f32::MAX];
     let mut max_pos = [f32::MIN, f32::MIN, f32::MIN];
-    for chunk in mesh.positions.chunks_exact(3) {
+    for chunk in mesh.positions.as_chunks::<3>().0 {
         for i in 0..3 {
             if chunk[i] < min_pos[i] {
                 min_pos[i] = chunk[i];

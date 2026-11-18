@@ -110,6 +110,7 @@ export class WorldViewer extends Utils.EventEmitter {
       this.particles.clear();
       this.renderedParticles.clear();
       this.avatarBakes.clear();
+      this.avatarBodyBuffers.clear();
       this.localObjectIds.clear();
       this.objects = [];
       this.emit('region_changed', null);
@@ -316,6 +317,8 @@ export class WorldViewer extends Utils.EventEmitter {
   private avatarVisualParams = new Map<string, AvatarParamsManager>();
   /** Official-viewer style last-known-good baked texture per avatar/body layer. */
   private avatarBakes = new Map<string, string>();
+  /** Persistent Float32Array buffers for avatar body parts. */
+  private avatarBodyBuffers = new Map<string, Map<string, Float32Array>>();
   /** Objects whose skin currently holds an animated pose (restored to rest when their animation ends). */
   private posedObjects = new Set<string>();
 
@@ -324,7 +327,7 @@ export class WorldViewer extends Utils.EventEmitter {
    * alternate bind) requested by every mesh worn on the same avatar.
    * Null for unrigged meshes.
    */
-  private skinRowsFor(assetId: string, pose?: Map<string, JointPose>, subject?: string): Float32Array | null {
+  private skinRowsFor(assetId: string, pose?: Map<string, JointPose>, subject?: string, target?: Float32Array): Float32Array | null {
     const key = String(assetId);
     const skin = (this.decodedAssets.get(key) || this.decodedAssets.get(key.toLowerCase()))?.skin as (MeshSkin & { pelvisOffset?: number | number[] | null }) | null | undefined;
     let rows: Float32Array | null = null;
@@ -338,7 +341,7 @@ export class WorldViewer extends Utils.EventEmitter {
         ? this.avatarWorldMatrices(subject, pose)
         : this.skeleton.worldMatrices(pose, deformation.overrides, [0, 0, deformation.pelvisOffset]);
       const maxJoints = (this.scene3d as any)?.graphics?.maxJoints || SL_MAX_RIGGED_JOINTS;
-      rows = packJointRows(skinMatrices(this.skeleton, { ...skin, pelvisOffset: undefined }, world), maxJoints);
+      rows = packJointRows(skinMatrices(this.skeleton, { ...skin, pelvisOffset: undefined }, world), maxJoints, target);
     }
     return rows;
   }
@@ -402,9 +405,12 @@ export class WorldViewer extends Utils.EventEmitter {
       const subject = this.animationSubject(object);
       const animating = this.animator.isAnimating(subject);
       if (!animating && !this.posedObjects.has(object.id)) continue;
-      const rows = this.skinRowsFor(object.assetId, animating ? this.animator.pose(subject) : undefined, subject);
-      if (animating) this.posedObjects.add(object.id); else this.posedObjects.delete(object.id);
-      if (rows) this.scene3d.updateObject(object.id, { skin: rows });
+      const rows = this.skinRowsFor(object.assetId, animating ? this.animator.pose(subject) : undefined, subject, object.skinBuffer);
+      if (rows) {
+        object.skinBuffer = rows;
+        if (animating) this.posedObjects.add(object.id); else this.posedObjects.delete(object.id);
+        this.scene3d.updateObject(object.id, { skin: rows });
+      }
     }
   }
 
@@ -634,6 +640,36 @@ export class WorldViewer extends Utils.EventEmitter {
     try {
       const graphics = new Graphics3D(canvas);
       this.graphics3d = graphics;
+      if (typeof (graphics as any)?.on === 'function') {
+        graphics.on('contextrestored', async () => {
+          if (!this.scene3d) return;
+          this.scene3d.createDefaultPrimitives();
+          this.scene3d.createEnvironmentMeshes();
+          if (this.scene3d.showGrid) this.scene3d.createGrid();
+
+          this.applyEnvironment();
+          this.applyTerrainMaterials();
+          if (this.terrain) this.scene3d.setTerrain(this.terrain.heights, this.terrain.size);
+          if (this.displayedHud) this.scene3d.setDisplayedHud(this.displayedHud.id, this.displayedHud.size);
+
+          this.installBodyMeshes(this.scene3d);
+
+          for (const [assetId, geometry] of this.decodedAssets) {
+            const meshes = this.scene3d.addAssetMesh(assetId, geometry);
+            for (const object of this.sceneObjects.values()) {
+              if (object.assetId === assetId) object.decodedMeshes = meshes;
+            }
+          }
+          for (const texture of this.decodedTextures.values()) this.applyTexture(texture);
+          for (const object of this.sceneObjects.values()) {
+            if (object.assetId && !object.decodedMeshes && this.decodedAssets.has(object.assetId)) {
+              const geometry = this.decodedAssets.get(object.assetId);
+              object.decodedMeshes = this.scene3d.addAssetMesh(object.assetId, geometry);
+            }
+            this.applySceneObject(object);
+          }
+        });
+      }
       await graphics.init();
       if (stale()) return;
 
@@ -742,7 +778,7 @@ export class WorldViewer extends Utils.EventEmitter {
   public startRendering() {
     if (this.animationId !== null) return;
     const render = (time: number) => {
-      if (this.use3D && this.scene3d && this.camera3d) {
+      if (this.use3D && this.scene3d && this.camera3d && !this.graphics3d?.isContextLost) {
         if (!this.environment && Date.now() - this.fallbackSkyAt > WorldViewer.FALLBACK_SKY_REFRESH_MS) this.applyEnvironment();
         this.camera3d.updateMatrices();
         this.updateAnimatedSkins();
@@ -781,6 +817,7 @@ export class WorldViewer extends Utils.EventEmitter {
     this.camera3d = null;
     this.scene3d = null;
     this.renderedParticles.clear();
+    this.avatarBodyBuffers.clear();
     this.canvas = null;
   }
 
@@ -1219,7 +1256,8 @@ export class WorldViewer extends Utils.EventEmitter {
   private applySceneObject(object: any) {
     if (!this.scene3d) return;
     const subject = !object.avatar ? this.animationSubject(object) : object.id;
-    const skin = object.assetId && !object.avatar ? this.skinRowsFor(object.assetId, undefined, subject) : null;
+    const skin = object.assetId && !object.avatar ? this.skinRowsFor(object.assetId, undefined, subject, object.skinBuffer) : null;
+    if (skin) object.skinBuffer = skin;
     const { position, rotation } = skin ? this.riggedTransform(object) : this.worldTransform(object);
     const hudRoot = object.avatar ? null : this.hudRootOf(object);
     // Worn rigged attachments are authored in avatar space and ignore their prim scale. Animesh is
@@ -1331,12 +1369,20 @@ export class WorldViewer extends Utils.EventEmitter {
     const world = this.avatarWorldMatrices(avatarId);
     const maxJoints = (this.scene3d as any)?.graphics?.maxJoints || SL_MAX_RIGGED_JOINTS;
     const rows = new Map<string, Float32Array>();
+    let bodyMap = this.avatarBodyBuffers.get(avatarId);
+    if (!bodyMap) {
+      bodyMap = new Map<string, Float32Array>();
+      this.avatarBodyBuffers.set(avatarId, bodyMap);
+    }
     for (const { part, instance, rigidJoint } of BODY_PARTS) {
       const geometry = this.bodyParts?.get(part);
       if (!geometry) continue;
       let skin = this.bodySkins.get(instance);
       if (!skin) { skin = bodyPartSkin(this.skeleton, geometry, rigidJoint); this.bodySkins.set(instance, skin); }
-      rows.set(instance, bodyPartRows(this.skeleton, skin, world, maxJoints));
+      const target = bodyMap.get(instance);
+      const updated = bodyPartRows(this.skeleton, skin, world, maxJoints, target);
+      bodyMap.set(instance, updated);
+      rows.set(instance, updated);
     }
     return rows;
   }
@@ -1392,11 +1438,19 @@ export class WorldViewer extends Utils.EventEmitter {
     if (skirtTexture && skirtGeometry) {
       let skirtSkin = this.bodySkins.get('skirt');
       if (!skirtSkin) { skirtSkin = bodyPartSkin(this.skeleton, skirtGeometry); this.bodySkins.set('skirt', skirtSkin); }
+      let bodyMap = this.avatarBodyBuffers.get(id);
+      if (!bodyMap) {
+        bodyMap = new Map<string, Float32Array>();
+        this.avatarBodyBuffers.set(id, bodyMap);
+      }
+      const target = bodyMap.get('skirt');
+      const skirtRows = bodyPartRows(this.skeleton, skirtSkin, this.avatarWorldMatrices(id), (this.scene3d as any).graphics?.maxJoints || SL_MAX_RIGGED_JOINTS, target);
+      bodyMap.set('skirt', skirtRows);
       const skirt = {
         mesh: 'cube', meshes: [{ mesh: 'avatar-body:skirt', materialIndex: 0 }],
         position: [x, y, z - height / 2], rotation: config.rotation, scale: [1, 1, 1], color: [1, 1, 1, 1],
         faces: [{ texture: skirtTexture, color: [1, 1, 1, 1], repeat: [1, 1], offset: [0, 0], rotation: 0, pbr: { alphaMode: 'MASK', alphaCutoff: 0.5, doubleSided: true } }],
-        skin: bodyPartRows(this.skeleton, skirtSkin, this.avatarWorldMatrices(id), (this.scene3d as any).graphics?.maxJoints || SL_MAX_RIGGED_JOINTS), visible: true,
+        skin: skirtRows, visible: true,
       };
       if (this.scene3d.objects.has(skirtId)) this.scene3d.updateObject(skirtId, skirt);
       else this.scene3d.addObject(skirtId, skirt);
@@ -1419,7 +1473,15 @@ export class WorldViewer extends Utils.EventEmitter {
         let skirtSkin = this.bodySkins.get('skirt');
         if (!skirtSkin) { skirtSkin = bodyPartSkin(this.skeleton, skirtGeometry); this.bodySkins.set('skirt', skirtSkin); }
         const world = this.avatarWorldMatrices(object.id);
-        this.scene3d.updateObject(`${object.id}:body:skirt`, { skin: bodyPartRows(this.skeleton, skirtSkin, world, (this.scene3d as any).graphics?.maxJoints || SL_MAX_RIGGED_JOINTS) });
+        let bodyMap = this.avatarBodyBuffers.get(object.id);
+        if (!bodyMap) {
+          bodyMap = new Map<string, Float32Array>();
+          this.avatarBodyBuffers.set(object.id, bodyMap);
+        }
+        const target = bodyMap.get('skirt');
+        const skirtRows = bodyPartRows(this.skeleton, skirtSkin, world, (this.scene3d as any).graphics?.maxJoints || SL_MAX_RIGGED_JOINTS, target);
+        bodyMap.set('skirt', skirtRows);
+        this.scene3d.updateObject(`${object.id}:body:skirt`, { skin: skirtRows });
       }
     }
   }
@@ -1460,6 +1522,8 @@ export class WorldViewer extends Utils.EventEmitter {
     this.animator.remove(id);
     this.particles.removeEmitter(id);
     for (const key of this.avatarBakes.keys()) if (key.startsWith(`${id}:`)) this.avatarBakes.delete(key);
+    this.avatarBodyBuffers.delete(id);
+    if (removed) delete removed.skinBuffer;
     this.posedObjects.delete(id);
     this.scene3d?.removeObject(id);
     for (const suffix of [':body', ':head', ':legs', ...BODY_PARTS.map((p) => `:body:${p.instance}`)]) this.scene3d?.removeObject(`${id}${suffix}`);

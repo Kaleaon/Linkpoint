@@ -39,12 +39,27 @@ export function scaleToPowerOfTwo(width: number, height: number): { width: numbe
   };
 }
 
+export interface TextureCanvasMetadataOptions {
+  channelLayout?: 'RGBA' | 'BGRA' | 'RGB' | 'MONO';
+  colorSpace?: 'sRGB' | 'linear';
+}
+
+export interface PreparedTextureCanvas {
+  canvas: HTMLCanvasElement;
+  width: number;
+  height: number;
+  rgba: Uint8Array;
+  channelLayout: 'RGBA' | 'BGRA' | 'RGB' | 'MONO';
+  colorSpace: 'sRGB' | 'linear';
+}
+
 /**
  * Prepares HTMLCanvasElement and extracts RGBA pixels scaled to power-of-two dimensions.
  */
 export async function prepareTextureCanvas(
-  input: File | Blob | HTMLImageElement | HTMLCanvasElement
-): Promise<{ canvas: HTMLCanvasElement; width: number; height: number; rgba: Uint8Array }> {
+  input: File | Blob | HTMLImageElement | HTMLCanvasElement,
+  options?: TextureCanvasMetadataOptions
+): Promise<PreparedTextureCanvas> {
   let imgWidth = 512;
   let imgHeight = 512;
   let drawSource: CanvasImageSource | null = null;
@@ -127,7 +142,14 @@ export async function prepareTextureCanvas(
     }
   }
 
-  return { canvas, width, height, rgba };
+  return {
+    canvas,
+    width,
+    height,
+    rgba,
+    channelLayout: options?.channelLayout ?? 'RGBA',
+    colorSpace: options?.colorSpace ?? 'sRGB',
+  };
 }
 
 /**

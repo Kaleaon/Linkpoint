@@ -101,6 +101,9 @@ class OutfitManager(
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
+    // Pending background wearable loading jobs
+    private val pendingWearableJobs = ConcurrentHashMap<WearableType, Job>()
+
     // Currently worn items
     private val wornWearables = ConcurrentHashMap<WearableType, UUID>()
     private val wornAttachments = ConcurrentHashMap<Int, UUID>()
@@ -110,6 +113,21 @@ class OutfitManager(
 
     private val _currentOutfit = MutableStateFlow<List<UUID>>(emptyList())
     val currentOutfit: StateFlow<List<UUID>> = _currentOutfit
+
+    /**
+     * Cancel active wearable retry job for a specific wearable type.
+     */
+    fun cancelWearableRetry(type: WearableType) {
+        pendingWearableJobs.remove(type)?.cancel()
+    }
+
+    /**
+     * Cancel all active wearable retry jobs.
+     */
+    fun cancelAllWearableRetries() {
+        pendingWearableJobs.values.forEach { it.cancel() }
+        pendingWearableJobs.clear()
+    }
 
     /**
      * Wear an item
@@ -141,70 +159,96 @@ class OutfitManager(
         val wearableType = WearableType.fromValue(item.flags and 0xFF)
         applyWearableSelection(wornWearables, wearableType, item.itemId, replace)
 
-        // Load wearable data
-        val wearableData = loadWearableData(item)
-        if (wearableData != null) {
-            baker.setWearable(wearableType, wearableData)
-            rebakeWearableLayers(wearableType)
-        } else {
-            // Keep previous wearable state if parse/fetch failed to avoid dropping appearance.
-            Log.w(TAG, "Skipping wearable apply for ${item.itemId} (${item.name}) due to missing/corrupt asset data")
+        cancelWearableRetry(wearableType)
+
+        val job = scope.launch {
+            loadWearableDataWithRetry(item, wearableType)
+        }
+        pendingWearableJobs[wearableType] = job
+
+        try {
+            job.join()
+        } catch (e: CancellationException) {
+            Log.d(TAG, "Wearable job cancelled for ${item.itemId}")
         }
 
         updateCurrentOutfit()
         return true
     }
 
-    private suspend fun loadWearableData(item: InventoryItem): WearableData? {
-        val wearableType = WearableType.fromValue(item.flags and 0xFF)
+    private suspend fun loadWearableDataWithRetry(item: InventoryItem, wearableType: WearableType) {
         val fetcher = wearableAssetFetcher
-
         if (fetcher == null) {
-            return fallbackWearableData(
+            fallbackWearableData(
                 type = wearableType,
                 item = item,
                 reason = WearableLoadFailureReason.MISSING_FETCHER,
                 detail = "No wearable asset fetcher configured"
             )
+            return
         }
 
-        return try {
-            val bytes = fetcher(item)
-            if (bytes == null) {
-                fallbackWearableData(
-                    type = wearableType,
-                    item = item,
-                    reason = WearableLoadFailureReason.MISSING_ASSET_BYTES,
-                    detail = "Wearable asset fetch returned null bytes"
-                )
-            } else {
-                val parseResult = WearableAssetParser.parseWithDiagnostics(
-                    raw = bytes,
-                    defaultType = wearableType,
-                    assetId = item.assetId
-                )
-                val parsed = parseResult.data
-                if (parsed == null) {
-                    fallbackWearableData(
-                        type = wearableType,
-                        item = item,
-                        reason = WearableLoadFailureReason.CORRUPT_ASSET_PAYLOAD,
-                        detail =
-                            "Wearable parse failed (${parseResult.error ?: "unknown parse error"}, ${bytes.size} bytes)"
-                    )
-                } else {
-                    parsed
+        val maxAttempts = 3
+        var initialDelayMs = 1000L
+        var attempt = 1
+
+        while (attempt <= maxAttempts && currentCoroutineContext().isActive) {
+            WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_ATTEMPT)
+            if (attempt > 1) {
+                val backoff = initialDelayMs * (1L shl (attempt - 2))
+                try {
+                    delay(backoff)
+                } catch (e: CancellationException) {
+                    Log.d(TAG, "Wearable asset retry cancelled for item ${item.itemId}")
+                    return
                 }
             }
-        } catch (e: Exception) {
-            fallbackWearableData(
-                type = wearableType,
-                item = item,
-                reason = WearableLoadFailureReason.FETCH_EXCEPTION,
-                detail = "Failed to load wearable asset: ${e.message}",
-                throwable = e
-            )
+
+            try {
+                val bytes = fetcher(item)
+                if (bytes != null) {
+                    val parseResult = WearableAssetParser.parseWithDiagnostics(
+                        raw = bytes,
+                        defaultType = wearableType,
+                        assetId = item.assetId
+                    )
+                    val parsed = parseResult.data
+                    if (parsed != null) {
+                        if (attempt > 1) {
+                            WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_SUCCESS)
+                        }
+                        baker.setWearable(wearableType, parsed)
+                        rebakeWearableLayers(wearableType)
+                        return
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Attempt $attempt failed for wearable item ${item.itemId}: ${e.message}")
+            }
+            attempt++
         }
+
+        // Failed across all retries
+        WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.RETRY_FAILURE)
+
+        if (wearableType == WearableType.SKIN) {
+            WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK)
+            val systemSkinData = WearableData(
+                type = WearableType.SKIN,
+                assetId = AvatarBaker.DEFAULT_SYSTEM_SKIN_ID,
+                textures = mapOf(
+                    AvatarBaker.TEX_HEAD_BODYPAINT to AvatarBaker.DEFAULT_SYSTEM_SKIN_ID,
+                    AvatarBaker.TEX_UPPER_SHIRT to AvatarBaker.DEFAULT_SYSTEM_SKIN_ID,
+                    AvatarBaker.TEX_LOWER_PANTS to AvatarBaker.DEFAULT_SYSTEM_SKIN_ID
+                ),
+                params = emptyMap()
+            )
+            baker.setWearable(WearableType.SKIN, systemSkinData)
+            rebakeWearableLayers(WearableType.SKIN)
+        }
+        // For non-skin wearables, active layer in baker is preserved on failure.
     }
 
     private fun fallbackWearableData(
@@ -346,6 +390,7 @@ class OutfitManager(
      * Remove a wearable
      */
     suspend fun removeWearable(type: WearableType): Boolean {
+        cancelWearableRetry(type)
         wornWearables.remove(type)
         baker.removeWearable(type)
         rebakeWearableLayers(type)
@@ -456,6 +501,7 @@ class OutfitManager(
                 val contents = inventoryManager.getFolderContents(folderId)
 
                 if (replace) {
+                    cancelAllWearableRetries()
                     // Remove all current items
                     wornWearables.clear()
                     wornAttachments.clear()
@@ -647,7 +693,12 @@ internal enum class WearableLoadFailureReason {
     MISSING_FETCHER,
     MISSING_ASSET_BYTES,
     CORRUPT_ASSET_PAYLOAD,
-    FETCH_EXCEPTION
+    FETCH_EXCEPTION,
+    RETRY_ATTEMPT,
+    RETRY_SUCCESS,
+    RETRY_FAILURE,
+    SYSTEM_SKIN_FALLBACK,
+    APPEARANCE_DEFERRED
 }
 
 internal object WearableAssetTelemetry {

@@ -106,6 +106,9 @@ data class Linkpoint2Tokens(
     val onUnreadBadge: Color,
     val hudBackground: Color = GeneratedTokens.Color.HudBackground,
     val hudStroke: Color = GeneratedTokens.Color.HudStroke,
+    val axisX: Color = Color(0xFFFF6B6B),
+    val axisY: Color = Color(0xFF7CFFD8),
+    val axisZ: Color = Color(0xFF6DE8FF),
 )
 
 val LocalLinkpoint2Tokens = staticCompositionLocalOf {
@@ -129,6 +132,9 @@ val LocalLinkpoint2Tokens = staticCompositionLocalOf {
         warning = GeneratedTokens.Color.Status.Warning,
         unreadBadge = GeneratedTokens.Color.UnreadBadge,
         onUnreadBadge = GeneratedTokens.Color.OnUnreadBadge,
+        axisX = Color(0xFFFF6B6B),
+        axisY = Color(0xFF7CFFD8),
+        axisZ = Color(0xFF6DE8FF),
     )
 }
 

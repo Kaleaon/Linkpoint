@@ -162,6 +162,89 @@ class SharedTestVectorSuiteTest {
     }
 
     @Test
+    @DisplayName("Verify Multi-LOD Screen Area Selection Test Vectors")
+    fun testMultiLodVectors() {
+        val vectorFile = File(findTestVectorsDir(), "mesh/llmesh_decompress_vectors.json")
+        assertTrue(vectorFile.exists(), "Vector file missing: ${vectorFile.absolutePath}")
+
+        val json = JSONObject(vectorFile.readText())
+        val lodVectors = json.getJSONArray("multi_lod_vectors")
+        val fetcher = com.linkpoint.assets.LLMeshFetcher()
+
+        for (i in 0 until lodVectors.length()) {
+            val caseObj = lodVectors.getJSONObject(i)
+            val name = caseObj.getString("name")
+            val radius = caseObj.getDouble("bounding_radius").toFloat()
+            val distance = caseObj.getDouble("distance_meters").toFloat()
+            val fov = caseObj.getDouble("fov_rad").toFloat()
+            val height = caseObj.getInt("screen_height_px")
+            val expected = caseObj.getJSONObject("expected")
+
+            val px = fetcher.calculateProjectedPixelCoverage(
+                boundingRadius = radius,
+                distanceMeters = distance,
+                fovRad = fov,
+                screenHeightPx = height
+            )
+            assertEquals(expected.getDouble("projected_pixel_coverage").toFloat(), px, 0.5f, "$name: projectedPixelCoverage")
+
+            val camera = com.linkpoint.assets.LLMeshFetcher.CameraParams(
+                position = com.linkpoint.protocol.types.LLVector3(0f, 0f, 0f),
+                fovRad = fov,
+                screenHeightPx = height
+            )
+            val objPos = com.linkpoint.protocol.types.LLVector3(0f, distance, 0f)
+            val selection = fetcher.selectLod(
+                meshId = java.util.UUID.randomUUID(),
+                objectPos = objPos,
+                boundingRadius = radius,
+                camera = camera
+            )
+            val expectedLodName = expected.getString("selected_lod")
+            val expectedMeshLod = when (expectedLodName) {
+                "high_lod" -> com.linkpoint.assets.MeshLOD.HIGHEST
+                "medium_lod" -> com.linkpoint.assets.MeshLOD.HIGH
+                "low_lod" -> com.linkpoint.assets.MeshLOD.MEDIUM
+                else -> com.linkpoint.assets.MeshLOD.LOW
+            }
+            assertEquals(expectedMeshLod, selection.targetLod, "$name: targetLod")
+        }
+    }
+
+    @Test
+    @DisplayName("Verify Submesh Material Partition Test Vectors")
+    fun testSubmeshVectors() {
+        val vectorFile = File(findTestVectorsDir(), "mesh/llmesh_decompress_vectors.json")
+        assertTrue(vectorFile.exists(), "Vector file missing: ${vectorFile.absolutePath}")
+
+        val json = JSONObject(vectorFile.readText())
+        val submeshVectors = json.getJSONArray("submesh_vectors")
+
+        for (i in 0 until submeshVectors.length()) {
+            val caseObj = submeshVectors.getJSONObject(i)
+            val name = caseObj.getString("name")
+            val hexBytes = caseObj.getString("hex_bytes")
+            val expected = caseObj.getJSONObject("expected")
+
+            val bytes = hexToBytes(hexBytes)
+            val parsed = LLMeshLoader.parse(bytes, name)
+            assertNotNull(parsed, "$name: LLMeshLoader.parse returned null")
+
+            val expSubCount = expected.getInt("submesh_count")
+            assertEquals(expSubCount, parsed!!.submeshes.size, "$name: submesh_count")
+
+            val expSubArray = expected.getJSONArray("submeshes")
+            for (s in 0 until expSubArray.length()) {
+                val expSub = expSubArray.getJSONObject(s)
+                val sub = parsed.submeshes[s]
+                assertEquals(expSub.getInt("material_index"), sub.materialIndex, "$name: submesh[$s].materialIndex")
+                assertEquals(expSub.getInt("vertex_count"), sub.positions.size / 3, "$name: submesh[$s].vertex_count")
+                assertEquals(expSub.getInt("index_count"), sub.indices.size, "$name: submesh[$s].index_count")
+            }
+        }
+    }
+
+    @Test
     @DisplayName("Verify JPEG2000 Texture Decoder Test Vectors")
     fun testJ2kTextureDecoderVectors() {
         val vectorFile = File(findTestVectorsDir(), "textures/j2k_texture_decoder_vectors.json")

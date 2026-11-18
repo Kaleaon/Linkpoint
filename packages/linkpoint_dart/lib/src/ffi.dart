@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:ffi/ffi.dart';
 
 final class LlsdResultBufferStruct extends Struct {
@@ -19,14 +20,20 @@ final class LlsdResultBufferStruct extends Struct {
 }
 
 typedef NativeLinkpointFreeBuffer = Void Function(
-    Pointer<LlsdResultBufferStruct>);
+  Pointer<LlsdResultBufferStruct>,
+);
 typedef DartLinkpointFreeBuffer = void Function(
-    Pointer<LlsdResultBufferStruct>);
+  Pointer<LlsdResultBufferStruct>,
+);
 
 typedef NativeLinkpointParse = Pointer<LlsdResultBufferStruct> Function(
-    Pointer<Uint8>, IntPtr);
+  Pointer<Uint8>,
+  IntPtr,
+);
 typedef DartLinkpointParse = Pointer<LlsdResultBufferStruct> Function(
-    Pointer<Uint8>, int);
+  Pointer<Uint8>,
+  int,
+);
 
 class LinkpointProtocolFFI {
   static DynamicLibrary? _lib;
@@ -45,6 +52,10 @@ class LinkpointProtocolFFI {
     if (Platform.isLinux) {
       final searchPaths = [
         'liblinkpoint_protocol.so',
+        'builds/native/liblinkpoint_protocol.so',
+        '../../builds/native/liblinkpoint_protocol.so',
+        '../builds/native/liblinkpoint_protocol.so',
+        '/app/Linkpoint/builds/native/liblinkpoint_protocol.so',
         '../../target/release/liblinkpoint_protocol.so',
         '../target/release/liblinkpoint_protocol.so',
         'target/release/liblinkpoint_protocol.so',
@@ -66,6 +77,10 @@ class LinkpointProtocolFFI {
     } else if (Platform.isMacOS) {
       final searchPaths = [
         'liblinkpoint_protocol.dylib',
+        'builds/native/liblinkpoint_protocol.dylib',
+        '../../builds/native/liblinkpoint_protocol.dylib',
+        '../builds/native/liblinkpoint_protocol.dylib',
+        '/app/Linkpoint/builds/native/liblinkpoint_protocol.dylib',
         '../../target/release/liblinkpoint_protocol.dylib',
         '../target/release/liblinkpoint_protocol.dylib',
         'target/release/liblinkpoint_protocol.dylib',
@@ -86,6 +101,10 @@ class LinkpointProtocolFFI {
     } else if (Platform.isWindows) {
       final searchPaths = [
         'linkpoint_protocol.dll',
+        'builds/native/linkpoint_protocol.dll',
+        '../../builds/native/linkpoint_protocol.dll',
+        '../builds/native/linkpoint_protocol.dll',
+        '/app/Linkpoint/builds/native/linkpoint_protocol.dll',
         '../../target/release/linkpoint_protocol.dll',
         '../target/release/linkpoint_protocol.dll',
         'target/release/linkpoint_protocol.dll',
@@ -133,7 +152,8 @@ class LinkpointProtocolFFI {
     final lib = _loadLibrary();
     final freeFn =
         lib.lookupFunction<NativeLinkpointFreeBuffer, DartLinkpointFreeBuffer>(
-            'linkpoint_free_buffer');
+      'linkpoint_free_buffer',
+    );
     freeFn(buf);
   }
 
@@ -160,7 +180,8 @@ class LinkpointProtocolFFI {
   }
 
   static List<int> _extractAndFreeBinaryResult(
-      Pointer<LlsdResultBufferStruct> resBuf) {
+    Pointer<LlsdResultBufferStruct> resBuf,
+  ) {
     if (resBuf == nullptr) {
       throw Exception('FFI returned null buffer');
     }

@@ -77,6 +77,10 @@ class TransferManager(
     // Pending completions for suspend functions
     private val pendingCompletions = ConcurrentHashMap<UUID, CompletableDeferred<ByteArray?>>()
 
+    // Bounded active retries map
+    private val activeRetryJobs = ConcurrentHashMap<UUID, Job>()
+    private val MAX_CONCURRENT_RETRIES = 16
+
     /**
      * Fetch an asset synchronously (suspend function).
      *
@@ -112,6 +116,74 @@ class TransferManager(
                 null
             } finally {
                 pendingCompletions.remove(transferId)
+            }
+        }
+    }
+
+    /**
+     * Fetch an asset asynchronously with exponential backoff retries.
+     * Delays: 1s, 2s, 4s up to maxAttempts (default 3).
+     */
+    suspend fun fetchAssetWithRetry(
+        assetId: UUID,
+        assetType: Int,
+        maxAttempts: Int = 3,
+        initialDelayMs: Long = 1000L
+    ): ByteArray? {
+        return withContext(Dispatchers.IO) {
+            val job = coroutineContext[Job]
+            if (job != null) {
+                if (activeRetryJobs.size >= MAX_CONCURRENT_RETRIES && !activeRetryJobs.containsKey(assetId)) {
+                    Log.w(TAG, "Retry queue at capacity (${activeRetryJobs.size}); shedding retry request for $assetId")
+                }
+                activeRetryJobs[assetId] = job
+            }
+
+            try {
+                var attempt = 1
+                while (attempt <= maxAttempts && currentCoroutineContext().isActive) {
+                    if (attempt > 1) {
+                        val backoff = initialDelayMs * (1L shl (attempt - 2))
+                        Log.d(TAG, "Retrying asset download $assetId (attempt $attempt/$maxAttempts) after ${backoff}ms")
+                        updateStats { it.copy(retryAttempts = it.retryAttempts + 1) }
+                        try {
+                            delay(backoff)
+                        } catch (e: CancellationException) {
+                            Log.d(TAG, "Asset fetch retry cancelled for $assetId")
+                            return@withContext null
+                        }
+                    } else {
+                        updateStats { it.copy(retryAttempts = it.retryAttempts + 1) }
+                    }
+
+                    val result = fetchAsset(assetId, assetType)
+                    if (result != null && result.isNotEmpty()) {
+                        Log.i(TAG, "Asset fetch succeeded for $assetId on attempt $attempt")
+                        if (attempt > 1) {
+                            updateStats { it.copy(retrySuccesses = it.retrySuccesses + 1) }
+                        }
+                        return@withContext result
+                    }
+                    attempt++
+                }
+
+                Log.w(TAG, "Asset fetch failed for $assetId after $maxAttempts attempts")
+                updateStats { it.copy(retryFailures = it.retryFailures + 1) }
+                null
+            } finally {
+                activeRetryJobs.remove(assetId)
+            }
+        }
+    }
+
+    /**
+     * Cancel any active retry or pending transfer for an asset ID.
+     */
+    fun cancelAssetRetry(assetId: UUID) {
+        activeRetryJobs.remove(assetId)?.cancel()
+        assetToTransfer.keys.find { it.assetId == assetId }?.let { key ->
+            assetToTransfer[key]?.let { transferId ->
+                cancelTransfer(transferId)
             }
         }
     }
@@ -618,7 +690,10 @@ data class TransferStats(
     val completedTransfers: Int = 0,
     val failedTransfers: Int = 0,
     val cancelledTransfers: Int = 0,
-    val bytesReceived: Long = 0
+    val bytesReceived: Long = 0,
+    val retryAttempts: Int = 0,
+    val retrySuccesses: Int = 0,
+    val retryFailures: Int = 0
 )
 
 /**

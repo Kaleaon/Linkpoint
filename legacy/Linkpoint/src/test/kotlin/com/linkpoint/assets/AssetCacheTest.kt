@@ -111,4 +111,35 @@ class AssetCacheTest {
         assertFalse("General asset file should be removed after clear", savedGestureFile.exists())
         assertFalse("Legacy unsegregated file should be removed after clear", legacyFile.exists())
     }
+
+    @Test
+    fun `getOrFetchWithRetry fetches and caches on success`() = runBlocking {
+        val assetId = UUID.randomUUID()
+        var attempts = 0
+        val data = "retried_asset_data".toByteArray()
+
+        val result = assetCache.getOrFetchWithRetry(assetId, AssetType.TEXTURE, maxAttempts = 3, initialDelayMs = 10L) { _, _ ->
+            attempts++
+            if (attempts < 2) null else data
+        }
+
+        assertNotNull(result)
+        assertArrayEquals(data, result)
+        assertEquals(2, attempts)
+        assertTrue(assetCache.contains(assetId, AssetType.TEXTURE))
+    }
+
+    @Test
+    fun `getOrFetchWithRetry returns null when max attempts exceeded`() = runBlocking {
+        val assetId = UUID.randomUUID()
+        var attempts = 0
+
+        val result = assetCache.getOrFetchWithRetry(assetId, AssetType.TEXTURE, maxAttempts = 3, initialDelayMs = 10L) { _, _ ->
+            attempts++
+            null
+        }
+
+        assertNull(result)
+        assertEquals(3, attempts)
+    }
 }

@@ -10,6 +10,8 @@ import android.util.Log
 import com.linkpoint.assets.AssetCache
 import com.linkpoint.assets.AssetType
 import com.linkpoint.assets.TextureManager
+import com.linkpoint.inventory.WearableAssetTelemetry
+import com.linkpoint.inventory.WearableLoadFailureReason
 import com.linkpoint.network.SSLHelper
 import com.linkpoint.protocol.capabilities.CapabilityManager
 import com.linkpoint.protocol.llsd.*
@@ -65,6 +67,9 @@ class AvatarBaker(
         const val TEX_UPPER_SHIRT = 1
         const val TEX_LOWER_PANTS = 2
         // ... etc
+
+        // Built-in system default skin asset ID
+        val DEFAULT_SYSTEM_SKIN_ID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
     }
 
     // HTTP client configured for CDN access with custom hostname verification
@@ -164,7 +169,7 @@ class AvatarBaker(
             // Composite each layer
             for (layer in layers) {
                 try {
-                    val fetched = textureManager.getTexture(layer.textureId)
+                    val fetched = if (layer.textureId == DEFAULT_SYSTEM_SKIN_ID) null else textureManager.getTexture(layer.textureId)
                     val texture = if (fetched == null || textureManager.isPlaceholder(layer.textureId)) {
                         createFallbackLayerTexture(channel)
                     } else {
@@ -194,7 +199,10 @@ class AvatarBaker(
             }
 
             // Upload baked texture
-            uploadBakedTexture(bitmap, channel)
+            val uploadedUuid = uploadBakedTexture(bitmap, channel)
+            val finalUuid = uploadedUuid ?: UUID.nameUUIDFromBytes("baked_channel_$channel".toByteArray())
+            bakedTextures[channel] = finalUuid
+            finalUuid
         } finally {
             bitmap.recycle()
         }
@@ -206,10 +214,12 @@ class AvatarBaker(
         when (channel) {
             BAKE_HEAD -> {
                 // Base skin
-                wearables[WearableType.SKIN]?.let { skin ->
-                    skin.textures[TEX_HEAD_BODYPAINT]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val headTex = wearables[WearableType.SKIN]?.textures?.get(TEX_HEAD_BODYPAINT)
+                if (headTex != null && headTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(headTex, null, BlendMode.NORMAL))
+                } else {
+                    WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK)
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 // Tattoos
                 wearables[WearableType.TATTOO]?.let { tattoo ->
@@ -220,10 +230,12 @@ class AvatarBaker(
             }
             BAKE_UPPER -> {
                 // Base skin
-                wearables[WearableType.SKIN]?.let { skin ->
-                    skin.textures[TEX_UPPER_SHIRT]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val upperTex = wearables[WearableType.SKIN]?.textures?.get(TEX_UPPER_SHIRT)
+                if (upperTex != null && upperTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(upperTex, null, BlendMode.NORMAL))
+                } else {
+                    WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK)
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 // Undershirt
                 wearables[WearableType.UNDERSHIRT]?.let { under ->
@@ -246,10 +258,12 @@ class AvatarBaker(
             }
             BAKE_LOWER -> {
                 // Base skin
-                wearables[WearableType.SKIN]?.let { skin ->
-                    skin.textures[TEX_LOWER_PANTS]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val lowerTex = wearables[WearableType.SKIN]?.textures?.get(TEX_LOWER_PANTS)
+                if (lowerTex != null && lowerTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(lowerTex, null, BlendMode.NORMAL))
+                } else {
+                    WearableAssetTelemetry.recordFallback(WearableLoadFailureReason.SYSTEM_SKIN_FALLBACK)
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 // Underpants
                 wearables[WearableType.UNDERPANTS]?.let { under ->
@@ -281,15 +295,15 @@ class AvatarBaker(
             // Bakes on Mesh (BoM) channels
             BAKE_LEFTARM, BAKE_LEFTLEG -> {
                 // BoM uses same skin textures as upper/lower but for mesh bodies
-                wearables[WearableType.SKIN]?.let { skin ->
-                    val texIndex = if (channel == BAKE_LEFTARM) TEX_UPPER_SHIRT else TEX_LOWER_PANTS
-                    skin.textures[texIndex]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val texIndex = if (channel == BAKE_LEFTARM) TEX_UPPER_SHIRT else TEX_LOWER_PANTS
+                val skinTex = wearables[WearableType.SKIN]?.textures?.get(texIndex)
+                if (skinTex != null && skinTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(skinTex, null, BlendMode.NORMAL))
+                } else {
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 // Add clothing layers
                 wearables[WearableType.TATTOO]?.let { tattoo ->
-                    val texIndex = if (channel == BAKE_LEFTARM) TEX_UPPER_SHIRT else TEX_LOWER_PANTS
                     tattoo.textures[texIndex]?.let { texId ->
                         layers.add(BakeLayer(texId, null, BlendMode.MULTIPLY))
                     }
@@ -297,10 +311,11 @@ class AvatarBaker(
             }
             BAKE_AUX1 -> {
                 // Mesh head - use head textures
-                wearables[WearableType.SKIN]?.let { skin ->
-                    skin.textures[TEX_HEAD_BODYPAINT]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val skinTex = wearables[WearableType.SKIN]?.textures?.get(TEX_HEAD_BODYPAINT)
+                if (skinTex != null && skinTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(skinTex, null, BlendMode.NORMAL))
+                } else {
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 wearables[WearableType.TATTOO]?.let { tattoo ->
                     tattoo.textures[TEX_HEAD_BODYPAINT]?.let { texId ->
@@ -310,10 +325,11 @@ class AvatarBaker(
             }
             BAKE_AUX2 -> {
                 // Mesh upper body - use upper textures
-                wearables[WearableType.SKIN]?.let { skin ->
-                    skin.textures[TEX_UPPER_SHIRT]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val skinTex = wearables[WearableType.SKIN]?.textures?.get(TEX_UPPER_SHIRT)
+                if (skinTex != null && skinTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(skinTex, null, BlendMode.NORMAL))
+                } else {
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 wearables[WearableType.SHIRT]?.let { shirt ->
                     shirt.textures[TEX_UPPER_SHIRT]?.let { texId ->
@@ -323,10 +339,11 @@ class AvatarBaker(
             }
             BAKE_AUX3 -> {
                 // Mesh lower body - use lower textures
-                wearables[WearableType.SKIN]?.let { skin ->
-                    skin.textures[TEX_LOWER_PANTS]?.let { texId ->
-                        layers.add(BakeLayer(texId, null, BlendMode.NORMAL))
-                    }
+                val skinTex = wearables[WearableType.SKIN]?.textures?.get(TEX_LOWER_PANTS)
+                if (skinTex != null && skinTex != DEFAULT_SYSTEM_SKIN_ID) {
+                    layers.add(BakeLayer(skinTex, null, BlendMode.NORMAL))
+                } else {
+                    layers.add(BakeLayer(DEFAULT_SYSTEM_SKIN_ID, null, BlendMode.NORMAL))
                 }
                 wearables[WearableType.PANTS]?.let { pants ->
                     pants.textures[TEX_LOWER_PANTS]?.let { texId ->
@@ -429,6 +446,32 @@ class AvatarBaker(
                 null
             }
         }
+    }
+
+    /**
+     * Checks if base skin channels (BAKE_HEAD, BAKE_UPPER, BAKE_LOWER) have valid bakes.
+     */
+    fun hasValidBaseSkinBakes(): Boolean {
+        val head = bakedTextures[BAKE_HEAD]
+        val upper = bakedTextures[BAKE_UPPER]
+        val lower = bakedTextures[BAKE_LOWER]
+        val emptyUuid = UUID(0L, 0L)
+        return head != null && head != emptyUuid &&
+               upper != null && upper != emptyUuid &&
+               lower != null && lower != emptyUuid
+    }
+
+    /**
+     * Checks if default system skin is applied (e.g. skin is missing or uses default skin asset ID).
+     */
+    fun isDefaultSkinApplied(): Boolean {
+        val skin = wearables[WearableType.SKIN] ?: return true
+        val headTex = skin.textures[TEX_HEAD_BODYPAINT]
+        val upperTex = skin.textures[TEX_UPPER_SHIRT]
+        val lowerTex = skin.textures[TEX_LOWER_PANTS]
+        return headTex == null || headTex == DEFAULT_SYSTEM_SKIN_ID ||
+               upperTex == null || upperTex == DEFAULT_SYSTEM_SKIN_ID ||
+               lowerTex == null || lowerTex == DEFAULT_SYSTEM_SKIN_ID
     }
 
     /**

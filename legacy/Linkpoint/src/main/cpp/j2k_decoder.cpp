@@ -386,7 +386,7 @@ Java_com_linkpoint_assets_JPEG2000Decoder_nativeDecode(
         if (prec > 8) {
             v >>= (prec - 8);
         } else if (prec < 8 && prec > 0) {
-            v <<= (8 - prec);
+            v = (v * 255) / ((1 << prec) - 1);
         }
         if (v < 0) v = 0;
         if (v > 255) v = 255;
@@ -631,9 +631,9 @@ Java_com_linkpoint_assets_NativeEtcpak_nativeCompressEtc2Rgba(
         const uint8_t g = in[i * 4 + 1];
         const uint8_t b = in[i * 4 + 2];
         const uint8_t a = in[i * 4 + 3];
-        src[i] = static_cast<uint32_t>(b)
+        src[i] = static_cast<uint32_t>(r)
                | (static_cast<uint32_t>(g) << 8)
-               | (static_cast<uint32_t>(r) << 16)
+               | (static_cast<uint32_t>(b) << 16)
                | (static_cast<uint32_t>(a) << 24);
     }
     env->ReleaseByteArrayElements(jrgba, rgba, JNI_ABORT);

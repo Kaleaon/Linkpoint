@@ -54,29 +54,31 @@ tasks.register('generateProtocolCode', Exec) {
 }
 
 // Delegating tasks for root project to included build Linkpoint
-tasks.register('testDebugUnitTest') {
-    dependsOn generateProtocolCode
-    dependsOn gradle.includedBuild('Linkpoint').task(':testStableDebugUnitTest')
-}
+if (gradle.includedBuilds.any { it.name == 'Linkpoint' }) {
+    tasks.register('testDebugUnitTest') {
+        dependsOn generateProtocolCode
+        dependsOn gradle.includedBuild('Linkpoint').task(':testStableDebugUnitTest')
+    }
 
-tasks.register('verifyRoborazziDebug') {
-    dependsOn gradle.includedBuild('Linkpoint').task(':verifyRoborazziDebug')
-}
+    tasks.register('verifyRoborazziDebug') {
+        dependsOn gradle.includedBuild('Linkpoint').task(':verifyRoborazziDebug')
+    }
 
-tasks.register('recordRoborazziDebug') {
-    dependsOn gradle.includedBuild('Linkpoint').task(':recordRoborazziDebug')
-}
+    tasks.register('recordRoborazziDebug') {
+        dependsOn gradle.includedBuild('Linkpoint').task(':recordRoborazziDebug')
+    }
 
-tasks.register('assembleDebug') {
-    dependsOn gradle.includedBuild('Linkpoint').task(':assembleDebug')
-}
+    tasks.register('assembleDebug') {
+        dependsOn gradle.includedBuild('Linkpoint').task(':assembleDebug')
+    }
 
-tasks.register('jacocoTestReport') {
-    dependsOn gradle.includedBuild('Linkpoint').task(':jacocoTestReport')
-}
+    tasks.register('jacocoTestReport') {
+        dependsOn gradle.includedBuild('Linkpoint').task(':jacocoTestReport')
+    }
 
-tasks.register('paparazziDebugCheck') {
-    dependsOn gradle.includedBuild('Linkpoint').task(':ui-components:paparazziDebugCheck')
+    tasks.register('paparazziDebugCheck') {
+        dependsOn gradle.includedBuild('Linkpoint').task(':ui-components:paparazziDebugCheck')
+    }
 }
 
 // Universal clean task
