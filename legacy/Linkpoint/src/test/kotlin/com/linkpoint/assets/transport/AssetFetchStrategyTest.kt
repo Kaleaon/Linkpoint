@@ -190,9 +190,9 @@ class AssetFetchStrategyTest {
         val parsedMap = GridInfoResolver.parseGridInfoPayload(xmlPayload)
         assertEquals("http://assets.testgrid.org:8003", parsedMap["asset_server_url"])
 
-        val gridInfo = GridInfoResolver.resolveGridInfo("http://login.testgrid.org:8002/")
-        val mergedGrid = GridInfoResolver.parseGridInfoPayload(xmlPayload)
-        assertTrue(mergedGrid.containsKey("asset_server_url"))
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(xmlPayload))
+        val resolved = GridInfoResolver.resolveGridInfo(mockWebServer.url("/").toString())
+        assertEquals("http://assets.testgrid.org:8003", resolved.assetServerUrl)
     }
 
     @Test
