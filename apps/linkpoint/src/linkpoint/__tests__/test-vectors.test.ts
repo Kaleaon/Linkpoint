@@ -161,7 +161,6 @@ describe('Canonical Shared Test Vectors Suite', () => {
         }
       }
     });
-
     it('verifies pre-processed Unified-LLSD geometry payload test vectors', () => {
       const filePath = findVectorFile('mesh/preprocessed_mesh_vectors.json');
       const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
