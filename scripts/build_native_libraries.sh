@@ -39,7 +39,7 @@ for target in "${OPTIONAL_TARGETS[@]}"; do
             fi
         fi
         echo "Building for installed target: ${target}"
-        cargo build -p linkpoint-protocol --release --target "${target}" || echo "Warning: build for ${target} skipped"
+        cargo build -p linkpoint-protocol --release --target "${target}" || echo "Warning: build for ${target} skipped" || true
     else
         echo "Skipping target ${target} (not installed in current toolchain environment)"
     fi
