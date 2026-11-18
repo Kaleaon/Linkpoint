@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Linkpoint.Protocol.Tests/Linkpoint.Protocol.Tests.csproj" />
+  <Project Path="Linkpoint.Protocol/Linkpoint.Protocol.csproj" />
+</Solution>

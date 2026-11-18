@@ -276,6 +276,9 @@ jobs:
       - name: Grant execute permissions
         run: chmod +x legacy/Linkpoint/tools/protocol/*.sh legacy/Linkpoint/tools/protocol/*.py 2>/dev/null || true
 
+      - name: Run protocol generator unit tests
+        run: PYTHONPATH=. python3 tools/protocol_gen/tests/test_generator.py
+
       - name: Run protocol conformance suite
         run: legacy/Linkpoint/tools/protocol/run_conformance.sh --skip-gradle
 
@@ -323,7 +326,7 @@ jobs:
           flutter test
 
   swift:
-    name: Task 7 - Swift SPM Verification
+    name: Task 7 - Swift iOS Engine Verification
     runs-on: macos-latest
     timeout-minutes: 20
 
@@ -331,16 +334,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-
-      - name: Run Swift tests
+      - name: Run Swift Package Tests
         run: |
           cd platforms/iOS
           swift test
 
   csharp:
-    name: Task 8 - C# SDK Verification
+    name: Task 8 - C# .NET SDK & Protocol Verification
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -351,10 +351,20 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
-      - name: Run C# tests
-        run: dotnet test sdks/csharp
+      - name: Run C# .NET Protocol Tests
+        run: |
+          cd platforms/dotnet
+          dotnet run --project Linkpoint.Protocol.Tests/Linkpoint.Protocol.Tests.csproj
+
+      - name: Run C# LLSD SDK Tests
+        run: dotnet run --project sdks/csharp/tests/Linkpoint.LLSD.Tests.csproj
+
+      - name: Pack NuGet Packages
+        run: |
+          dotnet pack -c Release platforms/dotnet/Linkpoint.Protocol/Linkpoint.Protocol.csproj -o nupkg
+          dotnet pack -c Release sdks/csharp/src/Linkpoint.LLSD.csproj -o nupkg
 
   ci-status:
     name: Task 9 - CI Status & Coverage Quality Gate

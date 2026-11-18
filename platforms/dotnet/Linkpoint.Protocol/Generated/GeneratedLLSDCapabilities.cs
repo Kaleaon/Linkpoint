@@ -6,27 +6,27 @@
 using System;
 using System.Collections.Generic;
 
-namespace Linkpoint.Protocol.Generated
+namespace Linkpoint.Protocol
 {
     // LLSD Schema: AgentDomainCapabilities
     public class AgentDomainCapabilitiesCapabilities
     {
-        public string agent_id { get; set; }
-        public string session_id { get; set; }
-        public string display_name { get; set; }
-        public string legacy_first_name { get; set; }
-        public string legacy_last_name { get; set; }
+        public string agent_id { get; set; } = string.Empty;
+        public string session_id { get; set; } = string.Empty;
+        public string? display_name { get; set; }
+        public string? legacy_first_name { get; set; }
+        public string? legacy_last_name { get; set; }
         public double? hover_height { get; set; }
-        public string active_group_id { get; set; }
-        public string maturity_rating { get; set; }
+        public string? active_group_id { get; set; }
+        public string? maturity_rating { get; set; }
     }
 
     // LLSD Schema: CapabilitiesRequestResponse
     public class CapabilitiesRequestResponseCapabilities
     {
         public List<string> capabilities { get; set; } = new List<string>();
-        public string seed_response { get; set; }
-        public string fetch_inventory { get; set; }
+        public string? seed_response { get; set; }
+        public string? fetch_inventory { get; set; }
     }
 
     // LLSD Schema: EventQueueGet
