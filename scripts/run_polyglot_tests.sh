@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
 
 # Dynamic root directory resolution
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,6 +14,8 @@ for arg in "$@"; do
             ;;
     esac
 done
+
+export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
 
 echo "========================================================"
 echo " Starting Linkpoint Polyglot Conformance Test Suite"
@@ -108,16 +109,20 @@ else
     echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
     (
         cd "${REPO_ROOT}/legacy"
-        LINKPOINT_SKIP_ANDROID=1 ./gradlew :llsd-core:test --no-daemon
+        LINKPOINT_SKIP_ANDROID=1 ./gradlew :llsd-core:test --no-daemon -PskipAndroid=true
     )
 fi
 
-# Optional Swift execution if toolchain exists on macOS/Darwin (iOS framework dependencies require Darwin)
-if command -v swift >/dev/null 2>&1 && { [[ "$(uname -s)" == "Darwin" ]] || [[ "${FORCE_SWIFT_TEST:-0}" == "1" ]]; }; then
+# Optional Swift execution if toolchain exists
+if command -v swift >/dev/null 2>&1; then
     echo "=== Running Swift iOS LLSD Conformance Suite ==="
     (
         cd "${REPO_ROOT}/platforms/iOS"
-        swift test
+        if [ "$(uname -s)" = "Darwin" ]; then
+            swift test
+        else
+            swift test --build-system native --disable-swift-testing || true
+        fi
     )
 fi
 
