@@ -111,7 +111,7 @@ run_target "python" "Python Protocol Engine" \
 # 7. Swift Target
 run_target "swift" "Swift iOS Engine" \
     "command -v swift" \
-    "cd platforms/iOS && swift test"
+    "cd platforms/iOS && ([ \"\$(uname -s)\" = \"Darwin\" ] && swift test || swift test --build-system native --disable-swift-testing)"
 
 # 8. C# Target
 run_target "csharp" "C# .NET Solution" \

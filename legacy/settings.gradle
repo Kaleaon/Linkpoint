@@ -23,22 +23,33 @@ def skipAndroid = System.getenv('LINKPOINT_SKIP_ANDROID') == '1' ||
                   System.getenv('LINKPOINT_SKIP_ANDROID') == 'true' ||
                   System.getenv('SKIP_ANDROID_BUILD') == '1' ||
                   System.getenv('SKIP_ANDROID_BUILD') == 'true' ||
-                  providers.gradleProperty('skipAndroid').orNull == 'true' ||
-                  providers.gradleProperty('skipAndroidBuild').orNull == 'true'
+                  providers.gradleProperty('skipAndroidBuild').orNull == 'true' ||
+                  providers.gradleProperty('skipAndroid').orNull == 'true'
 
 def sdkDir = resolveAndroidSdkDir()
-def hasAndroidSdk = !skipAndroid && sdkDir != null && sdkDir.exists() && (
-    new File(sdkDir, 'ndk/26.3.11579264').exists() ||
-    (System.getenv('ANDROID_NDK_HOME') != null && file(System.getenv('ANDROID_NDK_HOME')).exists() && (
-        file(System.getenv('ANDROID_NDK_HOME')).name == '26.3.11579264' ||
-        new File(file(System.getenv('ANDROID_NDK_HOME')), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
-    )) ||
-    (System.getenv('ANDROID_NDK_ROOT') != null && file(System.getenv('ANDROID_NDK_ROOT')).exists() && (
-        file(System.getenv('ANDROID_NDK_ROOT')).name == '26.3.11579264' ||
-        new File(file(System.getenv('ANDROID_NDK_ROOT')), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
-    ))
-)
+def ndkRoot = System.getenv('ANDROID_NDK_ROOT') ?: System.getenv('ANDROID_NDK_HOME')
+if (sdkDir != null && ndkRoot == null) {
+    def localPropsFile = file('Linkpoint/local.properties').exists() ? file('Linkpoint/local.properties') :
+                         (file('local.properties').exists() ? file('local.properties') : null)
+    if (localPropsFile != null) {
+        def props = new Properties()
+        localPropsFile.withInputStream { props.load(it) }
+        ndkRoot = props.getProperty('ndk.dir')
+    }
+}
 
-if (hasAndroidSdk && file('Linkpoint').exists()) {
+def hasNdk26 = (sdkDir != null && new File(sdkDir, 'ndk/26.3.11579264').exists()) ||
+               (ndkRoot != null && file(ndkRoot).exists() && (
+                   file(ndkRoot).name == '26.3.11579264' ||
+                   new File(file(ndkRoot), 'source.properties').with { it.exists() && it.text.contains('26.3.11579264') }
+               ))
+
+def hasCompleteSdk = !skipAndroid &&
+                     sdkDir != null &&
+                     sdkDir.exists() &&
+                     new File(sdkDir, 'platforms/android-35').exists() &&
+                     hasNdk26
+
+if (hasCompleteSdk && file('Linkpoint').exists()) {
     includeBuild('Linkpoint')
 }
