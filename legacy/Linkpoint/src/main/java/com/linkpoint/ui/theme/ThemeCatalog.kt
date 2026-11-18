@@ -80,6 +80,7 @@ object ThemeCatalog {
             val possibleDirs = listOfNotNull(
                 File("src/main/assets/themes"),
                 File("legacy/Linkpoint/src/main/assets/themes"),
+                File("../../legacy/Linkpoint/src/main/assets/themes"),
                 File("Linkpoint/src/main/assets/themes"),
                 File("packages/design-system/themes"),
                 File("packages/design-system/themes/community"),
