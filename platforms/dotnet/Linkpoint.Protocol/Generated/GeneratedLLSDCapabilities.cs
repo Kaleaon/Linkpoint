@@ -11,8 +11,8 @@ namespace Linkpoint.Protocol
     // LLSD Schema: AgentDomainCapabilities
     public class AgentDomainCapabilitiesCapabilities
     {
-        public string agent_id { get; set; } = "";
-        public string session_id { get; set; } = "";
+        public string agent_id { get; set; } = string.Empty;
+        public string session_id { get; set; } = string.Empty;
         public string? display_name { get; set; }
         public string? legacy_first_name { get; set; }
         public string? legacy_last_name { get; set; }
@@ -35,18 +35,5 @@ namespace Linkpoint.Protocol
         public int? ack { get; set; }
         public List<string> events { get; set; } = new List<string>();
     }
-
-}
-
-namespace Linkpoint.Protocol.Generated
-{
-    // LLSD Schema: AgentDomainCapabilities
-    public class AgentDomainCapabilitiesCapabilities : Linkpoint.Protocol.AgentDomainCapabilitiesCapabilities {}
-
-    // LLSD Schema: CapabilitiesRequestResponse
-    public class CapabilitiesRequestResponseCapabilities : Linkpoint.Protocol.CapabilitiesRequestResponseCapabilities {}
-
-    // LLSD Schema: EventQueueGet
-    public class EventQueueGetCapabilities : Linkpoint.Protocol.EventQueueGetCapabilities {}
 
 }

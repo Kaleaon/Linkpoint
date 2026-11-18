@@ -102,9 +102,9 @@ class SwiftEmitter(BaseEmitter):
         return dest
     }
 }
-
-public typealias GeneratedProtocolCatalog = GeneratedProtocol
 """)
+
+        out.append("public typealias GeneratedProtocolCatalog = GeneratedProtocol\n")
 
         # UDP Message structs
         out.append("// Generated UDP Messages")

@@ -110,6 +110,10 @@ version 2.0
 
         proto_content = results[proto_file]
         self.assertIn("public struct GeneratedProtocol", proto_content)
+        self.assertIn(
+            "public typealias GeneratedProtocolCatalog = GeneratedProtocol",
+            proto_content,
+        )
         self.assertIn("func decompressZerocoded", proto_content)
         self.assertIn("public struct TestPacketPacket", proto_content)
         self.assertIn("func serialize() -> Data", proto_content)
@@ -128,6 +132,7 @@ version 2.0
 
         proto_content = results[proto_file]
         self.assertIn("public static class GeneratedProtocol", proto_content)
+        self.assertIn("public static class GeneratedProtocolCatalog", proto_content)
         self.assertIn("DecompressZerocoded", proto_content)
         self.assertIn("public class TestPacketPacket", proto_content)
         self.assertIn("public byte[] Serialize()", proto_content)

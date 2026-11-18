@@ -27,26 +27,6 @@ class CSharpEmitter(BaseEmitter):
             with open(path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(content)
 
-        if out_dir == "platforms/dotnet/Generated" and os.path.exists(
-            "platforms/dotnet/Linkpoint.Protocol"
-        ):
-            extra_dir = "platforms/dotnet/Linkpoint.Protocol/Generated"
-            os.makedirs(extra_dir, exist_ok=True)
-            with open(
-                os.path.join(extra_dir, "GeneratedProtocol.cs"),
-                "w",
-                encoding="utf-8",
-                newline="\n",
-            ) as f:
-                f.write(proto_code)
-            with open(
-                os.path.join(extra_dir, "GeneratedLLSDCapabilities.cs"),
-                "w",
-                encoding="utf-8",
-                newline="\n",
-            ) as f:
-                f.write(llsd_code)
-
         return results
 
     def _generate_csharp_code(self, ast: ProtocolAST) -> str:
@@ -117,11 +97,12 @@ class CSharpEmitter(BaseEmitter):
 
         public static byte[] decompressZerocoded(byte[] src) => DecompressZerocoded(src);
     }
+""")
 
-    public static class GeneratedProtocolCatalog
+        out.append("""    public static class GeneratedProtocolCatalog
     {
         public const string TemplateVersion = GeneratedProtocol.TemplateVersion;
-        public static Dictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
+        public static IReadOnlyDictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
         public static byte[] DecompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
         public static byte[] decompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
     }
@@ -157,9 +138,10 @@ class CSharpEmitter(BaseEmitter):
             out.append("        public byte[] serialize() => Serialize();")
             out.append("    }\n")
 
-        out.append("}\n")
+        out.append("}")
 
-        out.append("namespace Linkpoint.Protocol.Generated")
+        # Compatibility namespace
+        out.append("\nnamespace Linkpoint.Protocol.Generated")
         out.append("{")
         out.append("    public static class GeneratedProtocol")
         out.append("    {")
@@ -175,26 +157,7 @@ class CSharpEmitter(BaseEmitter):
         out.append(
             "        public static byte[] decompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);"
         )
-        out.append("    }\n")
-        out.append("    public static class GeneratedProtocolCatalog")
-        out.append("    {")
-        out.append(
-            "        public const string TemplateVersion = Linkpoint.Protocol.GeneratedProtocol.TemplateVersion;"
-        )
-        out.append(
-            "        public static Dictionary<string, uint> RegisteredMessages => Linkpoint.Protocol.GeneratedProtocol.RegisteredMessages;"
-        )
-        out.append(
-            "        public static byte[] DecompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);"
-        )
-        out.append(
-            "        public static byte[] decompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);"
-        )
-        out.append("    }\n")
-        for msg in ast.messages:
-            out.append(
-                f"    public class {msg.name}Packet : Linkpoint.Protocol.{msg.name}Packet {{}}\n"
-            )
+        out.append("    }")
         out.append("}")
 
         return "\n".join(out)
@@ -214,27 +177,16 @@ class CSharpEmitter(BaseEmitter):
             for p_name, prop in schema.properties.items():
                 cs_type = self._map_csharp_type(prop)
                 init_val = ""
-                if prop.data_type == "array" and prop.required:
-                    init_val = " = new List<string>();"
-                elif (
-                    prop.data_type not in ("integer", "number", "boolean", "array")
-                    and prop.required
-                ):
-                    init_val = ' = "";'
+                if prop.required:
+                    if prop.data_type == "array":
+                        init_val = " = new List<string>();"
+                    elif prop.data_type not in ("integer", "number", "boolean"):
+                        init_val = " = string.Empty;"
                 out.append(
                     f"        public {cs_type} {p_name} {{ get; set; }}{init_val}"
                 )
             out.append("    }\n")
 
-        out.append("}\n")
-
-        out.append("namespace Linkpoint.Protocol.Generated")
-        out.append("{")
-        for schema in ast.llsd_schemas:
-            out.append(f"    // LLSD Schema: {schema.title}")
-            out.append(
-                f"    public class {schema.title}Capabilities : Linkpoint.Protocol.{schema.title}Capabilities {{}}\n"
-            )
         out.append("}")
         return "\n".join(out)
 

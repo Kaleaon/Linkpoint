@@ -65,7 +65,7 @@ public enum J2KDecoder {
             return nil
         }
 
-#if canImport(CoreGraphics) && canImport(ImageIO)
+        #if canImport(CoreGraphics) && canImport(ImageIO)
         // Attempt Apple CGImageSource native J2K decompression
         if let imageSource = CGImageSourceCreateWithData(data as CFData, nil),
            let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
@@ -89,7 +89,7 @@ public enum J2KDecoder {
             }
             return pixelData
         }
-#endif
+        #endif
 
         // Fallback RGBA generation
         var pixelData = Data(count: header.width * header.height * 4)
