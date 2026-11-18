@@ -142,7 +142,15 @@ def main():
     android_data = parse_jacoco_xml(args.android_report)
     if android_data is None:
         # Search fallback locations
-        for fallback in Path(".").glob("**/jacoco*.xml"):
+        fallback_candidates = [
+            Path(
+                "legacy/Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            ),
+            Path(
+                "Linkpoint/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+            ),
+        ] + list(Path(".").glob("**/jacoco*.xml"))
+        for fallback in fallback_candidates:
             android_data = parse_jacoco_xml(fallback)
             if android_data:
                 break
@@ -152,10 +160,12 @@ def main():
     # 2. Web
     web_data = parse_lcov(args.web_report)
     if web_data is None:
-        fallbacks = list(Path(".").glob("**/web-coverage/**/lcov.info")) + list(
-            Path(".").glob("**/coverage/lcov.info")
+        web_fallbacks = (
+            list(Path(".").glob("**/web-coverage/**/lcov.info"))
+            + list(Path(".").glob("**/coverage/lcov.info"))
+            + list(Path(".").glob("**/web*/**/lcov.info"))
         )
-        for fallback in fallbacks:
+        for fallback in web_fallbacks:
             web_data = parse_lcov(fallback)
             if web_data:
                 break
@@ -165,7 +175,7 @@ def main():
     # 3. Rust
     rust_data = parse_lcov(args.rust_report)
     if rust_data is None:
-        fallbacks = (
+        rust_fallbacks = (
             list(Path(".").glob("**/rust-coverage/**/lcov.info"))
             + [
                 Path("coverage-rust.lcov"),
@@ -173,13 +183,14 @@ def main():
                 Path("lcov.info"),
                 Path("coverage-artifacts/rust-coverage/lcov.info"),
             ]
+            + list(Path(".").glob("**/rust*/**/lcov.info"))
             + [
                 p
                 for p in Path(".").glob("**/lcov.info")
                 if "web" not in str(p) and p.parent.name != "coverage"
             ]
         )
-        for fallback in fallbacks:
+        for fallback in rust_fallbacks:
             rust_data = parse_lcov(fallback)
             if rust_data:
                 break

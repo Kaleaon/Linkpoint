@@ -157,6 +157,7 @@ jobs:
           retention-days: 14
 
       - name: Upload Android coverage report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-coverage
