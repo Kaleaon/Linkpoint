@@ -54,6 +54,7 @@ pub fn parse_llmesh_binary(data: &[u8]) -> Option<ParsedLLMesh> {
     })
 }
 
+#[allow(unknown_lints, clippy::chunks_exact_to_as_chunks)]
 pub fn convert_llmesh_to_gltf_json(mesh: &ParsedLLMesh) -> String {
     let mut buffer_bytes = Vec::new();
 
