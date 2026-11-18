@@ -28,3 +28,5 @@
 *.mesh binary
 *.glb binary
 
+**/llsd-conformance/** text eol=lf
+
