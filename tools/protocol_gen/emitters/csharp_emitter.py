@@ -36,7 +36,7 @@ class CSharpEmitter(BaseEmitter):
         out.append("using System.Collections.Generic;")
         out.append("using System.IO;\n")
 
-        out.append("namespace Linkpoint.Protocol.Generated")
+        out.append("namespace Linkpoint.Protocol")
         out.append("{")
         out.append("    public static class GeneratedProtocol")
         out.append("    {")
@@ -96,6 +96,15 @@ class CSharpEmitter(BaseEmitter):
     }
 """)
 
+        out.append("""    public static class GeneratedProtocolCatalog
+    {
+        public const string TemplateVersion = GeneratedProtocol.TemplateVersion;
+        public static IReadOnlyDictionary<string, uint> RegisteredMessages => GeneratedProtocol.RegisteredMessages;
+        public static byte[] DecompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
+        public static byte[] decompressZerocoded(byte[] src) => GeneratedProtocol.DecompressZerocoded(src);
+    }
+""")
+
         # Message Packet classes
         out.append("    // Generated UDP Messages")
         for msg in ast.messages:
@@ -104,6 +113,7 @@ class CSharpEmitter(BaseEmitter):
             out.append(
                 f'        public string MessageName {{ get; set; }} = "{msg.name}";'
             )
+            out.append("        public string Name => MessageName;")
             out.append(
                 f"        public uint MessageNumber {{ get; set; }} = {msg.message_number};"
             )
@@ -126,6 +136,27 @@ class CSharpEmitter(BaseEmitter):
             out.append("    }\n")
 
         out.append("}")
+
+        # Compatibility namespace
+        out.append("\nnamespace Linkpoint.Protocol.Generated")
+        out.append("{")
+        out.append("    public static class GeneratedProtocol")
+        out.append("    {")
+        out.append(
+            "        public const string TemplateVersion = Linkpoint.Protocol.GeneratedProtocol.TemplateVersion;"
+        )
+        out.append(
+            "        public static Dictionary<string, uint> RegisteredMessages => Linkpoint.Protocol.GeneratedProtocol.RegisteredMessages;"
+        )
+        out.append(
+            "        public static byte[] DecompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);"
+        )
+        out.append(
+            "        public static byte[] decompressZerocoded(byte[] src) => Linkpoint.Protocol.GeneratedProtocol.DecompressZerocoded(src);"
+        )
+        out.append("    }")
+        out.append("}")
+
         return "\n".join(out)
 
     def _generate_csharp_llsd(self, ast: ProtocolAST) -> str:
@@ -134,7 +165,7 @@ class CSharpEmitter(BaseEmitter):
         out.append("using System;")
         out.append("using System.Collections.Generic;\n")
 
-        out.append("namespace Linkpoint.Protocol.Generated")
+        out.append("namespace Linkpoint.Protocol")
         out.append("{")
         for schema in ast.llsd_schemas:
             out.append(f"    // LLSD Schema: {schema.title}")
@@ -143,8 +174,11 @@ class CSharpEmitter(BaseEmitter):
             for p_name, prop in schema.properties.items():
                 cs_type = self._map_csharp_type(prop)
                 init_val = ""
-                if prop.data_type == "array" and prop.required:
-                    init_val = " = new List<string>();"
+                if prop.required:
+                    if prop.data_type == "array":
+                        init_val = " = new List<string>();"
+                    elif prop.data_type not in ("integer", "number", "boolean"):
+                        init_val = " = string.Empty;"
                 out.append(
                     f"        public {cs_type} {p_name} {{ get; set; }}{init_val}"
                 )
@@ -161,6 +195,6 @@ class CSharpEmitter(BaseEmitter):
         elif prop.data_type == "boolean":
             return "bool" if prop.required else "bool?"
         elif prop.data_type == "array":
-            return "List<string>"
+            return "List<string>" if prop.required else "List<string>?"
         else:
-            return "string"
+            return "string" if prop.required else "string?"

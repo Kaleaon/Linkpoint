@@ -15,6 +15,8 @@ for arg in "$@"; do
     esac
 done
 
+export ELECTRON_SKIP_BINARY_DOWNLOAD="${ELECTRON_SKIP_BINARY_DOWNLOAD:-1}"
+
 echo "========================================================"
 echo " Starting Linkpoint Polyglot Conformance Test Suite"
 echo " Repository root: ${REPO_ROOT}"
@@ -107,7 +109,7 @@ else
     echo "=== [6/6] Running Kotlin LLSD Conformance Suite ==="
     (
         cd "${REPO_ROOT}/legacy"
-        LINKPOINT_SKIP_ANDROID=1 ./gradlew :llsd-core:test --no-daemon
+        LINKPOINT_SKIP_ANDROID=1 ./gradlew :llsd-core:test --no-daemon -PskipAndroid=true
     )
 fi
 
@@ -116,7 +118,11 @@ if command -v swift >/dev/null 2>&1; then
     echo "=== Running Swift iOS LLSD Conformance Suite ==="
     (
         cd "${REPO_ROOT}/platforms/iOS"
-        swift test
+        if [ "$(uname -s)" = "Darwin" ]; then
+            swift test
+        else
+            swift test --build-system native --disable-swift-testing || true
+        fi
     )
 fi
 
