@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 import Ktheme
 
@@ -62,7 +63,9 @@ struct LoginView: View {
                             // Username
                             TextField("Username", text: $username)
                                 .textFieldStyle(RoundedTextFieldStyle())
+#if os(iOS)
                                 .autocapitalization(.none)
+#endif
 
                             // Password
                             SecureField("Password", text: $password)
@@ -88,7 +91,8 @@ struct LoginView: View {
                             Button(action: login) {
                                 if authViewModel.isLoading {
                                     ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: Ktheme.textPrimary))
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                        .tint(Ktheme.textPrimary)
                                 } else {
                                     Text("Login")
                                         .font(.headline)
@@ -107,7 +111,9 @@ struct LoginView: View {
                     }
                 }
             }
+#if os(iOS)
             .navigationBarHidden(true)
+#endif
             .sheet(isPresented: $showingGridPicker) {
                 GridPickerView(selectedGrid: $authViewModel.selectedGrid, grids: authViewModel.availableGrids)
             }
@@ -169,7 +175,13 @@ struct GridPickerView: View {
                 }
             }
             .navigationTitle("Select Grid")
+#if os(iOS)
             .navigationBarItems(trailing: Button("Done") { dismiss() })
+#else
+            .toolbar {
+                Button("Done") { dismiss() }
+            }
+#endif
         }
     }
 }
@@ -180,3 +192,4 @@ struct LoginView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+#endif

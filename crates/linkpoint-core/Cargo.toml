@@ -3,6 +3,8 @@ name = "linkpoint-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "Core Linkpoint primitive types and data models"
 
 [dependencies]
 serde.workspace = true
