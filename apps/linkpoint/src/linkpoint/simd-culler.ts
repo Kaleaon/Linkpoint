@@ -36,54 +36,78 @@ export interface CullerObject {
   visible: boolean; // Active culling state (true = drawn, false = culled)
 }
 
-function defaultModelMatrix(position: number[], rotation: number[], scale: number[]): Float32Array {
-  const matrix = new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-  ]);
+export function eulerToQuaternion(rx: number, ry: number, rz: number): [number, number, number, number] {
+  const hx = rx / 2, hy = ry / 2, hz = rz / 2;
+  const sx = Math.sin(hx), cx = Math.cos(hx);
+  const sy = Math.sin(hy), cy = Math.cos(hy);
+  const sz = Math.sin(hz), cz = Math.cos(hz);
 
-  matrix[12] = position[0];
-  matrix[13] = position[1];
-  matrix[14] = position[2];
+  return [
+    sx * cy * cz - cx * sy * sz,
+    cx * sy * cz + sx * cy * sz,
+    cx * cy * sz - sx * sy * cz,
+    cx * cy * cz + sx * sy * sz,
+  ];
+}
 
-  const rx = rotation[0], ry = rotation[1], rz = rotation[2];
-  if (rx !== 0 || ry !== 0 || rz !== 0) {
-    const sx = Math.sin(rx), cx = Math.cos(rx);
-    const sy = Math.sin(ry), cy = Math.cos(ry);
-    const sz = Math.sin(rz), cz = Math.cos(rz);
+export function normalizeQuaternion(q: [number, number, number, number] | number[]): [number, number, number, number] {
+  const x = q[0] ?? 0, y = q[1] ?? 0, z = q[2] ?? 0, w = q[3] ?? 1;
+  const len = Math.hypot(x, y, z, w);
+  if (len > 1e-12) {
+    return [x / len, y / len, z / len, w / len];
+  }
+  return [0, 0, 0, 1];
+}
 
-    const m00 = cy * cz;
-    const m01 = cy * sz;
-    const m02 = -sy;
+export function defaultModelMatrix(position: number[], rotation: number[], scale: number[]): Float32Array {
+  let qx = 0, qy = 0, qz = 0, qw = 1;
 
-    const m10 = sx * sy * cz - cx * sz;
-    const m11 = sx * sy * sz + cx * cz;
-    const m12 = sx * cy;
-
-    const m20 = cx * sy * cz + sx * sz;
-    const m21 = cx * sy * sz - sx * cz;
-    const m22 = cx * cy;
-
-    matrix[0] = m00 * scale[0];
-    matrix[1] = m01 * scale[0];
-    matrix[2] = m02 * scale[0];
-
-    matrix[4] = m10 * scale[1];
-    matrix[5] = m11 * scale[1];
-    matrix[6] = m12 * scale[1];
-
-    matrix[8] = m20 * scale[2];
-    matrix[9] = m21 * scale[2];
-    matrix[10] = m22 * scale[2];
-  } else {
-    matrix[0] = scale[0];
-    matrix[5] = scale[1];
-    matrix[10] = scale[2];
+  if (rotation.length === 4) {
+    qx = rotation[0];
+    qy = rotation[1];
+    qz = rotation[2];
+    qw = rotation[3];
+  } else if (rotation.length === 3) {
+    const [x, y, z, w] = eulerToQuaternion(rotation[0], rotation[1], rotation[2]);
+    qx = x; qy = y; qz = z; qw = w;
   }
 
-  return matrix;
+  const len = Math.hypot(qx, qy, qz, qw);
+  if (len > 1e-12) {
+    qx /= len;
+    qy /= len;
+    qz /= len;
+    qw /= len;
+  } else {
+    qx = 0; qy = 0; qz = 0; qw = 1;
+  }
+
+  const sx = scale[0] ?? 1;
+  const sy = scale[1] ?? 1;
+  const sz = scale[2] ?? 1;
+
+  const xx = qx * qx, yy = qy * qy, zz = qz * qz;
+  const xy = qx * qy, xz = qx * qz, yz = qy * qz;
+  const wx = qw * qx, wy = qw * qy, wz = qw * qz;
+
+  const m00 = (1 - 2 * (yy + zz)) * sx;
+  const m10 = (2 * (xy + wz)) * sx;
+  const m20 = (2 * (xz - wy)) * sx;
+
+  const m01 = (2 * (xy - wz)) * sy;
+  const m11 = (1 - 2 * (xx + zz)) * sy;
+  const m21 = (2 * (yz + wx)) * sy;
+
+  const m02 = (2 * (xz + wy)) * sz;
+  const m12 = (2 * (yz - wx)) * sz;
+  const m22 = (1 - 2 * (xx + yy)) * sz;
+
+  return new Float32Array([
+    m00, m10, m20, 0,
+    m01, m11, m21, 0,
+    m02, m12, m22, 0,
+    position[0] ?? 0, position[1] ?? 0, position[2] ?? 0, 1,
+  ]);
 }
 
 /**
@@ -223,8 +247,8 @@ export class TieredSimdCuller {
 
     const rot4: [number, number, number, number] =
       rotation.length === 4
-        ? (rotation as [number, number, number, number])
-        : [rotation[0], rotation[1], rotation[2], 1.0];
+        ? normalizeQuaternion(rotation)
+        : eulerToQuaternion(rotation[0], rotation[1], rotation[2]);
 
     if (!obj) {
       obj = {
