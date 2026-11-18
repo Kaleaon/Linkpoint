@@ -86,3 +86,6 @@ default = []
 encoding = ["encoding_rs"]
 escape-html = []
 serialize = ["serde"]
+
+[lints.clippy]
+all = "allow"

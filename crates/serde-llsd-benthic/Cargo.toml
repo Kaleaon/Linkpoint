@@ -58,3 +58,6 @@ version = "2"
 [dependencies.uuid]
 version = "1"
 features = ["v4"]
+
+[lints.clippy]
+all = "allow"
