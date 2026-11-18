@@ -15,11 +15,15 @@ let package = Package(
         .library(name: "Ktheme", targets: ["Ktheme"]),
         .library(name: "LinkpointiOS", targets: ["LinkpointiOS"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/google/flatbuffers.git", from: "23.5.26")
+    ],
     targets: [
         .target(
             name: "LLSD",
-            dependencies: []
+            dependencies: [
+                .product(name: "FlatBuffers", package: "flatbuffers")
+            ]
         ),
         .target(
             name: "LLSDAssets",
