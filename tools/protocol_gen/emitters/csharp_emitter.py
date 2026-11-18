@@ -29,6 +29,9 @@ class CSharpEmitter(BaseEmitter):
 
         return results
 
+    def _generate_csharp_code(self, ast: ProtocolAST) -> str:
+        return self._generate_csharp_protocol(ast)
+
     def _generate_csharp_protocol(self, ast: ProtocolAST) -> str:
         out = []
         out.append(self.get_header_warning("//"))

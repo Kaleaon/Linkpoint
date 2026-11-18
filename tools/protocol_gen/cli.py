@@ -93,6 +93,14 @@ def cmd_generate(args):
             print(f"[{target.upper()}] Generated {path}")
             generated_count += 1
 
+        if target == "csharp" and not args.out_dir:
+            legacy_dir = "platforms/dotnet/Generated"
+            if os.path.exists(legacy_dir):
+                for p, c in results.items():
+                    dest = os.path.join(legacy_dir, os.path.basename(p))
+                    with open(dest, "w", encoding="utf-8", newline="\n") as f:
+                        f.write(c)
+
     print(
         f"\nSuccessfully generated {generated_count} source files across {len(targets)} targets."
     )

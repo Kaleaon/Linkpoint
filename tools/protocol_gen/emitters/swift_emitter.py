@@ -29,6 +29,9 @@ class SwiftEmitter(BaseEmitter):
 
         return results
 
+    def _generate_swift_code(self, ast: ProtocolAST) -> str:
+        return self._generate_swift_protocol(ast)
+
     def _generate_swift_protocol(self, ast: ProtocolAST) -> str:
         out = []
         out.append(self.get_header_warning("//"))
