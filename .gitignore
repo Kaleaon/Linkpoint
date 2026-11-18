@@ -205,3 +205,6 @@ lcov.info
 /playwright-report/
 **/test-results/
 **/playwright-report/
+**/obj/
+**/nupkg/
+*.nupkg
